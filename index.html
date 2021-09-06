@@ -145,7 +145,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/06/hello-world/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/06/python-pip/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -159,7 +159,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2021/09/06/hello-world/" class="post-title-link" itemprop="url">Hello World</a>
+            <a href="/2021/09/06/python-pip/" class="post-title-link" itemprop="url">pip 安装与使用</a>
         </h2>
 
         <div class="post-meta">
@@ -168,8 +168,9 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
+              
 
-              <time title="Created: 2021-09-06 13:14:35" itemprop="dateCreated datePublished" datetime="2021-09-06T13:14:35+08:00">2021-09-06</time>
+              <time title="Created: 2021-09-06 14:51:24 / Modified: 14:52:51" itemprop="dateCreated datePublished" datetime="2021-09-06T14:51:24+08:00">2021-09-06</time>
             </span>
 
           
@@ -183,19 +184,70 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
+          <p>pip 是 Python 包管理工具，该工具提供了对Python 包的查找、下载、安装、卸载的功能。</p>
+<p>目前如果你在 python.org 下载最新版本的安装包，则是已经自带了该工具。</p>
+<p>Python 2.7.9 + 或 Python 3.4+ 以上版本都自带 pip 工具。</p>
+<p>pip 官网：<a target="_blank" rel="noopener" href="https://pypi.org/project/pip/">https://pypi.org/project/pip/</a></p>
+<p>你可以通过以下命令来判断是否已安装：</p>
+<pre><code>pip --version     # Python2.x 版本命令
+pip3 --version    # Python3.x 版本命令
+</code></pre>
+<p>如果你还未安装，则可以使用以下方法来安装：</p>
+<pre><code># python2.7
+$ curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py   # 下载安装脚本
+# 最新版本
+$ curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py   # 下载安装脚本
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+$ sudo python get-pip.py    # 运行安装脚本
+</code></pre>
+<p>用哪个版本的 Python 运行安装脚本，pip 就被关联到哪个版本，如果是 Python3 则执行以下命令：</p>
+<pre><code>$ sudo python3 get-pip.py    # 运行安装脚本。
+</code></pre>
+<p>一般情况 pip 对应的是 Python 2.7，pip3 对应的是 Python 3.x。</p>
+<p>部分 Linux 发行版可直接用包管理器安装 pip，如 Debian 和 Ubuntu：</p>
+<pre><code>sudo apt-get install python-pip
+</code></pre>
+<p>简单使用</p>
+<pre><code>pip install 安装的包名 # 安装包
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+pip show --files 安装包名 # 查看包是否安装
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+pip list --outdated # 检查哪些包需要更新
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+pip install --upgrade 要升级的包名 # 升级
+
+pip uninstall 要卸载的包名 # 卸载包
+
+pip search SomePackage # 搜索包
+
+pip show  # 显示安装包信息
+
+pip show -f SomePackage # 查看指定包的详细信息
+
+pip list # 列出已安装的包
+
+pip list -o # 查看可升级的包
+
+# 阿里源
+pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
+
+# 腾讯源
+pip install -i https://mirrors.tencent.com/pypi/simple/ --upgrade tencentcloud-sdk-python
+
+# 豆瓣
+pip install -r requirements.txt -i https://pypi.douban.com/simple/
+
+# 清华大学
+pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple/
+</code></pre>
+<p>注意事项</p>
+<p>如果 Python2 和 Python3 同时有 pip，则使用方法如下：</p>
+<p>Python2：</p>
+<pre><code>python2 -m pip install XXX
+</code></pre>
+<p>Python3:</p>
+<pre><code>python3 -m pip install XXX
+</code></pre>
 
       
     </div>
@@ -280,6 +332,10 @@
           <span class="site-state-item-count">1</span>
           <span class="site-state-item-name">posts</span>
         </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">tags</span>
       </div>
   </nav>
 </div>
