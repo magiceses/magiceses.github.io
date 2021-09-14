@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>天青色等烟雨</title>
+  
+  
+  <link href="http://magiceses.github.io/atom.xml" rel="self"/>
+  
+  <link href="http://magiceses.github.io/"/>
+  <updated>2021-09-06T07:00:25.204Z</updated>
+  <id>http://magiceses.github.io/</id>
+  
+  <author>
+    <name>Magiceses</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>python-virtualenv</title>
+    <link href="http://magiceses.github.io/2021/09/06/python-virtualenv/"/>
+    <id>http://magiceses.github.io/2021/09/06/python-virtualenv/</id>
+    <published>2021-09-06T06:59:46.000Z</published>
+    <updated>2021-09-06T07:00:25.204Z</updated>
+    
+    <content type="html"><![CDATA[<p>pip, virtualenv, fabric通称为pythoner的三大神器</p><p>virtualenv</p><p>virtualenv——用来建立一个虚拟的python环境，一个专属于项目的python环境。用virtualenv 来保持一个干净的环境非常有用</p><p>基本使用</p><p>通过pip安装virtualenv：</p><pre><code>pip install virtualenv</code></pre><p>测试安装:</p><pre><code>virtualenv --version</code></pre><p>为一个工程项目搭建一个虚拟环境:</p><pre><code>cd my_projectvirtualenv my_project_env</code></pre><p>另外，如果存在多个python解释器，可以选择指定一个Python解释器（比如python2.7），没有指定则由系统默认的解释器来搭建：</p><pre><code>virtualenv -p /usr/bin/python2.7 my_project_env</code></pre><p>将会在当前的目录中创建一个名my_project_env的文件夹，这是一个独立的python运行环境，包含了Python可执行文件， 以及 pip 库的一份拷贝，这样就能安装其他包了，不过已经安装到系统Python环境中的所有第三方包都不会复制过来，这样，我们就得到了一个不带任何第三方包的“干净”的Python运行环境来。</p><p>要开始使用虚拟环境，其需要被激活：</p><pre><code>source my_project_env/bin/activate</code></pre><p>停用虚拟环境：</p><pre><code>deactivate</code></pre><p>停用后将回到系统默认的Python解释器</p><p>其他</p><p>用pip freeze查看当前安装版本</p><pre><code>pip freeze</code></pre><p>另外：</p><pre><code>pip freeze &gt; requirements.txt</code></pre><p>这将会创建一个 requirements.txt 文件，其中包含了当前环境中所有包及 各自的版本的简单列表。您可以使用 “pip list”在不产生requirements文件的情况下， 查看已安装包的列表。这将会使另一个不同的开发者（或者是您，如果您需要重新创建这样的环境） 在以后安装相同版本的相同包变得容易。</p><pre><code>pip install -r requirements.txt</code></pre><p>这能帮助确保安装、部署和开发者之间的一致性。</p><p>virtualenvwrapper</p><p>提供了一系列命令使得和虚拟环境工作变得愉快许多。它把您所有的虚拟环境都放在一个地方。</p><ol><li>将您的所有虚拟环境在一个地方。</li><li>包装用于管理虚拟环境（创建，删除，复制）。</li><li>使用一个命令来环境之间进行切换。</li></ol><p>安装</p><p>安装（确保 virtualenv 已经安装了）：</p><pre><code>pip install virtualenvwrapperexport WORKON_HOME=~/Envs  #设置环境变量mkdir -p $WORKON_HOME #创建虚拟环境管理目录find / -name virtualenvwrapper.sh #找到virtualenvwrapper.sh的路径source 路径 #激活virtualenvwrapper.sh</code></pre><p> 默认virtualenvwrapper安装在下面python解释器中的site-packages，实际上需要运行virtualenvwrapper.sh文件才行；所以需要先进行配置一下：</p><ul><li>找到virtualenvwrapper.sh的路径：find / -name virtualenvwrapper.sh</li><li>运行virtualenvwrapper.sh文件：source 路径</li></ul><p>ps：每次要想使用virtualenvwrapper 工具时，都必须先激活virtualenvwrapper.sh,另外，如果创建前要将即将的环境保存到Envs中，就要先设置一下环境变量：export WORKON_HOME=~/Envs，再搭建</p><p>对于Windows，您可以使用 virtualenvwrapper-win</p><p>安装（确保 virtualenv 已经安装了）：</p><pre><code>pip install virtualenvwrapper-win在Windows中，WORKON_HOME默认的路径是 %USERPROFILE%Envs 。</code></pre><p>基本使用</p><p>1、创建一个虚拟环境：</p><pre><code>mkvirtualenv project_env</code></pre><p>这会在Envs 中创建 project_env虚拟环境</p><p>选择一个python解释器来搭建：</p><pre><code>mkvirtualenv env  --python=python2.7</code></pre><p>2、在虚拟环境上工作：</p><pre><code> workon project_env</code></pre><p>或者，您可以创建一个项目，它会创建虚拟环境，并在 $WORKON_HOME 中创建一个项目目录。 当您使用 workonproject_env 时，会 cd -ed 到项目目录中。</p><pre><code>mkvirtualenv project_env</code></pre><p>virtualenvwrapper 提供环境名字的tab补全功能。当您有很多环境， 并且很难记住它们的名字时，这就显得很有用。</p><p>workon 也能停止您当前所在的环境，所以您可以在环境之间快速的切换。</p><p>3、停止虚拟环境</p><pre><code>deactivate</code></pre><p>4、删除：</p><pre><code> rmvirtualenv project_env</code></pre><p>其他有用的命令</p><pre><code>lsvirtualenv    #列举所有的环境。cdvirtualenv    #导航到当前激活的虚拟环境的目录中，比如说这样您就能够浏览它的 site-packages。cdsitepackages   # 和上面的类似，但是是直接进入到 site-packages 目录中。lssitepackages     #显示 site-packages 目录中的内容。</code></pre><p>virtualenvwrapper 命令的完全列表 。</p><p>原文： <a href="https://www.cnblogs.com/freely/p/8022923.html">https://www.cnblogs.com/freely/p/8022923.html</a></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;pip, virtualenv, fabric通称为pythoner的三大神器&lt;/p&gt;
+&lt;p&gt;virtualenv&lt;/p&gt;
+&lt;p&gt;virtualenv——用来建立一个虚拟的python环境，一个专属于项目的python环境。用virtualenv 来保持一个干净的环境非常有</summary>
+      
+    
+    
+    
+    
+    <category term="python" scheme="http://magiceses.github.io/tags/python/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>pip 安装与使用</title>
+    <link href="http://magiceses.github.io/2021/09/06/python-pip/"/>
+    <id>http://magiceses.github.io/2021/09/06/python-pip/</id>
+    <published>2021-09-06T06:51:24.000Z</published>
+    <updated>2021-09-06T06:52:51.584Z</updated>
+    
+    <content type="html"><![CDATA[<p>pip 是 Python 包管理工具，该工具提供了对Python 包的查找、下载、安装、卸载的功能。</p><p>目前如果你在 python.org 下载最新版本的安装包，则是已经自带了该工具。</p><p>Python 2.7.9 + 或 Python 3.4+ 以上版本都自带 pip 工具。</p><p>pip 官网：<a href="https://pypi.org/project/pip/">https://pypi.org/project/pip/</a></p><p>你可以通过以下命令来判断是否已安装：</p><pre><code>pip --version     # Python2.x 版本命令pip3 --version    # Python3.x 版本命令</code></pre><p>如果你还未安装，则可以使用以下方法来安装：</p><pre><code># python2.7$ curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py   # 下载安装脚本# 最新版本$ curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py   # 下载安装脚本$ sudo python get-pip.py    # 运行安装脚本</code></pre><p>用哪个版本的 Python 运行安装脚本，pip 就被关联到哪个版本，如果是 Python3 则执行以下命令：</p><pre><code>$ sudo python3 get-pip.py    # 运行安装脚本。</code></pre><p>一般情况 pip 对应的是 Python 2.7，pip3 对应的是 Python 3.x。</p><p>部分 Linux 发行版可直接用包管理器安装 pip，如 Debian 和 Ubuntu：</p><pre><code>sudo apt-get install python-pip</code></pre><p>简单使用</p><pre><code>pip install 安装的包名 # 安装包pip show --files 安装包名 # 查看包是否安装pip list --outdated # 检查哪些包需要更新pip install --upgrade 要升级的包名 # 升级pip uninstall 要卸载的包名 # 卸载包pip search SomePackage # 搜索包pip show  # 显示安装包信息pip show -f SomePackage # 查看指定包的详细信息pip list # 列出已安装的包pip list -o # 查看可升级的包# 阿里源pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/# 腾讯源pip install -i https://mirrors.tencent.com/pypi/simple/ --upgrade tencentcloud-sdk-python# 豆瓣pip install -r requirements.txt -i https://pypi.douban.com/simple/# 清华大学pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple/</code></pre><p>注意事项</p><p>如果 Python2 和 Python3 同时有 pip，则使用方法如下：</p><p>Python2：</p><pre><code>python2 -m pip install XXX</code></pre><p>Python3:</p><pre><code>python3 -m pip install XXX</code></pre>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;pip 是 Python 包管理工具，该工具提供了对Python 包的查找、下载、安装、卸载的功能。&lt;/p&gt;
+&lt;p&gt;目前如果你在 python.org 下载最新版本的安装包，则是已经自带了该工具。&lt;/p&gt;
+&lt;p&gt;Python 2.7.9 + 或 Python 3.4+ 以上</summary>
+      
+    
+    
+    
+    
+    <category term="python" scheme="http://magiceses.github.io/tags/python/"/>
+    
+  </entry>
+  
+</feed>
