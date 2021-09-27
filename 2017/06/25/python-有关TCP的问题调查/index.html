@@ -1,0 +1,1446 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Courier New:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Python,PythonWeb," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="天青色等烟雨" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="背景问题场景：
+容器内访问出现以下错误：
+1Failed to establish a new connection: [Errno 99] Cannot assign requested address">
+<meta property="og:type" content="article">
+<meta property="og:title" content="解决 Cannot assign requested address">
+<meta property="og:url" content="https://magiceses.github.io/2017/06/25/python-有关TCP的问题调查/index.html">
+<meta property="og:site_name" content="天青色等烟雨">
+<meta property="og:description" content="背景问题场景：
+容器内访问出现以下错误：
+1Failed to establish a new connection: [Errno 99] Cannot assign requested address">
+<meta property="og:image" content="https://magiceses.github.io/images/python-tcp-1.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-tcp-2.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-tcp-3.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-tcp-4.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-tcp-5.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-tcp-6.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-tcp-7.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-tcp-8.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-tcp-9.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-tcp-10.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-tcp-11.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-tcp-12.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-tcp-13.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-tcp-14.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-tcp-15.png">
+<meta property="og:updated_time" content="2021-09-26T02:23:46.214Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="解决 Cannot assign requested address">
+<meta name="twitter:description" content="背景问题场景：
+容器内访问出现以下错误：
+1Failed to establish a new connection: [Errno 99] Cannot assign requested address">
+<meta name="twitter:image" content="https://magiceses.github.io/images/python-tcp-1.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://magiceses.github.io/2017/06/25/python-有关TCP的问题调查/"/>
+
+
+<!-- 网页加载条 -->
+<script src="/js/src/pace.min.js"></script>
+  <title> 解决 Cannot assign requested address | 天青色等烟雨 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">天青色等烟雨</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">而我在等你</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-guestbook">
+          <a href="/guestbook" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-commenting"></i> <br />
+            
+            留言
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+      
+      
+        <li class="menu-item"> <a title="把这个链接拖到你的工具栏中,任何网页都可以High" href='javascript:(
+/*
+ * Copyright (C) 2016 Never_yu (Neveryu.github.io) <React.dong.yu@gmail.com>
+ * Sina Weibo (http://weibo.com/Neveryu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function go() {
+
+var songs = [
+  "http://dl.stream.qqmusic.qq.com/C400001Qu4I30eVFYb.m4a?vkey=2127178E4405E7B8B268F20F05232485735CCF4FF8C1432F0360D2626D0B6C9564B5627C7AB481BBC685FEDB0946A50E97C66F0D1B008226&guid=7175649092&uin=0&fromtag=66",
+  "",
+  "",
+  ""
+];
+
+function c() {
+  var e = document.createElement("link");
+  e.setAttribute("type", "text/css");
+  e.setAttribute("rel", "stylesheet");
+  e.setAttribute("href", f);
+  e.setAttribute("class", l);
+  document.body.appendChild(e)
+}
+
+function h() {
+  var e = document.getElementsByClassName(l);
+  for (var t = 0; t < e.length; t++) {
+    document.body.removeChild(e[t])
+  }
+}
+
+function p() {
+  var e = document.createElement("div");
+  e.setAttribute("class", a);
+  document.body.appendChild(e);
+  setTimeout(function() {
+    document.body.removeChild(e)
+  }, 100)
+}
+
+function d(e) {
+  return {
+    height : e.offsetHeight,
+    width : e.offsetWidth
+  }
+}
+
+function v(i) {
+  var s = d(i);
+  return s.height > e && s.height < n && s.width > t && s.width < r
+}
+
+function m(e) {
+  var t = e;
+  var n = 0;
+  while (!!t) {
+    n += t.offsetTop;
+    t = t.offsetParent
+  }
+  return n
+}
+
+function g() {
+  var e = document.documentElement;
+  if (!!window.innerWidth) {
+    return window.innerHeight
+  } else if (e && !isNaN(e.clientHeight)) {
+    return e.clientHeight
+  }
+  return 0
+}
+
+function y() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  }
+  return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+}
+
+function E(e) {
+  var t = m(e);
+  return t >= w && t <= b + w
+}
+
+function S() {
+  var e = document.getElementById("audio_element_id");
+  if(e != null){
+    var index = parseInt(e.getAttribute("curSongIndex"));
+    if(index > songs.length - 2) {
+      index = 0;
+    } else {
+      index++;
+    }
+    e.setAttribute("curSongIndex", index);
+    N();
+  }
+
+  e.src = i;
+  e.play()
+}
+
+function x(e) {
+  e.className += " " + s + " " + o
+}
+
+function T(e) {
+  e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+}
+
+function N() {
+  var e = document.getElementsByClassName(s);
+  var t = new RegExp("\\b" + s + "\\b");
+  for (var n = 0; n < e.length; ) {
+    e[n].className = e[n].className.replace(t, "")
+  }
+}
+
+function initAudioEle() {
+  var e = document.getElementById("audio_element_id");
+  if(e === null){
+    e = document.createElement("audio");
+    e.setAttribute("class", l);
+    e.setAttribute("curSongIndex", 0);
+    e.id = "audio_element_id";
+    e.loop = false;
+    e.bgcolor = 0;
+    e.addEventListener("canplay", function() {
+      setTimeout(function() {
+        x(k)
+      }, 500);
+      setTimeout(function() {
+        N();
+        p();
+        for (var e = 0; e < O.length; e++) {
+          T(O[e])
+        }
+      }, 15500)
+    }, true);
+    e.addEventListener("ended", function() {
+      N();
+      h();
+      go();
+    }, true);
+    e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+    document.body.appendChild(e);
+  }
+}
+
+initAudioEle();
+var e = 30;
+var t = 30;
+var n = 350;
+var r = 350;
+
+var curSongIndex = parseInt(document.getElementById("audio_element_id").getAttribute("curSongIndex"));
+var i = songs[curSongIndex];
+
+var s = "mw-harlem_shake_me";
+var o = "im_first";
+var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+var a = "mw-strobe_light";
+
+/* harlem-shake-style.css，替换成你的位置，也可以直接使用：//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css */
+var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+
+var l = "mw_added_css";
+var b = g();
+var w = y();
+var C = document.getElementsByTagName("*");
+var k = null;
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    if (E(A)) {
+      k = A;
+      break
+    }
+  }
+}
+if (A === null) {
+  console.warn("Could not find a node of the right size. Please try a different page.");
+  return
+}
+c();
+S();
+var O = [];
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    O.push(A)
+  }
+}
+})()'><i class="menu-item-icon fa fa-music fa-fw"></i> High一下</a></li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search fa-lg"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                解决 Cannot assign requested address
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-06-25T03:25:24+08:00" content="2017-06-25">
+              2017-06-25
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv">热度
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>问题场景：</p>
+<p>容器内访问出现以下错误：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Failed to establish a new connection: [Errno 99] Cannot assign requested address</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<p>网上找了下原因，大致上是由于客户端频繁的连服务器，由于每次连接都在很短的时间内结束，导致很多的TIME_WAIT，以至于用光了可用的端 口号，所以新的连接没办法绑定端口，但是使用</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsof -i | grep -E <span class="string">"TIME_WAIT"</span></span><br></pre></td></tr></table></figure>
+<p>没有发现有残留，但是</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsof -i | grep -E <span class="string">"CLOSE_WAIT"</span></span><br></pre></td></tr></table></figure>
+<p>处于 close_wait 状态的连接却是很多，高达两万多条</p>
+<blockquote>
+<p>通过下述命令也可以查看当前端口占用及分类</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">netstat -n | awk &apos;/^tcp/ &#123;++state[$NF]&#125; END &#123;for(key in state) print key,&quot;\t&quot;,state[key]&#125;&apos;</span><br><span class="line"></span><br><span class="line">CLOSE_WAIT       27352</span><br><span class="line">SYN_SENT         4</span><br><span class="line">ESTABLISHED      58</span><br><span class="line">TIME_WAIT				 4</span><br></pre></td></tr></table></figure>
+<p>先看下端口状态的大致说明：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">CLOSED: 这个没什么好说的了，表示初始状态。</span><br><span class="line"></span><br><span class="line">LISTEN: 这个也是非常容易理解的一个状态，表示服务器端的某个SOCKET处于监听状态，可以接受连接了。</span><br><span class="line"></span><br><span class="line">SYN_RCVD: 这个状态表示接受到了SYN报文，在正常情况下，这个状态是服务器端的SOCKET在建立TCP连接时的三次握手会话过程中的一个中间状态，很短暂，基本上用netstat你是很难看到这种状态的，除非你特意写了一个客户端测试程序，故意将三次TCP握手过程中最后一个ACK报文不予发送。因此这种状态时，当收到客户端的ACK报文后，它会进入到ESTABLISHED状态。</span><br><span class="line"></span><br><span class="line">SYN_SENT: 这个状态与SYN_RCVD遥想呼应，当客户端SOCKET执行CONNECT连接时，它首先发送SYN报文，因此也随即它会进入到了SYN_SENT状态，并等待服务端的发送三次握手中的第2个报文。SYN_SENT状态表示客户端已发送SYN报文。</span><br><span class="line"></span><br><span class="line">ESTABLISHED：这个容易理解了，表示连接已经建立了。</span><br><span class="line"></span><br><span class="line">FIN_WAIT_1: 这个状态要好好解释一下，其实FIN_WAIT_1和FIN_WAIT_2状态的真正含义都是表示等待对方的FIN报文。而这两种状态的区别是：FIN_WAIT_1状态实际上是当SOCKET在ESTABLISHED状态时，它想主动关闭连接，向对方发送了FIN报文，此时该SOCKET即进入到FIN_WAIT_1状态。而当对方回应ACK报文后，则进入到FIN_WAIT_2状态，当然在实际的正常情况下，无论对方何种情况下，都应该马上回应ACK报文，所以FIN_WAIT_1状态一般是比较难见到的，而FIN_WAIT_2状态还有时常常可以用netstat看到。</span><br><span class="line"></span><br><span class="line">FIN_WAIT_2：上面已经详细解释了这种状态，实际上FIN_WAIT_2状态下的SOCKET，表示半连接，也即有一方要求close连接，但另外还告诉对方，我暂时还有点数据需要传送给你，稍后再关闭连接。</span><br><span class="line"></span><br><span class="line">TIME_WAIT: 表示收到了对方的FIN报文，并发送出了ACK报文，就等2MSL后即可回到CLOSED可用状态了。如果FIN_WAIT_1状态下，收到了对方同时带FIN标志和ACK标志的报文时，可以直接进入到TIME_WAIT状态，而无须经过FIN_WAIT_2状态。</span><br><span class="line"></span><br><span class="line">CLOSING: 这种状态比较特殊，实际情况中应该是很少见，属于一种比较罕见的例外状态。正常情况下，当你发送FIN报文后，按理来说是应该先收到（或同时收到）对方的ACK报文，再收到对方的FIN报文。但是CLOSING状态表示你发送FIN报文后，并没有收到对方的ACK报文，反而却也收到了对方的FIN报文。什么情况下会出现此种情况呢？其实细想一下，也不难得出结论：那就是如果双方几乎在同时close一个SOCKET的话，那么就出现了双方同时发送FIN报文的情况，也即会出现CLOSING状态，表示双方都正在关闭SOCKET连接。</span><br><span class="line"></span><br><span class="line">CLOSE_WAIT: 这种状态的含义其实是表示在等待关闭。怎么理解呢？当对方close一个SOCKET后发送FIN报文给自己，你系统毫无疑问地会回应一个ACK报文给对方，此时则进入到CLOSE_WAIT状态。接下来呢，实际上你真正需要考虑的事情是察看你是否还有数据发送给对方，如果没有的话，那么你也就可以close这个SOCKET，发送FIN报文给对方，也即关闭连接。所以你在CLOSE_WAIT状态下，需要完成的事情是等待你去关闭连接。</span><br><span class="line"></span><br><span class="line">LAST_ACK: 这个状态还是比较容易好理解的，它是被动关闭一方在发送FIN报文后，最后等待对方的ACK报文。当收到ACK报文后，也即可以进入到CLOSED可用状态了。</span><br></pre></td></tr></table></figure>
+<p>要详细了解端口状态，需要从TCP的状态转换说起。</p>
+<h1 id="TCP协议解析"><a href="#TCP协议解析" class="headerlink" title="TCP协议解析"></a>TCP协议解析</h1><h2 id="报文格式"><a href="#报文格式" class="headerlink" title="报文格式"></a>报文格式</h2><p><img src="/images/python-tcp-1.png" alt="在这里插入图片描述"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">16 位源端口，16 位目的端口：</span><br><span class="line">数据从何而来，去向何方。</span><br><span class="line"></span><br><span class="line">32 位序号，32 位确认序号：</span><br><span class="line">和 TCP 的 ACK 机制有关，发送端给数据进行编号，接收端收到数据后确认收到哪些编号的数据。</span><br><span class="line"></span><br><span class="line">4 位报头长度：</span><br><span class="line">表示 TCP 的首部占用多少个 4 字节。</span><br><span class="line"></span><br><span class="line">6 个标志位：</span><br><span class="line">SYN：简写为S，同步标志位，用于建立会话连接，同步序列号；</span><br><span class="line">ACK：简写为.，确认标志位，对已接收的数据包进行确认；</span><br><span class="line">FIN：简写为F，完成标志位，表示我已经没有数据要发送了，即将关闭连接；</span><br><span class="line">PSH：简写为P，推送标志位，表示该数据包被对方接收后应立即交给上层应用，而不在缓冲区排队；</span><br><span class="line">RST：简写为R，重置标志位，用于连接复位、拒绝错误和非法的数据包；</span><br><span class="line">URG：简写为U，紧急标志位，表示数据包的紧急指针域有效，用来保证连接不被阻断，并督促中间设备尽快处理；</span><br><span class="line"></span><br><span class="line">16 位窗口大小：</span><br><span class="line">和 TCP 滑动窗口相关，在下文。</span><br><span class="line"></span><br><span class="line">16 位校验和：</span><br><span class="line">发送端填充，CRC 校验，接收端校验不通过，则认为数据有问题。此处的检验和不光包含TCP首部，也包含TCP数据部分。</span><br><span class="line"></span><br><span class="line">16 位紧急指针：</span><br><span class="line">标识哪部分数据是紧急数据。</span><br></pre></td></tr></table></figure>
+<p>上面是对<code>tcp</code>发送的报文做一个简单介绍，没兴趣的可以跳过</p>
+<h2 id="连接管理"><a href="#连接管理" class="headerlink" title="连接管理"></a>连接管理</h2><p>先放个总图</p>
+<p><img src="/images/python-tcp-2.png" alt="img"></p>
+<h3 id="建立连接，三次握手"><a href="#建立连接，三次握手" class="headerlink" title="建立连接，三次握手"></a>建立连接，三次握手</h3><p><img src="/images/python-tcp-3.png" alt="三次握手"></p>
+<p><strong>服务端</strong>：通过 socket，bind 和 listen 完成了被动套接字的准备工作，被动的意思就是等着别人来连接，然后调用 accept，就会阻塞在这里，等待客户端的连接来临；</p>
+<p><strong>客户端</strong>：通过调用 socket 和 connect 函数之后，也会阻塞。接下来的事情是由操作系统内核完成的，更具体一点的说，是操作系统内核网络协议栈在工作。</p>
+<p><strong>流程</strong>：</p>
+<ol>
+<li>客户端的协议栈向服务器端发送了 SYN 包，并告诉服务器端当前发送序列号 j，客户端进入 SYNC_SENT 状态；</li>
+<li>服务器端的协议栈收到这个包之后，和客户端进行 ACK 应答，应答的值为 j+1，表示对 SYN 包 j 的确认，同时服务器也发送一个 SYN 包，告诉客户端当前我的发送序列号为 k，服务器端进入 SYNC_RCVD 状态；</li>
+<li>客户端协议栈收到 ACK 之后，使得应用程序从 connect 调用返回，表示客户端到服务器端的单向连接建立成功，客户端的状态为 ESTABLISHED，同时客户端协议栈也会对服务器端的 SYN 包进行应答，应答数据为 k+1；</li>
+<li>应答包到达服务器端后，服务器端协议栈使得 accept 阻塞调用返回，这个时候服务器端到客户端的单向连接也建立成功，服务器端也进入 ESTABLISHED 状态。</li>
+</ol>
+<p><strong>客户端状态变化</strong></p>
+<ul>
+<li>客户端调用 socket() 后，进入 CLOSED 状态。</li>
+<li>客户端调用 connect()，发送 SYN 报文，进入 SYN_SENT 状态。</li>
+<li>客户端在收到刚刚 SYN 报文的 ACK 后，进入 ESTABLISHED 状态，从 connect() 返回。</li>
+</ul>
+<p><strong>服务端状态变化</strong></p>
+<ul>
+<li>服务器调用 socket() 后，进入 CLOSED 状态。</li>
+<li>服务器调用 bind(), listen() 后进入 LISTEN 状态，等待客户端连接，阻塞在 accept()。</li>
+<li>收到 SYN 报文后进入 SYN_RCVD 状态，就将该连接放入内核等待队列中，返回 SYN + ACK 报文。</li>
+<li>在客户端收到后，发送 ACK 报文，服务器从 accept() 返回，进入 ESTABLISHED 状态。</li>
+<li>至此连接建立完成，客户端、服务端都进入了 已连接 状态，即 ESTABLISHED。</li>
+</ul>
+<p><strong>抓包数据</strong></p>
+<p><code>tcpdump -i eth0 -S</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">07:37:06.157597 IP 192.168.1.10.945 &gt; 192.168.1.141.nfs: Flags [S], seq 2084759064, win 14600, options [mss 1460,sackOK,TS val 223408 ecr 0,nop,wscale 2], length 0</span><br><span class="line">07:37:06.157660 IP 192.168.1.141.nfs &gt; 192.168.1.10.945: Flags [S.], seq 2467243379, ack 2084759065, win 28960, options [mss 1460,sackOK,TS val 91684817 ecr 223408,nop,wscale 7], length 0</span><br><span class="line">07:37:06.158889 IP 192.168.1.10.945 &gt; 192.168.1.141.nfs: Flags [.], ack 2467243380, win 3650, options [nop,nop,TS val 223408 ecr 91684817], length 0</span><br></pre></td></tr></table></figure>
+<ul>
+<li>客户端–&gt;服务器： seq 2084759064,</li>
+<li>服务器–&gt;客户端： seq 2467243379, ack 2084759065 //ack等于 客户端2084759064+1</li>
+<li>客户端–&gt;服务器： ack 2467243380</li>
+</ul>
+<h3 id="断开连接，四次挥手"><a href="#断开连接，四次挥手" class="headerlink" title="断开连接，四次挥手"></a>断开连接，四次挥手</h3><p><img src="/images/python-tcp-4.png" alt="在这里插入图片描述"></p>
+<p><strong>流程：</strong></p>
+<p>挥手请求可以是Client端，也可以是Server端发起的，我们假设是Client端发起(主机1为client)</p>
+<ol>
+<li>第一次：Client端发起挥手请求，向Server端发送标志位是FIN报文段，设置序列号seq，此时，Client端进入FIN_WAIT_1状态，这表示Client端没有数据要发送给Server端了。</li>
+<li>第二次：Server端收到了Client端发送的FIN报文段，向Client端返回一个标志位是ACK的报文段，ack设为seq加1，Client端进入FIN_WAIT_2状态，Server端告诉Client端，我确认并同意你的关闭请求。</li>
+<li>第三次：Server端向Client端发送标志位是FIN的报文段，请求关闭连接，同时Client端进入LAST_ACK状态。</li>
+<li>第四次：Client端收到Server端发送的FIN报文段，向Server端发送标志位是ACK的报文段，然后Client端进入TIME_WAIT状态。Server端收到Client端的ACK报文段以后，就关闭连接。此时，Client端等待2MSL的时间后依然没有收到回复，则证明Server端已正常关闭，那好，Client端也可以关闭连接了。</li>
+</ol>
+<p><strong>抓包分析</strong></p>
+<p><strong>挥手包4条</strong></p>
+<blockquote>
+<p>说明：localhost.45788是客户端，localhost.ssh是服务器</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">23:13:14.956630 IP localhost.45788 &gt; localhost.ssh: Flags [F.], seq 3349160669, ack 377690074, win 342, options [nop,nop,TS val 1927014999 ecr 1927003705], length 0</span><br><span class="line">23:13:14.956738 IP localhost.ssh &gt; localhost.45788: Flags [.], ack 3349160670, win 342, options [nop,nop,TS val 1927015000 ecr 1927014999], length 0</span><br><span class="line">23:13:14.959316 IP localhost.ssh &gt; localhost.45788: Flags [F.], seq 377690074, ack 3349160670, win 342, options [nop,nop,TS val 1927015002 ecr 1927014999], length 0</span><br><span class="line">23:13:14.959328 IP localhost.45788 &gt; localhost.ssh: Flags [.], ack 377690075, win 342, options [nop,nop,TS val 1927015002 ecr 1927015002], length 0</span><br></pre></td></tr></table></figure>
+<p><img src="/images/python-tcp-5.png" alt="在这里插入图片描述"></p>
+<p><strong>客户端、服务器状态变化</strong></p>
+<ul>
+<li>客户端调用 close() ,发送一个FIN报文给服务器，客户端进入 FIN_WAIT_1 状态；</li>
+<li>服务器收到 FIN 报文，响应一个ACK，也进入CLOSE_WAIT状态。</li>
+<li>服务器 read() 获取到了EOF，则执行 close() ，发送FIN报文，此时进入 LAST_ACK 状态；</li>
+<li>客户端收到服务器关于FIN的ACK报文，进入FIN_WAIT_2状态；</li>
+<li>客户端收到服务器的FIN报文，进入 TIME_WAIT 状态，发送FIN的响应ACK给服务器；</li>
+<li>客户端会在 TIME_WAIT 状态等待2MSL，然后进入CLOSE状态；</li>
+</ul>
+<p><strong>挥手包3条</strong></p>
+<blockquote>
+<p>说明：192.168.1.10.32823是客户端，192.168.1.141.9090是服务器</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">11:34:53.378185 IP 192.168.1.10.32823 &gt; 192.168.1.141.9090: Flags [F.], seq 187740589, ack 2824594749, win 3650, options [nop,nop,TS val 79322 ecr 92901547], length 0</span><br><span class="line">11:34:53.378331 IP 192.168.1.141.9090 &gt; 192.168.1.10.32823: Flags [F.], seq 2824594749, ack 187740590, win 227, options [nop,nop,TS val 92904590 ecr 79322], length 0</span><br><span class="line">11:34:53.379595 IP 192.168.1.10.32823 &gt; 192.168.1.141.9090: Flags [.], ack 2824594750, win 3650, options [nop,nop,TS val 79322 ecr 92904590], length 0</span><br></pre></td></tr></table></figure>
+<p><img src="/images/python-tcp-6.png" alt="在这里插入图片描述"></p>
+<p><strong>出现的原因：这是TCP的捎带ACK机制，服务器将FIN的ACK和自己的FIN包一起发给了客户端</strong></p>
+<h3 id="问题思考"><a href="#问题思考" class="headerlink" title="问题思考"></a>问题思考</h3><p>问题1：为什么客户端在TIME-WAIT状态必须等待2MSL的时间？</p>
+<p>答：MSL最长报文段寿命Maximum Segment Lifetime，MSL=2</p>
+<p>两个理由：1）保证A发送的最后一个ACK报文段能够到达B。2）防止“已失效的连接请求报文段”出现在本连接中。</p>
+<ul>
+<li>1）这个ACK报文段有可能丢失，使得处于LAST-ACK状态的B收不到对已发送的FIN+ACK报文段的确认，B超时重传FIN+ACK报文段，而A能在2MSL时间内收到这个重传的FIN+ACK报文段，接着A重传一次确认，重新启动2MSL计时器，最后A和B都进入到CLOSED状态，<strong>若A在TIME-WAIT状态不等待一段时间，而是发送完ACK报文段后立即释放连接，则无法收到B重传的FIN+ACK报文段，所以不会再发送一次确认报文段，则B无法正常进入到CLOSED状态。</strong></li>
+<li>2）A在发送完最后一个ACK报文段后，再经过2MSL，就可以使本连接持续的时间内所产生的所有报文段都从网络中消失，使下一个新的连接中不会出现这种旧的连接请求报文段。</li>
+</ul>
+<p>问题2：为什么连接的时候是三次握手，关闭的时候却是四次握手？</p>
+<p>答：因为当Server端收到Client端的SYN连接请求报文后，可以直接发送SYN+ACK报文。其中ACK报文是用来应答的，SYN报文是用来同步的。但是关闭连接时，当Server端收到FIN报文时，很可能并不会立即关闭SOCKET，所以只能先回复一个ACK报文，告诉Client端，”你发的FIN报文我收到了”。只有等到我Server端所有的报文都发送完了，我才能发送FIN报文，因此不能一起发送。故需要四步握手。</p>
+<p>问题3：为什么TIME_WAIT状态需要经过2MSL(最大报文段生存时间)才能返回到CLOSE状态？</p>
+<p>答：虽然按道理，四个报文都发送完毕，我们可以直接进入CLOSE状态了，但是我们必须假象网络是不可靠的，有可以最后一个ACK丢失。所以TIME_WAIT状态就是用来重发可能丢失的ACK报文。</p>
+<p>根据上面的知识，我们再看下两种状态，而且一般来说，如果服务器出了异常，百分之八九十都是下面两种情况：</p>
+<ul>
+<li>服务器保持了大量TIME_WAIT状态</li>
+<li>服务器保持了大量CLOSE_WAIT状态</li>
+</ul>
+<p>因为linux分配给一个用户的文件句柄是有限的，而TIME_WAIT和CLOSE_WAIT两种状态如果一直被保持，那么意味着对应数目的通道就一直被占着，而我们上面的背景中问题就是因为出现太多的CLOSE_WAIT。</p>
+<p>下面来讨论下这两种情况的处理方法，网上有很多资料把这两种情况的处理方法混为一谈，以为优化系统内核参数就可以解决问题，其实是不恰当的，优化系统内核参数解决TIME_WAIT可能很容易，但是应对CLOSE_WAIT的情况还是需要从程序本身出发。现在来分别说说这两种情况的处理方法</p>
+<h3 id="TIME-WAIT-状态"><a href="#TIME-WAIT-状态" class="headerlink" title="TIME_WAIT 状态"></a>TIME_WAIT 状态</h3><blockquote>
+<p>TIME_WAIT: 表示收到了对方的FIN报文，并发送出了ACK报文，就等2MSL后即可回到CLOSED可用状态了。如果FIN_WAIT_1状态下，收到了对方同时带FIN标志和ACK标志的报文时，可以直接进入到TIME_WAIT状态，而无须经过FIN_WAIT_2状态。</p>
+</blockquote>
+<p><strong>服务器保持了大量TIME_WAIT状态</strong></p>
+<p>这种情况比较常见，一些爬虫服务器或者WEB服务器（如果网管在安装的时候没有做内核参数优化的话）上经常会遇到这个问题，这个问题是怎么产生的呢？</p>
+<p>TIME_WAIT是主动关闭连接的一方保持的状态，对于爬虫服务器来说他本身就是“客户端”，在完成一个爬取任务之后，他就会发起主动关闭连接，从而进入TIME_WAIT的状态，然后在保持这个状态2MSL（max segment lifetime）时间之后，彻底关闭回收资源。至于为啥要等，上面已经说过。</p>
+<p><strong>如何来解决这个问题</strong></p>
+<p>解决思路很简单，就是不要让处于TIME_WAIT的端口占满所有本地端口，导致没有新的本地端口用来创建新的客户端。</p>
+<p><strong>1. 别让客户端的速率太快</strong></p>
+<p>将客户端请求的速率降下来就可以避免端时间占用大量的端口，吞吐量限制就是470tps或者235tps，具体根据系统TIME_WAIT默认时长决定，如果考虑到其他服务正常运行这个值还要保守一些才行；此外还需要注意，如果客户端和服务端增加了一层NAT或者L7负载均衡，那么这个限制可能会在负载均衡器上面；</p>
+<p><strong>2. 客户端改成长连接的形式</strong></p>
+<p>长连接效率高又不会产生大量TIME_WAIT端口。目前对我们来说还是不太现实的，虽然HTTP支持长连接，但是CGI调用应该是不可能的了，除非用之前的介绍的方式将CGI的请求转换成HTTP服务来实现。对于一般socket直连的程序来说，短连接改成长连接就需要额外的封装来标识完整请求在整个字节流中的起始位置，需要做一些额外的工作；</p>
+<p><strong>3. SO_LINGER选项</strong></p>
+<p>通常我们关闭socket的时候，即使该连接的缓冲区有数据要发送，close调用也会立即返回，TCP本身会尝试发送这些未发送出去的数据，只不过应用程序不知道也无法知道是否发送成功过了。如果我们将套接字设置SO_LINGER这个选项，并填写linger结构设置参数，就可以控制这种行为：<br>如果linger结构的l_onoff==0，则linger选项就被关闭，其行为就和默认的close相同；如果打开，那么具体行为依据另外一个成员l_linger的值来确定：如果l_linger!=0，则内核会将当前close调用挂起，直到数据都发送完毕，或者设置的逗留时间超时返回，前者调用会返回0并且正常进入TIME_WAIT状态，后者调用会返回EWOULDBLOCK，所有未发送出去的数据可能会丢失（此处可能会向对端发送一个RST而快速关闭连接）；如果l_linger==0，则直接将缓冲区中未发送的数据丢弃，且向对等实体发送一个RST，自己不经过TIME_WAIT状态立即关闭连接。<br>我们都认为TIME_WAIT是TCP机制的正常组成部分，应用程序中不应该依赖设置l_linger=0这种机制避免TIME_WAIT。</p>
+<p><strong>4. 修改系统参数</strong></p>
+<ul>
+<li><p>增加本地端口范围，修改net.ipv4.ip_local_port_range，虽然不能解决根本问题但情况可以得到一定的缓解；</p>
+</li>
+<li><p>缩短TIME_WAIT的时间。这个时长在书中描述到RFC推荐是2min，而BSD实现通常是30s，也就说明这个值是可以减小的，尤其我们用在内网通信的环境，数据包甚至都流不出路由器，所以根本不需要设置那么长的TIME_WAIT。这个很多资料说不允许修改，因为是写死在内核中的；也有说可以修改netfilter.ip_conntrack_tcp_timeout_time_wait(新版本nf_conntrack_tcp_timeout_time_wait)的，他们依赖于加载nf_conntract_ipv4模块，不过我试了一下好像不起作用。</p>
+</li>
+<li><p>像之前在项目中推荐的，做出如下调整：</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">net.ipv4.tcp_tw_reuse = 1</span><br><span class="line">net.ipv4.tcp_timestamps=1</span><br><span class="line">net.ipv4.tcp_tw_recycle=1</span><br></pre></td></tr></table></figure>
+<p>很多文献说这种设置是不安全的，所以在测试环境以外就别尝试了，因为这些选项还涉及到timestamp特性，我还不清楚什么回事，后面有时间再看什么吧。</p>
+<p>我们在开发服务端的时候，通常都会设置SO_REUSEADDR这个选项。其实像上面描述到的，该选项也牵涉到侦听socket端口处于TIME_WAIT的情况，设置这个选项将允许处于TIME_WAIT的端口进行绑定</p>
+<h3 id="CLOSE-WAIT-状态"><a href="#CLOSE-WAIT-状态" class="headerlink" title="CLOSE_WAIT 状态"></a>CLOSE_WAIT 状态</h3><blockquote>
+<p>CLOSE_WAIT: 这种状态的含义其实是表示在等待关闭。怎么理解呢？当对方close一个SOCKET后发送FIN报文给自己，你系统毫无疑问地会回应一个ACK报文给对方，此时则进入到CLOSE_WAIT状态。接下来呢，实际上你真正需要考虑的事情是察看你是否还有数据发送给对方，如果没有的话，那么你也就可以close这个SOCKET，发送FIN报文给对方，也即关闭连接。所以你在CLOSE_WAIT状态下，需要完成的事情是等待你去关闭连接。</p>
+</blockquote>
+<p>TIME_WAIT状态可以通过优化服务器参数得到解决，因为发生TIME_WAIT的情况是服务器自己可控的，要么就是对方连接的异常，要么就是自己没有迅速回收资源，总之不是由于自己程序错误导致的。</p>
+<p>但是CLOSE_WAIT就不一样了，从上面的图可以看出来，如果一直保持在CLOSE_WAIT状态，那么只有一种情况，就是在对方关闭连接之后服务器程序自己没有进一步发出ack信号。换句话说，就是在对方连接关闭之后，程序里没有检测到，或者程序压根就忘记了这个时候需要关闭连接，于是这个资源就一直被程序占着。个人觉得这种情况，通过服务器内核参数也没办法解决，服务器对于程序抢占的资源没有主动回收的权利，除非终止程序运行。</p>
+<p>所以如果将大量CLOSE_WAIT的解决办法总结为一句话那就是：查代码。因为问题出在服务器程序里头啊。</p>
+<h3 id="两种状态区别"><a href="#两种状态区别" class="headerlink" title="两种状态区别"></a>两种状态区别</h3><p>场景说明：服务器A是一台爬虫服务器，它使用简单的HttpClient去请求资源服务器B上面的apache获取文件资源，正常情况下，如果请求成功，那么在抓取完资源后，服务器A会主动发出关闭连接的请求，这个时候就是主动关闭连接，服务器A的连接状态我们可以看到是TIME_WAIT。如果一旦发生异常呢？假设请求的资源服务器B上并不存在，那么这个时候就会由服务器B发出关闭连接的请求，服务器A就是被动的关闭了连接，如果服务器A被动关闭连接之后程序员忘了让HttpClient释放连接，那就会造成CLOSE_WAIT的状态了。</p>
+<h1 id="解决方案分析"><a href="#解决方案分析" class="headerlink" title="解决方案分析"></a>解决方案分析</h1><h2 id="解决思路-1"><a href="#解决思路-1" class="headerlink" title="解决思路-1"></a>解决思路-1</h2><p>上面我们已经知道了连接处于 CLOSE_WAIT 状态是怎么回事了，一句话总结一下，就是 CLOSE_WAIT是被动关闭连接是形成的，即服务端主动断开了连接。那么问题来了，服务端为什么会主动断开连接，而不是客户端去处理？再有，我们知道，客户端断开连接会正常进行四次挥手的过程，那么服务端主动断开的话，会出现什么情况？</p>
+<h3 id="TCP-两端分别主动断开连接分析"><a href="#TCP-两端分别主动断开连接分析" class="headerlink" title="TCP 两端分别主动断开连接分析"></a>TCP 两端分别主动断开连接分析</h3><h4 id="正常退出情况"><a href="#正常退出情况" class="headerlink" title="正常退出情况"></a>正常退出情况</h4><p>首先我们来看看一次服务器和客户端正常通信的情况。</p>
+<p><img src="/images/python-tcp-7.png" alt="这里写图片描述"></p>
+<p>当我们只打开服务端时，此时由于客户端没有向服务端发出连接请求，所以服务端此时处在<strong>LISTEN</strong>状态，这个状态称为监听状态，表示服务端在等待客户端的连接请求报文。</p>
+<p><img src="/images/python-tcp-8.png" alt="这里写图片描述"></p>
+<p>这次我们打开客户端，并且通过客户端向服务端发送数据，服务端页正常接收到了数据，此时服务端和客户端都处于ESTABLISHED状态，表示连接已经建立完成，即此时三次握手这个过程已经完毕，但是大家应该清楚，中间还有两次状态的切换客户端的SYN-SENT 以及 服务端的SYN-RCV.由于我们是手动监视，所以我们不能显示的看到这两个状态。</p>
+<p><img src="/images/python-tcp-9.png" alt="这里写图片描述"></p>
+<p>上图中，客户端在数据通信完成后想要结束掉与服务端的连接状态，我们直接通过按Ctrl + C 键向客户端发送了信号将客户端终止,此时，服务端应该也会向客户端发送ACK 字段的报文 相当于我们完成了四次挥手过程中的前两次挥手，通过指令的查看，我们发现结果确实也是那样，随后我们在Ctrl + C 掉服务端，完成了后两次挥手，整个通信过程也就完成了。</p>
+<h4 id="异常终止的情况"><a href="#异常终止的情况" class="headerlink" title="异常终止的情况"></a>异常终止的情况</h4><p>上面的正常过程中，我们是让客户端比服务端先退出，这样满足了四次挥手过程的要求；现在我们让服务器在客户端前面退出，我们来看看这个过程发生了什么。<br>由于我们研究的情况是连接的异常终止情况，所以三次握手状态我们就不关心了，这里我们这研究连接的异常终止情况。</p>
+<p><img src="/images/python-tcp-10.png" alt="这里写图片描述"></p>
+<p>上图中，我们让服务端先退出，然后我们用<strong>netstat</strong>观察端口的状态，此时我们发现<strong>四次挥手过程中服务器和客户端的状态颠倒了</strong>， 也就是说，服务端和客户端的进程那个先向对方发送<strong>FIN 字段</strong>报文，那么哪个就先进入<strong>FIN_WAIT2</strong>状态。</p>
+<p><img src="/images/python-tcp-11.png" alt="这里写图片描述"></p>
+<p>上图发生的原因是这样的，当服务器进程被终止时，会关闭其打开的所有文件描述符，此时就会向客户端发送一个FIN 的报文,客户端则响应一个ACK 报文,但是这样只完成了“四次挥手”的前两次挥手，也就是说这样只实现了半关闭，客户端仍然可以向服务器写入数据。<br>但是当客户端向服务器写入数据时，由于服务器端的套接字进程已经终止，此时连接的状态已经异常了，所以服务端进程不会向客户端发送ACK 报文，而是发送了一个RST 报文请求将处于异常状态的连接复位； 如果客户端此时还要向服务端发送数据，将诱发服务端TCP向客户端发送SIGPIPE信号，因为向接收到RST的套接口写数据都会收到此信号. 所以说，这就是为什么我们主动关闭服务端后，用客户端向服务端写数据，还必须是写两次后连接才会关闭的原因。</p>
+<p>大家可以在自己的Linux系统实验一下，用tcpdump去抓包效果会更好。</p>
+<h2 id="解决思路-2"><a href="#解决思路-2" class="headerlink" title="解决思路-2"></a>解决思路-2</h2><p>上面我们已经知道了当 server 端主动断开的时候，也会正常完成四次挥手的过程，但是需要客户端主动关闭，或者直接程序结束，由 language 的 gc 机制来回收资源，那么上面的问题就很明朗了，要么就是 client 没有进行回收，要么进程没结束。这个需要具体看下代码才能知道，下面看下对我的解决方案。</p>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>由于我用的是 python 的 requests 库来进行 api 请求，所以简单说下两个方案：</p>
+<ol>
+<li>客户端调用 close 强制回收；</li>
+<li>客户端打开 Socket 的 keepalive 机制，通过类似心跳的功能解决。</li>
+</ol>
+<h3 id="方案一"><a href="#方案一" class="headerlink" title="方案一"></a>方案一</h3><p>调用 close 方案不用说，直接调用类似 <code>request.Session().close()</code> 即可；</p>
+<h3 id="方案二"><a href="#方案二" class="headerlink" title="方案二"></a>方案二</h3><p>修改 socket 的 keepalive 属性，在 python 的 requests 库中这个属性是默认没有配置的（在linux中默认值是0，即<a href="https://blog.csdn.net/weixin_39540568/article/details/87889811" target="_blank" rel="external">关闭</a>），在该库中对 socket 的设置的默认值只有一个 <code>(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)</code> ，这个是用来控制是否开启Nagle算法，该算法是为了提高较慢的广域网传输效率，减小小分组的报文个数，完整描述：</p>
+<blockquote>
+<p>该算法要求一个TCP连接上最多只能有一个未被确认的小分组，在该小分组的确认到来之前，不能发送其他小分组。</p>
+</blockquote>
+<p>这里的小分组指的是报文长度小于MSS(Max Segment Size)长度的分组（MSS是在TCP握手的时候在报文选项里面进行通告的大小，主要是用来限制另一端发送数据的长度，防止IP数据包被分段，提高效率，一般是链路层的传输最大传输单元大小减去IP首部与TCP首部大小）。</p>
+<p>如果小分组的确认ACK一直没有回来，那么就可能会触发TCP超时重传的定时器。</p>
+<p>下面是一个简单的示意图，开启了Nagle算法与没有开启：</p>
+<p><img src="/images/python-tcp-12.png" alt="img"></p>
+<p>这也是为什么 linux 的 <code>/proc/sys/net/ipv4/tcp_keepalive_time</code> 没有生效的原因，由于没有给socket带上keepalive的标签，linux在该socket异常以后并不会对其进行回收。</p>
+<p>偏题了，回来一下，那么怎么修改 socket 值呢，具体代码不便贴上，给个思路：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">request</span><span class="params">()</span>:</span></span><br><span class="line">    adapter = TCPKeepAliveAdapter(</span><br><span class="line">        socket_options=[(socket.SOL_SOCKET, socket.SO_KEEPALIVE,<span class="number">1</span>), </span><br><span class="line">                        (socket.IPPROTO_TCP, socket.TCP_KEEPIDLE,<span class="number">30</span>),</span><br><span class="line">                        (socket.IPPROTO_TCP, socket.TCP_KEEPINTVL,<span class="number">3</span>)])</span><br><span class="line">    s = requests.session()</span><br><span class="line">    s.mount(<span class="string">"http://"</span>, adapter)</span><br><span class="line">    s.mount(<span class="string">"https://"</span>, adapter)</span><br><span class="line">    <span class="keyword">return</span> s</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TCPKeepAliveAdapter</span><span class="params">(requests.adapters.HTTPAdapter)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, *args, **kwargs)</span>:</span></span><br><span class="line">        self.socket_options = kwargs.pop(<span class="string">"socket_options"</span>, <span class="keyword">None</span>)</span><br><span class="line">        super(TCPKeepAliveAdapter, self).__init__(*args, **kwargs)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">init_poolmanager</span><span class="params">(self, *args, **kwargs)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> self.socket_options <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>:</span><br><span class="line">            kwargs[<span class="string">"socket_options"</span>] = self.socket_options</span><br><span class="line">        super(TCPKeepAliveAdapter,</span><br><span class="line">              self).init_poolmanager(*args, **kwargs)</span><br></pre></td></tr></table></figure>
+<p>通过实现 <code>requests.adapters.HTTPAdapter</code> 的 <code>init_poolmanager</code> 方法给 <code>socket_options</code> 赋值来修改 <code>socket</code> 的属性。</p>
+<p>是否有人会感到疑惑，在python库requests给服务端发请求的时候，明明已经在<code>Header</code>设置了 <code>&#39;Connection&#39;: &#39;keep-alive&#39;</code></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Session</span><span class="params">(SessionRedirectMixin)</span>:</span></span><br><span class="line">	<span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">		self.headers = default_headers()</span><br><span class="line">    ...</span><br><span class="line">  ...  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">default_headers</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    :rtype: requests.structures.CaseInsensitiveDict</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="keyword">return</span> CaseInsensitiveDict(&#123;</span><br><span class="line">        <span class="string">'User-Agent'</span>: default_user_agent(),</span><br><span class="line">        <span class="string">'Accept-Encoding'</span>: <span class="string">', '</span>.join((<span class="string">'gzip'</span>, <span class="string">'deflate'</span>)),</span><br><span class="line">        <span class="string">'Accept'</span>: <span class="string">'*/*'</span>,</span><br><span class="line">        <span class="string">'Connection'</span>: <span class="string">'keep-alive'</span>,</span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+<p>为什么没有生效呢？</p>
+<h1 id="HTTP-keep-alive-和-TCP-keepalive-原理和区别"><a href="#HTTP-keep-alive-和-TCP-keepalive-原理和区别" class="headerlink" title="HTTP keep-alive 和 TCP keepalive 原理和区别"></a>HTTP keep-alive 和 TCP keepalive 原理和区别</h1><p>不管是在OSI七层网络模型还是在TCP/IP五层网络模型中，<strong>TCP是传输层的一种协议，而HTTP是应用层的一种协议</strong>。</p>
+<p><img src="/images/python-tcp-13.png" alt="在这里插入图片描述"></p>
+<blockquote>
+<p>HTTP中是keep-alive，TCP中是keepalive，HTTP中是带中划线的。大小写无所谓</p>
+</blockquote>
+<h2 id="TCP-Keepalive"><a href="#TCP-Keepalive" class="headerlink" title="TCP Keepalive"></a>TCP Keepalive</h2><p><strong>起源</strong></p>
+<p>双方建立交互的连接，但是并不是一直存在数据交互，有些连接会在数据交互完毕后，主动释放连接，而有些不会，那么在长时间无数据交互的时间段内，交互双方都有可能出现掉电、死机、异常重启等各种意外，当这些意外发生之后，这些TCP连接并未来得及正常释放，那么，连接的另一方并不知道对端的情况，它会一直维护这个连接，长时间的积累会导致非常多的半打开连接，造成端系统资源的消耗和浪费，为了解决这个问题，在传输层可以利用TCP的保活报文来实现。</p>
+<p><strong>存在的作用</strong></p>
+<ol>
+<li>探测连接的对端是否存活</li>
+</ol>
+<p>在应用交互的过程中，可能存在以下几种情况：</p>
+<p>(1) 客户端或服务端意外断电，死机，崩溃，重启。</p>
+<p>(2) 中间网络已经中断，而客户端与服务器并不知道。</p>
+<p>利用保活探测功能，可以探知这种对端的意外情况，从而保证在意外发生时，可以释放半打开的TCP连接。</p>
+<ol>
+<li>防止中间设备因超时删除连接相关的连接表</li>
+</ol>
+<p>中间设备如防火墙等，会为经过它的数据报文建立相关的连接信息表，并未其设置一个超时时间的定时器，如果超出预定时间，某连接无任何报文交互的话，中间设备会将该连接信息从表中删除，在删除后，再有应用报文过来时，中间设备将丢弃该报文，从而导致应用出现异常，这个交互的过程大致如下图所示:</p>
+<p><img src="/images/python-tcp-14.png" alt="img"></p>
+<p>这种情况在有防火墙的应用环境下非常常见，这会给某些长时间无数据交互但是又要长时间维持连接的应用(如数据库)带来很大的影响，为了解决这个问题，应用本身或TCP可以通过保活报文来维持中间设备中该连接的信息，(也可以在中间设备上开启长连接属性或调高连接表的释放时间来解决，但是，这个影响可能较大，有机会再针对这个做详细的描述，在此不多说)。</p>
+<p>TCP保活的交互过程大致如下图所示:</p>
+<p><img src="/images/python-tcp-15.png" alt="img"></p>
+<p>TCP保活可能带来的问题</p>
+<ol>
+<li>中间设备因大量保活连接，导致其连接表满</li>
+</ol>
+<p>网关设备由于保活问题，导致其连接表满，无法新建连接(XX局网闸故障案例)或性能下降严重</p>
+<ol>
+<li>正常连接被释放</li>
+</ol>
+<p>当连接一端在发送保活探测报文时，中间网络正好由于各种异常(如链路中断、中间设备重启等)而无法将保活探测报文正确转发至对端时，可能会导致探测的一方释放本来正常的连接，但是这种可能情况发生的概率较小，另外，一般也可以增加保活探测报文发生的次数来减少这种情况发生的概率和影响。</p>
+<h2 id="HTTP-Keep-alive"><a href="#HTTP-Keep-alive" class="headerlink" title="HTTP Keep-alive"></a>HTTP Keep-alive</h2><p>Httpd守护进程，一般都提供了keep-alive timeout时间设置参数。比如nginx的keepalive_timeout,和Apache的KeepAliveTimeout。</p>
+<p>这个keepalive_timeout时间值意味着:一个http产生的tcp连接在传送完最后一个响应后，还需要hold住keepalive_timeout秒后，才开始关闭这个连接。</p>
+<p>当httpd守护进程发送完一个响应后，理应马上主动关闭响应的tcp连接，设置keepalive_timeout后，httpd守护进程会想说:”再等等吧,看看浏览器还有没有请求过来”,这一等，便是keepalive_timeout时间。如果守护进程在这个等待的时间里，一直没有收到浏览器发过来http请求，则关闭这个http连接。</p>
+<blockquote>
+<ol>
+<li><p>在没有设置keepalive_timeout情况下，一个socket资源从建立到真正释放需要经过的时间是:建立tcp连接+传送http请求+php脚本执行+传送http响应+关闭tcp连接。</p>
+</li>
+<li><p>设置了keepalive_timeout时间情况下，一个socket建立到释放需要的时间是多了keepalive_timeout时间。</p>
+</li>
+</ol>
+</blockquote>
+<h2 id="区别"><a href="#区别" class="headerlink" title="区别"></a>区别</h2><p>http keep-alive与tcp keep-alive，不是同一回事，意图不一样。http keep-alive是为了让tcp活的更久一点，以便在同一个连接上传送多个http，提高socket的效率。而tcp keep-alive是TCP的一种检测TCP连接状况的保险机制。tcp keep-alive保险定时器，支持三个系统内核配置参数:</p>
+<blockquote>
+<p>echo 1800 &gt; /proc/sys/net/ipv4/tcp_keepalive_time</p>
+<p>echo 15 &gt; /proc/sys/net/ipv4/tcp_keepalive_intvl</p>
+<p>echo 5 &gt; /proc/sys/net/ipv4/tcp_keepalive_probes</p>
+</blockquote>
+<p>keepalive是TCP保鲜定时器，当网路两端建立了TCP连接之后，闲置idle(双方没有任何数据发送往来)了tcp_keepalive_time后，服务器内核就会尝试向客户端发送侦测包，来判断TCP连接状况(有可能客户端崩溃、强制关闭了应用、主机不可达等等)。如果没有收到对方的回答(ack包),则会在tcp_keepalive_intvl后再次尝试发送侦测包，直到收到对方的ack，如果一直没有收到对方的ack，一共会尝试tcp_keepalive_probes次，每次的间隔时间在这里分别是15s、30s、45s、60s、75s。如果尝试tcp_keepalive_probes,依然没有收到对方的ack包，则会丢弃该TCP连接。</p>
+<p>TCP连接默认闲置时间是2小时，一般设置为30分钟足够了。也就是说，仅当nginx的keepalive_timeout值设置高于tcp_keepalive_time,并且距此tcp连接传输的最后一个http响应，经过了tcp_keepalive_time时间之后，操作系统才会发送侦测包来决定是否要丢弃这个TCP连接。一般不会出现这种情况，除非你需要这样做。</p>
+<p>同时，还记得我们上面说的 TIME_WAIT 状态的连接吗，大量这样的连接可能会导致服务不可用，使用http keep-alive,可以减少服务端TIME_WAIT数量(因为由服务端httpd守护进程主动关闭连接)。道理很简单，相较而言，启用keep-alive,建立的tcp连接更少了，自然要被关闭的tcp连接也相应更少了。</p>
+<p>下面再介绍个抓包工具</p>
+<h1 id="tcpdump-抓包工具"><a href="#tcpdump-抓包工具" class="headerlink" title="tcpdump 抓包工具"></a>tcpdump 抓包工具</h1><p>写不动了，介绍两篇文章吧</p>
+<p><a href="https://www.cnblogs.com/f-ck-need-u/p/7064286.html" target="_blank" rel="external">抓包工具tcpdump用法说明</a></p>
+<p><a href="https://www.cnblogs.com/lvdongjie/p/10911564.html" target="_blank" rel="external">最全的tcpdump使用详解</a></p>
+<p><br> </p>
+<p>参考：</p>
+<p><a href="https://blog.csdn.net/yanghangwww/article/details/106456584" target="_blank" rel="external">TCP协议解析、tcpdump抓包分析三次握手和四次挥手</a></p>
+<p><a href="https://www.cnblogs.com/Andya/p/7272462.html" target="_blank" rel="external">TCP三次握手和四次挥手过程</a></p>
+<p><a href="https://blog.csdn.net/zzhongcy/article/details/38851271?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-4.baidujs&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-4.baidujs" target="_blank" rel="external">端口状态 LISTENING、ESTABLISHED、TIME_WAIT及CLOSE_WAIT详解，以及三次握手，滑动窗口</a></p>
+<p><a href="https://blog.csdn.net/yucdsn/article/details/81092679?utm_medium=distribute.pc_relevant.none-task-blog-baidujs_title-1&amp;spm=1001.2101.3001.4242" target="_blank" rel="external">服务器出现TIME_WAIT和CLOSE_WAIT的原因以及解决方法</a></p>
+<p><a href="https://blog.csdn.net/mingwulipo/article/details/89378276" target="_blank" rel="external">TIME_WAIT和CLOSE_WAIT的区别</a></p>
+<p><a href="https://www.jianshu.com/p/ccafdeda0b95" target="_blank" rel="external">详解Socket编程—TCP_NODELAY选项</a></p>
+<p><a href="https://blog.csdn.net/weixin_39610085/article/details/110966721?utm_medium=distribute.pc_relevant.none-task-blog-baidujs_title-1&amp;spm=1001.2101.3001.4242" target="_blank" rel="external">requests.adapters.HTTPAdapter.init_poolmanager某些字段含义</a></p>
+<p><a href="https://blog.csdn.net/zhangge3663/article/details/88714037?utm_medium=distribute.pc_relevant.none-task-blog-baidujs_title-1&amp;spm=1001.2101.3001.4242" target="_blank" rel="external">Tcp Keepalive和HTTP Keepalive详解</a></p>
+<p><a href="https://blog.csdn.net/lpf463061655/article/details/108460311?utm_medium=distribute.pc_relevant.none-task-blog-baidujs_title-6&amp;spm=1001.2101.3001.4242" target="_blank" rel="external">HTTP keep-alive和TCP keepalive测试试验</a></p>
+<p><a href="https://blog.csdn.net/niejiangshuai/article/details/88525909?utm_medium=distribute.pc_relevant.none-task-blog-baidujs_baidulandingword-1&amp;spm=1001.2101.3001.4242" target="_blank" rel="external">Apache 开启和关闭 Keep-Alive 解决访问长连接问题</a></p>
+<p><a href="https://blog.csdn.net/pmt123456/article/details/58233999" target="_blank" rel="external">TCP协议的KeepAlive机制</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+<blockquote class="blockquote-center" style="color: #ccc;">
+    -------------本文结束 <i class="fa fa-apple"></i> 感谢您的阅读-------------
+</blockquote>
+
+  <span id="inline-green" style="border-radius:3px;">作者</span>：<a class="link-blue" href="https://github.com/magiceses" target="_blank">Magiceses</a><br/>有问题请 <a class="link-blue" href="https://magiceses.github.io/guestbook" target="_blank">留言</a> 或者私信我的 <a class="link-blue" href="https://weibo.com/u/3069595351" target="_blank">微博</a>。
+
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>满分是10分的话，这篇文章你给几分</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/reward/reward_wechat.png" alt="magiceses WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/reward/reward_alipay.png" alt="magiceses Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"><i class="fa fa-tag"></i> Python</a>
+          
+            <a href="/tags/PythonWeb/" rel="tag"><i class="fa fa-tag"></i> PythonWeb</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/06/08/service-worker/" rel="next" title="使用 Service worker 实现加速/离线访问博客">
+                <i class="fa fa-chevron-left"></i> 使用 Service worker 实现加速/离线访问博客
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/07/15/hexo-next-five/" rel="prev" title="Hexo-NexT搭建个人博客（五）">
+                Hexo-NexT搭建个人博客（五） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar/avatar.png"
+               alt="magiceses" />
+          <p class="site-author-name" itemprop="name">magiceses</p>
+          <p class="site-description motion-element" itemprop="description">Stay Hungry,Stay Foolish</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">36</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/magiceses" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://blog.csdn.net/weixin_43700106" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-chrome"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/weblog" title="建站日志" target="_blank">建站日志</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/reward" title="打赏" target="_blank">打赏</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#TCP协议解析"><span class="nav-number">2.</span> <span class="nav-text">TCP协议解析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#报文格式"><span class="nav-number">2.1.</span> <span class="nav-text">报文格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#连接管理"><span class="nav-number">2.2.</span> <span class="nav-text">连接管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#建立连接，三次握手"><span class="nav-number">2.2.1.</span> <span class="nav-text">建立连接，三次握手</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#断开连接，四次挥手"><span class="nav-number">2.2.2.</span> <span class="nav-text">断开连接，四次挥手</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#问题思考"><span class="nav-number">2.2.3.</span> <span class="nav-text">问题思考</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TIME-WAIT-状态"><span class="nav-number">2.2.4.</span> <span class="nav-text">TIME_WAIT 状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CLOSE-WAIT-状态"><span class="nav-number">2.2.5.</span> <span class="nav-text">CLOSE_WAIT 状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#两种状态区别"><span class="nav-number">2.2.6.</span> <span class="nav-text">两种状态区别</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#解决方案分析"><span class="nav-number">3.</span> <span class="nav-text">解决方案分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#解决思路-1"><span class="nav-number">3.1.</span> <span class="nav-text">解决思路-1</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP-两端分别主动断开连接分析"><span class="nav-number">3.1.1.</span> <span class="nav-text">TCP 两端分别主动断开连接分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#正常退出情况"><span class="nav-number">3.1.1.1.</span> <span class="nav-text">正常退出情况</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#异常终止的情况"><span class="nav-number">3.1.1.2.</span> <span class="nav-text">异常终止的情况</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决思路-2"><span class="nav-number">3.2.</span> <span class="nav-text">解决思路-2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决方案"><span class="nav-number">3.3.</span> <span class="nav-text">解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#方案一"><span class="nav-number">3.3.1.</span> <span class="nav-text">方案一</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#方案二"><span class="nav-number">3.3.2.</span> <span class="nav-text">方案二</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#HTTP-keep-alive-和-TCP-keepalive-原理和区别"><span class="nav-number">4.</span> <span class="nav-text">HTTP keep-alive 和 TCP keepalive 原理和区别</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP-Keepalive"><span class="nav-number">4.1.</span> <span class="nav-text">TCP Keepalive</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP-Keep-alive"><span class="nav-number">4.2.</span> <span class="nav-text">HTTP Keep-alive</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#区别"><span class="nav-number">4.3.</span> <span class="nav-text">区别</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#tcpdump-抓包工具"><span class="nav-number">5.</span> <span class="nav-text">tcpdump 抓包工具</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+      
+        <section style="border-top:1px dotted #ccc; padding-top:10px;">
+          <iframe width="100%" height="120" class="share_self"  frameborder="0" scrolling="no" src="https://widget.weibo.com/weiboshow/index.php?language=&width=0&height=120&fansRow=2&ptype=1&speed=0&skin=5&isTitle=1&noborder=1&isWeibo=0&isFans=0&uid=5346488237&verifier=d529ff3a&dpc=1"></iframe>
+        </section>
+      
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="busuanzi-count">
+
+  <!-- <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script> -->
+  <!-- 上面这个是之前的，不知道为什么失效了，改成下面这个 -->
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">您是第<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>个小伙伴</span>
+  
+
+  
+    <span class="site-pv">本站总浏览<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">magiceses</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Pisces
+  </a>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count" style="color: #e90f92;">全站共 165k 字</span>
+</div>
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+  <!-- 按需加载背景 -->
+  <!-- 背景动画 -->
+<script type="text/javascript">
+  // 按需加载背景
+  // 如果是all，就直接加载了
+  if("pc" == "all") {
+    $.getScript("/js/src/particle.js?v=5.0.1");
+  }
+  // 识别手机或电脑的js开始
+  (function(){
+    var res = GetRequest();
+    var par = res['index'];
+    if(par!='gfan'){
+      var ua=navigator.userAgent.toLowerCase();
+      var contains=function (a, b){
+          if(a.indexOf(b)!=-1){return true;}
+      };
+      if((contains(ua,"android") && contains(ua,"mobile"))||(contains(ua,"android") && contains(ua,"mozilla"))||(contains(ua,"android") && contains(ua,"opera"))||contains(ua,"ucweb7")||contains(ua,"iphone")){
+        return false;
+      } else {
+        $.getScript("/js/src/particle.js?v=5.0.1");
+      }
+    }
+  })();
+  function GetRequest() {
+    var url = location.search;
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+      var str = url.substr(1);
+      strs = str.split("&");
+      for(var i = 0; i < strs.length; i ++) {
+        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+      }
+    }
+    return theRequest;
+  }
+</script>
+<!-- 识别手机或电脑的js结束 -->  
+
+  <!-- 页面点击小红心 -->
+  <!-- 页面点击小红心 -->
+
+  <script type="text/javascript" src="/js/src/love.js?v=5.0.1"></script>
+
+
+  <!-- 鼠标移动，效果 -->
+  <!-- 鼠标移动特效 -->
+
+  <script type="text/javascript" src="/js/src/jquery-stars.js?v=5.0.1"></script>
+  <script type="text/javascript">
+  jQuery('body').jstars({
+  	image_path: '/images',
+  	image: 'candy-cane-stars.png',
+  	style: 'white',
+  	width: 34,
+  	height: 34,
+  	delay: 700,
+  	frequency: 5
+  });
+  </script>
+
+
+  <!-- 页面 title 进入/离开 效果 -->
+
+  <script type="text/javascript">var OriginTitile=document.title,st;document.addEventListener("visibilitychange",function(){document.hidden?(document.title="Waiting for you back！",clearTimeout(st)):(document.title="Thanks for visit~ "+OriginTitile,st=setTimeout(function(){document.title=OriginTitile},4e3))})</script>
+
+
+</body>
+</html>

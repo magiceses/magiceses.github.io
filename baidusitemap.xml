@@ -1,0 +1,758 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/06/25/python-%E6%9C%89%E5%85%B3TCP%E7%9A%84%E9%97%AE%E9%A2%98%E8%B0%83%E6%9F%A5/</loc>
+    <lastmod>2021-09-26T02:23:46.214Z</lastmod>
+    <data>
+        <display>
+        <title>解决 Cannot assign requested address</title>
+        <pubTime>2017-06-24T19:25:24.000Z</pubTime>
+        
+        <tag>Python</tag>
+         
+        <tag>PythonWeb</tag>
+         
+         
+           
+             
+              <breadCrumb title="Python" url="https://magiceses.github.io/categories/Python/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+    
+  <url>
+    <loc>https://magiceses.github.io/2016/11/18/python-virtualenv%E7%9A%84%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8/</loc>
+    <lastmod>2021-09-18T15:41:16.699Z</lastmod>
+    <data>
+        <display>
+        <title>Python virtualenv的安装与使用</title>
+        <pubTime>2016-11-18T05:25:24.000Z</pubTime>
+        
+        <tag>Python</tag>
+         
+         
+           
+             
+              <breadCrumb title="Python" url="https://magiceses.github.io/categories/Python/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/03/07/python-with%E8%AF%AD%E5%8F%A5%E5%92%8C%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AE%A1%E7%90%86%E5%99%A8%E5%AF%B9%E8%B1%A1/</loc>
+    <lastmod>2021-09-18T15:39:21.351Z</lastmod>
+    <data>
+        <display>
+        <title>Python with语句和上下文管理器对象</title>
+        <pubTime>2017-03-07T05:25:24.000Z</pubTime>
+        
+        <tag>Python</tag>
+         
+         
+           
+             
+              <breadCrumb title="Python" url="https://magiceses.github.io/categories/Python/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/03/20/python-pip%E7%9A%84%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8/</loc>
+    <lastmod>2021-09-14T10:57:13.221Z</lastmod>
+    <data>
+        <display>
+        <title>Python pip的安装与使用</title>
+        <pubTime>2017-03-19T19:25:24.000Z</pubTime>
+        
+        <tag>Python</tag>
+         
+         
+           
+             
+              <breadCrumb title="Python" url="https://magiceses.github.io/categories/Python/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+    
+    
+    
+    
+    
+    
+    
+  <url>
+    <loc>https://magiceses.github.io/2019/03/31/vue-ssr/</loc>
+    <lastmod>2021-09-14T09:01:17.801Z</lastmod>
+    <data>
+        <display>
+        <title>手把手教你 Vue 服务端渲染</title>
+        <pubTime>2019-03-30T23:25:24.000Z</pubTime>
+        
+        <tag>Vue</tag>
+         
+         
+           
+             
+              <breadCrumb title="前端" url="https://magiceses.github.io/categories/%E5%89%8D%E7%AB%AF/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2016/12/24/why-introversion-like-alone/</loc>
+    <lastmod>2021-09-14T09:01:17.801Z</lastmod>
+    <data>
+        <display>
+        <title>【转】为什么一些生活中很外向开朗的人会喜欢独来独往</title>
+        <pubTime>2016-12-24T14:25:24.000Z</pubTime>
+        
+        <tag>essay</tag>
+         
+         
+           
+             
+              <breadCrumb title="综合" url="https://magiceses.github.io/categories/%E7%BB%BC%E5%90%88/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/11/11/vue-sell/</loc>
+    <lastmod>2021-09-14T09:01:17.801Z</lastmod>
+    <data>
+        <display>
+        <title>vue2.x 做一个外卖app</title>
+        <pubTime>2017-11-10T19:25:24.000Z</pubTime>
+        
+        <tag>vue</tag>
+         
+         
+           
+             
+              <breadCrumb title="前端" url="https://magiceses.github.io/categories/%E5%89%8D%E7%AB%AF/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/02/14/why-we-dropped-zepto/</loc>
+    <lastmod>2021-09-14T09:01:17.801Z</lastmod>
+    <data>
+        <display>
+        <title>【转】为什么我们放弃了 Zepto</title>
+        <pubTime>2017-02-13T17:25:24.000Z</pubTime>
+        
+        <tag>zepto</tag>
+         
+         
+           
+             
+              <breadCrumb title="综合" url="https://magiceses.github.io/categories/%E7%BB%BC%E5%90%88/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2018/07/20/yarn/</loc>
+    <lastmod>2021-09-14T09:01:17.801Z</lastmod>
+    <data>
+        <display>
+        <title>Yarn安装与使用详细介绍</title>
+        <pubTime>2018-07-19T19:25:24.000Z</pubTime>
+        
+        <tag>Yarn</tag>
+         
+         
+           
+             
+              <breadCrumb title="前端" url="https://magiceses.github.io/categories/%E5%89%8D%E7%AB%AF/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2016/11/22/use-jquery-skill/</loc>
+    <lastmod>2021-09-14T09:01:17.800Z</lastmod>
+    <data>
+        <display>
+        <title>jQuery使用技巧</title>
+        <pubTime>2016-11-22T03:54:55.000Z</pubTime>
+        
+        <tag>JavaScript</tag>
+         
+        <tag>jQuery</tag>
+         
+         
+           
+             
+              <breadCrumb title="前端" url="https://magiceses.github.io/categories/%E5%89%8D%E7%AB%AF/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2019/07/01/vue-element-change-theme/</loc>
+    <lastmod>2021-09-14T09:01:17.800Z</lastmod>
+    <data>
+        <display>
+        <title>基于Vue、ElementUI的换肤解决方案</title>
+        <pubTime>2019-06-30T19:25:24.000Z</pubTime>
+        
+        <tag>JavaScript</tag>
+         
+        <tag>Vue</tag>
+         
+         
+           
+             
+              <breadCrumb title="前端" url="https://magiceses.github.io/categories/%E5%89%8D%E7%AB%AF/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2018/05/01/vue-music/</loc>
+    <lastmod>2021-09-14T09:01:17.800Z</lastmod>
+    <data>
+        <display>
+        <title>vue2.x 做一个音乐app</title>
+        <pubTime>2018-04-30T19:25:24.000Z</pubTime>
+        
+        <tag>vue</tag>
+         
+         
+           
+             
+              <breadCrumb title="前端" url="https://magiceses.github.io/categories/%E5%89%8D%E7%AB%AF/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2018/06/18/vue-prerender/</loc>
+    <lastmod>2021-09-14T09:01:17.800Z</lastmod>
+    <data>
+        <display>
+        <title>Vue 服务端渲染 or 预渲染</title>
+        <pubTime>2018-06-18T08:25:24.000Z</pubTime>
+        
+        <tag>vue</tag>
+         
+         
+           
+             
+              <breadCrumb title="前端" url="https://magiceses.github.io/categories/%E5%89%8D%E7%AB%AF/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/06/08/service-worker/</loc>
+    <lastmod>2021-09-14T09:01:17.799Z</lastmod>
+    <data>
+        <display>
+        <title>使用 Service worker 实现加速/离线访问博客</title>
+        <pubTime>2017-06-08T03:25:24.000Z</pubTime>
+        
+        <tag>Service-worker</tag>
+         
+         
+           
+             
+              <breadCrumb title="前端" url="https://magiceses.github.io/categories/%E5%89%8D%E7%AB%AF/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2019/02/05/travis-ci/</loc>
+    <lastmod>2021-09-14T09:01:17.799Z</lastmod>
+    <data>
+        <display>
+        <title>使用 Travis CI 自动更新 GitHub Pages</title>
+        <pubTime>2019-02-04T23:25:24.000Z</pubTime>
+        
+        <tag>CI</tag>
+         
+         
+           
+             
+              <breadCrumb title="前端" url="https://magiceses.github.io/categories/%E5%89%8D%E7%AB%AF/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2019/10/10/mid-age/</loc>
+    <lastmod>2021-09-14T09:01:17.798Z</lastmod>
+    <data>
+        <display>
+        <title>人到中年</title>
+        <pubTime>2019-10-09T19:25:24.000Z</pubTime>
+        
+        <tag>essay</tag>
+         
+         
+           
+             
+              <breadCrumb title="综合" url="https://magiceses.github.io/categories/%E7%BB%BC%E5%90%88/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/05/20/npm-two/</loc>
+    <lastmod>2021-09-14T09:01:17.798Z</lastmod>
+    <data>
+        <display>
+        <title>npm 的一个小细节</title>
+        <pubTime>2017-05-19T17:25:24.000Z</pubTime>
+        
+        <tag>npm</tag>
+         
+         
+           
+             
+              <breadCrumb title="前端" url="https://magiceses.github.io/categories/%E5%89%8D%E7%AB%AF/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/04/10/npm/</loc>
+    <lastmod>2021-09-14T09:01:17.798Z</lastmod>
+    <data>
+        <display>
+        <title>npm 全面介绍</title>
+        <pubTime>2017-04-09T19:25:24.000Z</pubTime>
+        
+        <tag>npm</tag>
+         
+         
+           
+             
+              <breadCrumb title="前端" url="https://magiceses.github.io/categories/%E5%89%8D%E7%AB%AF/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/02/11/respond-js/</loc>
+    <lastmod>2021-09-14T09:01:17.798Z</lastmod>
+    <data>
+        <display>
+        <title>polyfill — Respond.js</title>
+        <pubTime>2017-02-11T15:25:24.000Z</pubTime>
+        
+        <tag>JavaScript</tag>
+         
+         
+           
+             
+              <breadCrumb title="前端" url="https://magiceses.github.io/categories/%E5%89%8D%E7%AB%AF/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2016/10/23/sass/</loc>
+    <lastmod>2021-09-14T09:01:17.798Z</lastmod>
+    <data>
+        <display>
+        <title>Sass 教程</title>
+        <pubTime>2016-10-23T02:49:15.000Z</pubTime>
+        
+        <tag>css</tag>
+         
+        <tag>sass</tag>
+         
+         
+           
+             
+              <breadCrumb title="前端" url="https://magiceses.github.io/categories/%E5%89%8D%E7%AB%AF/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2020/06/10/husky-lint-staged/</loc>
+    <lastmod>2021-09-14T09:01:17.797Z</lastmod>
+    <data>
+        <display>
+        <title>husky+lint-staged助力团队编码规范</title>
+        <pubTime>2020-06-09T21:25:24.000Z</pubTime>
+        
+        <tag>husky</tag>
+         
+        <tag>lint-staged</tag>
+         
+         
+           
+             
+              <breadCrumb title="前端" url="https://magiceses.github.io/categories/%E5%89%8D%E7%AB%AF/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2019/05/01/js-exception-handing/</loc>
+    <lastmod>2021-09-14T09:01:17.797Z</lastmod>
+    <data>
+        <display>
+        <title>【转】如何优雅处理前端异常</title>
+        <pubTime>2019-04-30T19:25:24.000Z</pubTime>
+        
+        <tag>JavaScript</tag>
+         
+         
+           
+             
+              <breadCrumb title="前端" url="https://magiceses.github.io/categories/%E5%89%8D%E7%AB%AF/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/02/18/js-memory-management-and-gc/</loc>
+    <lastmod>2021-09-14T09:01:17.797Z</lastmod>
+    <data>
+        <display>
+        <title>JavaScript 内存管理 & 垃圾回收机制</title>
+        <pubTime>2017-02-18T05:25:24.000Z</pubTime>
+        
+        <tag>JavaScript</tag>
+         
+         
+           
+             
+              <breadCrumb title="综合" url="https://magiceses.github.io/categories/%E7%BB%BC%E5%90%88/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2018/06/01/js-this/</loc>
+    <lastmod>2021-09-14T09:01:17.797Z</lastmod>
+    <data>
+        <display>
+        <title>关于 JavaScript 中 this 的详细总结</title>
+        <pubTime>2018-05-31T19:25:24.000Z</pubTime>
+        
+        <tag>JavaScript</tag>
+         
+         
+           
+             
+              <breadCrumb title="前端" url="https://magiceses.github.io/categories/%E5%89%8D%E7%AB%AF/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/02/28/memory-leak/</loc>
+    <lastmod>2021-09-14T09:01:17.797Z</lastmod>
+    <data>
+        <display>
+        <title>如何解决内存泄漏引发的血案</title>
+        <pubTime>2017-02-27T17:01:00.000Z</pubTime>
+        
+        <tag>JavaScript</tag>
+         
+         
+           
+             
+              <breadCrumb title="综合" url="https://magiceses.github.io/categories/%E7%BB%BC%E5%90%88/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2016/10/16/how-it-feels-to-learn-javascript-in-2016/</loc>
+    <lastmod>2021-09-14T09:01:17.796Z</lastmod>
+    <data>
+        <display>
+        <title>【转】在2016年学JavaScript是一种什么样的体验</title>
+        <pubTime>2016-10-16T15:25:24.000Z</pubTime>
+        
+        <tag>essay</tag>
+         
+        <tag>JavaScript</tag>
+         
+         
+           
+             
+              <breadCrumb title="前端" url="https://magiceses.github.io/categories/%E5%89%8D%E7%AB%AF/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/01/18/html5shiv/</loc>
+    <lastmod>2021-09-14T09:01:17.796Z</lastmod>
+    <data>
+        <display>
+        <title>腻子脚本 — HTML5Shiv</title>
+        <pubTime>2017-01-18T05:25:24.000Z</pubTime>
+        
+        <tag>JavaScript</tag>
+         
+         
+           
+             
+              <breadCrumb title="前端" url="https://magiceses.github.io/categories/%E5%89%8D%E7%AB%AF/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2018/10/15/hexo-next-six/</loc>
+    <lastmod>2021-09-14T09:01:17.795Z</lastmod>
+    <data>
+        <display>
+        <title>Hexo-NexT搭建个人博客（六）</title>
+        <pubTime>2018-10-15T15:25:24.000Z</pubTime>
+        
+        <tag>Hexo</tag>
+         
+        <tag>Next</tag>
+         
+         
+           
+             
+              <breadCrumb title="Hexo" url="https://magiceses.github.io/categories/Hexo/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2016/11/11/hexo-next-three/</loc>
+    <lastmod>2021-09-14T09:01:17.795Z</lastmod>
+    <data>
+        <display>
+        <title>Hexo-NexT搭建个人博客（三）</title>
+        <pubTime>2016-11-11T05:25:24.000Z</pubTime>
+        
+        <tag>Hexo</tag>
+         
+        <tag>Next</tag>
+         
+         
+           
+             
+              <breadCrumb title="Hexo" url="https://magiceses.github.io/categories/Hexo/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2016/09/30/hexo-next-two/</loc>
+    <lastmod>2021-09-14T09:01:17.795Z</lastmod>
+    <data>
+        <display>
+        <title>Hexo-NexT搭建个人博客（二）</title>
+        <pubTime>2016-09-30T14:18:22.000Z</pubTime>
+        
+        <tag>Hexo</tag>
+         
+        <tag>Next</tag>
+         
+         
+           
+             
+              <breadCrumb title="Hexo" url="https://magiceses.github.io/categories/Hexo/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2016/10/07/git/</loc>
+    <lastmod>2021-09-14T09:01:17.794Z</lastmod>
+    <data>
+        <display>
+        <title>Git学习总结</title>
+        <pubTime>2016-10-07T05:25:24.000Z</pubTime>
+        
+        <tag>Git</tag>
+         
+         
+           
+             
+              <breadCrumb title="综合" url="https://magiceses.github.io/categories/%E7%BB%BC%E5%90%88/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/05/01/gulp/</loc>
+    <lastmod>2021-09-14T09:01:17.794Z</lastmod>
+    <data>
+        <display>
+        <title>gulp 详解与使用</title>
+        <pubTime>2017-04-30T17:25:24.000Z</pubTime>
+        
+        <tag>gulp</tag>
+         
+         
+           
+             
+              <breadCrumb title="前端" url="https://magiceses.github.io/categories/%E5%89%8D%E7%AB%AF/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/07/15/hexo-next-five/</loc>
+    <lastmod>2021-09-14T09:01:17.794Z</lastmod>
+    <data>
+        <display>
+        <title>Hexo-NexT搭建个人博客（五）</title>
+        <pubTime>2017-07-15T15:25:24.000Z</pubTime>
+        
+        <tag>Hexo</tag>
+         
+        <tag>Next</tag>
+         
+         
+           
+             
+              <breadCrumb title="Hexo" url="https://magiceses.github.io/categories/Hexo/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2016/12/15/hexo-next-four/</loc>
+    <lastmod>2021-09-14T09:01:17.794Z</lastmod>
+    <data>
+        <display>
+        <title>Hexo-NexT搭建个人博客（四）</title>
+        <pubTime>2016-12-15T15:25:24.000Z</pubTime>
+        
+        <tag>Hexo</tag>
+         
+        <tag>Next</tag>
+         
+         
+           
+             
+              <breadCrumb title="Hexo" url="https://magiceses.github.io/categories/Hexo/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2016/09/03/hexo-next-one/</loc>
+    <lastmod>2021-09-14T09:01:17.794Z</lastmod>
+    <data>
+        <display>
+        <title>Hexo-NexT搭建个人博客（一）</title>
+        <pubTime>2016-09-03T05:25:24.000Z</pubTime>
+        
+        <tag>Hexo</tag>
+         
+        <tag>Next</tag>
+         
+         
+           
+             
+              <breadCrumb title="Hexo" url="https://magiceses.github.io/categories/Hexo/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2016/09/25/essay-20160925/</loc>
+    <lastmod>2021-09-14T09:01:17.793Z</lastmod>
+    <data>
+        <display>
+        <title>如果深圳的夜晚没有风</title>
+        <pubTime>2016-09-25T15:25:24.000Z</pubTime>
+        
+        <tag>essay</tag>
+         
+         
+           
+             
+              <breadCrumb title="随笔" url="https://magiceses.github.io/categories/%E9%9A%8F%E7%AC%94/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+</urlset>
