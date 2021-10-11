@@ -4,12 +4,12 @@
 
     
   <url>
-    <loc>https://magiceses.github.io/2019/10/10/python-%E8%BF%9B%E7%A8%8B%E7%BA%BF%E7%A8%8B%E5%8D%8F%E7%A8%8B-4.0/</loc>
-    <lastmod>2021-10-11T09:26:22.014Z</lastmod>
+    <loc>https://magiceses.github.io/2019/10/11/python-%E8%BF%9B%E7%A8%8B%E7%BA%BF%E7%A8%8B%E5%8D%8F%E7%A8%8B-4.1/</loc>
+    <lastmod>2021-10-11T09:34:15.543Z</lastmod>
     <data>
         <display>
-        <title>Python 进程线程协程(4)--multiprocessing模块(上)</title>
-        <pubTime>2019-10-09T19:25:24.000Z</pubTime>
+        <title>Python 进程线程协程(4)--multiprocessing模块(中)</title>
+        <pubTime>2019-10-10T19:25:24.000Z</pubTime>
         
         <tag>Python</tag>
          
@@ -268,26 +268,6 @@
         <display>
         <title>Python 进程线程协程(4)--线程池</title>
         <pubTime>2019-10-13T08:25:24.000Z</pubTime>
-        
-        <tag>Python</tag>
-         
-         
-           
-             
-              <breadCrumb title="Python" url="https://magiceses.github.io/categories/Python/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>https://magiceses.github.io/2019/10/11/python-%E8%BF%9B%E7%A8%8B%E7%BA%BF%E7%A8%8B%E5%8D%8F%E7%A8%8B-4.1/</loc>
-    <lastmod>2021-10-11T07:17:25.631Z</lastmod>
-    <data>
-        <display>
-        <title>Python 进程线程协程(4)--multiprocessing模块(中)</title>
-        <pubTime>2019-10-10T19:25:24.000Z</pubTime>
         
         <tag>Python</tag>
          
