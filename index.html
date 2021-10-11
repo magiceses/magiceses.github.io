@@ -743,6 +743,246 @@ for (var L = 0; L < C.length; L++) {
             
               
                 
+                <a class="post-title-link" href="/2020/11/02/prometheus-thanos-学习总结/" itemprop="url">
+                  Prometheus和Thanos的前生今世
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2020-11-02T03:25:24+08:00" content="2020-11-02">
+              2020-11-02
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Prometheus/" itemprop="url" rel="index">
+                    <span itemprop="name">Prometheus</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+<!-- 自定义，用于添加摘要图片，文章中不显示 -->
+        
+<!-- 自定义结束 -->
+        
+          <p id="div-border-top-green">没有人会为你的贫穷负责，却有人为你的富有而喝彩！所以不要活在别人的嘴巴里，做好自己！有路，就大胆的去走；有梦，就大胆地飞翔；前行的路，不怕万人阻挡，只怕自己投降！<br></p>
+
+<p>总结thanos之前先来回顾一下prometheus</p>
+<h1 id="prometheus-回顾"><a href="#prometheus-回顾" class="headerlink" title="prometheus 回顾"></a>prometheus 回顾</h1><h2 id="云原生监控的事实标准Promethues"><a href="#云原生监控的事实标准Promethues" class="headerlink" title="云原生监控的事实标准Promethues"></a>云原生监控的事实标准Promethues</h2><p>监控系统的历史悠久，是一个颇为成熟的领域，而Prometheus作为新生代的开源监控系统，慢慢成为了云原生体系的监控事实标准，也证明了其设计得到业界认可。Prometheus启发于Google公司的borgmon监控系统，由google前员工在2012年作为社区开源项目创建和开发，并于2015年正式发布。2016年，Prometheus正式加入Cloud Native Computing Foundation，成为仅次于Kubernetes的第二把交椅的项目。</p>
+<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p><img src="/images/prometheus-thanos-1.png" alt="img"></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2020/11/02/prometheus-thanos-学习总结/" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2020/11/01/prometheus-thanos-源码分析/" itemprop="url">
+                  Thanos 源码分析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2020-11-01T03:25:24+08:00" content="2020-11-01">
+              2020-11-01
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Prometheus/" itemprop="url" rel="index">
+                    <span itemprop="name">Prometheus</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+<!-- 自定义，用于添加摘要图片，文章中不显示 -->
+        
+<!-- 自定义结束 -->
+        
+          <p id="div-border-top-green">不要因为没有掌声，而放弃梦想，我们需要的是坚持，而不是观众。<br></p>
+
+<p>thanos组件版本：v0.16.0</p>
+<h1 id="Thanos-Query"><a href="#Thanos-Query" class="headerlink" title="Thanos Query"></a>Thanos Query</h1><h2 id="Thanos-Query的作用"><a href="#Thanos-Query的作用" class="headerlink" title="Thanos Query的作用"></a>Thanos Query的作用</h2><p>Thanos Query组件是http服务器 + grpc服务器，它的数据源是位于下游的已发现的实现STORE API的组件（例如Thanos Sidecar组件、Thanos Store组件、Thanos Ruler组件），同时实现了Prometheus官方的HTTP API。Thanos Query组件从下游处获得数据后，能进行合并、去重等操作，最后将结果返回给外部的客户端。因此，Thanos Query就是数据库中间件的角色。</p>
+<p><img src="/images/prometheus-thanos-14.png" alt="在这里插入图片描述"></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2020/11/01/prometheus-thanos-源码分析/" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2020/10/08/prometheus-prometheus-7-storage/" itemprop="url">
                   Prometheus Local storage和Remote storage
                 </a>
@@ -928,7 +1168,7 @@ for (var L = 0; L < C.length; L++) {
         
 <!-- 自定义结束 -->
         
-          <p id="div-border-top-green">我们每个人的心中，都有两只老虎。第一只老虎，是善的，它大方、善良、慈悲；第二只老虎，是恶的，它狭隘、邪恶、自私。而且，这两只老虎每天都在我们的心里打架……<br></p>
+          <p id="div-border-top-green">改变，永远不嫌晚。无论你是几岁，也无论你目前所处的境况有多糟，只要立定目标、一步一步往前走，人生随时都有翻盘的可能性。<br></p>
 
 <p>Prometheus 提供了其它大量的内置函数，可以对时序数据进行丰富的处理。某些函数有默认的参数，例如：<code>year(v=vector(time()) instant-vector)</code>。其中参数 <code>v</code> 是一个瞬时向量，如果不提供该参数，将使用默认值 <code>vector(time())</code>。instant-vector 表示参数类型。</p>
 <h2 id="abs"><a href="#abs" class="headerlink" title="abs()"></a>abs()</h2><p><code>abs(v instant-vector)</code> 返回输入向量的所有样本的绝对值。</p>
@@ -1049,7 +1289,7 @@ for (var L = 0; L < C.length; L++) {
         
 <!-- 自定义结束 -->
         
-          <p id="div-border-top-green">生活像一只蝴蝶，没有破茧的勇气，哪来飞舞的美丽。生活像一只蜜蜂，没有勤劳和努力，怎能尝到花粉的甜蜜，越努力越幸运！<br></p>
+          <p id="div-border-top-green">每个人真正强大起来都要度过一段没人帮忙，没人支持的日子。所有事情都是自己一个人撑，所有情绪都是只有自己知道。但只要咬牙撑过去，一切都不一样了。<br></p>
 
 <h1 id="rules-配置和使用"><a href="#rules-配置和使用" class="headerlink" title="rules 配置和使用"></a>rules 配置和使用</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>prometheus不仅可以提供数据采集功能，而且还可以做告警服务，通过匹配的性能参数，发出告警；然后把产生的警报发给Alertmanager进行处理。</p>
 <p>但是这需要在Prometheus使用的配置文件中添加关联Alertmanager的组件的对应配置信息</p>
@@ -1444,243 +1684,6 @@ for (var L = 0; L < C.length; L++) {
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2020/10/02/prometheus-prometheus-1-安装/" itemprop="url">
-                  Prometheus 安装(二进制和Docker)
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2020-10-02T23:25:24+08:00" content="2020-10-02">
-              2020-10-02
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Prometheus/" itemprop="url" rel="index">
-                    <span itemprop="name">Prometheus</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-<!-- 自定义，用于添加摘要图片，文章中不显示 -->
-        
-<!-- 自定义结束 -->
-        
-          <p id="div-border-top-green">走好自己的路就要有自己的思考，有坚定的意志，坚持自己的信念，坚持自己的追求，不能放松对自己的要求，更不能糊里糊涂地度过自己的人生。人生不能虚度，自己要对得起自己。<br></p>
-
-<h1 id="二进制包安装"><a href="#二进制包安装" class="headerlink" title="二进制包安装"></a>二进制包安装</h1><p>我们可以到 Prometheus 二进制安装包<a href="https://prometheus.io/download/">下载页面</a>，根据自己的操作系统选择下载对应的安装包。下面我们将以 Amazon Linux 2 作为演示。</p>
-<p>下载版本 <code>v2.17.1</code>。</p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2020/10/02/prometheus-prometheus-1-安装/" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2020/10/01/prometheus-prometheus-0-简单使用/" itemprop="url">
-                  Prometheus 简单使用
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2020-10-01T13:25:24+08:00" content="2020-10-01">
-              2020-10-01
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Prometheus/" itemprop="url" rel="index">
-                    <span itemprop="name">Prometheus</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-<!-- 自定义，用于添加摘要图片，文章中不显示 -->
-        
-<!-- 自定义结束 -->
-        
-          <p id="div-border-top-green">与其每天担心未来，不如努力现在。别对自己丧失信心，成长的路上，只有奋斗才能给你最大的安全感。<br></p>
-
-<h1 id="Prometheus-简介"><a href="#Prometheus-简介" class="headerlink" title="Prometheus 简介"></a>Prometheus 简介</h1><h2 id="Prometheus-是啥"><a href="#Prometheus-是啥" class="headerlink" title="Prometheus 是啥"></a>Prometheus 是啥</h2><p>Prometheus 是一套开源的系统监控报警框架。它启发于 Google 的 borgmon 监控系统，由工作在 SoundCloud 的 google 前员工在 2012 年创建，作为社区开源项目进行开发，并于 2015 年正式发布。2016 年，Prometheus 正式加入 Cloud Native Computing Foundation，成为受欢迎度仅次于 Kubernetes 的项目。</p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2020/10/01/prometheus-prometheus-0-简单使用/" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1725,7 +1728,7 @@ for (var L = 0; L < C.length; L++) {
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">36</span>
+              <span class="site-state-item-count">37</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1733,7 +1736,7 @@ for (var L = 0; L < C.length; L++) {
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-count">3</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -1870,7 +1873,7 @@ for (var L = 0; L < C.length; L++) {
 
 <div class="theme-info">
   <div class="powered-by"></div>
-  <span class="post-count" style="color: #e90f92;">全站共 685k 字</span>
+  <span class="post-count" style="color: #e90f92;">全站共 732k 字</span>
 </div>
         
       </div>

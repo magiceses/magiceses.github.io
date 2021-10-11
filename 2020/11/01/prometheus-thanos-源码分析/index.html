@@ -1,0 +1,1247 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Courier New:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Prometheus,Thanos," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="天青色等烟雨" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="不要因为没有掌声，而放弃梦想，我们需要的是坚持，而不是观众。
+
+thanos组件版本：v0.16.0
+Thanos QueryThanos Query的作用Thanos Query组件是http服务器 + grpc服务器，它的数据源是位于下游的已发现的实现STORE API的组件（例如Thanos Sidecar组件、Thanos Store组件、Thanos Ruler组件），同时实现了Prom">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Thanos 源码分析">
+<meta property="og:url" content="https://magiceses.github.io/2020/11/01/prometheus-thanos-源码分析/index.html">
+<meta property="og:site_name" content="天青色等烟雨">
+<meta property="og:description" content="不要因为没有掌声，而放弃梦想，我们需要的是坚持，而不是观众。
+
+thanos组件版本：v0.16.0
+Thanos QueryThanos Query的作用Thanos Query组件是http服务器 + grpc服务器，它的数据源是位于下游的已发现的实现STORE API的组件（例如Thanos Sidecar组件、Thanos Store组件、Thanos Ruler组件），同时实现了Prom">
+<meta property="og:image" content="https://magiceses.github.io/images/prometheus-thanos-14.png">
+<meta property="og:image" content="https://magiceses.github.io/images/prometheus-thanos-15.png">
+<meta property="og:image" content="https://magiceses.github.io/images/prometheus-thanos-16.png">
+<meta property="og:updated_time" content="2021-10-11T07:58:26.003Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Thanos 源码分析">
+<meta name="twitter:description" content="不要因为没有掌声，而放弃梦想，我们需要的是坚持，而不是观众。
+
+thanos组件版本：v0.16.0
+Thanos QueryThanos Query的作用Thanos Query组件是http服务器 + grpc服务器，它的数据源是位于下游的已发现的实现STORE API的组件（例如Thanos Sidecar组件、Thanos Store组件、Thanos Ruler组件），同时实现了Prom">
+<meta name="twitter:image" content="https://magiceses.github.io/images/prometheus-thanos-14.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://magiceses.github.io/2020/11/01/prometheus-thanos-源码分析/"/>
+
+
+<!-- 网页加载条 -->
+<script src="/js/src/pace.min.js"></script>
+  <title> Thanos 源码分析 | 天青色等烟雨 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">天青色等烟雨</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">而我在等你</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-guestbook">
+          <a href="/guestbook" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-commenting"></i> <br />
+            
+            留言
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+      
+      
+        <li class="menu-item"> <a title="把这个链接拖到你的工具栏中,任何网页都可以High" href='javascript:(
+/*
+ * Copyright (C) 2016 Never_yu (Neveryu.github.io) <React.dong.yu@gmail.com>
+ * Sina Weibo (http://weibo.com/Neveryu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function go() {
+
+var songs = [
+  "http://dl.stream.qqmusic.qq.com/C400001Qu4I30eVFYb.m4a?vkey=2127178E4405E7B8B268F20F05232485735CCF4FF8C1432F0360D2626D0B6C9564B5627C7AB481BBC685FEDB0946A50E97C66F0D1B008226&guid=7175649092&uin=0&fromtag=66",
+  "",
+  "",
+  ""
+];
+
+function c() {
+  var e = document.createElement("link");
+  e.setAttribute("type", "text/css");
+  e.setAttribute("rel", "stylesheet");
+  e.setAttribute("href", f);
+  e.setAttribute("class", l);
+  document.body.appendChild(e)
+}
+
+function h() {
+  var e = document.getElementsByClassName(l);
+  for (var t = 0; t < e.length; t++) {
+    document.body.removeChild(e[t])
+  }
+}
+
+function p() {
+  var e = document.createElement("div");
+  e.setAttribute("class", a);
+  document.body.appendChild(e);
+  setTimeout(function() {
+    document.body.removeChild(e)
+  }, 100)
+}
+
+function d(e) {
+  return {
+    height : e.offsetHeight,
+    width : e.offsetWidth
+  }
+}
+
+function v(i) {
+  var s = d(i);
+  return s.height > e && s.height < n && s.width > t && s.width < r
+}
+
+function m(e) {
+  var t = e;
+  var n = 0;
+  while (!!t) {
+    n += t.offsetTop;
+    t = t.offsetParent
+  }
+  return n
+}
+
+function g() {
+  var e = document.documentElement;
+  if (!!window.innerWidth) {
+    return window.innerHeight
+  } else if (e && !isNaN(e.clientHeight)) {
+    return e.clientHeight
+  }
+  return 0
+}
+
+function y() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  }
+  return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+}
+
+function E(e) {
+  var t = m(e);
+  return t >= w && t <= b + w
+}
+
+function S() {
+  var e = document.getElementById("audio_element_id");
+  if(e != null){
+    var index = parseInt(e.getAttribute("curSongIndex"));
+    if(index > songs.length - 2) {
+      index = 0;
+    } else {
+      index++;
+    }
+    e.setAttribute("curSongIndex", index);
+    N();
+  }
+
+  e.src = i;
+  e.play()
+}
+
+function x(e) {
+  e.className += " " + s + " " + o
+}
+
+function T(e) {
+  e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+}
+
+function N() {
+  var e = document.getElementsByClassName(s);
+  var t = new RegExp("\\b" + s + "\\b");
+  for (var n = 0; n < e.length; ) {
+    e[n].className = e[n].className.replace(t, "")
+  }
+}
+
+function initAudioEle() {
+  var e = document.getElementById("audio_element_id");
+  if(e === null){
+    e = document.createElement("audio");
+    e.setAttribute("class", l);
+    e.setAttribute("curSongIndex", 0);
+    e.id = "audio_element_id";
+    e.loop = false;
+    e.bgcolor = 0;
+    e.addEventListener("canplay", function() {
+      setTimeout(function() {
+        x(k)
+      }, 500);
+      setTimeout(function() {
+        N();
+        p();
+        for (var e = 0; e < O.length; e++) {
+          T(O[e])
+        }
+      }, 15500)
+    }, true);
+    e.addEventListener("ended", function() {
+      N();
+      h();
+      go();
+    }, true);
+    e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+    document.body.appendChild(e);
+  }
+}
+
+initAudioEle();
+var e = 30;
+var t = 30;
+var n = 350;
+var r = 350;
+
+var curSongIndex = parseInt(document.getElementById("audio_element_id").getAttribute("curSongIndex"));
+var i = songs[curSongIndex];
+
+var s = "mw-harlem_shake_me";
+var o = "im_first";
+var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+var a = "mw-strobe_light";
+
+/* harlem-shake-style.css，替换成你的位置，也可以直接使用：//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css */
+var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+
+var l = "mw_added_css";
+var b = g();
+var w = y();
+var C = document.getElementsByTagName("*");
+var k = null;
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    if (E(A)) {
+      k = A;
+      break
+    }
+  }
+}
+if (A === null) {
+  console.warn("Could not find a node of the right size. Please try a different page.");
+  return
+}
+c();
+S();
+var O = [];
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    O.push(A)
+  }
+}
+})()'><i class="menu-item-icon fa fa-music fa-fw"></i> High一下</a></li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search fa-lg"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Thanos 源码分析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2020-11-01T03:25:24+08:00" content="2020-11-01">
+              2020-11-01
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Prometheus/" itemprop="url" rel="index">
+                    <span itemprop="name">Prometheus</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv">热度
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p id="div-border-top-green">不要因为没有掌声，而放弃梦想，我们需要的是坚持，而不是观众。<br></p>
+
+<p>thanos组件版本：v0.16.0</p>
+<h1 id="Thanos-Query"><a href="#Thanos-Query" class="headerlink" title="Thanos Query"></a>Thanos Query</h1><h2 id="Thanos-Query的作用"><a href="#Thanos-Query的作用" class="headerlink" title="Thanos Query的作用"></a>Thanos Query的作用</h2><p>Thanos Query组件是http服务器 + grpc服务器，它的数据源是位于下游的已发现的实现STORE API的组件（例如Thanos Sidecar组件、Thanos Store组件、Thanos Ruler组件），同时实现了Prometheus官方的HTTP API。Thanos Query组件从下游处获得数据后，能进行合并、去重等操作，最后将结果返回给外部的客户端。因此，Thanos Query就是数据库中间件的角色。</p>
+<p><img src="/images/prometheus-thanos-14.png" alt="在这里插入图片描述"></p>
+<a id="more"></a>
+<p>使用github.com/oklog/run包来启动一组协程，这些协程的逻辑主要是启动了http server、grpc server、动态发现位于下游的实现STORE API的组件等。</p>
+<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p><img src="/images/prometheus-thanos-15.png" alt="在这里插入图片描述"></p>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><h3 id="启动参数"><a href="#启动参数" class="headerlink" title="启动参数"></a>启动参数</h3><p>Thanos的启动命令格式如下，格式都是thanos开头（因为是同一个可执行二进制文件）。启动哪个组件，在于第一个参数，在本例子中是query，因此这条命令是启动query组件的逻辑。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">thanos query \</span><br><span class="line">--log.level=debug \</span><br><span class="line">--query.auto-downsampling \</span><br><span class="line">--grpc-address=0.0.0.0:10901 \</span><br><span class="line">--http-address=0.0.0.0:9090 \</span><br><span class="line">--query.partial-response \</span><br><span class="line">--query.replica-label=prometheus_replica \</span><br><span class="line">--query.replica-label=rule_replica \</span><br><span class="line">--store=dnssrv+_grpc._tcp.prometheus-headless.thanos.svc.cluster.local \</span><br><span class="line">--store=dnssrv+_grpc._tcp.thanos-rule.thanos.svc.cluster.local \</span><br><span class="line">--store=dnssrv+_grpc._tcp.thanos-store.thanos.svc.cluster.local</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意：<br>1、partial-response 一定要加上</p>
+<p>这个flag设立的目的是遵照数据一致性原则<br>如果1、2、3中有某个返回查询数据为空或者超时（默认是2分钟）的情况下，这次整体的结果是否还要保留：<br>开启的情况下 ， 有点儿部分人成虎的感觉<br>不开启，则必须要求每个上游都要有结果才行，真一致性</p>
+<p>2、deduplicate</p>
+<p>不去重的情况下，会看到相同数据了具体来自哪个数据源，尤其是prom和ruler源<br>去重开启，程序后台会对每次响应的数据源做个打分，选择优秀的源作为本次的gRPC对象</p>
+</blockquote>
+<h3 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h3><h4 id="main方法"><a href="#main方法" class="headerlink" title="main方法"></a>main方法</h4><p>来具体看看main方法。创建app对象，app对象包含了所有Thanos组件的启动函数，但真正启动时只从map中取出一个函数进行启动，取出哪个函数取决于启动命令。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	app := extkingpin.NewApp(kingpin.New(filepath.Base(os.Args[<span class="number">0</span>]), <span class="string">"A block storage based long-term storage for Prometheus"</span>).Version(version.Print(<span class="string">"thanos"</span>)))</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 把所有组件的启动逻辑都放进app对象中的setups列表中</span></span><br><span class="line">	registerSidecar(app)</span><br><span class="line">	registerStore(app)</span><br><span class="line">	registerQuery(app)</span><br><span class="line">	registerRule(app)</span><br><span class="line">	registerCompact(app)</span><br><span class="line">	registerTools(app)</span><br><span class="line">	registerReceive(app)</span><br><span class="line">	registerQueryFrontend(app)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 根据命令行的信息，从app对象的setups列表中取出一个组件逻辑</span></span><br><span class="line">	cmd, setup := app.Parse()</span><br><span class="line">	logger := logging.NewLogger(*logLevel, *logFormat, *debugName)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> g run.Group</span><br><span class="line">	<span class="keyword">var</span> tracer opentracing.Tracer</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">		tracing相关的代码</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line">	</span><br><span class="line">	</span><br><span class="line">	reloadCh := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 启动特定的一个组件(sidecar、query、store等组件中的一种)，底层还是执行g.Add(...)</span></span><br><span class="line">	<span class="keyword">if</span> err := setup(&amp;g, logger, metrics, tracer, reloadCh, *logLevel == <span class="string">"debug"</span>); err != <span class="literal">nil</span> &#123;		</span><br><span class="line">		os.Exit(<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 监听来自系统的杀死信号.</span></span><br><span class="line">	&#123;</span><br><span class="line">		cancel := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">		g.Add(<span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">			<span class="keyword">return</span> interrupt(logger, cancel)</span><br><span class="line">		&#125;, <span class="function"><span class="keyword">func</span><span class="params">(error)</span></span> &#123;</span><br><span class="line">			<span class="built_in">close</span>(cancel)</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 监听来配置重载的信号</span></span><br><span class="line">	&#123;</span><br><span class="line">		cancel := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">		g.Add(<span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">			<span class="keyword">return</span> reload(logger, cancel, reloadCh)</span><br><span class="line">		&#125;, <span class="function"><span class="keyword">func</span><span class="params">(error)</span></span> &#123;</span><br><span class="line">			<span class="built_in">close</span>(cancel)</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 阻塞地等待所有协程中的退出</span></span><br><span class="line">	<span class="comment">// 有一个协程返回，其他协程也会返回</span></span><br><span class="line">	<span class="keyword">if</span> err := g.Run(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		level.Error(logger).Log(<span class="string">"err"</span>, fmt.Sprintf(<span class="string">"%+v"</span>, errors.Wrapf(err, <span class="string">"%s command failed"</span>, cmd)))</span><br><span class="line">		os.Exit(<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 到达此处，说明整个程序结束了。</span></span><br><span class="line">	level.Info(logger).Log(<span class="string">"msg"</span>, <span class="string">"exiting"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="registerQuery函数"><a href="#registerQuery函数" class="headerlink" title="registerQuery函数"></a>registerQuery函数</h4><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">registerQuery</span><span class="params">(app *extkingpin.App)</span></span> &#123;</span><br><span class="line">	cmd := app.Command(comp.String(), <span class="string">"query node exposing PromQL enabled Query API with data retrieved from multiple store nodes"</span>)	</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">		解析命令行参数</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">//Setup()的参数是一个函数，会被放入app对象的setups列表中</span></span><br><span class="line">	<span class="comment">//闭包的使用技巧以及相关堆栈的分析</span></span><br><span class="line">	<span class="comment">//最核心的是runQuery()方法</span></span><br><span class="line">	cmd.Setup(<span class="function"><span class="keyword">func</span><span class="params">(g *run.Group, logger log.Logger, reg *prometheus.Registry, tracer opentracing.Tracer, _ &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, _ <span class="keyword">bool</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		...</span><br><span class="line">		...</span><br><span class="line">		...</span><br><span class="line">		<span class="keyword">return</span> runQuery(</span><br><span class="line">			g,</span><br><span class="line">			logger,</span><br><span class="line">			reg,</span><br><span class="line">			tracer,</span><br><span class="line">			*requestLoggingDecision,</span><br><span class="line">			*grpcBindAddr,</span><br><span class="line">			time.Duration(*grpcGracePeriod),</span><br><span class="line">			*grpcCert,</span><br><span class="line">			*grpcKey,</span><br><span class="line">			*grpcClientCA,</span><br><span class="line">			<span class="comment">/*</span></span><br><span class="line"><span class="comment">				其他代码</span></span><br><span class="line"><span class="comment">			*/</span></span><br><span class="line">		)</span><br><span class="line">	)</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="runQuery函数"><a href="#runQuery函数" class="headerlink" title="runQuery函数"></a>runQuery函数</h4><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//使用run.Group对象来启动http server、grpc server、服务发现协程。</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">runQuery</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">	g *run.Group,		//其实来自main()</span>方法</span></span><br><span class="line"><span class="function">	<span class="title">logger</span> <span class="title">log</span>.<span class="title">Logger</span>,</span></span><br><span class="line"><span class="function">	<span class="title">reg</span> *<span class="title">prometheus</span>.<span class="title">Registry</span>,</span></span><br><span class="line"><span class="function">	<span class="title">tracer</span> <span class="title">opentracing</span>.<span class="title">Tracer</span>,</span></span><br><span class="line"><span class="function">	<span class="title">requestLoggingDecision</span> <span class="title">string</span>,</span></span><br><span class="line"><span class="function">	<span class="title">grpcBindAddr</span> <span class="title">string</span>,</span></span><br><span class="line"><span class="function">	<span class="title">grpcGracePeriod</span> <span class="title">time</span>.<span class="title">Duration</span>,</span></span><br><span class="line"><span class="function">	<span class="title">grpcCert</span> <span class="title">string</span>,</span></span><br><span class="line"><span class="function">	<span class="title">grpcKey</span> <span class="title">string</span>,</span></span><br><span class="line"><span class="function">	<span class="title">grpcClientCA</span> <span class="title">string</span>,</span></span><br><span class="line"><span class="function">	/*</span></span><br><span class="line"><span class="function">		其他代码</span></span><br><span class="line"><span class="function">	*/</span></span><br><span class="line"><span class="function">) <span class="title">error</span></span> &#123;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">var</span> (</span><br><span class="line">		<span class="comment">// stores对象的类型StoreSet。它包含了一组store组件</span></span><br><span class="line">		<span class="comment">//（位于下游的实现Store API的组件），这一组store组件是可以动态变化的</span></span><br><span class="line">		<span class="comment">/*</span></span><br><span class="line"><span class="comment">		type StoreSet struct &#123;</span></span><br><span class="line"><span class="comment">			//其他属性</span></span><br><span class="line"><span class="comment">			stores       map[string]*storeRef</span></span><br><span class="line"><span class="comment">		&#125;		</span></span><br><span class="line"><span class="comment">		*/</span>		</span><br><span class="line">		stores = query.NewStoreSet(...)</span><br><span class="line">		</span><br><span class="line">		<span class="comment">// proxy对象，即下游的Store API组件的代理</span></span><br><span class="line">		<span class="comment">// 下游的Store API组件的列表，其实就是构造方法的入参stores.Get这个方法来获取</span></span><br><span class="line">		proxy            = store.NewProxyStore(logger, reg, stores.Get, component.Query, selectorLset, storeResponseTimeout)</span><br><span class="line">		rulesProxy       = rules.NewProxy(logger, stores.GetRulesClients)</span><br><span class="line">				</span><br><span class="line">		<span class="comment">/*</span></span><br><span class="line"><span class="comment">			queryableCreator是一个方法，用于创建一个querier结构体对象;			</span></span><br><span class="line"><span class="comment">			querier结构体的属性proxy就是proxy对象，它包含了一组会动态变化的thanos store组件(动态变化是因为启动了一些额外的专门的协程来动态地修改这个切片);</span></span><br><span class="line"><span class="comment">		*/</span>	</span><br><span class="line">		queryableCreator = query.NewQueryableCreator(</span><br><span class="line">			logger,</span><br><span class="line">			extprom.WrapRegistererWithPrefix(<span class="string">"thanos_query_"</span>, reg),</span><br><span class="line">			proxy,</span><br><span class="line">			maxConcurrentSelects,</span><br><span class="line">			queryTimeout,</span><br><span class="line">		)</span><br><span class="line">							</span><br><span class="line">		<span class="comment">/*</span></span><br><span class="line"><span class="comment">			这一段代码都是启动一些协程，定时发现和动态发现Store API组件的变化，随即更新stores对象中的类型为map[string]*storeRef的属性	</span></span><br><span class="line"><span class="comment">		*/</span></span><br><span class="line">				</span><br><span class="line">		</span><br><span class="line">		<span class="comment">// 创建http server，注册http handler，并启动server</span></span><br><span class="line">		&#123;</span><br><span class="line"></span><br><span class="line">			router := route.New()</span><br><span class="line">			<span class="comment">//新建QueryAPI结构体对象</span></span><br><span class="line">			api := v1.NewQueryAPI(</span><br><span class="line">						logger,</span><br><span class="line">						stores,</span><br><span class="line">						engine,</span><br><span class="line">						queryableCreator,</span><br><span class="line">						rules.NewGRPCClientWithDedup(rulesProxy, queryReplicaLabels),</span><br><span class="line">						enableAutodownsampling,</span><br><span class="line">						enableQueryPartialResponse,</span><br><span class="line">						enableRulePartialResponse,</span><br><span class="line">						queryReplicaLabels,</span><br><span class="line">						flagsMap,</span><br><span class="line">						instantDefaultMaxSourceResolution,</span><br><span class="line">						defaultMetadataTimeRange,</span><br><span class="line">						gate.New(</span><br><span class="line">							extprom.WrapRegistererWithPrefix(<span class="string">"thanos_query_concurrent_"</span>, reg),</span><br><span class="line">							maxConcurrentQueries,</span><br><span class="line">						),</span><br><span class="line">					)</span><br><span class="line">					</span><br><span class="line">			<span class="comment">// 为router对象注册http方法	</span></span><br><span class="line">			api.Register(router.WithPrefix(<span class="string">"/api/v1"</span>), tracer, logger, ins, logMiddleware)</span><br><span class="line">			</span><br><span class="line">			srv := httpserver.New(logger, reg, comp, httpProbe,</span><br><span class="line">					httpserver.WithListen(httpBindAddr),</span><br><span class="line">					httpserver.WithGracePeriod(httpGracePeriod),</span><br><span class="line">			)</span><br><span class="line">			<span class="comment">// http服务器使用router对象</span></span><br><span class="line">			srv.Handle(<span class="string">"/"</span>, router)</span><br><span class="line">			</span><br><span class="line">			g.Add(<span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">				statusProber.Healthy()</span><br><span class="line">				<span class="comment">// 启动http server</span></span><br><span class="line">				<span class="keyword">return</span> srv.ListenAndServe()		</span><br><span class="line">			&#125;, <span class="function"><span class="keyword">func</span><span class="params">(err error)</span></span> &#123;</span><br><span class="line">				statusProber.NotReady(err)</span><br><span class="line">				<span class="keyword">defer</span> statusProber.NotHealthy(err)</span><br><span class="line">				srv.Shutdown(err)</span><br><span class="line">		&#125;)</span><br><span class="line">		&#125;</span><br><span class="line">			</span><br><span class="line">		<span class="comment">// 创建gprc server，注册grpc handler，并启动server</span></span><br><span class="line">		<span class="comment">// 它本身也可以是一个store, 为上层的front做准备</span></span><br><span class="line">		&#123;</span><br><span class="line">			tlsCfg, err := tls.NewServerConfig(log.With(logger, <span class="string">"protocol"</span>, <span class="string">"gRPC"</span>), grpcCert, grpcKey, grpcClientCA)</span><br><span class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">				<span class="keyword">return</span> errors.Wrap(err, <span class="string">"setup gRPC server"</span>)</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			s := grpcserver.New(logger, reg, tracer, comp, grpcProbe,				</span><br><span class="line">				grpcserver.WithServer(store.RegisterStoreServer(proxy)),		<span class="comment">// 注册grpc handler</span></span><br><span class="line">				grpcserver.WithServer(rules.RegisterRulesServer(rulesProxy)),   <span class="comment">// 注册grpc handler</span></span><br><span class="line">				grpcserver.WithListen(grpcBindAddr),</span><br><span class="line">				grpcserver.WithGracePeriod(grpcGracePeriod),</span><br><span class="line">				grpcserver.WithTLSConfig(tlsCfg),</span><br><span class="line">			)</span><br><span class="line"></span><br><span class="line">			g.Add(<span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">				statusProber.Ready()</span><br><span class="line">				<span class="comment">// 启动grpc server</span></span><br><span class="line">				<span class="keyword">return</span> s.ListenAndServe()		</span><br><span class="line">			&#125;, <span class="function"><span class="keyword">func</span><span class="params">(error)</span></span> &#123;</span><br><span class="line">				statusProber.NotReady(err)</span><br><span class="line">				s.Shutdown(err)</span><br><span class="line">			&#125;)</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 至此，http server和grpc server都启动了。</span></span><br><span class="line">		level.Info(logger).Log(<span class="string">"msg"</span>, <span class="string">"starting query node"</span>)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>			</span><br><span class="line">	)</span><br><span class="line">	</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="QueryAPI结构体及其方法"><a href="#QueryAPI结构体及其方法" class="headerlink" title="QueryAPI结构体及其方法"></a>QueryAPI结构体及其方法</h4><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// QueryAPI is an API used by Thanos Query.</span></span><br><span class="line"><span class="keyword">type</span> QueryAPI <span class="keyword">struct</span> &#123;</span><br><span class="line">	baseAPI         *api.BaseAPI</span><br><span class="line">	logger          log.Logger</span><br><span class="line">	gate            gate.Gate</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 构造方法，用于创建一个querier结构体对象</span></span><br><span class="line">	queryableCreate query.QueryableCreator</span><br><span class="line">	</span><br><span class="line">	queryEngine     *promql.Engine</span><br><span class="line">	ruleGroups      rules.UnaryClient</span><br><span class="line">	...</span><br><span class="line">	...</span><br><span class="line">	...</span><br><span class="line">	replicaLabels []<span class="keyword">string</span></span><br><span class="line">	storeSet      *query.StoreSet</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(qapi *QueryAPI)</span> <span class="title">Register</span><span class="params">(r *route.Router, tracer opentracing.Tracer, logger log.Logger, ins extpromhttp.InstrumentationMiddleware, logMiddleware *logging.HTTPServerMiddleware)</span></span> &#123;</span><br><span class="line">	qapi.baseAPI.Register(r, tracer, logger, ins, logMiddleware)</span><br><span class="line">	instr := api.GetInstr(tracer, logger, ins, logMiddleware)</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">		其他代码</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 把qapi.query、qapi.series、 qapi.stores注册到入参r，从而完成http handler的注册</span></span><br><span class="line">	<span class="comment">// 不管是/query接口和/series接口，每次请求到达都会创建querier对象，而querier对象内含了一组的Store API组件</span></span><br><span class="line">	r.Get(<span class="string">"/query"</span>, instr(<span class="string">"query"</span>, qapi.query))</span><br><span class="line">	r.Get(<span class="string">"/series"</span>, instr(<span class="string">"series"</span>, qapi.series))</span><br><span class="line">	r.Get(<span class="string">"/stores"</span>, instr(<span class="string">"stores"</span>, qapi.stores))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//返回指标数据</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(qapi *QueryAPI)</span> <span class="title">series</span><span class="params">(r *http.Request)</span> <span class="params">(<span class="keyword">interface</span>&#123;&#125;, []error, *api.ApiError)</span></span> &#123;</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	其他代码</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 创建一个querier对象</span></span><br><span class="line">	<span class="comment">// querier对象的属性proxy则包含了一组thanos store组件</span></span><br><span class="line">	q, err := qapi.queryableCreate(enableDedup, replicaLabels, storeDebugMatchers, math.MaxInt64, enablePartialResponse, <span class="literal">true</span>).</span><br><span class="line">		Querier(r.Context(), timestamp.FromTime(start), timestamp.FromTime(end))</span><br><span class="line">		</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	其他代码</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line">	</span><br><span class="line">	<span class="keyword">var</span> (</span><br><span class="line">		metrics = []labels.Labels&#123;&#125;</span><br><span class="line">		sets    []storage.SeriesSet</span><br><span class="line">	)</span><br><span class="line">	<span class="keyword">for</span> _, mset := <span class="keyword">range</span> matcherSets &#123;</span><br><span class="line">		<span class="comment">// 调用querier对象的Select()方法获取指标</span></span><br><span class="line">		sets = <span class="built_in">append</span>(sets, q.Select(<span class="literal">false</span>, <span class="literal">nil</span>, mset...))</span><br><span class="line">	&#125;</span><br><span class="line">	set := storage.NewMergeSeriesSet(sets, storage.ChainedSeriesMerge)</span><br><span class="line">	<span class="keyword">for</span> set.Next() &#123;</span><br><span class="line">		metrics = <span class="built_in">append</span>(metrics, set.At().Labels())</span><br><span class="line">	&#125;	</span><br><span class="line">	<span class="keyword">return</span> metrics, set.Warnings(), <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="querier结构体及其方法"><a href="#querier结构体及其方法" class="headerlink" title="querier结构体及其方法"></a>querier结构体及其方法</h4><p>实现了 Querier接口（github.com/prometheus/prometheus/storage/interface.go），此接口的核心方法是Select(…)，这个方法在/query和/series等接口中都会被使用到。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> querier <span class="keyword">struct</span> &#123;</span><br><span class="line">	ctx                 context.Context</span><br><span class="line">	logger              log.Logger</span><br><span class="line">	cancel              <span class="function"><span class="keyword">func</span><span class="params">()</span></span></span><br><span class="line"><span class="function">	<span class="title">mint</span>, <span class="title">maxt</span>          <span class="title">int64</span></span></span><br><span class="line"><span class="function">	<span class="title">replicaLabels</span>       <span class="title">map</span>[<span class="title">string</span>]<span class="title">struct</span></span>&#123;&#125;</span><br><span class="line">	storeDebugMatchers  [][]*labels.Matcher</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// proxy包含了一组动态的thanos store组件</span></span><br><span class="line">	proxy               storepb.StoreServer</span><br><span class="line">	</span><br><span class="line">	deduplicate         <span class="keyword">bool</span>	</span><br><span class="line">	maxResolutionMillis <span class="keyword">int64</span></span><br><span class="line">	partialResponse     <span class="keyword">bool</span></span><br><span class="line">	skipChunks          <span class="keyword">bool</span></span><br><span class="line">	selectGate          gate.Gate</span><br><span class="line">	selectTimeout       time.Duration</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(q *querier)</span> <span class="title">Select</span><span class="params">(_ <span class="keyword">bool</span>, hints *storage.SelectHints, ms ...*labels.Matcher)</span> <span class="title">storage</span>.<span class="title">SeriesSet</span></span> &#123;</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">		其他代码</span></span><br><span class="line"><span class="comment">	*/</span>	</span><br><span class="line">	promise := <span class="built_in">make</span>(<span class="keyword">chan</span> storage.SeriesSet, <span class="number">1</span>)</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="keyword">defer</span> <span class="built_in">close</span>(promise)</span><br><span class="line">		<span class="keyword">var</span> err error</span><br><span class="line">		<span class="comment">/*</span></span><br><span class="line"><span class="comment">			其他代码</span></span><br><span class="line"><span class="comment">		*/</span>	</span><br><span class="line">		<span class="comment">//获取到指标数据</span></span><br><span class="line">		set, err := q.selectFn(ctx, hints, ms...)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="comment">// 把错误送至管道，并退出本协程</span></span><br><span class="line">			promise &lt;- storage.ErrSeriesSet(err)</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//将指标数据送至管道</span></span><br><span class="line">		promise &lt;- set</span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 返回指标的封装</span></span><br><span class="line">	<span class="keyword">return</span> &amp;lazySeriesSet&#123;</span><br><span class="line">		create: <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="params">(storage.SeriesSet, <span class="keyword">bool</span>)</span></span> &#123;</span><br><span class="line">			<span class="comment">/*</span></span><br><span class="line"><span class="comment">				其他代码</span></span><br><span class="line"><span class="comment">			*/</span>	</span><br><span class="line">			<span class="comment">// 从管道中读取指标</span></span><br><span class="line">			set, ok := &lt;-promise	</span><br><span class="line">			<span class="keyword">return</span> set, set.Next()</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 获取指标，调用的是属性proxy的Series(...)方法</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(q *querier)</span> <span class="title">selectFn</span><span class="params">(ctx context.Context, hints *storage.SelectHints, ms ...*labels.Matcher)</span> <span class="params">(storage.SeriesSet, error)</span></span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">		其他代码</span></span><br><span class="line"><span class="comment">	*/</span>	</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// seriesServer结构体重写了Send()方法，在Sender()方法中将gprc返回的数据数据存储到它的seriesSet属性</span></span><br><span class="line">	resp := &amp;seriesServer&#123;ctx: ctx&#125;	</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// q.proxy的实现是ProxyStore结构体</span></span><br><span class="line">	<span class="comment">// q.proxy.Series()是grpc方法(流式)</span></span><br><span class="line">	<span class="comment">// q.proxy.Series()调用完毕后，resp的seriesSet属性的值会被填充	</span></span><br><span class="line">	<span class="keyword">if</span> err := q.proxy.Series(&amp;storepb.SeriesRequest&#123;</span><br><span class="line">		MinTime:                 hints.Start,</span><br><span class="line">		MaxTime:                 hints.End,</span><br><span class="line">		Matchers:                sms,</span><br><span class="line">		<span class="comment">/*</span></span><br><span class="line"><span class="comment">			其他代码</span></span><br><span class="line"><span class="comment">		*/</span></span><br><span class="line">	&#125;, resp); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, errors.Wrap(err, <span class="string">"proxy Series()"</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">		其他代码</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line">	</span><br><span class="line">	</span><br><span class="line">	set := &amp;promSeriesSet&#123;</span><br><span class="line">		mint:  q.mint,</span><br><span class="line">		maxt:  q.maxt,</span><br><span class="line">		set:   newStoreSeriesSet(resp.seriesSet),  <span class="comment">// 把resp的seriesSet属性抽出来</span></span><br><span class="line">		aggrs: aggrs,</span><br><span class="line">		warns: warns,</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// set就是指标</span></span><br><span class="line">	<span class="keyword">return</span> newDedupSeriesSet(set, q.replicaLabels, <span class="built_in">len</span>(aggrs) == <span class="number">1</span> &amp;&amp; aggrs[<span class="number">0</span>] == storepb.Aggr_COUNTER), <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="ProxyStore对象"><a href="#ProxyStore对象" class="headerlink" title="ProxyStore对象"></a>ProxyStore对象</h4><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ProxyStore implements the store API that proxies request to all given underlying stores.</span></span><br><span class="line"><span class="keyword">type</span> ProxyStore <span class="keyword">struct</span> &#123;</span><br><span class="line">	logger         log.Logger</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 返回位于下游的实现Store API接口的组件，查询指标时会用到此属性</span></span><br><span class="line">	stores         <span class="function"><span class="keyword">func</span><span class="params">()</span> []<span class="title">Client</span></span></span><br><span class="line"><span class="function">	</span></span><br><span class="line"><span class="function">	<span class="title">component</span>      <span class="title">component</span>.<span class="title">StoreAPI</span></span></span><br><span class="line"><span class="function">	<span class="title">selectorLabels</span> <span class="title">labels</span>.<span class="title">Labels</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">	<span class="title">responseTimeout</span> <span class="title">time</span>.<span class="title">Duration</span></span></span><br><span class="line"><span class="function">	<span class="title">metrics</span>         *<span class="title">proxyStoreMetrics</span></span></span><br><span class="line"><span class="function">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>查询指标时，会从下游的所有的Store API的组件中查询指标以及进行合并、去重(如果设置了)</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">根据客户端的请求，从下游的所有的Store API的组件中查询指标以及进行合并、去重，最后将指标传输给入参srv.</span></span><br><span class="line"><span class="comment">这是一个gprc流式接口。</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *ProxyStore)</span> <span class="title">Series</span><span class="params">(r *storepb.SeriesRequest, srv storepb.Store_SeriesServer)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">		其他代码</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line">	g, gctx := errgroup.WithContext(srv.Context())</span><br><span class="line">	respSender, respCh := newCancelableRespChannel(gctx, <span class="number">10</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 生产者协程</span></span><br><span class="line">	g.Go(<span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">error</span></span> &#123;		</span><br><span class="line">		<span class="comment">/*</span></span><br><span class="line"><span class="comment">			本协程会从后端的thanos store组件中获取指标，并进行指标合并操作。</span></span><br><span class="line"><span class="comment">			本协程的关闭，消费者协程也会关闭。</span></span><br><span class="line"><span class="comment">		*/</span></span><br><span class="line">		</span><br><span class="line">		<span class="keyword">var</span> (</span><br><span class="line">			seriesSet      []storepb.SeriesSet</span><br><span class="line">			storeDebugMsgs []<span class="keyword">string</span>		</span><br><span class="line">			wg = &amp;sync.WaitGroup&#123;&#125;</span><br><span class="line">		)</span><br><span class="line"></span><br><span class="line">		<span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">			wg.Wait()</span><br><span class="line">			<span class="comment">//close()方法会引发消费者协程退出</span></span><br><span class="line">			<span class="built_in">close</span>(respCh)</span><br><span class="line">		&#125;()</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 遍历后端的Store API组件</span></span><br><span class="line">		<span class="keyword">for</span> _, st := <span class="keyword">range</span> s.stores() &#123;</span><br><span class="line">		</span><br><span class="line">			<span class="comment">/*</span></span><br><span class="line"><span class="comment">				其他代码</span></span><br><span class="line"><span class="comment">			*/</span>	</span><br><span class="line">			</span><br><span class="line">			sc, err := st.Series(seriesCtx, r)		</span><br><span class="line">			seriesSet = <span class="built_in">append</span>(seriesSet, startStreamSeriesSet(seriesCtx, s.logger, closeSeries,</span><br><span class="line">				wg, sc, respSender, st.String(), !r.PartialResponseDisabled, s.responseTimeout, s.metrics.emptyStreamResponses))</span><br><span class="line">		</span><br><span class="line">			<span class="comment">/*</span></span><br><span class="line"><span class="comment">				其他代码</span></span><br><span class="line"><span class="comment">			*/</span></span><br><span class="line">			</span><br><span class="line">		<span class="comment">// 获得合并后的指标，再发送给respCh管道</span></span><br><span class="line">		mergedSet := storepb.MergeSeriesSets(seriesSet...)</span><br><span class="line">		<span class="keyword">for</span> mergedSet.Next() &#123;		</span><br><span class="line">			lset, chk := mergedSet.At()</span><br><span class="line">			<span class="comment">// respSender.send(...)其实是将指标发送给respCh管道</span></span><br><span class="line">			respSender.send(storepb.NewSeriesResponse(&amp;storepb.Series&#123;Labels: labelpb.ZLabelsFromPromLabels(lset), Chunks: chk&#125;))</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> mergedSet.Err()</span><br><span class="line">	&#125;)</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 消费者协程</span></span><br><span class="line">	g.Go(<span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">error</span></span> &#123;				</span><br><span class="line">		<span class="comment">// 响应(已被merged)被本协程获取，并将响应输送给方法入参srv.</span></span><br><span class="line">		<span class="keyword">for</span> resp := <span class="keyword">range</span> respCh &#123;</span><br><span class="line">			<span class="keyword">if</span> err := srv.Send(resp); err != <span class="literal">nil</span> &#123;</span><br><span class="line">				<span class="keyword">return</span> status.Error(codes.Unknown, errors.Wrap(err, <span class="string">"send series response"</span>).Error())</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;)</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 等待生产者协程和消费者协程结束</span></span><br><span class="line">	<span class="keyword">if</span> err := g.Wait(); err != <span class="literal">nil</span> &#123;			</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>本文分析了代码的轮廓，还有许多细节没有被提及，但Thanos Query组件的代码结构清晰易懂，使用了github.com/oklog/run包来启动一组协程，编写http server和grpc server的思路、动态发现下游Store API组件的套路都值得模仿。</p>
+<h1 id="Thanos-Sidecar"><a href="#Thanos-Sidecar" class="headerlink" title="Thanos Sidecar"></a>Thanos Sidecar</h1><h2 id="Thanos-Sidecar的作用"><a href="#Thanos-Sidecar的作用" class="headerlink" title="Thanos Sidecar的作用"></a>Thanos Sidecar的作用</h2><p>Thanos Query组件和prometheus实例绑定在一起，三大作用：</p>
+<ul>
+<li>作为访问代理，对客户端暴露grpc接口，业务逻辑是访问其绑定的prometheus实例的http接口，从而获取metrics和rule数据，最终返回给客户端；</li>
+<li>如果开启对象存储功能，会将promethues tsdb目录下的所有block目录上传至指定的对象存储系统中；</li>
+<li>监听promethues配置文件的变化，发现文件变化后也是访问prometheus实例的http接口让prometheus重载配置。</li>
+</ul>
+<p><img src="/images/prometheus-thanos-16.png" alt="在这里插入图片描述"></p>
+<p>使用github.com/oklog/run包来启动一组协程，这些协程的逻辑主要是启动了http server、grpc server、动态发现位于下游的实现STORE API的组件等。</p>
+<h2 id="源码分析-1"><a href="#源码分析-1" class="headerlink" title="源码分析"></a>源码分析</h2><h3 id="启动参数-1"><a href="#启动参数-1" class="headerlink" title="启动参数"></a>启动参数</h3><p>Thanos的启动命令格式如下，格式都是thanos开头（因为是同一个可执行二进制文件）。启动哪个组件，在于第一个参数，在本例子中是sidecar，因此这条命令是启动sidecar组件的逻辑。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">thanos sidecar \</span><br><span class="line">--prometheus.url=http://localhost:9090/ \</span><br><span class="line">--tsdb.path=/prometheus \</span><br><span class="line">--grpc-address=[$(POD_IP)]:10901 \</span><br><span class="line">--http-address=[$(POD_IP)]:10902 \</span><br></pre></td></tr></table></figure>
+<h3 id="代码分析-1"><a href="#代码分析-1" class="headerlink" title="代码分析"></a>代码分析</h3><h4 id="main方法-1"><a href="#main方法-1" class="headerlink" title="main方法"></a>main方法</h4><p>来具体看看main方法。创建app对象，app对象包含了所有Thanos组件的启动函数，但真正启动时只从map中取出一个函数进行启动，取出哪个函数取决于启动命令。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">		其他代码</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line"></span><br><span class="line">	app := extkingpin.NewApp(kingpin.New(filepath.Base(os.Args[<span class="number">0</span>]), <span class="string">"A block storage based long-term storage for Prometheus"</span>).Version(version.Print(<span class="string">"thanos"</span>)))</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">		其他代码</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 把所有组件的启动逻辑都放进app对象中的setups列表中</span></span><br><span class="line">	registerSidecar(app)</span><br><span class="line">	registerStore(app)</span><br><span class="line">	registerQuery(app)</span><br><span class="line">	registerRule(app)</span><br><span class="line">	registerCompact(app)</span><br><span class="line">	registerTools(app)</span><br><span class="line">	registerReceive(app)</span><br><span class="line">	registerQueryFrontend(app)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 根据命令行的信息，从app对象的setups列表中取出一个组件逻辑</span></span><br><span class="line">	cmd, setup := app.Parse()</span><br><span class="line">	logger := logging.NewLogger(*logLevel, *logFormat, *debugName)</span><br><span class="line"></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">		其他代码</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> g run.Group</span><br><span class="line">	<span class="keyword">var</span> tracer opentracing.Tracer</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">		tracing相关的代码</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line">	</span><br><span class="line">	</span><br><span class="line">	reloadCh := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 启动特定的一个组件(sidecar、query、store等组件中的一种)，底层还是执行g.Add(...)</span></span><br><span class="line">	<span class="keyword">if</span> err := setup(&amp;g, logger, metrics, tracer, reloadCh, *logLevel == <span class="string">"debug"</span>); err != <span class="literal">nil</span> &#123;		</span><br><span class="line">		os.Exit(<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 监听来自系统的杀死信号.</span></span><br><span class="line">	&#123;</span><br><span class="line">		cancel := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">		g.Add(<span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">			<span class="keyword">return</span> interrupt(logger, cancel)</span><br><span class="line">		&#125;, <span class="function"><span class="keyword">func</span><span class="params">(error)</span></span> &#123;</span><br><span class="line">			<span class="built_in">close</span>(cancel)</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 监听来配置重载的信号</span></span><br><span class="line">	&#123;</span><br><span class="line">		cancel := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">		g.Add(<span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">			<span class="keyword">return</span> reload(logger, cancel, reloadCh)</span><br><span class="line">		&#125;, <span class="function"><span class="keyword">func</span><span class="params">(error)</span></span> &#123;</span><br><span class="line">			<span class="built_in">close</span>(cancel)</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 阻塞地等待所有协程中的退出</span></span><br><span class="line">	<span class="comment">// 有一个协程返回，其他协程也会返回</span></span><br><span class="line">	<span class="keyword">if</span> err := g.Run(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		level.Error(logger).Log(<span class="string">"err"</span>, fmt.Sprintf(<span class="string">"%+v"</span>, errors.Wrapf(err, <span class="string">"%s command failed"</span>, cmd)))</span><br><span class="line">		os.Exit(<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 到达此处，说明整个程序结束了。</span></span><br><span class="line">	level.Info(logger).Log(<span class="string">"msg"</span>, <span class="string">"exiting"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="registerSidecar方法"><a href="#registerSidecar方法" class="headerlink" title="registerSidecar方法"></a>registerSidecar方法</h4><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">registerSidecar</span><span class="params">(app *extkingpin.App)</span></span> &#123;</span><br><span class="line">	cmd := app.Command(component.Sidecar.String(), <span class="string">"Sidecar for Prometheus server"</span>)</span><br><span class="line">	conf := &amp;sidecarConfig&#123;&#125;</span><br><span class="line">	<span class="comment">// 解析命令行参数</span></span><br><span class="line">	conf.registerFlag(cmd)</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// Setup()的入参方法，会被放入app对象的setups列表中</span></span><br><span class="line">	<span class="comment">// 最核心的是runSidecar()方法</span></span><br><span class="line">	cmd.Setup(<span class="function"><span class="keyword">func</span><span class="params">(g *run.Group, logger log.Logger, reg *prometheus.Registry, tracer opentracing.Tracer, _ &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, _ <span class="keyword">bool</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		rl := reloader.New(log.With(logger, <span class="string">"component"</span>, <span class="string">"reloader"</span>),</span><br><span class="line">			extprom.WrapRegistererWithPrefix(<span class="string">"thanos_sidecar_"</span>, reg),</span><br><span class="line">			&amp;reloader.Options&#123;</span><br><span class="line">				ReloadURL:     reloader.ReloadURLFromBase(conf.prometheus.url),</span><br><span class="line">				CfgFile:       conf.reloader.confFile,</span><br><span class="line">				CfgOutputFile: conf.reloader.envVarConfFile,</span><br><span class="line">				WatchedDirs:   conf.reloader.ruleDirectories,</span><br><span class="line">				WatchInterval: conf.reloader.watchInterval,</span><br><span class="line">				RetryInterval: conf.reloader.retryInterval,</span><br><span class="line">			&#125;)</span><br><span class="line"></span><br><span class="line">		<span class="keyword">return</span> runSidecar(g, logger, reg, tracer, rl, component.Sidecar, *conf)</span><br><span class="line">	&#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="runSidecar方法"><a href="#runSidecar方法" class="headerlink" title="runSidecar方法"></a>runSidecar方法</h4><p>使用run.Group对象来启动http server、grpc server、传输block目录至对象存储的协程、监听prometheus配置文件的协程、定期检测prometheus实例存活的协程。</p>
+<p>细节说明：</p>
+<ul>
+<li>查看prometheus实例的心跳机制是通过/api/v1/status/config接口；</li>
+<li>监听prometheus配置文件变化的工具包是github.com/fsnotify/fsnotify；</li>
+<li>开启上传block功能，则每30s遍历prometheus tsdb目录下的所有的block目录（已上传的block或空block会被忽略，默认情况下被压缩过的block也会被忽略），并上传相应的文件至对象存储；</li>
+<li>获取不到prometheus实例的external label或者prometheus没有配置external label，会导致sidecar启动失败。</li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">runSidecar</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">	g *run.Group,</span></span></span><br><span class="line"><span class="function"><span class="params">	logger log.Logger,</span></span></span><br><span class="line"><span class="function"><span class="params">	reg *prometheus.Registry,</span></span></span><br><span class="line"><span class="function"><span class="params">	tracer opentracing.Tracer,</span></span></span><br><span class="line"><span class="function"><span class="params">	reloader *reloader.Reloader,</span></span></span><br><span class="line"><span class="function"><span class="params">	comp component.Component,</span></span></span><br><span class="line"><span class="function"><span class="params">	conf sidecarConfig,</span></span></span><br><span class="line"><span class="function"><span class="params">)</span> <span class="title">error</span></span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 用一个结构体来保存prometheus实例的url、prometheus实例的external label、prometheus client等信息。</span></span><br><span class="line">	<span class="keyword">var</span> m = &amp;promMetadata&#123;</span><br><span class="line">		promURL: conf.prometheus.url,</span><br><span class="line"></span><br><span class="line">		mint: conf.limitMinTime.PrometheusTimestamp(),</span><br><span class="line">		maxt: math.MaxInt64,</span><br><span class="line"></span><br><span class="line">		limitMinTime: conf.limitMinTime,</span><br><span class="line">		client:       promclient.NewWithTracingClient(logger, <span class="string">"thanos-sidecar"</span>),</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 获取对象存储的配置信息，如果有，说明是开启上传block至对象存储的功能。</span></span><br><span class="line">	confContentYaml, err := conf.objStore.Content()</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> errors.Wrap(err, <span class="string">"getting object store config"</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">var</span> uploads = <span class="literal">true</span></span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(confContentYaml) == <span class="number">0</span> &#123;</span><br><span class="line">		level.Info(logger).Log(<span class="string">"msg"</span>, <span class="string">"no supported bucket was configured, uploads will be disabled"</span>)</span><br><span class="line">		uploads = <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line"></span><br><span class="line">	grpcProbe := prober.NewGRPC()</span><br><span class="line">	httpProbe := prober.NewHTTP()</span><br><span class="line">	statusProber := prober.Combine(</span><br><span class="line">		httpProbe,</span><br><span class="line">		grpcProbe,</span><br><span class="line">		prober.NewInstrumentation(comp, logger, extprom.WrapRegistererWithPrefix(<span class="string">"thanos_"</span>, reg)),</span><br><span class="line">	)</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 创建http server，并启动server(只有/metrics、/-/healthy、/-/ready等接口)</span></span><br><span class="line">	srv := httpserver.New(logger, reg, comp, httpProbe,</span><br><span class="line">		httpserver.WithListen(conf.http.bindAddress),</span><br><span class="line">		httpserver.WithGracePeriod(time.Duration(conf.http.gracePeriod)),</span><br><span class="line">	)</span><br><span class="line">	g.Add(<span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		statusProber.Healthy()</span><br><span class="line">		<span class="keyword">return</span> srv.ListenAndServe()</span><br><span class="line">	&#125;, <span class="function"><span class="keyword">func</span><span class="params">(err error)</span></span> &#123;</span><br><span class="line">		statusProber.NotReady(err)</span><br><span class="line">		<span class="keyword">defer</span> statusProber.NotHealthy(err)</span><br><span class="line">		srv.Shutdown(err)</span><br><span class="line">	&#125;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 获取promehtues实例的external label，并做心跳</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">// promUp记录promehtues是否正常，0表示不正常，1表示正常</span></span><br><span class="line">		promUp := promauto.With(reg).NewGauge(prometheus.GaugeOpts&#123;</span><br><span class="line">			Name: <span class="string">"thanos_sidecar_prometheus_up"</span>,</span><br><span class="line">			Help: <span class="string">"Boolean indicator whether the sidecar can reach its Prometheus peer."</span>,</span><br><span class="line">		&#125;)</span><br><span class="line">		<span class="comment">// lastHeartbeat记录最后一次心跳时间</span></span><br><span class="line">		lastHeartbeat := promauto.With(reg).NewGauge(prometheus.GaugeOpts&#123;</span><br><span class="line">			Name: <span class="string">"thanos_sidecar_last_heartbeat_success_time_seconds"</span>,</span><br><span class="line">			Help: <span class="string">"Timestamp of the last successful heartbeat in seconds."</span>,</span><br><span class="line">		&#125;)</span><br><span class="line"></span><br><span class="line">		ctx, cancel := context.WithCancel(context.Background())</span><br><span class="line">		<span class="comment">// 获取prometheus实例的external label（/api/v1/status/config接口），并通过定期(30s)做这件事情来做心跳</span></span><br><span class="line">		g.Add(<span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">			<span class="comment">/*</span></span><br><span class="line"><span class="comment">				检查性代码</span></span><br><span class="line"><span class="comment">			*/</span></span><br><span class="line">			</span><br><span class="line">			<span class="comment">// 获取prometheus实例的external label</span></span><br><span class="line">			err := runutil.Retry(<span class="number">2</span>*time.Second, ctx.Done(), <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">				<span class="comment">// m.UpdateLabels(ctx)去访问prometheus实例的/api/v1/status/config接口，并将返回的数据设置到自己的属性labels</span></span><br><span class="line">				<span class="keyword">if</span> err := m.UpdateLabels(ctx); err != <span class="literal">nil</span> &#123;						</span><br><span class="line">					promUp.Set(<span class="number">0</span>)</span><br><span class="line">					statusProber.NotReady(err)</span><br><span class="line">					<span class="keyword">return</span> err</span><br><span class="line">				&#125;			</span><br><span class="line">				promUp.Set(<span class="number">1</span>)</span><br><span class="line">				statusProber.Ready()</span><br><span class="line">				<span class="comment">// 记录心跳时间</span></span><br><span class="line">				lastHeartbeat.SetToCurrentTime()</span><br><span class="line">				<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">			&#125;)</span><br><span class="line">			</span><br><span class="line">			<span class="comment">// 拿不到prometheus实例的external label或者prometheus没有配置external label则退出</span></span><br><span class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">				<span class="keyword">return</span> errors.Wrap(err, <span class="string">"initial external labels query"</span>)</span><br><span class="line">			&#125;			</span><br><span class="line">			<span class="keyword">if</span> <span class="built_in">len</span>(m.Labels()) == <span class="number">0</span> &#123;</span><br><span class="line">				<span class="keyword">return</span> errors.New(<span class="string">"no external labels configured on Prometheus server, uniquely identifying external labels must be configured; see https://thanos.io/tip/thanos/storage.md#external-labels for details."</span>)</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			<span class="comment">// 每个30s从prometheus实例获取exterlan label，通过此方式来记录心跳时间</span></span><br><span class="line">			<span class="keyword">return</span> runutil.Repeat(<span class="number">30</span>*time.Second, ctx.Done(), <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">error</span></span> &#123;				</span><br><span class="line">				<span class="comment">/*</span></span><br><span class="line"><span class="comment">					其他代码</span></span><br><span class="line"><span class="comment">				*/</span></span><br><span class="line">				</span><br><span class="line">				<span class="keyword">if</span> err := m.UpdateLabels(iterCtx); err != <span class="literal">nil</span> &#123;</span><br><span class="line">					level.Warn(logger).Log(<span class="string">"msg"</span>, <span class="string">"heartbeat failed"</span>, <span class="string">"err"</span>, err)</span><br><span class="line">					promUp.Set(<span class="number">0</span>)</span><br><span class="line">				&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">					promUp.Set(<span class="number">1</span>)</span><br><span class="line">					<span class="comment">// 记录心跳时间</span></span><br><span class="line">					lastHeartbeat.SetToCurrentTime()</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">			&#125;)</span><br><span class="line">		&#125;, <span class="function"><span class="keyword">func</span><span class="params">(error)</span></span> &#123;</span><br><span class="line">			cancel()</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 使用github.com/fsnotify/fsnotify包监听prometheus实例的配置文件的变化</span></span><br><span class="line">	<span class="comment">// 如果文件发生变化则发送一个POST请求给prometheus实例，让它重新加载配置文件</span></span><br><span class="line">	&#123;</span><br><span class="line">		ctx, cancel := context.WithCancel(context.Background())</span><br><span class="line">		g.Add(<span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">			<span class="keyword">return</span> reloader.Watch(ctx)</span><br><span class="line">		&#125;, <span class="function"><span class="keyword">func</span><span class="params">(error)</span></span> &#123;</span><br><span class="line">			cancel()</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	&#123;</span><br><span class="line">		t := exthttp.NewTransport()</span><br><span class="line">		t.MaxIdleConnsPerHost = conf.connection.maxIdleConnsPerHost</span><br><span class="line">		t.MaxIdleConns = conf.connection.maxIdleConns</span><br><span class="line">		c := promclient.NewClient(&amp;http.Client&#123;Transport: tracing.HTTPTripperware(logger, t)&#125;, logger, thanoshttp.ThanosUserAgent)</span><br><span class="line"></span><br><span class="line">		promStore, err := store.NewPrometheusStore(logger, reg, c, conf.prometheus.url, component.Sidecar, m.Labels, m.Timestamps)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> errors.Wrap(err, <span class="string">"create Prometheus store"</span>)</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		tlsCfg, err := tls.NewServerConfig(log.With(logger, <span class="string">"protocol"</span>, <span class="string">"gRPC"</span>),</span><br><span class="line">			conf.grpc.tlsSrvCert, conf.grpc.tlsSrvKey, conf.grpc.tlsSrvClientCA)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> errors.Wrap(err, <span class="string">"setup gRPC server"</span>)</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 创建并grpc server</span></span><br><span class="line">		s := grpcserver.New(logger, reg, tracer, comp, grpcProbe,</span><br><span class="line">			<span class="comment">// 注册grpc handler(通过http client从prometheus实例中获取指标数据)</span></span><br><span class="line">			grpcserver.WithServer(store.RegisterStoreServer(promStore)),	</span><br><span class="line">			<span class="comment">// 注册grpc handler(通过http client从prometheus实例中获取rule数据)</span></span><br><span class="line">			grpcserver.WithServer(rules.RegisterRulesServer(rules.NewPrometheus(conf.prometheus.url, c, m.Labels))), </span><br><span class="line">			grpcserver.WithListen(conf.grpc.bindAddress),</span><br><span class="line">			grpcserver.WithGracePeriod(time.Duration(conf.grpc.gracePeriod)),</span><br><span class="line">			grpcserver.WithTLSConfig(tlsCfg),</span><br><span class="line">		)</span><br><span class="line">		g.Add(<span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">			statusProber.Ready()</span><br><span class="line">			<span class="keyword">return</span> s.ListenAndServe()</span><br><span class="line">		&#125;, <span class="function"><span class="keyword">func</span><span class="params">(err error)</span></span> &#123;</span><br><span class="line">			statusProber.NotReady(err)</span><br><span class="line">			s.Shutdown(err)</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 若开启了上传block功能，则定期遍历prometehus tsdb目录下的所有block目录并上传文件至对象存储。</span></span><br><span class="line">	<span class="keyword">if</span> uploads &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">// 获取一个对象存储bucket</span></span><br><span class="line">		bkt, err := client.NewBucket(logger, confContentYaml, reg, component.Sidecar.String())</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> err</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">/*</span></span><br><span class="line"><span class="comment">			其他代码</span></span><br><span class="line"><span class="comment">		*/</span></span><br><span class="line"></span><br><span class="line">		ctx, cancel := context.WithCancel(context.Background())</span><br><span class="line">		g.Add(<span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">			<span class="comment">/*</span></span><br><span class="line"><span class="comment">				其他代码</span></span><br><span class="line"><span class="comment">			*/</span></span><br><span class="line"></span><br><span class="line">			<span class="comment">/*</span></span><br><span class="line"><span class="comment">				拿不到prometheus实例的external label或者prometheus没有配置external label则退出</span></span><br><span class="line"><span class="comment">			*/</span></span><br><span class="line">			</span><br><span class="line">			s := shipper.New(logger, reg, conf.tsdb.path, bkt, m.Labels, metadata.SidecarSource,</span><br><span class="line">				conf.shipper.uploadCompacted, conf.shipper.allowOutOfOrderUpload)</span><br><span class="line">			</span><br><span class="line">			<span class="comment">// 每30执行一次s.Sync(ctx)</span></span><br><span class="line">			<span class="comment">// s.Sync(ctx)会遍历prometheus tsdb目录下的所有block目录(已上传的block或空block会被忽略，默认情况下被压缩过的block也会被忽略)，并上传相应的文件</span></span><br><span class="line">			<span class="keyword">return</span> runutil.Repeat(<span class="number">30</span>*time.Second, ctx.Done(), <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">				<span class="keyword">if</span> uploaded, err := s.Sync(ctx); err != <span class="literal">nil</span> &#123;</span><br><span class="line">					<span class="comment">// 至少有一个block上传失败，则打印日志</span></span><br><span class="line">				&#125;</span><br><span class="line">				<span class="comment">/*</span></span><br><span class="line"><span class="comment">					其他代码</span></span><br><span class="line"><span class="comment">				*/</span></span><br><span class="line">				<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">			&#125;)</span><br><span class="line">		&#125;, <span class="function"><span class="keyword">func</span><span class="params">(error)</span></span> &#123;</span><br><span class="line">			cancel()</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	level.Info(logger).Log(<span class="string">"msg"</span>, <span class="string">"starting sidecar"</span>)</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h3><p>Thanos Sidecar组件的代码逻辑简单、易懂，通过http协议访问与其绑定的prometheus实例，从prometheus实例中获取到的数据则通过grpc接口对外进行暴露，遍历所有block目录进行文件上传，还有监听promethues配置文件变化的小功能。</p>
+<p>参考：</p>
+<p><a href="https://blog.csdn.net/nangonghen/article/details/110731518?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-5.control&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-5.control" target="_blank" rel="external">thanos sidecar组件源码简析</a></p>
+<p><a href="https://blog.csdn.net/nangonghen/article/details/110010423?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-3.control&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-3.control" target="_blank" rel="external">thanos query组件源码简析</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+<blockquote class="blockquote-center" style="color: #ccc;">
+    -------------本文结束 <i class="fa fa-apple"></i> 感谢您的阅读-------------
+</blockquote>
+
+  <span id="inline-green" style="border-radius:3px;">作者</span>：<a class="link-blue" href="https://github.com/magiceses" target="_blank">Magiceses</a><br/>有问题请 <a class="link-blue" href="https://magiceses.github.io/guestbook" target="_blank">留言</a> 或者私信我的 <a class="link-blue" href="https://weibo.com/u/3069595351" target="_blank">微博</a>。
+
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>满分是10分的话，这篇文章你给几分</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/reward/reward_wechat.png" alt="magiceses WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/reward/reward_alipay.png" alt="magiceses Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Prometheus/" rel="tag"><i class="fa fa-tag"></i> Prometheus</a>
+          
+            <a href="/tags/Thanos/" rel="tag"><i class="fa fa-tag"></i> Thanos</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/10/08/prometheus-prometheus-7-storage/" rel="next" title="Prometheus Local storage和Remote storage">
+                <i class="fa fa-chevron-left"></i> Prometheus Local storage和Remote storage
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/11/02/prometheus-thanos-学习总结/" rel="prev" title="Prometheus和Thanos的前生今世">
+                Prometheus和Thanos的前生今世 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar/avatar.png"
+               alt="magiceses" />
+          <p class="site-author-name" itemprop="name">magiceses</p>
+          <p class="site-description motion-element" itemprop="description">Stay Hungry,Stay Foolish</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">37</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/magiceses" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://blog.csdn.net/weixin_43700106" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-chrome"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/weblog" title="建站日志" target="_blank">建站日志</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/reward" title="打赏" target="_blank">打赏</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Thanos-Query"><span class="nav-number">1.</span> <span class="nav-text">Thanos Query</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Thanos-Query的作用"><span class="nav-number">1.1.</span> <span class="nav-text">Thanos Query的作用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#架构"><span class="nav-number">1.2.</span> <span class="nav-text">架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#源码分析"><span class="nav-number">1.3.</span> <span class="nav-text">源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#启动参数"><span class="nav-number">1.3.1.</span> <span class="nav-text">启动参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码分析"><span class="nav-number">1.3.2.</span> <span class="nav-text">代码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#main方法"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">main方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#registerQuery函数"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">registerQuery函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#runQuery函数"><span class="nav-number">1.3.2.3.</span> <span class="nav-text">runQuery函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#QueryAPI结构体及其方法"><span class="nav-number">1.3.2.4.</span> <span class="nav-text">QueryAPI结构体及其方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#querier结构体及其方法"><span class="nav-number">1.3.2.5.</span> <span class="nav-text">querier结构体及其方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ProxyStore对象"><span class="nav-number">1.3.2.6.</span> <span class="nav-text">ProxyStore对象</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结"><span class="nav-number">1.3.3.</span> <span class="nav-text">小结</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Thanos-Sidecar"><span class="nav-number">2.</span> <span class="nav-text">Thanos Sidecar</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Thanos-Sidecar的作用"><span class="nav-number">2.1.</span> <span class="nav-text">Thanos Sidecar的作用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#源码分析-1"><span class="nav-number">2.2.</span> <span class="nav-text">源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#启动参数-1"><span class="nav-number">2.2.1.</span> <span class="nav-text">启动参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码分析-1"><span class="nav-number">2.2.2.</span> <span class="nav-text">代码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#main方法-1"><span class="nav-number">2.2.2.1.</span> <span class="nav-text">main方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#registerSidecar方法"><span class="nav-number">2.2.2.2.</span> <span class="nav-text">registerSidecar方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#runSidecar方法"><span class="nav-number">2.2.2.3.</span> <span class="nav-text">runSidecar方法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结-1"><span class="nav-number">2.2.3.</span> <span class="nav-text">小结</span></a></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+      
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="busuanzi-count">
+
+  <!-- <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script> -->
+  <!-- 上面这个是之前的，不知道为什么失效了，改成下面这个 -->
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">您是第<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>个小伙伴</span>
+  
+
+  
+    <span class="site-pv">本站总浏览<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">magiceses</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Pisces
+  </a>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count" style="color: #e90f92;">全站共 732k 字</span>
+</div>
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+  <!-- 按需加载背景 -->
+  <!-- 背景动画 -->
+<script type="text/javascript">
+  // 按需加载背景
+  // 如果是all，就直接加载了
+  if("pc" == "all") {
+    $.getScript("/js/src/particle.js?v=5.0.1");
+  }
+  // 识别手机或电脑的js开始
+  (function(){
+    var res = GetRequest();
+    var par = res['index'];
+    if(par!='gfan'){
+      var ua=navigator.userAgent.toLowerCase();
+      var contains=function (a, b){
+          if(a.indexOf(b)!=-1){return true;}
+      };
+      if((contains(ua,"android") && contains(ua,"mobile"))||(contains(ua,"android") && contains(ua,"mozilla"))||(contains(ua,"android") && contains(ua,"opera"))||contains(ua,"ucweb7")||contains(ua,"iphone")){
+        return false;
+      } else {
+        $.getScript("/js/src/particle.js?v=5.0.1");
+      }
+    }
+  })();
+  function GetRequest() {
+    var url = location.search;
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+      var str = url.substr(1);
+      strs = str.split("&");
+      for(var i = 0; i < strs.length; i ++) {
+        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+      }
+    }
+    return theRequest;
+  }
+</script>
+<!-- 识别手机或电脑的js结束 -->  
+
+  <!-- 页面点击小红心 -->
+  <!-- 页面点击小红心 -->
+
+  <script type="text/javascript" src="/js/src/love.js?v=5.0.1"></script>
+
+
+  <!-- 鼠标移动，效果 -->
+  <!-- 鼠标移动特效 -->
+
+  <script type="text/javascript" src="/js/src/jquery-stars.js?v=5.0.1"></script>
+  <script type="text/javascript">
+  jQuery('body').jstars({
+  	image_path: '/images',
+  	image: 'candy-cane-stars.png',
+  	style: 'white',
+  	width: 34,
+  	height: 34,
+  	delay: 700,
+  	frequency: 5
+  });
+  </script>
+
+
+  <!-- 页面 title 进入/离开 效果 -->
+
+  <script type="text/javascript">var OriginTitile=document.title,st;document.addEventListener("visibilitychange",function(){document.hidden?(document.title="Waiting for you back！",clearTimeout(st)):(document.title="Thanks for visit~ "+OriginTitile,st=setTimeout(function(){document.title=OriginTitile},4e3))})</script>
+
+
+</body>
+</html>

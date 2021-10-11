@@ -1,0 +1,1279 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Courier New:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Python," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="天青色等烟雨" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="你勤奋充电努力工作保持身材，对人微笑这些都不是为了取悦他人，而是为了扮靓自己照亮自己的心，告诉自己我是一股独立向上的力量。
+
+在Python中还有一个线程池的概念，它也有并发处理能力，在一定程度上能提高系统运行效率；
+线程的生命周期可以分为5个状态：创建、就绪、运行、阻塞和终止。自线程创建到终止，线程便不断在运行、创建和销毁这3个状态。一个线程的运行时间可由此可以分为3部分：线程的启动时间、线程体">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python 进程线程协程(4)--线程池">
+<meta property="og:url" content="https://magiceses.github.io/2019/10/13/python-进程线程协程-5/index.html">
+<meta property="og:site_name" content="天青色等烟雨">
+<meta property="og:description" content="你勤奋充电努力工作保持身材，对人微笑这些都不是为了取悦他人，而是为了扮靓自己照亮自己的心，告诉自己我是一股独立向上的力量。
+
+在Python中还有一个线程池的概念，它也有并发处理能力，在一定程度上能提高系统运行效率；
+线程的生命周期可以分为5个状态：创建、就绪、运行、阻塞和终止。自线程创建到终止，线程便不断在运行、创建和销毁这3个状态。一个线程的运行时间可由此可以分为3部分：线程的启动时间、线程体">
+<meta property="og:image" content="https://magiceses.github.io/images/python-process-3.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-process-4.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-process-5.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-process-6.png">
+<meta property="og:updated_time" content="2021-10-11T07:20:00.198Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python 进程线程协程(4)--线程池">
+<meta name="twitter:description" content="你勤奋充电努力工作保持身材，对人微笑这些都不是为了取悦他人，而是为了扮靓自己照亮自己的心，告诉自己我是一股独立向上的力量。
+
+在Python中还有一个线程池的概念，它也有并发处理能力，在一定程度上能提高系统运行效率；
+线程的生命周期可以分为5个状态：创建、就绪、运行、阻塞和终止。自线程创建到终止，线程便不断在运行、创建和销毁这3个状态。一个线程的运行时间可由此可以分为3部分：线程的启动时间、线程体">
+<meta name="twitter:image" content="https://magiceses.github.io/images/python-process-3.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://magiceses.github.io/2019/10/13/python-进程线程协程-5/"/>
+
+
+<!-- 网页加载条 -->
+<script src="/js/src/pace.min.js"></script>
+  <title> Python 进程线程协程(4)--线程池 | 天青色等烟雨 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">天青色等烟雨</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">而我在等你</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-guestbook">
+          <a href="/guestbook" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-commenting"></i> <br />
+            
+            留言
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+      
+      
+        <li class="menu-item"> <a title="把这个链接拖到你的工具栏中,任何网页都可以High" href='javascript:(
+/*
+ * Copyright (C) 2016 Never_yu (Neveryu.github.io) <React.dong.yu@gmail.com>
+ * Sina Weibo (http://weibo.com/Neveryu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function go() {
+
+var songs = [
+  "http://dl.stream.qqmusic.qq.com/C400001Qu4I30eVFYb.m4a?vkey=2127178E4405E7B8B268F20F05232485735CCF4FF8C1432F0360D2626D0B6C9564B5627C7AB481BBC685FEDB0946A50E97C66F0D1B008226&guid=7175649092&uin=0&fromtag=66",
+  "",
+  "",
+  ""
+];
+
+function c() {
+  var e = document.createElement("link");
+  e.setAttribute("type", "text/css");
+  e.setAttribute("rel", "stylesheet");
+  e.setAttribute("href", f);
+  e.setAttribute("class", l);
+  document.body.appendChild(e)
+}
+
+function h() {
+  var e = document.getElementsByClassName(l);
+  for (var t = 0; t < e.length; t++) {
+    document.body.removeChild(e[t])
+  }
+}
+
+function p() {
+  var e = document.createElement("div");
+  e.setAttribute("class", a);
+  document.body.appendChild(e);
+  setTimeout(function() {
+    document.body.removeChild(e)
+  }, 100)
+}
+
+function d(e) {
+  return {
+    height : e.offsetHeight,
+    width : e.offsetWidth
+  }
+}
+
+function v(i) {
+  var s = d(i);
+  return s.height > e && s.height < n && s.width > t && s.width < r
+}
+
+function m(e) {
+  var t = e;
+  var n = 0;
+  while (!!t) {
+    n += t.offsetTop;
+    t = t.offsetParent
+  }
+  return n
+}
+
+function g() {
+  var e = document.documentElement;
+  if (!!window.innerWidth) {
+    return window.innerHeight
+  } else if (e && !isNaN(e.clientHeight)) {
+    return e.clientHeight
+  }
+  return 0
+}
+
+function y() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  }
+  return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+}
+
+function E(e) {
+  var t = m(e);
+  return t >= w && t <= b + w
+}
+
+function S() {
+  var e = document.getElementById("audio_element_id");
+  if(e != null){
+    var index = parseInt(e.getAttribute("curSongIndex"));
+    if(index > songs.length - 2) {
+      index = 0;
+    } else {
+      index++;
+    }
+    e.setAttribute("curSongIndex", index);
+    N();
+  }
+
+  e.src = i;
+  e.play()
+}
+
+function x(e) {
+  e.className += " " + s + " " + o
+}
+
+function T(e) {
+  e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+}
+
+function N() {
+  var e = document.getElementsByClassName(s);
+  var t = new RegExp("\\b" + s + "\\b");
+  for (var n = 0; n < e.length; ) {
+    e[n].className = e[n].className.replace(t, "")
+  }
+}
+
+function initAudioEle() {
+  var e = document.getElementById("audio_element_id");
+  if(e === null){
+    e = document.createElement("audio");
+    e.setAttribute("class", l);
+    e.setAttribute("curSongIndex", 0);
+    e.id = "audio_element_id";
+    e.loop = false;
+    e.bgcolor = 0;
+    e.addEventListener("canplay", function() {
+      setTimeout(function() {
+        x(k)
+      }, 500);
+      setTimeout(function() {
+        N();
+        p();
+        for (var e = 0; e < O.length; e++) {
+          T(O[e])
+        }
+      }, 15500)
+    }, true);
+    e.addEventListener("ended", function() {
+      N();
+      h();
+      go();
+    }, true);
+    e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+    document.body.appendChild(e);
+  }
+}
+
+initAudioEle();
+var e = 30;
+var t = 30;
+var n = 350;
+var r = 350;
+
+var curSongIndex = parseInt(document.getElementById("audio_element_id").getAttribute("curSongIndex"));
+var i = songs[curSongIndex];
+
+var s = "mw-harlem_shake_me";
+var o = "im_first";
+var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+var a = "mw-strobe_light";
+
+/* harlem-shake-style.css，替换成你的位置，也可以直接使用：//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css */
+var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+
+var l = "mw_added_css";
+var b = g();
+var w = y();
+var C = document.getElementsByTagName("*");
+var k = null;
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    if (E(A)) {
+      k = A;
+      break
+    }
+  }
+}
+if (A === null) {
+  console.warn("Could not find a node of the right size. Please try a different page.");
+  return
+}
+c();
+S();
+var O = [];
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    O.push(A)
+  }
+}
+})()'><i class="menu-item-icon fa fa-music fa-fw"></i> High一下</a></li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search fa-lg"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Python 进程线程协程(4)--线程池
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2019-10-13T16:25:24+08:00" content="2019-10-13">
+              2019-10-13
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv">热度
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p id="div-border-top-green">你勤奋充电努力工作保持身材，对人微笑这些都不是为了取悦他人，而是为了扮靓自己照亮自己的心，告诉自己我是一股独立向上的力量。<br></p>
+
+<p>在Python中还有一个线程池的概念，它也有并发处理能力，在一定程度上能提高系统运行效率；</p>
+<p>线程的生命周期可以分为5个状态：创建、就绪、运行、阻塞和终止。自线程创建到终止，线程便不断在运行、创建和销毁这3个状态。一个线程的运行时间可由此可以分为3部分：线程的启动时间、线程体的运行时间和线程的销毁时间。在多线程处理的情景中，如果线程不能被重用，就意味着每次创建都需要经过启动、销毁和运行3个过程。这必然会增加系统相应的时间，降低了效率。看看之前介绍线程的博文的例子中（<a href="http://11026142.blog.51cto.com/11016142/1867519" target="_blank" rel="external"> 点击此处可以阅读</a>），有多少个任务，就创建多少个线程，但是由于Python特有的GIL限制，它并不是真正意义上的多线程，反而会因为频繁的切换任务等开销而降低了性能(<a href="http://11026142.blog.51cto.com/11016142/1864799" target="_blank" rel="external"> 点击此处可以了解Python的GIL</a>)。这种情况下可以使用线程池提高运行效率。</p>
+<p>线程池的基本原理如下图，它是通过将事先创建多个能够执行任务的线程放入池中，所需要执行的任务通常要被安排在队列任务中。一般情况下，需要处理的任务比线程数目要多，线程执行完当前任务后，会从队列中取下一个任务，知道所有的任务完成。</p>
+<p><img src="/images/python-process-3.png" alt="Python：线程、进程与协程(7)——线程池_Python"></p>
+<p>由于线程预先被创建并放入线程池中，同时处理完当前任务之后并不销毁而是被安排处理下一个任务，因此能够避免多次创建线程，从而节省线程创建和销毁的开销，能带来更好的性能和系统稳定性。所以，说白了，Python的线程池也没有利用到多核或者多CPU的优势，只是跟普通的多线程相比，它不用去多次创建线程，节省了线程创建和销毁的时间，从而提高了性能。</p>
+<p>Python中 线程池技术适合处理突发性大量请求或者需要大量线程来完成任务、但每个任务实际处理时间较短的场景，它能有效的避免由于系统创建线程过多而导致性能负荷过大、响应过慢等问题。下面介绍几种利用线程池的方法。</p>
+<a id="more"></a>
+<h2 id="自定义线程池模式"><a href="#自定义线程池模式" class="headerlink" title="自定义线程池模式"></a><strong>自定义线程池模式</strong></h2><p>我们可以利用Queue模块和threading模块来实现线程池。Queue用来创建任务队列，threading用来创建一个线程池子。</p>
+<p>看下面例子</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Queue,threading</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Worker</span><span class="params">(threading.Thread)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    定义一个能够处理任务的线程类，属于自定义线程类，自定义线程类就需要定义run()函数</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self,workqueue,resultqueue,**kwargs)</span>:</span></span><br><span class="line">        threading.Thread.__init__(self,**kwargs)</span><br><span class="line">        self.workqueue = workqueue<span class="comment">#存放任务的队列,任务一般都是函数</span></span><br><span class="line">        self.resultqueue = resultqueue<span class="comment">#存放结果的队列</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">while</span> <span class="keyword">True</span>:</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                <span class="comment">#从任务队列中取出一个任务，block设置为False表示如果队列空了，就会抛出异常</span></span><br><span class="line">                callable,args,kwargs = self.workqueue.get(block=<span class="keyword">False</span>)</span><br><span class="line">                res = callable(*args,**kwargs)</span><br><span class="line">                self.resultqueue.put(res)<span class="comment">#将任务的结果存放到结果队列中</span></span><br><span class="line">            <span class="keyword">except</span> Queue.Empty:<span class="comment">#抛出空队列异常</span></span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">WorkerManger</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    定义一个线程池的类</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self,num=<span class="number">10</span>)</span>:</span><span class="comment">#默认这个池子里有10个线程</span></span><br><span class="line">        self.workqueue = Queue.Queue()<span class="comment">#任务队列，</span></span><br><span class="line">        self.resultqueue = Queue.Queue()<span class="comment">#存放任务结果的队列</span></span><br><span class="line">        self.workers = []<span class="comment">#所有的线程都存放在这个列表中</span></span><br><span class="line">        self._recruitthreads(num)<span class="comment">#创建一系列线程的函数</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_recruitthreads</span><span class="params">(self,num)</span>:</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        创建线程</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> xrange(num):</span><br><span class="line">            worker = Worker(self.workqueue,self.resultqueue)</span><br><span class="line">            self.workers.append(worker)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">start</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        启动线程池中每个线程</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="keyword">for</span> work <span class="keyword">in</span> self.workers:</span><br><span class="line">            work.start()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">wait_for_complete</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        等待至任务队列中所有任务完成</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="keyword">while</span> len(self.workers):</span><br><span class="line">            worker = self.workers.pop()</span><br><span class="line">            worker.join()</span><br><span class="line">            <span class="keyword">if</span> worker.isAlive() <span class="keyword">and</span> <span class="keyword">not</span> self.workqueue.empty():</span><br><span class="line">                self.workers.append(worker)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">add_job</span><span class="params">(self,callable,*args,**kwargs)</span>:</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        往任务队列中添加任务</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        self.workqueue.put((callable,args,kwargs))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get_result</span><span class="params">(self,*args,**kwargs)</span>:</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        获取结果队列</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="keyword">return</span> self.resultqueue.get(*args,**kwargs)</span><br><span class="line">        </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">add_result</span><span class="params">(self,result)</span>:</span></span><br><span class="line">        self.resultqueue.put(result)</span><br></pre></td></tr></table></figure>
+<p>上面定义了一个线程池，它的初始化函数<strong>init</strong>()定义了一些存放相关数据的属性，这在Python的一些内部模块的类的定义中很常见，所有有时候多看看源码其实挺好的，学习大神的编程习惯和编程思想。</p>
+<p>另外还要提到一点，Queue模块中的队列，不仅可以存放数据（指字符串，数值，列表，字典等等），还可以存放函数的（也就是任务），上面的代码中，callable是一个函数，当用put()将一个函数添加到队列时，put()接受的参数有函数对象以及该函数的相关参数，而且要是一个整体，所以就有了上面代码中的self.workqueue.put((callable,args,kwargs))。同理，当从这种存放函数的队列中取出数据，它返回的就是一个函数对象包括它的相关参数，有兴趣的可以打印出上面代码中run()里的callable,args,kwargs。</p>
+<p>下面就简单的举个小例子吧。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib2,datetime</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">open_url</span><span class="params">(url)</span>:</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        res = urllib2.urlopen(url).getcode()</span><br><span class="line">    <span class="keyword">except</span> urllib2.HTTPError, e:</span><br><span class="line">        res = e.code</span><br><span class="line">    <span class="comment">#print res</span></span><br><span class="line">    res = str(res)</span><br><span class="line">    <span class="keyword">with</span> open(<span class="string">'/home/liulonghua/无标题文档'</span>,<span class="string">'wr'</span>) <span class="keyword">as</span> f:</span><br><span class="line">        f.write(res)</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    urls = [</span><br><span class="line">        <span class="string">'http://www.python.org'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/about/'</span>,</span><br><span class="line">        <span class="string">'http://www.onlamp.com/pub/a/python/2003/04/17/metaclasses.html'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/doc/'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/download/'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/getit/'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/community/'</span>,</span><br><span class="line">        <span class="string">'https://wiki.python.org/moin/'</span>,</span><br><span class="line">        <span class="string">'http://planet.python.org/'</span>,</span><br><span class="line">        <span class="string">'https://wiki.python.org/moin/LocalUserGroups'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/psf/'</span>,</span><br><span class="line">        <span class="string">'http://docs.python.org/devguide/'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/community/awards/'</span></span><br><span class="line">    ]</span><br><span class="line">    t1 = datetime.datetime.now()</span><br><span class="line">    w = WorkerManger(<span class="number">2</span>)</span><br><span class="line">    <span class="keyword">for</span> url <span class="keyword">in</span> urls:</span><br><span class="line">        w.add_job(open_url,url)</span><br><span class="line">    w.start()</span><br><span class="line">    w.wait_for_complete()</span><br><span class="line">    t2 = datetime.datetime.now()</span><br><span class="line">    <span class="keyword">print</span> t2 - t1</span><br></pre></td></tr></table></figure>
+<p>最后结果如下：</p>
+<p><img src="/images/python-process-4.png" alt="Python：线程、进程与协程(7)——线程池_进程池_02"></p>
+<p>如果把上面代码改成用多线程而不是用线程池，会是怎样的呢？</p>
+<p>代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    urls = [</span><br><span class="line">        <span class="string">'http://www.python.org'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/about/'</span>,</span><br><span class="line">        <span class="string">'http://www.onlamp.com/pub/a/python/2003/04/17/metaclasses.html'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/doc/'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/download/'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/getit/'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/community/'</span>,</span><br><span class="line">        <span class="string">'https://wiki.python.org/moin/'</span>,</span><br><span class="line">        <span class="string">'http://planet.python.org/'</span>,</span><br><span class="line">        <span class="string">'https://wiki.python.org/moin/LocalUserGroups'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/psf/'</span>,</span><br><span class="line">        <span class="string">'http://docs.python.org/devguide/'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/community/awards/'</span></span><br><span class="line">    ]</span><br><span class="line">    t1 = datetime.datetime.now()</span><br><span class="line">    <span class="keyword">for</span> url <span class="keyword">in</span> urls:</span><br><span class="line">        t = threading.Thread(target=open_url,args=(url,))</span><br><span class="line">        t.start()</span><br><span class="line">        t.join()</span><br><span class="line">    t2 = datetime.datetime.now()</span><br><span class="line">    <span class="keyword">print</span> t2-t1</span><br></pre></td></tr></table></figure>
+<p>运行效率的差异还是很大的，有兴趣的可以动手试试。</p>
+<h2 id="使用现成的线程池模块"><a href="#使用现成的线程池模块" class="headerlink" title="使用现成的线程池模块"></a><strong>使用现成的线程池模块</strong></h2><p>下载安装也很简单，用pip工具</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo pip install threadpool</span><br></pre></td></tr></table></figure>
+<p><strong>注意：这里要提到一点，我就陷入这个坑，还好没有花多长时间就解决了。由于我的电脑里有python2.7.12,python3.5,还有一个PyPy5.4.1，上面的指令竟然将threadpool包安装到了PyPy目录下了，所以在python2.7.12里，我import threadpool，它一直报错，如果你的系统里有多个Python版本，又没有用virtualenvs虚拟环境工具，很容易造成这种混乱，虽然我安装了virtualenvs，但在自己的电脑上很少用，这里的解决方法是：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo python -m pip install threadpool</span><br></pre></td></tr></table></figure>
+<p><strong>以区分PyPy，同理如果是在PyPy环境下安装第三方包的话，用sudo pypy -m pip install packagename,这个在之前的博文中也有介绍，感兴趣的可以<a href="http://11026142.blog.51cto.com/11016142/1858971" target="_blank" rel="external"> 点此</a></strong></p>
+<p>该模块主要的类和方法：</p>
+<ol>
+<li><p>threadpool.ThreadPool:线程池类，主要是用来分派任务请求和收集运行结果。主要方法有：</p>
+<ul>
+<li><p><code>__init__</code>(self,number_workers,q_size,resq_size=0,poll_timeout=5):</p>
+<p>建立线程池，并启动对应的num_workers的线程；q_size表示任务请求队列的大小，resq_size表示存放运行结果队列的大小。</p>
+</li>
+<li><p>createWorkers(self,num_workers，poll_timeout=5):</p>
+<p>将num_workers数量对应的线程加入线程池</p>
+</li>
+<li><p>dismissWorkers(self,num_workers,do_join=False):</p>
+<p>告诉num_workers数量的工作线程在执行完当前任务后退出</p>
+</li>
+<li><p>joinAllDismissWorkers(self):</p>
+<p>在设置为退出的线程上执行Thread.join</p>
+</li>
+<li><p>putRequest(self,request,block=True,timeout=None):</p>
+<p>加入一个任务请求到工作队列</p>
+</li>
+<li><p>pool(self,block=False)</p>
+<p>处理任务队列中新请求。也就是循环的调用各个线程结果中的回调和错误回调。不过，当请求队列为空时会抛出 NoResultPending 异常，以表示所有的结果都处理完了。这个特点对于依赖线程执行结果继续加入请求队列的方式不太适合。</p>
+</li>
+<li><p>wait(self)</p>
+<p>等待执行结果，直到所有任务完成。当所有执行结果返回后，线程池内部的线程并没有销毁，而是在等待新任务。因此，wait()之后依然可以在此调用pool.putRequest()往其中添加任务。</p>
+</li>
+</ul>
+</li>
+<li><p>threadpool.WorkerThread:处理任务的工作线程，主要有run()方法和dismiss()方法。</p>
+</li>
+<li><p>threadpool.WorkRequest:任务请求类，包含有具体执行方法的工作请求类</p>
+<ul>
+<li><p><code>__init__</code>(self,callable,args=None,kwds=None,requestID=None,callback=None,exc_callback=None)</p>
+<p>创建一个工作请求。</p>
+</li>
+</ul>
+</li>
+<li><p>makeRequests(callable_,args_list,callback=None,exc_callback=_handle_thread_exception):</p>
+<p>主要函数，用来创建具有相同的执行函数但参数不同的一系列工作请求。</p>
+</li>
+</ol>
+<p>有了上面自定义线程池模式的基础，这个模块不难理解，有兴趣的可以去看看该模块的源码。它的使用步骤一般如下：</p>
+<ul>
+<li>（1）引入threadpool模块</li>
+<li>（2）定义线程函数</li>
+<li>（3）创建线程 池threadpool.ThreadPool()</li>
+<li>（4）创建需要线程池处理的任务即threadpool.makeRequests()</li>
+<li>（5）将创建的多个任务put到线程池中,threadpool.putRequest</li>
+<li>（6）等到所有任务处理完毕theadpool.pool()</li>
+</ul>
+<p>将上面的例子用线程池模块进行修改，代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> threadpool</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    urls = [</span><br><span class="line">        <span class="string">'http://www.python.org'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/about/'</span>,</span><br><span class="line">        <span class="string">'http://www.onlamp.com/pub/a/python/2003/04/17/metaclasses.html'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/doc/'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/download/'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/getit/'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/community/'</span>,</span><br><span class="line">        <span class="string">'https://wiki.python.org/moin/'</span>,</span><br><span class="line">        <span class="string">'http://planet.python.org/'</span>,</span><br><span class="line">        <span class="string">'https://wiki.python.org/moin/LocalUserGroups'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/psf/'</span>,</span><br><span class="line">        <span class="string">'http://docs.python.org/devguide/'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/community/awards/'</span></span><br><span class="line">    ]</span><br><span class="line">    t1 = datetime.datetime.now()</span><br><span class="line">    pool = threadpool.ThreadPool(<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">    requests = threadpool.makeRequests(open_url,urls)</span><br><span class="line">    [pool.putRequest(req) <span class="keyword">for</span> req <span class="keyword">in</span> requests]</span><br><span class="line">    pool.wait()</span><br><span class="line">    t2 = datetime.datetime.now()</span><br><span class="line">    <span class="keyword">print</span> t2-t1</span><br></pre></td></tr></table></figure>
+<p>执行结果如下：</p>
+<p><img src="/images/python-process-5.png" alt="Python：线程、进程与协程(7)——线程池_进程池_04"></p>
+<h2 id="multiprocessing-dummy-执行多线程任务"><a href="#multiprocessing-dummy-执行多线程任务" class="headerlink" title="multiprocessing.dummy 执行多线程任务"></a><strong>multiprocessing.dummy 执行多线程任务</strong></h2><p>multiprocessing.dummy 模块与 multiprocessing 模块的区别： dummy 模块是多线程，而 multiprocessing 是多进程， api 都是通用的。</p>
+<p>Python3里的multiprocessing里也有现成的线程池，如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> multiprocessing.pool <span class="keyword">import</span> ThreadPool</span><br></pre></td></tr></table></figure>
+<p>有时候看到有人这么用dummy,from multiprocessing.dummy import Pool as ThreadPool ,把它当作了一个线程池。它的属性和方法可以参考<a href="http://11026142.blog.51cto.com/11016142/1876989" target="_blank" rel="external"> 进程池</a>。将上面的例子可以用这种方法改下代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> multiprocessing.dummy <span class="keyword">import</span> Pool <span class="keyword">as</span> ThreadPool </span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    urls = [</span><br><span class="line">        <span class="string">'http://www.python.org'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/about/'</span>,</span><br><span class="line">        <span class="string">'http://www.onlamp.com/pub/a/python/2003/04/17/metaclasses.html'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/doc/'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/download/'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/getit/'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/community/'</span>,</span><br><span class="line">        <span class="string">'https://wiki.python.org/moin/'</span>,</span><br><span class="line">        <span class="string">'http://planet.python.org/'</span>,</span><br><span class="line">        <span class="string">'https://wiki.python.org/moin/LocalUserGroups'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/psf/'</span>,</span><br><span class="line">        <span class="string">'http://docs.python.org/devguide/'</span>,</span><br><span class="line">        <span class="string">'http://www.python.org/community/awards/'</span></span><br><span class="line">    ]</span><br><span class="line">    t1 = datetime.datetime.now()</span><br><span class="line">    pool =ThreadPool(<span class="number">2</span>)</span><br><span class="line">    pool.map(open_url,urls)</span><br><span class="line">    pool.close()</span><br><span class="line">    pool.join()</span><br><span class="line">    t2 = datetime.datetime.now()</span><br><span class="line">    <span class="keyword">print</span> t2-t1</span><br></pre></td></tr></table></figure>
+<p>运行结果如下：</p>
+<p><img src="/images/python-process-6.png" alt="Python：线程、进程与协程(7)——线程池_线程池_05"></p>
+<p>原文： <a href="https://blog.51cto.com/u_11026142/1879245" target="_blank" rel="external">https://blog.51cto.com/u_11026142/1879245</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+<blockquote class="blockquote-center" style="color: #ccc;">
+    -------------本文结束 <i class="fa fa-apple"></i> 感谢您的阅读-------------
+</blockquote>
+
+  <span id="inline-green" style="border-radius:3px;">作者</span>：<a class="link-blue" href="https://github.com/magiceses" target="_blank">Magiceses</a><br/>有问题请 <a class="link-blue" href="https://magiceses.github.io/guestbook" target="_blank">留言</a> 或者私信我的 <a class="link-blue" href="https://weibo.com/u/3069595351" target="_blank">微博</a>。
+
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>满分是10分的话，这篇文章你给几分</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/reward/reward_wechat.png" alt="magiceses WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/reward/reward_alipay.png" alt="magiceses Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"><i class="fa fa-tag"></i> Python</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/10/12/python-进程线程协程-4.2/" rel="next" title="Python 进程线程协程(4)--multiprocessing模块(下)">
+                <i class="fa fa-chevron-left"></i> Python 进程线程协程(4)--multiprocessing模块(下)
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/03/31/prometheus-alertmanager-使用原理和源码分析/" rel="prev" title="Alertmanager 使用原理和源码分析">
+                Alertmanager 使用原理和源码分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar/avatar.png"
+               alt="magiceses" />
+          <p class="site-author-name" itemprop="name">magiceses</p>
+          <p class="site-description motion-element" itemprop="description">Stay Hungry,Stay Foolish</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">37</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/magiceses" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://blog.csdn.net/weixin_43700106" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-chrome"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/weblog" title="建站日志" target="_blank">建站日志</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/reward" title="打赏" target="_blank">打赏</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#自定义线程池模式"><span class="nav-number">1.</span> <span class="nav-text">自定义线程池模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用现成的线程池模块"><span class="nav-number">2.</span> <span class="nav-text">使用现成的线程池模块</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#multiprocessing-dummy-执行多线程任务"><span class="nav-number">3.</span> <span class="nav-text">multiprocessing.dummy 执行多线程任务</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+      
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="busuanzi-count">
+
+  <!-- <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script> -->
+  <!-- 上面这个是之前的，不知道为什么失效了，改成下面这个 -->
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">您是第<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>个小伙伴</span>
+  
+
+  
+    <span class="site-pv">本站总浏览<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">magiceses</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Pisces
+  </a>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count" style="color: #e90f92;">全站共 732k 字</span>
+</div>
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+  <!-- 按需加载背景 -->
+  <!-- 背景动画 -->
+<script type="text/javascript">
+  // 按需加载背景
+  // 如果是all，就直接加载了
+  if("pc" == "all") {
+    $.getScript("/js/src/particle.js?v=5.0.1");
+  }
+  // 识别手机或电脑的js开始
+  (function(){
+    var res = GetRequest();
+    var par = res['index'];
+    if(par!='gfan'){
+      var ua=navigator.userAgent.toLowerCase();
+      var contains=function (a, b){
+          if(a.indexOf(b)!=-1){return true;}
+      };
+      if((contains(ua,"android") && contains(ua,"mobile"))||(contains(ua,"android") && contains(ua,"mozilla"))||(contains(ua,"android") && contains(ua,"opera"))||contains(ua,"ucweb7")||contains(ua,"iphone")){
+        return false;
+      } else {
+        $.getScript("/js/src/particle.js?v=5.0.1");
+      }
+    }
+  })();
+  function GetRequest() {
+    var url = location.search;
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+      var str = url.substr(1);
+      strs = str.split("&");
+      for(var i = 0; i < strs.length; i ++) {
+        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+      }
+    }
+    return theRequest;
+  }
+</script>
+<!-- 识别手机或电脑的js结束 -->  
+
+  <!-- 页面点击小红心 -->
+  <!-- 页面点击小红心 -->
+
+  <script type="text/javascript" src="/js/src/love.js?v=5.0.1"></script>
+
+
+  <!-- 鼠标移动，效果 -->
+  <!-- 鼠标移动特效 -->
+
+  <script type="text/javascript" src="/js/src/jquery-stars.js?v=5.0.1"></script>
+  <script type="text/javascript">
+  jQuery('body').jstars({
+  	image_path: '/images',
+  	image: 'candy-cane-stars.png',
+  	style: 'white',
+  	width: 34,
+  	height: 34,
+  	delay: 700,
+  	frequency: 5
+  });
+  </script>
+
+
+  <!-- 页面 title 进入/离开 效果 -->
+
+  <script type="text/javascript">var OriginTitile=document.title,st;document.addEventListener("visibilitychange",function(){document.hidden?(document.title="Waiting for you back！",clearTimeout(st)):(document.title="Thanks for visit~ "+OriginTitile,st=setTimeout(function(){document.title=OriginTitile},4e3))})</script>
+
+
+</body>
+</html>

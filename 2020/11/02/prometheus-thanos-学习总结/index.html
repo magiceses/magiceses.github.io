@@ -1,0 +1,1369 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Courier New:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Prometheus,Thanos," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="天青色等烟雨" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="没有人会为你的贫穷负责，却有人为你的富有而喝彩！所以不要活在别人的嘴巴里，做好自己！有路，就大胆的去走；有梦，就大胆地飞翔；前行的路，不怕万人阻挡，只怕自己投降！
+
+总结thanos之前先来回顾一下prometheus
+prometheus 回顾云原生监控的事实标准Promethues监控系统的历史悠久，是一个颇为成熟的领域，而Prometheus作为新生代的开源监控系统，慢慢成为了云原生体系的监">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Prometheus和Thanos的前生今世">
+<meta property="og:url" content="https://magiceses.github.io/2020/11/02/prometheus-thanos-学习总结/index.html">
+<meta property="og:site_name" content="天青色等烟雨">
+<meta property="og:description" content="没有人会为你的贫穷负责，却有人为你的富有而喝彩！所以不要活在别人的嘴巴里，做好自己！有路，就大胆的去走；有梦，就大胆地飞翔；前行的路，不怕万人阻挡，只怕自己投降！
+
+总结thanos之前先来回顾一下prometheus
+prometheus 回顾云原生监控的事实标准Promethues监控系统的历史悠久，是一个颇为成熟的领域，而Prometheus作为新生代的开源监控系统，慢慢成为了云原生体系的监">
+<meta property="og:image" content="https://magiceses.github.io/images/prometheus-thanos-1.png">
+<meta property="og:image" content="https://magiceses.github.io/images/prometheus-thanos-2.png">
+<meta property="og:image" content="https://magiceses.github.io/images/prometheus-thanos-3.png">
+<meta property="og:image" content="https://magiceses.github.io/images/prometheus-thanos-4.jpeg">
+<meta property="og:image" content="https://magiceses.github.io/images/prometheus-thanos-5.png">
+<meta property="og:image" content="https://magiceses.github.io/images/prometheus-thanos-6.png">
+<meta property="og:image" content="https://magiceses.github.io/images/prometheus-thanos-7.png">
+<meta property="og:image" content="https://magiceses.github.io/images/prometheus-thanos-8.png">
+<meta property="og:image" content="https://magiceses.github.io/images/prometheus-thanos-9.png">
+<meta property="og:image" content="https://magiceses.github.io/images/prometheus-thanos-10.png">
+<meta property="og:image" content="https://magiceses.github.io/images/prometheus-thanos-11.png">
+<meta property="og:image" content="https://magiceses.github.io/images/prometheus-thanos-12.png">
+<meta property="og:image" content="https://magiceses.github.io/images/prometheus-thanos-13.png">
+<meta property="og:updated_time" content="2021-10-11T07:57:07.707Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Prometheus和Thanos的前生今世">
+<meta name="twitter:description" content="没有人会为你的贫穷负责，却有人为你的富有而喝彩！所以不要活在别人的嘴巴里，做好自己！有路，就大胆的去走；有梦，就大胆地飞翔；前行的路，不怕万人阻挡，只怕自己投降！
+
+总结thanos之前先来回顾一下prometheus
+prometheus 回顾云原生监控的事实标准Promethues监控系统的历史悠久，是一个颇为成熟的领域，而Prometheus作为新生代的开源监控系统，慢慢成为了云原生体系的监">
+<meta name="twitter:image" content="https://magiceses.github.io/images/prometheus-thanos-1.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://magiceses.github.io/2020/11/02/prometheus-thanos-学习总结/"/>
+
+
+<!-- 网页加载条 -->
+<script src="/js/src/pace.min.js"></script>
+  <title> Prometheus和Thanos的前生今世 | 天青色等烟雨 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">天青色等烟雨</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">而我在等你</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-guestbook">
+          <a href="/guestbook" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-commenting"></i> <br />
+            
+            留言
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+      
+      
+        <li class="menu-item"> <a title="把这个链接拖到你的工具栏中,任何网页都可以High" href='javascript:(
+/*
+ * Copyright (C) 2016 Never_yu (Neveryu.github.io) <React.dong.yu@gmail.com>
+ * Sina Weibo (http://weibo.com/Neveryu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function go() {
+
+var songs = [
+  "http://dl.stream.qqmusic.qq.com/C400001Qu4I30eVFYb.m4a?vkey=2127178E4405E7B8B268F20F05232485735CCF4FF8C1432F0360D2626D0B6C9564B5627C7AB481BBC685FEDB0946A50E97C66F0D1B008226&guid=7175649092&uin=0&fromtag=66",
+  "",
+  "",
+  ""
+];
+
+function c() {
+  var e = document.createElement("link");
+  e.setAttribute("type", "text/css");
+  e.setAttribute("rel", "stylesheet");
+  e.setAttribute("href", f);
+  e.setAttribute("class", l);
+  document.body.appendChild(e)
+}
+
+function h() {
+  var e = document.getElementsByClassName(l);
+  for (var t = 0; t < e.length; t++) {
+    document.body.removeChild(e[t])
+  }
+}
+
+function p() {
+  var e = document.createElement("div");
+  e.setAttribute("class", a);
+  document.body.appendChild(e);
+  setTimeout(function() {
+    document.body.removeChild(e)
+  }, 100)
+}
+
+function d(e) {
+  return {
+    height : e.offsetHeight,
+    width : e.offsetWidth
+  }
+}
+
+function v(i) {
+  var s = d(i);
+  return s.height > e && s.height < n && s.width > t && s.width < r
+}
+
+function m(e) {
+  var t = e;
+  var n = 0;
+  while (!!t) {
+    n += t.offsetTop;
+    t = t.offsetParent
+  }
+  return n
+}
+
+function g() {
+  var e = document.documentElement;
+  if (!!window.innerWidth) {
+    return window.innerHeight
+  } else if (e && !isNaN(e.clientHeight)) {
+    return e.clientHeight
+  }
+  return 0
+}
+
+function y() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  }
+  return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+}
+
+function E(e) {
+  var t = m(e);
+  return t >= w && t <= b + w
+}
+
+function S() {
+  var e = document.getElementById("audio_element_id");
+  if(e != null){
+    var index = parseInt(e.getAttribute("curSongIndex"));
+    if(index > songs.length - 2) {
+      index = 0;
+    } else {
+      index++;
+    }
+    e.setAttribute("curSongIndex", index);
+    N();
+  }
+
+  e.src = i;
+  e.play()
+}
+
+function x(e) {
+  e.className += " " + s + " " + o
+}
+
+function T(e) {
+  e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+}
+
+function N() {
+  var e = document.getElementsByClassName(s);
+  var t = new RegExp("\\b" + s + "\\b");
+  for (var n = 0; n < e.length; ) {
+    e[n].className = e[n].className.replace(t, "")
+  }
+}
+
+function initAudioEle() {
+  var e = document.getElementById("audio_element_id");
+  if(e === null){
+    e = document.createElement("audio");
+    e.setAttribute("class", l);
+    e.setAttribute("curSongIndex", 0);
+    e.id = "audio_element_id";
+    e.loop = false;
+    e.bgcolor = 0;
+    e.addEventListener("canplay", function() {
+      setTimeout(function() {
+        x(k)
+      }, 500);
+      setTimeout(function() {
+        N();
+        p();
+        for (var e = 0; e < O.length; e++) {
+          T(O[e])
+        }
+      }, 15500)
+    }, true);
+    e.addEventListener("ended", function() {
+      N();
+      h();
+      go();
+    }, true);
+    e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+    document.body.appendChild(e);
+  }
+}
+
+initAudioEle();
+var e = 30;
+var t = 30;
+var n = 350;
+var r = 350;
+
+var curSongIndex = parseInt(document.getElementById("audio_element_id").getAttribute("curSongIndex"));
+var i = songs[curSongIndex];
+
+var s = "mw-harlem_shake_me";
+var o = "im_first";
+var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+var a = "mw-strobe_light";
+
+/* harlem-shake-style.css，替换成你的位置，也可以直接使用：//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css */
+var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+
+var l = "mw_added_css";
+var b = g();
+var w = y();
+var C = document.getElementsByTagName("*");
+var k = null;
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    if (E(A)) {
+      k = A;
+      break
+    }
+  }
+}
+if (A === null) {
+  console.warn("Could not find a node of the right size. Please try a different page.");
+  return
+}
+c();
+S();
+var O = [];
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    O.push(A)
+  }
+}
+})()'><i class="menu-item-icon fa fa-music fa-fw"></i> High一下</a></li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search fa-lg"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Prometheus和Thanos的前生今世
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2020-11-02T03:25:24+08:00" content="2020-11-02">
+              2020-11-02
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Prometheus/" itemprop="url" rel="index">
+                    <span itemprop="name">Prometheus</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv">热度
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p id="div-border-top-green">没有人会为你的贫穷负责，却有人为你的富有而喝彩！所以不要活在别人的嘴巴里，做好自己！有路，就大胆的去走；有梦，就大胆地飞翔；前行的路，不怕万人阻挡，只怕自己投降！<br></p>
+
+<p>总结thanos之前先来回顾一下prometheus</p>
+<h1 id="prometheus-回顾"><a href="#prometheus-回顾" class="headerlink" title="prometheus 回顾"></a>prometheus 回顾</h1><h2 id="云原生监控的事实标准Promethues"><a href="#云原生监控的事实标准Promethues" class="headerlink" title="云原生监控的事实标准Promethues"></a>云原生监控的事实标准Promethues</h2><p>监控系统的历史悠久，是一个颇为成熟的领域，而Prometheus作为新生代的开源监控系统，慢慢成为了云原生体系的监控事实标准，也证明了其设计得到业界认可。Prometheus启发于Google公司的borgmon监控系统，由google前员工在2012年作为社区开源项目创建和开发，并于2015年正式发布。2016年，Prometheus正式加入Cloud Native Computing Foundation，成为仅次于Kubernetes的第二把交椅的项目。</p>
+<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p><img src="/images/prometheus-thanos-1.png" alt="img"></p>
+<a id="more"></a>
+<h2 id="组件概述"><a href="#组件概述" class="headerlink" title="组件概述"></a>组件概述</h2><ul>
+<li><p>Prometheus server</p>
+<p>核心组件，负责从外部主动抓取指标到内存时序数据库，并定时将内存中的指标同步到磁盘。</p>
+</li>
+<li><p>Alertmanager</p>
+<p>转发来自Prometheus server发送的告警信息至外部的告警接收者。</p>
+</li>
+<li><p>Pushgateway</p>
+<p>被监控对象可主动推送指标至Pushgateway，Pushgateway的指标是被Prometheus server抓取。</p>
+</li>
+<li><p>Promethues web UI</p>
+<p>Prometheus server的界面，输入表达式可查询相关的指标数据。</p>
+</li>
+</ul>
+<h2 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h2><p>Prometheus的工作流程核心是，以主动拉取pull的方式搜集被监控对象的metrics数据（监控指标数据），并将这些metrics数据存储到一个内存TSDB（时间序列数据库）中，并定期将内存中的指标同步到本地硬盘。有了这个核心工作流程，其余组件只是为了配合这个工作流程。被监控对象也可向Pushgateway组件推送指标，Prometheus最终也会从Pushgateway组件拉取指标到TSDB。Altermanager组件像是一个路由器，将Prometheus的告警进行转发至外部的接收者。</p>
+<h2 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h2><p>Prometheus具有以下引人注意的优点：</p>
+<ul>
+<li>强大的多维度数据模型</li>
+<li>灵活而强大的查询语句（PromQL）：在同一个查询语句，可以对多个metrics进行乘法、加法、连接、取分数位等操作。</li>
+<li>易于管理：Prometheus server是一个单独的二进制文件，可直接在本地工作，不依赖于分布式存储。</li>
+<li>高效：平均每个采样点仅占3 bytes，且一个Prometheus server可以处理数百万的 metrics。</li>
+<li>使用pull模式采集时间序列数据，这样不仅有利于本机测试而且可以避免有问题的服务器推送坏的metrics。</li>
+<li>可以采用push gateway的方式把时间序列数据推送至Prometheus server端。</li>
+<li>可以通过服务发现或者静态配置去获取监控目标。</li>
+<li>有多种可视化图形界面。</li>
+<li>非常多的应用都实现了Prometheus的metrics接口以暴露自身各项数据指标让 Prometheus去采集，很多没有适配的应用也会有第三方 exporter 帮它去适配 Prometheus。</li>
+</ul>
+<h2 id="局限性"><a href="#局限性" class="headerlink" title="局限性"></a>局限性</h2><h3 id="无集群部署"><a href="#无集群部署" class="headerlink" title="无集群部署"></a>无集群部署</h3><p>Prometheus 本身只支持单机部署，没有自带支持集群部署，对于集群化和水平扩展，官方和社区都没有银弹，需要合理选择Federate、Cortex、Thanos等开源方案或自研方案。</p>
+<h3 id="存储容量"><a href="#存储容量" class="headerlink" title="存储容量"></a>存储容量</h3><p>它的存储空间也受限于单机磁盘容量，磁盘容量决定了单个Prometheus所能存储的数据量，数据量大小又取决于被采集服务的指标数量、服务数量、采集速率以及数据过期时间。在数据量大的情况下，我们可能就需要做很多取舍，比如丢弃不重要的指标、降低采集速率、设置较短的数据过期时间。</p>
+<h3 id="非精确监控系统"><a href="#非精确监控系统" class="headerlink" title="非精确监控系统"></a>非精确监控系统</h3><p>在设计上的权衡：放弃了一部分数据准确性，但放弃一点准确性得到的是更高的可靠性，监控系统一般情况下可用性大于一致性，容忍部分副本数据丢失，保证查询请求成功。Prometheus不一定保证数据准确，这里的非精确来自两个方面：<br>1）rate、histogram_quantile等数学函数。<br>2）来查询范围过长要做降采样，势必会造成数据精度丢失。</p>
+<h2 id="资源消耗"><a href="#资源消耗" class="headerlink" title="资源消耗"></a>资源消耗</h2><p>在一个节点数量为6的kuberntes集群（指标主要来自kubelet服务、node-exporter服务、kube-apiserver、kube-controller等核心服务），单个Prometheus实例消耗0.1-0.4个cpu，2.5G-3G内存。</p>
+<p><img src="/images/prometheus-thanos-2.png" alt="在这里插入图片描述"></p>
+<h1 id="Prometheus高可用方案"><a href="#Prometheus高可用方案" class="headerlink" title="Prometheus高可用方案"></a>Prometheus高可用方案</h1><h2 id="业界Prometheus高可用方案概述"><a href="#业界Prometheus高可用方案概述" class="headerlink" title="业界Prometheus高可用方案概述"></a>业界Prometheus高可用方案概述</h2><ul>
+<li>基本HA：即两套 Prometheus 采集完全一样的数据，外边挂负载均衡；</li>
+<li>HA + 远程存储：除了基础的多副本 Prometheus，还通过 Remote Write 写入到远程存储，解决存储持久化问题；</li>
+<li>联邦集群：即Federation，按照功能进行分区，不同的 Shard 采集不同的数据，由 Global 节点来统一存放，解决监控数据规模的问题。</li>
+</ul>
+<p>使用 Thanos或者Victoriametrics，来解决全局查询、多副本数据 Join 问题。</p>
+<p>就算使用官方建议的多副本+联邦，仍然会遇到一些问题，比如官方建议数据做Shard，然后通过Federation来实现高可用，但是边缘节点和Global节点依然是单点，需要自行决定是否每一层都要使用双节点重复采集进行保活。本质原因是，Prometheus的本地存储没有数据同步能力，要在保证可用性的前提下，再保持数据一致性是比较困难的，基础的HA Proxy满足不了以下要求，比如：集群的后端有A和B两个实例，A和B之间没有数据同步。A 宕机一段时间，丢失了一部分指标数据，如果负载均衡正常轮询，请求打到 A 上时，数据就会异常。</p>
+<h2 id="增强高可用的Prometheus数据一致性的思路"><a href="#增强高可用的Prometheus数据一致性的思路" class="headerlink" title="增强高可用的Prometheus数据一致性的思路"></a>增强高可用的Prometheus数据一致性的思路</h2><p>解决方案是可以从存储、查询两个角度上保证数据的一致。</p>
+<h3 id="存储角度"><a href="#存储角度" class="headerlink" title="存储角度"></a>存储角度</h3><p>如果使用 Remote Write 远程存储， A和B后面可以都加一个Adapter，Adapter做选主逻辑，只有一份数据能推送到 TSDB，这样可以保证一个异常，另一个也能推送成功，数据不丢，同时远程存储只有一份，是共享数据。</p>
+<h3 id="查询角度"><a href="#查询角度" class="headerlink" title="查询角度"></a>查询角度</h3><p>存储角度的解决方案实现很复杂且有一定风险，因此现在的大多数方案在查询层面做文章，比如Thanos或者Victoriametrics，仍然是两份数据，但是查询时做数据去重和Join。只是Thanos是通过Sidecar把数据放在对象存储，Victoriametrics是把数据Remote Write 到自己的Server实例，但查询层Thanos-Query和Victor的Promxy的逻辑基本一致。</p>
+<h1 id="扩展Prometheus的解决方案"><a href="#扩展Prometheus的解决方案" class="headerlink" title="扩展Prometheus的解决方案"></a>扩展Prometheus的解决方案</h1><h2 id="cortext"><a href="#cortext" class="headerlink" title="cortext"></a>cortext</h2><h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>Cortex（<a href="https://cortexmetrics.io）为Prometheus提供了水平可扩展，高可用性，多租户的长期存储。目前在cncf" target="_blank" rel="external">https://cortexmetrics.io）为Prometheus提供了水平可扩展，高可用性，多租户的长期存储。目前在cncf</a> 沙箱孵化。</p>
+<p>Cortex为Prometheus提供了水平可扩展，高可用性，多租户的长期存储。Cortex是一个CNCF沙箱项目，用于多个生产系统，包括Weave Cloud和Grafana Cloud。Corte主要用作Prometheus的远程写入的存储，它提供与Prometheus兼容的查询API。</p>
+<h3 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h3><ul>
+<li>水平可扩展：Cortex可以跨集群中的多台机器运行，超过了单台机器的吞吐量和存储量。这使您能够将指标从多个Prometheus服务器发送到单个Cortex群集，并在单个位置跨所有数据运行“全局聚合”查询；</li>
+<li>高度可用：在集群中运行时，Cortex可以在机器之间复制数据。这样，您就可以在机器故障中幸存下来，而不会在图表中留下空白。</li>
+<li>多租户：Cortex可以将数据和查询与单个群集中的多个不同独立Prometheus源隔离，从而使不受信任的各方共享同一群集；</li>
+<li>长期存储：Cortex支持Amazon DynamoDB，Google Bigtable，Cassandra，S3和GCS来长期存储度量标准数据。这样一来，您可以持久地存储数据，其时间长于任何一台计算机的生命周期，并将此数据用于长期容量规划。</li>
+</ul>
+<h2 id="VictoriaMetrics"><a href="#VictoriaMetrics" class="headerlink" title="VictoriaMetrics"></a>VictoriaMetrics</h2><h3 id="概述-1"><a href="#概述-1" class="headerlink" title="概述"></a>概述</h3><p>VictoriaMetrics是一种快速，经济高效且可扩展的时间序列数据库。</p>
+<p>它在二进制发行版，Docker映像和源代码中可用。</p>
+<p>VictoriaMetrics也提供付费企业支持。</p>
+<h2 id="Thanos"><a href="#Thanos" class="headerlink" title="Thanos"></a>Thanos</h2><h3 id="概述-2"><a href="#概述-2" class="headerlink" title="概述"></a>概述</h3><p>诞生于2018年9月，Thanos是一系列组件，基于Prometheus之上的可以组成具有无限存储容量的高可用性指标系统。Thanos是CNCF沙箱项目。Thanos利用Prometheus 2.0存储格式在任何对象存储中经济高效地存储历史指标数据，同时保留快速查询延迟。另外，它提供了所有Prometheus安装的全局查询视图，并且可以即时合并Prometheus HA对中的数据。</p>
+<h3 id="架构-1"><a href="#架构-1" class="headerlink" title="架构"></a>架构</h3><p><img src="/images/prometheus-thanos-3.png" alt="img"></p>
+<p><img src="/images/prometheus-thanos-4.jpeg" alt="img"></p>
+<h3 id="特点-1"><a href="#特点-1" class="headerlink" title="特点"></a>特点</h3><ul>
+<li>提供全局查询视图；</li>
+<li>支持主流对象存储，以提供可靠的历史数据存储；</li>
+<li>支持降准采样，以提供更大时间范围的指标。</li>
+</ul>
+<h4 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h4><p>面对大量的存储数据，Thanos有两种横向扩展方式，一种是基于时间的分区(TIME-BASED)，一种是基于标签的分区(LABEL-BASED)。</p>
+<h5 id="基于时间的分区-TIME-BASED"><a href="#基于时间的分区-TIME-BASED" class="headerlink" title="基于时间的分区(TIME-BASED)"></a>基于时间的分区(TIME-BASED)</h5><p>默认情况下，Thanos的存储网关(Store Gateway)查看对象存储(OSS)中的所有数据，并根据查询的时间范围返回这些数据。所有StoreAPI源都会公布可用的最短和最长时间。我们可以使用这些参数来缩小这个分区的范围，此参数可以是相对时间，也可以是具体日期。如</p>
+<ul>
+<li>A: <code>max-time=-6w</code></li>
+<li>B: <code>min-time=-8w</code> and <code>max-time=-2w</code></li>
+<li>C: <code>min-time=-3w</code></li>
+</ul>
+<h5 id="基于标签的分区-LABEL-BASED"><a href="#基于标签的分区-LABEL-BASED" class="headerlink" title="基于标签的分区(LABEL-BASED)"></a>基于标签的分区(LABEL-BASED)</h5><p>基于标签的分区类似于基于时间的分区，所有StoreAPI源都会公布可用的LABEL序列的相关标签，，这些标签来自Prometheus的external标签，并基于Thanos组件显式设置标签。</p>
+<h5 id="重复数据消除-DEDUPLICATION"><a href="#重复数据消除-DEDUPLICATION" class="headerlink" title="重复数据消除(DEDUPLICATION)"></a>重复数据消除(DEDUPLICATION)</h5><p>在Thanos架构中我们可以使用多个相同的Prometheus实例来实现高可用(HA)，以防止Prometheus单点故障。Thanos提供了查询结果的重复数据消除功能，从而可以实现Prometheus查询无缝对接。为了实现这一点，我们只需要在sidecar组件上设置一个或多个副本标签，其余的由query组件完成。如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Prometheus + sidecar “A”: cluster=1,env=2,replica=A</span><br><span class="line">Prometheus + sidecar “B”: cluster=1,env=2,replica=B</span><br><span class="line">Prometheus + sidecar “A” in different cluster: cluster=2,env=2,replica=A</span><br></pre></td></tr></table></figure>
+<p>查询示例: <code>up{job=&quot;prometheus&quot;,env=&quot;2&quot;}</code>. <strong>重复数据消除</strong>功能开户后:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">up&#123;job=&quot;prometheus&quot;,env=&quot;2&quot;,cluster=&quot;1&quot;&#125; 1</span><br><span class="line">up&#123;job=&quot;prometheus&quot;,env=&quot;2&quot;,cluster=&quot;2&quot;&#125; 1</span><br></pre></td></tr></table></figure>
+<p>没有开启重复数据消除功能:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">up&#123;job=&quot;prometheus&quot;,env=&quot;2&quot;,cluster=&quot;1&quot;,replica=&quot;A&quot;&#125; 1</span><br><span class="line">up&#123;job=&quot;prometheus&quot;,env=&quot;2&quot;,cluster=&quot;1&quot;,replica=&quot;B&quot;&#125; 1</span><br><span class="line">up&#123;job=&quot;prometheus&quot;,env=&quot;2&quot;,cluster=&quot;2&quot;,replica=&quot;A&quot;&#125; 1</span><br></pre></td></tr></table></figure>
+<h4 id="降采样"><a href="#降采样" class="headerlink" title="降采样"></a>降采样</h4><p>在Thanos中进行降采样(DOWNSAMPLING)的目的不是为了节省磁盘空间。它的主要好处是使长周期范围的数据查询（如数月或数年）变得更快。事实上降采样并不会节省任何空间，它为每个原始块添加多了两个新块，它们略小于或接近原始块的大小。这意味着，降采样稍微增加了存储空间使用量，但在查询长周期范围时，它提供了巨大的性能和带宽占用优势。</p>
+<p>三个粒度的块(chunks)：</p>
+<ul>
+<li>raw — Prometheus的原始metrics块；</li>
+<li>5m — 原始metrics块的5分钟压缩块</li>
+<li>1h —原始metrics块的1小时压缩块</li>
+</ul>
+<p><img src="/images/prometheus-thanos-5.png" alt="img"></p>
+<p>使用压缩块查询的优势对比：</p>
+<p><img src="/images/prometheus-thanos-6.png" alt="img"></p>
+<p>在没有降采样块的情况下查询长周期范围意味着必须下载和处理与范围长度成比例的数据量。在1y示例中，我们将看到，降采样后就不需要下载20亿个样本（2GB，Prometheus默认15秒一个采样数据），而只需要获取和处理800万个样本（9MB），就足以呈现一个年度图表，这将带来很大的性能改进，并减少了很多带宽使用。</p>
+<h3 id="核心组件"><a href="#核心组件" class="headerlink" title="核心组件"></a>核心组件</h3><h4 id="Thanos-sidecar"><a href="#Thanos-sidecar" class="headerlink" title="Thanos sidecar"></a>Thanos sidecar</h4><p>Sidecar作为一个单独的进程和已有的Prometheus实例运行在一个server上，互不影响。Sidecar可以视为一个Proxy组件，所有对Prometheus的访问都通过Sidecar来代理进行。通过Sidecar还可以将采集到的数据直接备份到云端对象存储服务器。</p>
+<p>同时可支持多种对象存储(OSS)，<a href="https://thanos.io/storage.md/#configuration" target="_blank" rel="external">如Aliyun、腾讯云、S3、Google云存储、Azure存储等</a>，可无缝集成在Prometheus operator中进行部署。</p>
+<h4 id="Thanos-store-gateway"><a href="#Thanos-store-gateway" class="headerlink" title="Thanos store gateway"></a>Thanos store gateway</h4><p>Store gateway实现了一套和Sidecar完全一致的API提供给Querier用于查询Sidecar备份到云端对象存储的数据。因为Sidecar在完成数据备份后，Prometheus会清理掉本地数据保证本地空间可用。所以当监控人员需要调取历史数据时只能去对象存储空间获取，而Store就提供了这样一个接口。Store Gateway内部还做了一些加速数据获取的优化逻辑，一是缓存了 TSDB 索引，二是优化了对象存储的远程调用请求 (用尽可能少的请求量拿到所有需要的数据)。</p>
+<ul>
+<li><p><strong>Store</strong></p>
+<ul>
+<li>从对象存储(OSS)中检索块(chunks)，以便查询长周期的监控指标</li>
+<li>支持基于时间(time-based)的分区查询</li>
+<li>支持基于标签(label-based)的分区查询</li>
+</ul>
+</li>
+<li><p><strong>Bucket</strong></p>
+<ul>
+<li>监视对象存储Bucket中存储的监控数据</li>
+</ul>
+</li>
+</ul>
+<h4 id="Thanos-query"><a href="#Thanos-query" class="headerlink" title="Thanos query"></a>Thanos query</h4><p><img src="/images/prometheus-thanos-7.png" alt="img"></p>
+<p>Querier从Sidecar和Store gateway获取指标数据，同时Querier实现了一套Prometheus官方的HTTP API从而保证对外提供与Prometheus一致的数据源接口，Grafana可以通过同一个查询接口请求不同集群的数据，Querier负责找到对应的集群并通过Sidecar获取数据，也能从Store gateway获取指标数据。Querier本身也是无状态的、可水平可扩展的，因而可以实现高可部署。Querier可以实现对高可部署的Prometheus的数据进行合并从而保证多次查询结果的一致性，从而解决全局视图和Prometheus高可用的问题。</p>
+<p><img src="/images/prometheus-thanos-8.png" alt="img"></p>
+<p>Thanos Query查询位于下游的Thanos Sidecar的指标数据，而Thanos Sidecar的指标数据来自与其绑定的Prometheus实例。</p>
+<h4 id="Thanos-ruler"><a href="#Thanos-ruler" class="headerlink" title="Thanos ruler"></a>Thanos ruler</h4><p>对监控数据进行评估和告警，还可以计算出新的监控数据，将这些新指标数据提供给 Thanos Query 查询，上传指标数据到对象存储，以供长期存储。</p>
+<h4 id="Thanos-compactor"><a href="#Thanos-compactor" class="headerlink" title="Thanos compactor"></a>Thanos compactor</h4><p>通常在查看较大时间范围的监控数据时，很多时候并不需要那么详细的数据，更多时候是为了得到数据趋势。compactor读取对象存储的数据，对其进行压缩以及降采样后再上传到对象存储，在查询大时间范围数据时就只读取压缩和降采样后的数据，极大地减少了查询的数据量，从而加速查询。</p>
+<p>注意：Compact 组件并不会减少对象存储的使用空间，而是会增加，因为增加更长采样间隔的指标数据。如此一来，当查询大时间范围的数据时，就自动拉取更长时间间隔采样的数据以减少查询数据的总量，从而加快查询速度（大时间范围的数据不需要很精细的指标，需要的是趋势），当放大往细节查看时 (选择其中一小段时间)，又自动选择拉取更短采样间隔的数据，从而也能显示出小时间范围的监控细节。</p>
+<h1 id="Thanos-部署"><a href="#Thanos-部署" class="headerlink" title="Thanos 部署"></a>Thanos 部署</h1><p>## </p>
+<p>thanos主要使用到sidecar和query，如果需要数据备份至云存储，store组件也得启动。</p>
+<h2 id="Thanos-Sidecar"><a href="#Thanos-Sidecar" class="headerlink" title="Thanos Sidecar"></a>Thanos Sidecar</h2><p>Thanos Sidecar以边车形式和Prometheus处于同一个Pod中，由于Prometheus散落在多个集群中，因此Thanos Sidecar位于多个集群中。prometheus和thanos sidecar是通过prometheus-operator来进行部署。thanos sidecar也通过nodePort方式的暴露（由于一个集群有2个thanos sidecar，因此分为设置nodePort为10901和10902）。thanos sidecar暴露的原因是作为位于其他集群的thanos query组件的后端存储。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">monitoring.coreos.com/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Prometheus</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    prometheus:</span> <span class="string">k8s</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">k8s</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">monitoring</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  alerting:</span></span><br><span class="line"><span class="attr">    alertmanagers:</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">alertmanager-main</span></span><br><span class="line"><span class="attr">      namespace:</span> <span class="string">monitoring</span></span><br><span class="line"><span class="attr">      port:</span> <span class="string">web</span></span><br><span class="line"><span class="attr">  image:</span> <span class="string">quay.mirrors.ustc.edu.cn/prometheus/prometheus:v2.15.2</span></span><br><span class="line"><span class="attr">  nodeSelector:</span></span><br><span class="line">    <span class="string">kubernetes.io/os:</span> <span class="string">linux</span></span><br><span class="line"><span class="attr">  podMonitorNamespaceSelector:</span> <span class="string">&#123;&#125;</span></span><br><span class="line"><span class="attr">  podMonitorSelector:</span> <span class="string">&#123;&#125;</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">2</span></span><br><span class="line"><span class="attr">  resources:</span></span><br><span class="line"><span class="attr">    requests:</span></span><br><span class="line"><span class="attr">      memory:</span> <span class="number">400</span><span class="string">Mi</span></span><br><span class="line"><span class="attr">  ruleSelector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      prometheus:</span> <span class="string">k8s</span></span><br><span class="line"><span class="attr">      role:</span> <span class="string">alert-rules</span></span><br><span class="line"><span class="attr">  securityContext:</span></span><br><span class="line"><span class="attr">    fsGroup:</span> <span class="number">2000</span></span><br><span class="line"><span class="attr">    runAsNonRoot:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">    runAsUser:</span> <span class="number">1000</span></span><br><span class="line"><span class="attr">  serviceAccountName:</span> <span class="string">prometheus-k8s</span></span><br><span class="line"><span class="attr">  serviceMonitorNamespaceSelector:</span> <span class="string">&#123;&#125;</span></span><br><span class="line"><span class="attr">  serviceMonitorSelector:</span> <span class="string">&#123;&#125;</span></span><br><span class="line"><span class="attr">  version:</span> <span class="string">v2.15.2</span></span><br><span class="line"><span class="attr">  tolerations:</span></span><br><span class="line"><span class="attr">  - effect:</span> <span class="string">NoSchedule</span></span><br><span class="line"><span class="attr">    key:</span> <span class="string">node-role.kubernetes.io/master</span></span><br><span class="line"><span class="attr">  thanos:</span></span><br><span class="line"><span class="attr">    baseImage:</span> <span class="string">quay.mirrors.ustc.edu.cn/thanos/thanos</span></span><br><span class="line"><span class="attr">    version:</span> <span class="string">v0.11.0</span></span><br><span class="line"><span class="attr">    objectStorageConfig:</span></span><br><span class="line"><span class="attr">      key:</span> <span class="string">objectstorage.yaml</span></span><br><span class="line"><span class="attr">     name:</span> <span class="string">thanos-objectstorage</span></span><br><span class="line"><span class="attr">  externalLabels:</span></span><br><span class="line"><span class="attr">    cluster:</span> <span class="string">test</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">thanos-sidecar</span></span><br><span class="line">    <span class="string">statefulset.kubernetes.io/pod-name:</span> <span class="string">prometheus-k8s-0</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">thanos-sidecar-0-external</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">monitoring</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  externalTrafficPolicy:</span> <span class="string">Cluster</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">grpc</span></span><br><span class="line"><span class="attr">    nodePort:</span> <span class="number">10901</span></span><br><span class="line"><span class="attr">    port:</span> <span class="number">10901</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="string">grpc</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    prometheus:</span> <span class="string">k8s</span></span><br><span class="line">    <span class="string">statefulset.kubernetes.io/pod-name:</span> <span class="string">prometheus-k8s-0</span></span><br><span class="line"><span class="attr">  sessionAffinity:</span> <span class="string">None</span></span><br><span class="line"><span class="attr">  type:</span> <span class="string">NodePort</span></span><br><span class="line"><span class="bullet">-</span><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">thanos-sidecar</span></span><br><span class="line">    <span class="string">statefulset.kubernetes.io/pod-name:</span> <span class="string">prometheus-k8s-1</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">thanos-sidecar-1-external</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">monitoring</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  externalTrafficPolicy:</span> <span class="string">Cluster</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">grpc</span></span><br><span class="line"><span class="attr">    nodePort:</span> <span class="number">10902</span></span><br><span class="line"><span class="attr">    port:</span> <span class="number">10901</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="string">grpc</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    prometheus:</span> <span class="string">k8s</span></span><br><span class="line">    <span class="string">statefulset.kubernetes.io/pod-name:</span> <span class="string">prometheus-k8s-1</span></span><br><span class="line"><span class="attr">  sessionAffinity:</span> <span class="string">None</span></span><br><span class="line"><span class="attr">  type:</span> <span class="string">NodePort</span></span><br></pre></td></tr></table></figure>
+<h2 id="Thanos-query-1"><a href="#Thanos-query-1" class="headerlink" title="Thanos query"></a>Thanos query</h2><p>Thanos Query是无状态服务，以Deployment形式、双副本部署在一个独立集群中。通过配置文件的方式指定位于其他集群中的thanos sidecar。</p>
+<p><img src="/images/prometheus-thanos-9.png" alt="在这里插入图片描述"></p>
+<p>说明：</p>
+<ul>
+<li>开启部分响应特性，此时在部分后端 Store API 返回错误或超时的情况下也能查询到正确的监控数据(如果后端 Store API 做了高可用，挂掉一个副本，Query访问挂掉的副本超时，但由于还存在其他可用的副本，于是客户端能获取正确的查询结果；如果挂掉的某个后端本身就不存在客户端需要的数据，挂掉也不影响查询结果的正确性)；</li>
+<li>开启查询时自动降采样的特性，以提供查询效率。</li>
+</ul>
+<h2 id="Thanos-store-gateway-1"><a href="#Thanos-store-gateway-1" class="headerlink" title="Thanos store gateway"></a>Thanos store gateway</h2><p>store gateway以StatefulSet形式、双副本部署在一个独立集群中。为它创建Kubernetes headless service，用于 Thanos Query组件对Store Gateway进行服务发现。</p>
+<h2 id="Thanos-ruler-1"><a href="#Thanos-ruler-1" class="headerlink" title="Thanos ruler"></a>Thanos ruler</h2><p>Thanos ruler以StatefulSet形式、双副本部署在一个独立集群（和thanos query同一个集群）中。为它创建Kubernetes headless service，用于 Thanos Query组件对Thanos Ruler进行集群内的服务发现。另外我制作了一个小镜像用于让ruler组件重载配置文件，在规则文件被修改的时候。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line">    <span class="string">app.kubernetes.io/name:</span> <span class="string">thanos-rule</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">thanos-rule</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">monitoring</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  clusterIP:</span> <span class="string">None</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">grpc</span></span><br><span class="line"><span class="attr">    port:</span> <span class="number">10901</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="string">grpc</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">http</span></span><br><span class="line"><span class="attr">    port:</span> <span class="number">10902</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="string">http</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line">    <span class="string">app.kubernetes.io/name:</span> <span class="string">thanos-rule</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">StatefulSet</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line">    <span class="string">app.kubernetes.io/name:</span> <span class="string">thanos-rule</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">thanos-rule</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">monitoring</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">2</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line">      <span class="string">app.kubernetes.io/name:</span> <span class="string">thanos-rule</span></span><br><span class="line"><span class="attr">  serviceName:</span> <span class="string">thanos-rules</span></span><br><span class="line"><span class="attr">  podManagementPolicy:</span> <span class="string">Parallel</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line">        <span class="string">app.kubernetes.io/name:</span> <span class="string">thanos-rule</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      serviceAccount:</span> <span class="string">thanos-rules</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">reloader</span></span><br><span class="line"><span class="attr">        image:</span> <span class="string">registry.cn-shenzhen.aliyuncs.com/gzlj/thanos-reloader:v0.1</span></span><br><span class="line"><span class="attr">        imagePullPolicy:</span> <span class="string">Always</span></span><br><span class="line"><span class="attr">        resources:</span></span><br><span class="line"><span class="attr">          limits:</span></span><br><span class="line"><span class="attr">            cpu:</span> <span class="number">100</span><span class="string">m</span></span><br><span class="line"><span class="attr">            memory:</span> <span class="number">100</span><span class="string">Mi</span></span><br><span class="line"><span class="attr">      - args:</span></span><br><span class="line"><span class="bullet">        -</span> <span class="string">rule</span></span><br><span class="line"><span class="bullet">        -</span> <span class="bullet">--grpc-address=0.0.0.0:10901</span></span><br><span class="line"><span class="bullet">        -</span> <span class="bullet">--http-address=0.0.0.0:10902</span></span><br><span class="line"><span class="bullet">        -</span> <span class="bullet">--rule-file=/etc/thanos/rules/*rules.yaml</span></span><br><span class="line"><span class="bullet">        -</span> <span class="bullet">--objstore.config-file=/etc/thanos/objectstorage.yaml</span></span><br><span class="line"><span class="bullet">        -</span> <span class="bullet">--data-dir=/var/thanos/rule</span></span><br><span class="line"><span class="bullet">        -</span> <span class="bullet">--label=rule_replica="$(NAME)"</span></span><br><span class="line"><span class="bullet">        -</span> <span class="bullet">--alert.label-drop="rule_replica"</span></span><br><span class="line"><span class="bullet">        -</span> <span class="bullet">--query=dnssrv+_http._tcp.thanos-query.monitoring.svc.cluster.local</span></span><br><span class="line"><span class="bullet">        -</span> <span class="bullet">--alertmanagers.url=http://alertmanager-main.monitoring.svc.cluster.local:9093</span></span><br><span class="line"><span class="attr">        env:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">NAME</span></span><br><span class="line"><span class="attr">          valueFrom:</span></span><br><span class="line"><span class="attr">            fieldRef:</span></span><br><span class="line"><span class="attr">              fieldPath:</span> <span class="string">metadata.name</span></span><br><span class="line"><span class="attr">        image:</span> <span class="string">quay.mirrors.ustc.edu.cn/thanos/thanos:v0.11.0</span></span><br><span class="line"><span class="attr">        livenessProbe:</span></span><br><span class="line"><span class="attr">          failureThreshold:</span> <span class="number">24</span></span><br><span class="line"><span class="attr">          httpGet:</span></span><br><span class="line"><span class="attr">            path:</span> <span class="string">/-/healthy</span></span><br><span class="line"><span class="attr">            port:</span> <span class="number">10902</span></span><br><span class="line"><span class="attr">            scheme:</span> <span class="string">HTTP</span></span><br><span class="line"><span class="attr">          periodSeconds:</span> <span class="number">5</span></span><br><span class="line"><span class="attr">        name:</span> <span class="string">thanos-rule</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">10901</span></span><br><span class="line"><span class="attr">          name:</span> <span class="string">grpc</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">10902</span></span><br><span class="line"><span class="attr">          name:</span> <span class="string">http</span></span><br><span class="line"><span class="attr">        readinessProbe:</span></span><br><span class="line"><span class="attr">          failureThreshold:</span> <span class="number">18</span></span><br><span class="line"><span class="attr">          httpGet:</span></span><br><span class="line"><span class="attr">            path:</span> <span class="string">/-/ready</span></span><br><span class="line"><span class="attr">            port:</span> <span class="number">10902</span></span><br><span class="line"><span class="attr">            scheme:</span> <span class="string">HTTP</span></span><br><span class="line"><span class="attr">          initialDelaySeconds:</span> <span class="number">10</span></span><br><span class="line"><span class="attr">          periodSeconds:</span> <span class="number">5</span></span><br><span class="line"><span class="attr">        terminationMessagePolicy:</span> <span class="string">FallbackToLogsOnError</span></span><br><span class="line"><span class="attr">        volumeMounts:</span></span><br><span class="line"><span class="attr">        - mountPath:</span> <span class="string">/var/thanos/rule</span></span><br><span class="line"><span class="attr">          name:</span> <span class="string">data</span></span><br><span class="line"><span class="attr">          readOnly:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">thanos-objectstorage</span></span><br><span class="line"><span class="attr">          subPath:</span> <span class="string">objectstorage.yaml</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">/etc/thanos/objectstorage.yaml</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">thanos-rules</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">/etc/thanos/rules</span></span><br><span class="line"><span class="attr">      volumes:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">thanos-objectstorage</span></span><br><span class="line"><span class="attr">        secret:</span></span><br><span class="line"><span class="attr">          secretName:</span> <span class="string">thanos-objectstorage</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">thanos-rules</span></span><br><span class="line"><span class="attr">        configMap:</span></span><br><span class="line"><span class="attr">          name:</span> <span class="string">thanos-rules</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">data</span></span><br><span class="line"><span class="attr">        emptyDir:</span> <span class="string">&#123;&#125;</span></span><br></pre></td></tr></table></figure>
+<h1 id="Thanos-Operator部署"><a href="#Thanos-Operator部署" class="headerlink" title="Thanos Operator部署"></a>Thanos Operator部署</h1><h2 id="Thanos-operator-CRDs"><a href="#Thanos-operator-CRDs" class="headerlink" title="Thanos operator CRDs"></a>Thanos operator CRDs</h2><p><img src="/images/prometheus-thanos-10.png" alt="image-20210905124307681"></p>
+<h3 id="ObjectStore"><a href="#ObjectStore" class="headerlink" title="ObjectStore"></a>ObjectStore</h3><p>该资源负责 bucket 管理。 Thanos 在 bucket 上压缩和采样，强烈建议您每个 bucket 只运行一个 compactor。</p>
+<blockquote>
+<p>一般来说，超过一个部署不是并发安全的，必须针对 bucket 作为单例部署。</p>
+</blockquote>
+<p>此外，还有一个很棒的 bucket 检查工具，称为<code>bucket</code>，它为存储在bucket中的块提供了一个简单的 Web 界面。</p>
+<h3 id="Thanos-amp-StoreEndpoint"><a href="#Thanos-amp-StoreEndpoint" class="headerlink" title="Thanos &amp; StoreEndpoint"></a>Thanos &amp; StoreEndpoint</h3><p>Thanos 是负责查询、存储和规则配置的主要自定义资源。它与代表不同 StoreAPI 端点的 StoreEndpoint 有特殊关系。这些可以是 Sidecar、Store、Rule 或任何其他 Store API 提供程序。 Thanos 资源按 StoreEndpoint 实例化。这意味着您可以为多个 Prometheus 实例或集群使用单个 Thanos 配置。</p>
+<p>现在让我们看一些部署示例，以帮助我们更好地理解 CRD。</p>
+<h2 id="单集群"><a href="#单集群" class="headerlink" title="单集群"></a>单集群</h2><p>在这种情况下，我们将使用 Thanos 的长期存储功能。这意味着我们将安装一个带有 Thanos sidecar 和完整 Thanos 堆栈的 Prometheus 算子。让我们看一个极简主义设置的例子。</p>
+<p><img src="/images/prometheus-thanos-11.png" alt="img"></p>
+<p>可以看到蓝色为无状态服务（stateless），橙色为有状态服务</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">//编辑prometheus-operator的value.ymal文件开启thanos sidecar（待补充）</span><br><span class="line"> </span><br><span class="line">//安装、删除prometheus-operator</span><br><span class="line">helm template ./charts/prometheus-operator --name tpo --namespace monitor | kubectl apply --validate=false -f -</span><br><span class="line">helm template ./charts/prometheus-operator --name tpo --namespace monitor | kubectl delete --ignore-not-found=true -f -</span><br><span class="line"> </span><br><span class="line">//下载Thanos Operator</span><br><span class="line">helm repo add banzaicloud-stable https://kubernetes-charts.banzaicloud.com</span><br><span class="line">helm fetch --untar --untardir ./charts banzaicloud-stable/thanos</span><br><span class="line"> </span><br><span class="line">//编辑value.ymal文件（待补充）</span><br><span class="line"> </span><br><span class="line">//手动安装Thanos</span><br><span class="line">helm template ./charts/thanos --name t-thanos --namespace monitor | kubectl -n monitor apply --validate=false -f -</span><br><span class="line">helm template ./charts/thanos --name t-thanos --namespace monitor | kubectl -n monitor delete --ignore-not-found=true -f -</span><br></pre></td></tr></table></figure>
+<h3 id="objectstore"><a href="#objectstore" class="headerlink" title="objectstore"></a><strong>objectstore</strong></h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">monitoring.banzaicloud.io/v1alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ObjectStore</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">objectstore-sample</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  config:</span></span><br><span class="line"><span class="attr">    mountFrom:</span></span><br><span class="line"><span class="attr">      secretKeyRef:</span></span><br><span class="line"><span class="attr">        name:</span> <span class="string">thanos</span></span><br><span class="line"><span class="attr">        key:</span> <span class="string">object-store.yaml</span></span><br><span class="line"><span class="attr">  bucketWeb:</span></span><br><span class="line"><span class="attr">    label:</span> <span class="string">cluster</span></span><br><span class="line"><span class="attr">  compactor:</span> <span class="string">&#123;&#125;</span></span><br></pre></td></tr></table></figure>
+<h3 id="storeendpoint"><a href="#storeendpoint" class="headerlink" title="storeendpoint"></a><strong>storeendpoint</strong></h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">monitoring.banzaicloud.io/v1alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">StoreEndpoint</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">storeendpoint-sample</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="comment"># Add fields here</span></span><br><span class="line"><span class="attr">  thanos:</span> <span class="string">thanos-sample</span></span><br><span class="line"><span class="attr">  config:</span></span><br><span class="line"><span class="attr">    mountFrom:</span></span><br><span class="line"><span class="attr">      secretKeyRef:</span></span><br><span class="line"><span class="attr">        name:</span> <span class="string">thanos</span></span><br><span class="line"><span class="attr">        key:</span> <span class="string">object-store.yaml</span></span><br><span class="line"><span class="attr">  selector:</span> <span class="string">&#123;&#125;</span></span><br></pre></td></tr></table></figure>
+<h3 id="thanos"><a href="#thanos" class="headerlink" title="thanos"></a><strong>thanos</strong></h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">monitoring.banzaicloud.io/v1alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Thanos</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">thanos-sample</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  query:</span> <span class="string">&#123;&#125;</span></span><br><span class="line"><span class="attr">  rule:</span> <span class="string">&#123;&#125;</span></span><br><span class="line"><span class="attr">  storeGateway:</span> <span class="string">&#123;&#125;</span></span><br></pre></td></tr></table></figure>
+<h2 id="多集群"><a href="#多集群" class="headerlink" title="多集群"></a>多集群</h2><p>根据上面的部署，我们只有一个集群部署，但是如果我们有多个集群并且需要一种查看它们的方法怎么办？我们可以采取几种不同的方法。现在，我们将探索最基本的。我们已经安装了多个安装了 Thanos 的集群。我们需要使用指向这些集群的端点配置 Thanos 自定义资源。</p>
+<p><img src="/images/prometheus-thanos-12.png" alt="img"></p>
+<h3 id="Thanos-1"><a href="#Thanos-1" class="headerlink" title="Thanos"></a><strong>Thanos</strong></h3><p>Thanos with only query definition</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">monitoring.banzaicloud.io/v1alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Thanos</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">thanos-multi</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  query:</span> <span class="string">&#123;&#125;</span></span><br></pre></td></tr></table></figure>
+<h3 id="StoreEndpoint"><a href="#StoreEndpoint" class="headerlink" title="StoreEndpoint"></a>StoreEndpoint</h3><p>store-endpoints per cluster</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">monitoring.banzaicloud.io/v1alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">StoreEndpoint</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">remote-cluster-n</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  thanos:</span> <span class="string">thanos-multi</span></span><br><span class="line"><span class="attr">  url:</span> <span class="attr">http://remote-cluster-n.com</span></span><br></pre></td></tr></table></figure>
+<h2 id="观察者集群部署"><a href="#观察者集群部署" class="headerlink" title="观察者集群部署"></a>观察者集群部署</h2><p>此部署模型从集群中减去额外的工作负载，并将 Thanos 组件移动到专用的观察者集群。</p>
+<p><img src="/images/prometheus-thanos-13.png" alt="Thanos Observer Cluster"></p>
+<h3 id="Thanos-2"><a href="#Thanos-2" class="headerlink" title="Thanos"></a><strong>Thanos</strong></h3><p>thanos with queryDiscovery definition</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">monitoring.banzaicloud.io/v1alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Thanos</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">query-master</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  query:</span> <span class="string">&#123;&#125;</span></span><br><span class="line"><span class="attr">  queryDiscovery:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+<p>thanos definition for the remote clusters</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">monitoring.banzaicloud.io/v1alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Thanos</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">thanos-generic-n</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  query:</span> <span class="string">&#123;&#125;</span></span><br><span class="line"><span class="attr">  rule:</span> <span class="string">&#123;&#125;</span></span><br><span class="line"><span class="attr">  storeGateway:</span> <span class="string">&#123;&#125;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">monitoring.banzaicloud.io/v1alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">StoreEndpoint</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">remote-cluster-n</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  thanos:</span> <span class="string">thanos-generic-n</span></span><br><span class="line"><span class="attr">  url:</span> <span class="attr">http://remote-cluster-n.com</span></span><br><span class="line"><span class="attr">  config:</span></span><br><span class="line"><span class="attr">    mountFrom:</span></span><br><span class="line"><span class="attr">      secretKeyRef:</span></span><br><span class="line"><span class="attr">        name:</span> <span class="string">thanos</span></span><br><span class="line"><span class="attr">        key:</span> <span class="string">object-store-n.yaml</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意：此部署模型也适用于单集群多命名空间部署</p>
+</blockquote>
+<p>参考：</p>
+<p><a href="https://blog.csdn.net/nangonghen/article/details/108597905?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.control&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.control" target="_blank" rel="external">扩展Prometheus的解决方案thanos</a></p>
+<p><a href="https://blog.csdn.net/weixin_45502294/article/details/114086025?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-15.control&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-15.control" target="_blank" rel="external">多集群监控组件Thanos</a></p>
+<p><a href="https://www.dazhuanlan.com/kicker114/topics/1679342" target="_blank" rel="external">Deploy Prometheus Operator With Thanos</a></p>
+<p><a href="https://banzaicloud.com/blog/thanos-operator/" target="_blank" rel="external">Introducing the Thanos Operator</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+<blockquote class="blockquote-center" style="color: #ccc;">
+    -------------本文结束 <i class="fa fa-apple"></i> 感谢您的阅读-------------
+</blockquote>
+
+  <span id="inline-green" style="border-radius:3px;">作者</span>：<a class="link-blue" href="https://github.com/magiceses" target="_blank">Magiceses</a><br/>有问题请 <a class="link-blue" href="https://magiceses.github.io/guestbook" target="_blank">留言</a> 或者私信我的 <a class="link-blue" href="https://weibo.com/u/3069595351" target="_blank">微博</a>。
+
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>满分是10分的话，这篇文章你给几分</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/reward/reward_wechat.png" alt="magiceses WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/reward/reward_alipay.png" alt="magiceses Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Prometheus/" rel="tag"><i class="fa fa-tag"></i> Prometheus</a>
+          
+            <a href="/tags/Thanos/" rel="tag"><i class="fa fa-tag"></i> Thanos</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/11/01/prometheus-thanos-源码分析/" rel="next" title="Thanos 源码分析">
+                <i class="fa fa-chevron-left"></i> Thanos 源码分析
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/12/14/prometheus-alertmanager-高可用总结-下/" rel="prev" title="Alertmanager 高可用总结-下">
+                Alertmanager 高可用总结-下 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar/avatar.png"
+               alt="magiceses" />
+          <p class="site-author-name" itemprop="name">magiceses</p>
+          <p class="site-description motion-element" itemprop="description">Stay Hungry,Stay Foolish</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">37</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/magiceses" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://blog.csdn.net/weixin_43700106" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-chrome"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/weblog" title="建站日志" target="_blank">建站日志</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/reward" title="打赏" target="_blank">打赏</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#prometheus-回顾"><span class="nav-number">1.</span> <span class="nav-text">prometheus 回顾</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#云原生监控的事实标准Promethues"><span class="nav-number">1.1.</span> <span class="nav-text">云原生监控的事实标准Promethues</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#架构"><span class="nav-number">1.2.</span> <span class="nav-text">架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#组件概述"><span class="nav-number">1.3.</span> <span class="nav-text">组件概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#工作流程"><span class="nav-number">1.4.</span> <span class="nav-text">工作流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#优点"><span class="nav-number">1.5.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#局限性"><span class="nav-number">1.6.</span> <span class="nav-text">局限性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#无集群部署"><span class="nav-number">1.6.1.</span> <span class="nav-text">无集群部署</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#存储容量"><span class="nav-number">1.6.2.</span> <span class="nav-text">存储容量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#非精确监控系统"><span class="nav-number">1.6.3.</span> <span class="nav-text">非精确监控系统</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#资源消耗"><span class="nav-number">1.7.</span> <span class="nav-text">资源消耗</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Prometheus高可用方案"><span class="nav-number">2.</span> <span class="nav-text">Prometheus高可用方案</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#业界Prometheus高可用方案概述"><span class="nav-number">2.1.</span> <span class="nav-text">业界Prometheus高可用方案概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#增强高可用的Prometheus数据一致性的思路"><span class="nav-number">2.2.</span> <span class="nav-text">增强高可用的Prometheus数据一致性的思路</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#存储角度"><span class="nav-number">2.2.1.</span> <span class="nav-text">存储角度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查询角度"><span class="nav-number">2.2.2.</span> <span class="nav-text">查询角度</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#扩展Prometheus的解决方案"><span class="nav-number">3.</span> <span class="nav-text">扩展Prometheus的解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#cortext"><span class="nav-number">3.1.</span> <span class="nav-text">cortext</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">3.1.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#特点"><span class="nav-number">3.1.2.</span> <span class="nav-text">特点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VictoriaMetrics"><span class="nav-number">3.2.</span> <span class="nav-text">VictoriaMetrics</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述-1"><span class="nav-number">3.2.1.</span> <span class="nav-text">概述</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Thanos"><span class="nav-number">3.3.</span> <span class="nav-text">Thanos</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述-2"><span class="nav-number">3.3.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#架构-1"><span class="nav-number">3.3.2.</span> <span class="nav-text">架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#特点-1"><span class="nav-number">3.3.3.</span> <span class="nav-text">特点</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#查询"><span class="nav-number">3.3.3.1.</span> <span class="nav-text">查询</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#基于时间的分区-TIME-BASED"><span class="nav-number">3.3.3.1.1.</span> <span class="nav-text">基于时间的分区(TIME-BASED)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#基于标签的分区-LABEL-BASED"><span class="nav-number">3.3.3.1.2.</span> <span class="nav-text">基于标签的分区(LABEL-BASED)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#重复数据消除-DEDUPLICATION"><span class="nav-number">3.3.3.1.3.</span> <span class="nav-text">重复数据消除(DEDUPLICATION)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#降采样"><span class="nav-number">3.3.3.2.</span> <span class="nav-text">降采样</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#核心组件"><span class="nav-number">3.3.4.</span> <span class="nav-text">核心组件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Thanos-sidecar"><span class="nav-number">3.3.4.1.</span> <span class="nav-text">Thanos sidecar</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Thanos-store-gateway"><span class="nav-number">3.3.4.2.</span> <span class="nav-text">Thanos store gateway</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Thanos-query"><span class="nav-number">3.3.4.3.</span> <span class="nav-text">Thanos query</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Thanos-ruler"><span class="nav-number">3.3.4.4.</span> <span class="nav-text">Thanos ruler</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Thanos-compactor"><span class="nav-number">3.3.4.5.</span> <span class="nav-text">Thanos compactor</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Thanos-部署"><span class="nav-number">4.</span> <span class="nav-text">Thanos 部署</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Thanos-Sidecar"><span class="nav-number">4.1.</span> <span class="nav-text">Thanos Sidecar</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Thanos-query-1"><span class="nav-number">4.2.</span> <span class="nav-text">Thanos query</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Thanos-store-gateway-1"><span class="nav-number">4.3.</span> <span class="nav-text">Thanos store gateway</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Thanos-ruler-1"><span class="nav-number">4.4.</span> <span class="nav-text">Thanos ruler</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Thanos-Operator部署"><span class="nav-number">5.</span> <span class="nav-text">Thanos Operator部署</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Thanos-operator-CRDs"><span class="nav-number">5.1.</span> <span class="nav-text">Thanos operator CRDs</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ObjectStore"><span class="nav-number">5.1.1.</span> <span class="nav-text">ObjectStore</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Thanos-amp-StoreEndpoint"><span class="nav-number">5.1.2.</span> <span class="nav-text">Thanos & StoreEndpoint</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#单集群"><span class="nav-number">5.2.</span> <span class="nav-text">单集群</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#objectstore"><span class="nav-number">5.2.1.</span> <span class="nav-text">objectstore</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#storeendpoint"><span class="nav-number">5.2.2.</span> <span class="nav-text">storeendpoint</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#thanos"><span class="nav-number">5.2.3.</span> <span class="nav-text">thanos</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多集群"><span class="nav-number">5.3.</span> <span class="nav-text">多集群</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Thanos-1"><span class="nav-number">5.3.1.</span> <span class="nav-text">Thanos</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#StoreEndpoint"><span class="nav-number">5.3.2.</span> <span class="nav-text">StoreEndpoint</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#观察者集群部署"><span class="nav-number">5.4.</span> <span class="nav-text">观察者集群部署</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Thanos-2"><span class="nav-number">5.4.1.</span> <span class="nav-text">Thanos</span></a></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+      
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="busuanzi-count">
+
+  <!-- <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script> -->
+  <!-- 上面这个是之前的，不知道为什么失效了，改成下面这个 -->
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">您是第<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>个小伙伴</span>
+  
+
+  
+    <span class="site-pv">本站总浏览<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">magiceses</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Pisces
+  </a>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count" style="color: #e90f92;">全站共 732k 字</span>
+</div>
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+  <!-- 按需加载背景 -->
+  <!-- 背景动画 -->
+<script type="text/javascript">
+  // 按需加载背景
+  // 如果是all，就直接加载了
+  if("pc" == "all") {
+    $.getScript("/js/src/particle.js?v=5.0.1");
+  }
+  // 识别手机或电脑的js开始
+  (function(){
+    var res = GetRequest();
+    var par = res['index'];
+    if(par!='gfan'){
+      var ua=navigator.userAgent.toLowerCase();
+      var contains=function (a, b){
+          if(a.indexOf(b)!=-1){return true;}
+      };
+      if((contains(ua,"android") && contains(ua,"mobile"))||(contains(ua,"android") && contains(ua,"mozilla"))||(contains(ua,"android") && contains(ua,"opera"))||contains(ua,"ucweb7")||contains(ua,"iphone")){
+        return false;
+      } else {
+        $.getScript("/js/src/particle.js?v=5.0.1");
+      }
+    }
+  })();
+  function GetRequest() {
+    var url = location.search;
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+      var str = url.substr(1);
+      strs = str.split("&");
+      for(var i = 0; i < strs.length; i ++) {
+        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+      }
+    }
+    return theRequest;
+  }
+</script>
+<!-- 识别手机或电脑的js结束 -->  
+
+  <!-- 页面点击小红心 -->
+  <!-- 页面点击小红心 -->
+
+  <script type="text/javascript" src="/js/src/love.js?v=5.0.1"></script>
+
+
+  <!-- 鼠标移动，效果 -->
+  <!-- 鼠标移动特效 -->
+
+  <script type="text/javascript" src="/js/src/jquery-stars.js?v=5.0.1"></script>
+  <script type="text/javascript">
+  jQuery('body').jstars({
+  	image_path: '/images',
+  	image: 'candy-cane-stars.png',
+  	style: 'white',
+  	width: 34,
+  	height: 34,
+  	delay: 700,
+  	frequency: 5
+  });
+  </script>
+
+
+  <!-- 页面 title 进入/离开 效果 -->
+
+  <script type="text/javascript">var OriginTitile=document.title,st;document.addEventListener("visibilitychange",function(){document.hidden?(document.title="Waiting for you back！",clearTimeout(st)):(document.title="Thanks for visit~ "+OriginTitile,st=setTimeout(function(){document.title=OriginTitile},4e3))})</script>
+
+
+</body>
+</html>

@@ -98,16 +98,16 @@
 
 上篇博文介绍了Python的multiprocessing模块创建进程Process 类,进程间通信,进程间的同步三个部分，下面接着介绍学习进程共享。
 内存共享在多进程情">
-<meta property="og:image" content="https://magiceses.github.io/Users/stark/Documents/mdPicture/image-20211001130628878.png">
-<meta property="og:image" content="https://magiceses.github.io/Users/stark/Documents/mdPicture/image-20211001130557103.png">
-<meta property="og:updated_time" content="2021-10-02T03:03:07.638Z">
+<meta property="og:image" content="https://magiceses.github.io/images/python-process-1.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-process-2.png">
+<meta property="og:updated_time" content="2021-10-11T07:17:25.631Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Python 进程线程协程(4)--multiprocessing模块(中)">
 <meta name="twitter:description" content="生活的精彩，不只是轰轰烈烈，有的人你看了一辈子却忽视了一辈子，有的人你只看了一眼却影响了你的一生，有的人热情的为你而快乐却被你冷落，有的人让你拥有短暂的快乐却得到你思绪的连锁，有的人一个无心的表情却成了永恒的思念，这就是人生。
 
 上篇博文介绍了Python的multiprocessing模块创建进程Process 类,进程间通信,进程间的同步三个部分，下面接着介绍学习进程共享。
 内存共享在多进程情">
-<meta name="twitter:image" content="https://magiceses.github.io/Users/stark/Documents/mdPicture/image-20211001130628878.png">
+<meta name="twitter:image" content="https://magiceses.github.io/images/python-process-1.png">
 
 
 
@@ -586,10 +586,10 @@ for (var L = 0; L < C.length; L++) {
 <p>ctypes是Python的一个外部函数库，它提供了和C语言兼任的数据类型，可以调用DLLs或者共享库的函数，能被用作在python中包裹这些库;</p>
 <p>*args是传递给ctypes的构造参数。</p>
 <p>对于共享<strong>整数</strong>或者<strong>单个字符</strong>，初始化比较简单，参照下图映射关系：</p>
-<p><img src="/Users/stark/Documents/mdPicture/image-20211001130628878.png" alt="image-20211001130628878"></p>
+<p><img src="/images/python-process-1.png" alt="image-20211001130628878"></p>
 <p>比如整数1，可用Value(‘h’,1)</p>
 <p>如果共享的是<strong>字符串</strong>，则在上表是找不到映射关系的，就是没有对应的Type code可用。所以我们需要使用原始的ctype类型，对应关系如下：</p>
-<p><img src="/Users/stark/Documents/mdPicture/image-20211001130557103.png" alt="image-20211001130557103"></p>
+<p><img src="/images/python-process-2.png" alt="image-20211001130557103"></p>
 <p>比如上面的Value(‘h’,1)也可以用Value(c_short,1)，字符串的话，可以用Value(c_char_p,”hello”)，很好理解的。</p>
 <p>它返回的是个对象，所以，它也有一些属性和方法，而返回的对象是基于<strong>SynchronizedBase</strong>类，该类的定义如下：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SynchronizedBase</span><span class="params">(object)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, obj, lock=None)</span>:</span></span><br><span class="line">        self._obj = obj</span><br><span class="line">        self._lock = lock <span class="keyword">or</span> RLock()</span><br><span class="line">        self.acquire = self._lock.acquire</span><br><span class="line">        self.release = self._lock.release</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__reduce__</span><span class="params">(self)</span>:</span></span><br><span class="line">        assert_spawning(self)</span><br><span class="line">        <span class="keyword">return</span> synchronized, (self._obj, self._lock)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get_obj</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self._obj</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get_lock</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self._lock</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__repr__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">'&lt;%s wrapper for %s&gt;'</span> % (type(self).__name__, self._obj)</span><br></pre></td></tr></table></figure>
@@ -800,7 +800,7 @@ for (var L = 0; L < C.length; L++) {
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">36</span>
+              <span class="site-state-item-count">37</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -808,7 +808,7 @@ for (var L = 0; L < C.length; L++) {
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-count">3</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -956,7 +956,7 @@ for (var L = 0; L < C.length; L++) {
 
 <div class="theme-info">
   <div class="powered-by"></div>
-  <span class="post-count" style="color: #e90f92;">全站共 685k 字</span>
+  <span class="post-count" style="color: #e90f92;">全站共 732k 字</span>
 </div>
         
       </div>
