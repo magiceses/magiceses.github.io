@@ -1,0 +1,1370 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Courier New:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Prometheus," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="天青色等烟雨" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="生活像一只蝴蝶，没有破茧的勇气，哪来飞舞的美丽。生活像一只蜜蜂，没有勤劳和努力，怎能尝到花粉的甜蜜，越努力越幸运！
+
+rules 配置和使用简介prometheus不仅可以提供数据采集功能，而且还可以做告警服务，通过匹配的性能参数，发出告警；然后把产生的警报发给Alertmanager进行处理。
+但是这需要在Prometheus使用的配置文件中添加关联Alertmanager的组件的对应配置信息">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Prometheus 告警规则生成和发送分析">
+<meta property="og:url" content="https://magiceses.github.io/2020/10/06/prometheus-prometheus-5-告警规则生成和发送分析/index.html">
+<meta property="og:site_name" content="天青色等烟雨">
+<meta property="og:description" content="生活像一只蝴蝶，没有破茧的勇气，哪来飞舞的美丽。生活像一只蜜蜂，没有勤劳和努力，怎能尝到花粉的甜蜜，越努力越幸运！
+
+rules 配置和使用简介prometheus不仅可以提供数据采集功能，而且还可以做告警服务，通过匹配的性能参数，发出告警；然后把产生的警报发给Alertmanager进行处理。
+但是这需要在Prometheus使用的配置文件中添加关联Alertmanager的组件的对应配置信息">
+<meta property="og:image" content="https://magiceses.github.io/images/prometheus-prometheus-16.png">
+<meta property="og:image" content="https://magiceses.github.io/images/prometheus-prometheus-17.png">
+<meta property="og:image" content="https://magiceses.github.io/images/prometheus-prometheus-18.png">
+<meta property="og:updated_time" content="2021-10-02T08:36:41.818Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Prometheus 告警规则生成和发送分析">
+<meta name="twitter:description" content="生活像一只蝴蝶，没有破茧的勇气，哪来飞舞的美丽。生活像一只蜜蜂，没有勤劳和努力，怎能尝到花粉的甜蜜，越努力越幸运！
+
+rules 配置和使用简介prometheus不仅可以提供数据采集功能，而且还可以做告警服务，通过匹配的性能参数，发出告警；然后把产生的警报发给Alertmanager进行处理。
+但是这需要在Prometheus使用的配置文件中添加关联Alertmanager的组件的对应配置信息">
+<meta name="twitter:image" content="https://magiceses.github.io/images/prometheus-prometheus-16.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://magiceses.github.io/2020/10/06/prometheus-prometheus-5-告警规则生成和发送分析/"/>
+
+
+<!-- 网页加载条 -->
+<script src="/js/src/pace.min.js"></script>
+  <title> Prometheus 告警规则生成和发送分析 | 天青色等烟雨 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">天青色等烟雨</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">而我在等你</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-guestbook">
+          <a href="/guestbook" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-commenting"></i> <br />
+            
+            留言
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+      
+      
+        <li class="menu-item"> <a title="把这个链接拖到你的工具栏中,任何网页都可以High" href='javascript:(
+/*
+ * Copyright (C) 2016 Never_yu (Neveryu.github.io) <React.dong.yu@gmail.com>
+ * Sina Weibo (http://weibo.com/Neveryu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function go() {
+
+var songs = [
+  "http://dl.stream.qqmusic.qq.com/C400001Qu4I30eVFYb.m4a?vkey=2127178E4405E7B8B268F20F05232485735CCF4FF8C1432F0360D2626D0B6C9564B5627C7AB481BBC685FEDB0946A50E97C66F0D1B008226&guid=7175649092&uin=0&fromtag=66",
+  "",
+  "",
+  ""
+];
+
+function c() {
+  var e = document.createElement("link");
+  e.setAttribute("type", "text/css");
+  e.setAttribute("rel", "stylesheet");
+  e.setAttribute("href", f);
+  e.setAttribute("class", l);
+  document.body.appendChild(e)
+}
+
+function h() {
+  var e = document.getElementsByClassName(l);
+  for (var t = 0; t < e.length; t++) {
+    document.body.removeChild(e[t])
+  }
+}
+
+function p() {
+  var e = document.createElement("div");
+  e.setAttribute("class", a);
+  document.body.appendChild(e);
+  setTimeout(function() {
+    document.body.removeChild(e)
+  }, 100)
+}
+
+function d(e) {
+  return {
+    height : e.offsetHeight,
+    width : e.offsetWidth
+  }
+}
+
+function v(i) {
+  var s = d(i);
+  return s.height > e && s.height < n && s.width > t && s.width < r
+}
+
+function m(e) {
+  var t = e;
+  var n = 0;
+  while (!!t) {
+    n += t.offsetTop;
+    t = t.offsetParent
+  }
+  return n
+}
+
+function g() {
+  var e = document.documentElement;
+  if (!!window.innerWidth) {
+    return window.innerHeight
+  } else if (e && !isNaN(e.clientHeight)) {
+    return e.clientHeight
+  }
+  return 0
+}
+
+function y() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  }
+  return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+}
+
+function E(e) {
+  var t = m(e);
+  return t >= w && t <= b + w
+}
+
+function S() {
+  var e = document.getElementById("audio_element_id");
+  if(e != null){
+    var index = parseInt(e.getAttribute("curSongIndex"));
+    if(index > songs.length - 2) {
+      index = 0;
+    } else {
+      index++;
+    }
+    e.setAttribute("curSongIndex", index);
+    N();
+  }
+
+  e.src = i;
+  e.play()
+}
+
+function x(e) {
+  e.className += " " + s + " " + o
+}
+
+function T(e) {
+  e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+}
+
+function N() {
+  var e = document.getElementsByClassName(s);
+  var t = new RegExp("\\b" + s + "\\b");
+  for (var n = 0; n < e.length; ) {
+    e[n].className = e[n].className.replace(t, "")
+  }
+}
+
+function initAudioEle() {
+  var e = document.getElementById("audio_element_id");
+  if(e === null){
+    e = document.createElement("audio");
+    e.setAttribute("class", l);
+    e.setAttribute("curSongIndex", 0);
+    e.id = "audio_element_id";
+    e.loop = false;
+    e.bgcolor = 0;
+    e.addEventListener("canplay", function() {
+      setTimeout(function() {
+        x(k)
+      }, 500);
+      setTimeout(function() {
+        N();
+        p();
+        for (var e = 0; e < O.length; e++) {
+          T(O[e])
+        }
+      }, 15500)
+    }, true);
+    e.addEventListener("ended", function() {
+      N();
+      h();
+      go();
+    }, true);
+    e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+    document.body.appendChild(e);
+  }
+}
+
+initAudioEle();
+var e = 30;
+var t = 30;
+var n = 350;
+var r = 350;
+
+var curSongIndex = parseInt(document.getElementById("audio_element_id").getAttribute("curSongIndex"));
+var i = songs[curSongIndex];
+
+var s = "mw-harlem_shake_me";
+var o = "im_first";
+var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+var a = "mw-strobe_light";
+
+/* harlem-shake-style.css，替换成你的位置，也可以直接使用：//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css */
+var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+
+var l = "mw_added_css";
+var b = g();
+var w = y();
+var C = document.getElementsByTagName("*");
+var k = null;
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    if (E(A)) {
+      k = A;
+      break
+    }
+  }
+}
+if (A === null) {
+  console.warn("Could not find a node of the right size. Please try a different page.");
+  return
+}
+c();
+S();
+var O = [];
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    O.push(A)
+  }
+}
+})()'><i class="menu-item-icon fa fa-music fa-fw"></i> High一下</a></li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search fa-lg"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Prometheus 告警规则生成和发送分析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2020-10-06T11:54:55+08:00" content="2020-10-06">
+              2020-10-06
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Prometheus/" itemprop="url" rel="index">
+                    <span itemprop="name">Prometheus</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv">热度
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p id="div-border-top-green">生活像一只蝴蝶，没有破茧的勇气，哪来飞舞的美丽。生活像一只蜜蜂，没有勤劳和努力，怎能尝到花粉的甜蜜，越努力越幸运！<br></p>
+
+<h1 id="rules-配置和使用"><a href="#rules-配置和使用" class="headerlink" title="rules 配置和使用"></a>rules 配置和使用</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>prometheus不仅可以提供数据采集功能，而且还可以做告警服务，通过匹配的性能参数，发出告警；然后把产生的警报发给Alertmanager进行处理。</p>
+<p>但是这需要在Prometheus使用的配置文件中添加关联Alertmanager的组件的对应配置信息</p>
+<a id="more"></a>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">alerting:</span></span><br><span class="line"><span class="attr">  alert_relabel_configs:</span></span><br><span class="line">    <span class="string">[</span> <span class="bullet">-</span> <span class="string">&lt;relabel_config&gt;</span> <span class="string">...</span> <span class="string">]</span></span><br><span class="line"><span class="attr">  alertmanagers:</span></span><br><span class="line">    <span class="string">[</span> <span class="bullet">-</span> <span class="string">&lt;alertmanager_config&gt;</span> <span class="string">...</span> <span class="string">]</span></span><br><span class="line"><span class="comment"># alertmanagers 为 alertmanager_config 数组，</span></span><br></pre></td></tr></table></figure>
+<p>配置范例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">alerting:</span></span><br><span class="line"><span class="attr">  alert_relabel_configs:</span> <span class="comment"># 动态修改 alert 属性的规则配置。</span></span><br><span class="line"><span class="attr">    - source_labels:</span> <span class="string">[dc]</span> </span><br><span class="line"><span class="attr">      regex:</span> <span class="string">(.+)\d+</span></span><br><span class="line"><span class="attr">      target_label:</span> <span class="string">dc1</span></span><br><span class="line"><span class="attr">  alertmanagers:</span></span><br><span class="line"><span class="attr">    - static_configs:</span></span><br><span class="line"><span class="attr">        - targets:</span> <span class="string">['127.0.0.1:9093']</span> <span class="comment"># 单实例配置</span></span><br><span class="line">        <span class="comment">#- targets: ['172.31.10.167:19093','172.31.10.167:29093','172.31.10.167:39093'] # 集群配置</span></span><br><span class="line"><span class="attr">  - job_name:</span> <span class="string">'Alertmanager'</span></span><br><span class="line">    <span class="comment"># metrics_path defaults to '/metrics'</span></span><br><span class="line">    <span class="comment"># scheme defaults to 'http'.</span></span><br><span class="line"><span class="attr">    static_configs:</span></span><br><span class="line"><span class="attr">    - targets:</span> <span class="string">['localhost:19093']</span></span><br></pre></td></tr></table></figure>
+<p>上面的配置中的 <code>alert_relabel_configs</code>是指警报重新标记在发送到Alertmanager之前应用于警报。 它具有与目标重新标记相同的配置格式和操作，外部标签标记后应用警报重新标记，主要是针对集群配置。</p>
+<p>这个设置的用途是确保具有不同外部label的HA对Prometheus服务端发送相同的警报信息。</p>
+<p>Alertmanager 可以通过 <code>static_configs</code> 参数静态配置，也可以使用其中一种支持的服务发现机制动态发现，我们上面的配置是静态的单实例，针对集群HA配置，后面会讲。</p>
+<p>此外，<code>relabel_configs</code> 允许从发现的实体中选择 Alertmanager，并对使用的API路径提供高级修改，该路径通过 <code>__alerts_path__</code> 标签公开。</p>
+<p>完成以上配置后，重启Prometheus服务，用以加载生效，也可以使用前文说过的热加载功能，使其配置生效。然后通过浏览器，访问 <a href="https://links.jianshu.com/go?to=http%3A%2F%2F192.168.1.220%3A19090%2Falerts" target="_blank" rel="external">http://192.168.1.220:19090/alerts</a> 就可以看 <code>inactive</code> <code>pending</code> <code>firing</code> 三个状态，没有警报信息是因为我们还没有配置警报规则 <code>rules</code>。</p>
+<h2 id="告警规则"><a href="#告警规则" class="headerlink" title="告警规则"></a>告警规则</h2><p>警报规则 <code>rules</code> 使用的是 yaml 格式进行定义，在Prometheus中通过我们前面讲过的 <code>PromQL</code> 配置实际警报触发条件，Prometheus 会根据设置的警告规则 <code>Ruels</code> 以及配置间隔时间进行周期性计算，当满足触发条件规则会发送警报通知。</p>
+<p>警报规则加载的是在 <code>prometheus.yml</code> 文件中进行配置，默认的警报规则进行周期运行计算的时间是1分钟，可以使用 <code>global</code> 中的 <code>evaluation_interval</code> 来决定时间间隔。</p>
+<p>样例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">global:</span></span><br><span class="line"><span class="attr">    evaluation_interval:</span> <span class="number">15</span><span class="string">s</span></span><br></pre></td></tr></table></figure>
+<p>警报规则可以指定多个文件，也可以自定到自定义的目录下面，为了管理更为便捷，方便阅读，可以把警报规则拆成多份，用以区分环境，系统，服务等，如：prod，test，dev 等等，并且支持以正则表达式定义。</p>
+<p>样例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">rule_files:</span></span><br><span class="line">    <span class="comment">#- "/data/prometheus/rules/*.yml" # 正则表达式，会加在此目录下所有警报规则配置文件</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">"/data/prometheus/rules/ops.yml"</span> <span class="comment"># 仅加载ops.yml警报规则文件</span></span><br><span class="line">    <span class="comment">#- "/data/prometheus/rules/prod-*.yml" </span></span><br><span class="line">    <span class="comment">#- "/data/prometheus/rules/test-*.yml"</span></span><br><span class="line">    <span class="comment">#- "/data/prometheus/rules/dev-*.yml"</span></span><br></pre></td></tr></table></figure>
+<p>现在开始讲警报规则 <code>Rules</code> 的定义，格式为YAML。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">groups:</span></span><br><span class="line"><span class="attr">- name:</span> <span class="string">&lt;string&gt;</span></span><br><span class="line"><span class="attr">  rules:</span></span><br><span class="line"><span class="attr">  - alert:</span> <span class="string">&lt;string&gt;</span></span><br><span class="line"><span class="attr">    expr:</span> <span class="string">&lt;string&gt;</span></span><br><span class="line"><span class="attr">    for:</span>  <span class="string">[</span> <span class="string">&lt;duration&gt;</span> <span class="string">| default 0 ]</span></span><br><span class="line"><span class="string"></span><span class="attr">    labels:</span></span><br><span class="line">      <span class="string">[</span> <span class="string">&lt;lable_name&gt;:</span> <span class="string">&lt;label_value&gt;</span> <span class="string">]</span></span><br><span class="line"><span class="attr">    annotations:</span></span><br><span class="line">      <span class="string">[</span> <span class="string">&lt;lable_name&gt;:</span> <span class="string">&lt;tmpl_string&gt;</span> <span class="string">]</span></span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">参数</th>
+<th style="text-align:center">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>- name: &lt;string&gt;</code></td>
+<td style="text-align:center">警报规则组的名称</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>- alert: &lt;string&gt;</code></td>
+<td style="text-align:center">警报规则的名称</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>expr: &lt;string</code></td>
+<td style="text-align:center">使用PromQL表达式完成的警报触发条件，用于计算是否有满足触发条件</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>&lt;lable_name&gt;: &lt;label_value&gt;</code></td>
+<td style="text-align:center">自定义标签，允许自行定义标签附加在警报上，比如<code>high</code> <code>warning</code></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>annotations: &lt;lable_name&gt;: &lt;tmpl_string&gt;</code></td>
+<td style="text-align:center">用来设置有关警报的一组描述信息，其中包括自定义的标签，以及expr计算后的值。</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">groups:</span></span><br><span class="line"><span class="attr">- name:</span> <span class="string">operations</span></span><br><span class="line"><span class="attr">  rules:</span></span><br><span class="line"><span class="attr">  - alert:</span> <span class="string">node-down</span></span><br><span class="line"><span class="attr">    expr:</span> <span class="string">up&#123;env="operations"&#125;</span> <span class="string">!=</span> <span class="number">1</span></span><br><span class="line"><span class="attr">    for:</span> <span class="number">5</span><span class="string">m</span></span><br><span class="line"><span class="attr">    labels:</span></span><br><span class="line"><span class="attr">      status:</span> <span class="string">High</span></span><br><span class="line"><span class="attr">      team:</span> <span class="string">operations</span></span><br><span class="line"><span class="attr">    annotations:</span></span><br><span class="line"><span class="attr">      description:</span> <span class="string">"Environment: <span class="template-variable">&#123;&#123; $labels.env &#125;&#125;</span> Instance: <span class="template-variable">&#123;&#123; $labels.instance &#125;&#125;</span> is Down ! ! !"</span></span><br><span class="line"><span class="attr">      value:</span> <span class="string">'<span class="template-variable">&#123;&#123; $value &#125;&#125;</span>'</span></span><br><span class="line"><span class="attr">      summary:</span>  <span class="string">"The host node was down 20 minutes ago"</span></span><br></pre></td></tr></table></figure>
+<p>以上就是一个完整 <code>Rules</code> 的配置，如果Prometheus 在周期检测中使用PromQ以<code>env=operations</code>为维度查询，如果当前查询结果中具有标签<code>operations</code>，且返回值都不等于1的时候，发送警报。<br>对于写好的 <code>Rules</code> 可以是常用 <code>promtool</code> 来<code>check ruls.yml</code>的书写格式是否正确。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">/usr/<span class="built_in">local</span>/bin/promtool check rules /data/prometheus/rules/ops.yml</span><br><span class="line">Checking /data/prometheus/rules/ops.yml</span><br><span class="line">  SUCCESS: 7 rules found</span><br></pre></td></tr></table></figure>
+<p>对于修改好的rules文件，保存以后，经过检测没有问题，直接重新热加载 Prometheus就可以在页面看到了。对于触发警报规则，比较简单了，直接修改运算值或者去停掉 node-exporter 服务，便可在界面看到警报信息。一个警报在生命周期会有三种状态</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">状态</th>
+<th style="text-align:center">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>Inactive</code></td>
+<td style="text-align:center">正常状态，未激活警报</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>Pending</code></td>
+<td style="text-align:center">已满足触发条件，但没有满足发送时间条件，此条件就是上面rules范例中的 <code>for 5m</code> 子句中定义的持续时间</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>Firing</code></td>
+<td style="text-align:center">满足条件，且超过了 for 子句中的的指定持续时间5m</td>
+</tr>
+</tbody>
+</table>
+<p>带有for子句的警报触发以后首先会先转换成 <code>Pending</code> 状态，然后在转换为 <code>Firing</code> 状态。这里需要俩个周期才能触发警报条件，如果没有设置 <code>for</code> 子句，会直接 <code>Inactive</code> 状态转换成 <code>Firing状态</code>，然后触发警报，发送给 <code>Receiver</code> 设置的通知人。</p>
+<p>在运行过程中，Prometheus会把Pending或Firing状态的每一个警报创建一个 <code>Alerts</code>指标名称，这个可以通过Rules来触发警报测试，直接在UI中Graph查看指标 <code>ALERTS</code>，格式如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALERTS&#123;alertname=&quot;alert name&quot;,alertstate=&quot;pending|firing&quot;,&lt;additional alert label&gt;&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="/images/prometheus-prometheus-16.png" alt="img"></p>
+<p>当警报处于激活状态 <code>Pending</code> 或者 <code>Firing</code>时候，如上图所示，样本值为1。其他状态为0。则不显示。上图已经触发警报，其警报已经被转发给Alertmanager组件，此时可以在浏览器上通过可以用过9093端口访问，查看警报状态。</p>
+<p><img src="/images/prometheus-prometheus-17.png" alt="img"></p>
+<p>现在我们来说一下整理下Prometheus从收集监控指标信息到触发警报的过程：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">状态</th>
+<th style="text-align:center">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>1.定义规则</code></td>
+<td style="text-align:center">在Prometheus配置中，scrape_interval: 15s，默认是1分钟，这个定义是收集监控指标信息的采集周期，同时配置对应的警报规则，可以是全局，也可以单独为某一个metrics定义</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>2.周期计算</code></td>
+<td style="text-align:center">对于表达式进行计算时，Prometheus中的配置中配置了 evaluation_interval: 15s，默认也是一分钟，为警报规则的计算周期，<code>evaluation_interval</code> 只是全局计算周期值。</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>3.1警报状态转换(pending)</code></td>
+<td style="text-align:center">当首次触发警报规则条件成立，表达式为 <code>true</code>，并且没有满足警报规则中的for子句中的持续时间时，警报状态切换为 <code>Pending</code></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>3.2警报状态转换(firing)</code></td>
+<td style="text-align:center">若下一个计算周期中，表达式仍为 <code>true</code>，并且满足警报规则中的for子句的持续时间时，警报状态转换为 <code>Firing</code>，即为 <code>active</code>，警报会被Prometheus推送到ALertmanager组件</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>3.3警报状态转换(period)</code></td>
+<td style="text-align:center">如果在 <code>evaluation_interval</code> 的计算周期内，表达式还是为 <code>true</code>，同时满足 for子句的持续时间，持续转发到Alertmanager，这里只是转发状态到Alertmanager，并不是直接发送通知到指定通知源</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>3.4警报状态转换(resolve)</code></td>
+<td style="text-align:center">只到某个周期，表达式 为 <code>false</code>，警报状态会变成 <code>inactive</code> ，并且会有一个 <code>resolve</code> 被发送到Alertmanager，用于说明警报故障依解决，发送resolve信息需要自己单独在Alertmanager中定义</td>
+</tr>
+</tbody>
+</table>
+<h2 id="Rules-类型"><a href="#Rules-类型" class="headerlink" title="Rules 类型"></a>Rules 类型</h2><p>Prometheus 支持两种类型的 <code>Rules</code> ，可以对其进行配置，然后定期进行运算：<code>recording rules</code> 记录规则 与 <code>alerting rules</code> 警报规则，规则文件的计算频率与警报规则计算频率一致，都是通过全局配置中的 <code>evaluation_interval</code> 定义。</p>
+<h3 id="alerting-rules"><a href="#alerting-rules" class="headerlink" title="alerting rules"></a>alerting rules</h3><p>要在Prometheus中使用Rules规则，就必须创建一个包含必要规则语句的文件，并让Prometheus通过Prometheus配置中的rule_files字段加载该文件，前面我们已经讲过了。</p>
+<p>其实语法都一样，除了 <code>recording rules</code> 中的收集的指标名称 <code>record: &lt;string&gt;</code> 字段配置方式略有不同，其他都是一样的。</p>
+<p>样例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">- alert:</span> <span class="string">ServiceDown</span></span><br><span class="line"><span class="attr">    expr:</span> <span class="string">avg_over_time(up[5m])</span> <span class="string">*</span> <span class="number">100</span> <span class="string">&lt;</span> <span class="number">50</span></span><br><span class="line"><span class="attr">    annotations:</span></span><br><span class="line"><span class="attr">      description:</span> <span class="string">The</span> <span class="string">service</span> <span class="string">&#123;&#123;</span> <span class="string">$labels.job</span> <span class="string">&#125;&#125;</span> <span class="string">instance</span> <span class="string">&#123;&#123;</span> <span class="string">$labels.instance</span> <span class="string">&#125;&#125;</span> <span class="string">is</span></span><br><span class="line">        <span class="string">not</span> <span class="string">responding</span> <span class="string">for</span> <span class="string">more</span> <span class="string">than</span> <span class="number">50</span><span class="string">%</span> <span class="string">of</span> <span class="string">the</span> <span class="string">time</span> <span class="string">for</span> <span class="number">5</span> <span class="string">minutes.</span></span><br><span class="line"><span class="attr">      summary:</span> <span class="string">The</span> <span class="string">service</span> <span class="string">&#123;&#123;</span> <span class="string">$labels.job</span> <span class="string">&#125;&#125;</span> <span class="string">is</span> <span class="string">not</span> <span class="string">responding</span></span><br><span class="line"><span class="attr">  - alert:</span> <span class="string">RedisDown</span></span><br><span class="line"><span class="attr">    expr:</span> <span class="string">avg_over_time(redis_up[5m])</span> <span class="string">*</span> <span class="number">100</span> <span class="string">&lt;</span> <span class="number">50</span></span><br><span class="line"><span class="attr">    annotations:</span></span><br><span class="line"><span class="attr">      description:</span> <span class="string">The</span> <span class="string">Redis</span> <span class="string">service</span> <span class="string">&#123;&#123;</span> <span class="string">$labels.job</span> <span class="string">&#125;&#125;</span> <span class="string">instance</span> <span class="string">&#123;&#123;</span> <span class="string">$labels.instance</span></span><br><span class="line">        <span class="string">&#125;&#125;</span> <span class="string">is</span> <span class="string">not</span> <span class="string">responding</span> <span class="string">for</span> <span class="string">more</span> <span class="string">than</span> <span class="number">50</span><span class="string">%</span> <span class="string">of</span> <span class="string">the</span> <span class="string">time</span> <span class="string">for</span> <span class="number">5</span> <span class="string">minutes.</span></span><br><span class="line"><span class="attr">      summary:</span> <span class="string">The</span> <span class="string">Redis</span> <span class="string">service</span> <span class="string">&#123;&#123;</span> <span class="string">$labels.job</span> <span class="string">&#125;&#125;</span> <span class="string">is</span> <span class="string">not</span> <span class="string">responding</span></span><br><span class="line"><span class="attr">  - alert:</span> <span class="string">PostgresDown</span></span><br><span class="line"><span class="attr">    expr:</span> <span class="string">avg_over_time(pg_up[5m])</span> <span class="string">*</span> <span class="number">100</span> <span class="string">&lt;</span> <span class="number">50</span></span><br><span class="line"><span class="attr">    annotations:</span></span><br><span class="line"><span class="attr">      description:</span> <span class="string">The</span> <span class="string">Postgres</span> <span class="string">service</span> <span class="string">&#123;&#123;</span> <span class="string">$labels.job</span> <span class="string">&#125;&#125;</span> <span class="string">instance</span> <span class="string">&#123;&#123;</span> <span class="string">$labels.instance</span></span><br><span class="line">        <span class="string">&#125;&#125;</span> <span class="string">is</span> <span class="string">not</span> <span class="string">responding</span> <span class="string">for</span> <span class="string">more</span> <span class="string">than</span> <span class="number">50</span><span class="string">%</span> <span class="string">of</span> <span class="string">the</span> <span class="string">time</span> <span class="string">for</span> <span class="number">5</span> <span class="string">minutes.</span></span><br><span class="line"><span class="attr">      summary:</span> <span class="string">The</span> <span class="string">Postgres</span> <span class="string">service</span> <span class="string">&#123;&#123;</span> <span class="string">$labels.job</span> <span class="string">&#125;&#125;</span> <span class="string">is</span> <span class="string">not</span> <span class="string">responding</span></span><br></pre></td></tr></table></figure>
+<h3 id="recording-rules"><a href="#recording-rules" class="headerlink" title="recording rules"></a>recording rules</h3><p><code>recording rules</code> 是提前设置好一个比较花费大量时间运算或经常运算的表达式，其结果保存成一组新的时间序列数据。当需要查询的时候直接会返回已经计算好的结果，这样会比直接查询快，同时也减轻了PromQl的计算压力，同时对可视化查询的时候也很有用，可视化展示每次只需要刷新重复查询相同的表达式即可。</p>
+<p>在配置的时候，除却 <code>record: &lt;string&gt;</code> 需要注意，其他的基本上是一样的，一个 <code>groups</code> 下可以包含多条规则 <code>rules</code> ，<code>Recording</code> 和 <code>Rules</code> 保存在 <code>group</code> 内，<code>Group</code> 中的规则以规则的配置时间间隔顺序运算，也就是全局中的 <code>evaluation_interval</code> 设置。</p>
+<p>样例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">groups:</span></span><br><span class="line"><span class="attr">- name:</span> <span class="string">http_requests_total</span></span><br><span class="line"><span class="attr">  rules:</span></span><br><span class="line"><span class="attr">  - record:</span> <span class="attr">job:http_requests_total:rate10m</span></span><br><span class="line"><span class="attr">    expr:</span> <span class="string">sum</span> <span class="string">by</span> <span class="string">(job)(rate(http_requests_total[10m]))</span></span><br><span class="line"><span class="attr">    lables:</span></span><br><span class="line"><span class="attr">      team:</span> <span class="string">operations</span></span><br><span class="line"><span class="attr">  - record:</span> <span class="attr">job:http_requests_total:rate30m</span></span><br><span class="line"><span class="attr">    expr:</span> <span class="string">sum</span> <span class="string">by</span> <span class="string">(job)(rate(http_requests_total[30m]))</span></span><br><span class="line"><span class="attr">    lables:</span></span><br><span class="line"><span class="attr">      team:</span> <span class="string">operations</span></span><br></pre></td></tr></table></figure>
+<p>上面的规则其实就是根据 <code>record</code> 规则中的定义，Prometheus 会在后台完成 <code>expr</code> 中定义的 PromQL 表达式周期性运算，以 <code>job</code> 为维度使用 <code>sum</code> 聚合运算符 计算 函数<code>rate</code> 对<code>http_requests_total</code> 指标区间 <code>10m</code> 内的增长率，并且将计算结果保存到新的时间序列 <code>job:http_requests_total:rate10m</code> 中，</p>
+<p>同时还可以通过 <code>labels</code> 为样本数据添加额外的自定义标签，但是要注意的是这个 <code>Lables</code> 一定存在当前表达式 <code>Metrics</code> 中。</p>
+<h2 id="使用模板"><a href="#使用模板" class="headerlink" title="使用模板"></a>使用模板</h2><p>模板是在警报中使用时间序列标签和值展示的一种方法，可以用于警报规则中的注释（annotation）与标签（lable）。模板其实使用的go语言的标准模板语法，并公开一些包含时间序列标签和值的变量。这样查询的时候，更具有可读性，也可以执行其他PromQL查询来向警报添加额外内容，ALertmanager Web UI中会根据标签值显示器警报信息。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&#123;&#123;</span> <span class="string">$lable.&lt;lablename&gt;&#125;&#125;</span> <span class="string">可以获取当前警报实例中的指定标签值</span></span><br><span class="line"></span><br><span class="line"><span class="string">&#123;&#123;</span> <span class="string">$value</span> <span class="string">&#125;&#125;</span> <span class="string">变量可以获取当前PromQL表达式的计算样本值。</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">groups:</span></span><br><span class="line"><span class="attr">- name:</span> <span class="string">operations</span></span><br><span class="line"><span class="attr">  rules:</span></span><br><span class="line"><span class="comment"># monitor node memory usage</span></span><br><span class="line"><span class="attr">  - alert:</span> <span class="string">node-memory-usage</span></span><br><span class="line"><span class="attr">    expr:</span> <span class="string">(1</span> <span class="bullet">-</span> <span class="string">(node_memory_MemAvailable_bytes&#123;env="operations",job!='atlassian'&#125;</span> <span class="string">/</span> <span class="string">(node_memory_MemTotal_bytes&#123;env="operations"&#125;)))*</span> <span class="number">100</span> <span class="string">&gt; 90</span></span><br><span class="line"><span class="string"></span><span class="attr">    for:</span> <span class="number">1</span><span class="string">m</span></span><br><span class="line"><span class="attr">    labels:</span></span><br><span class="line"><span class="attr">      status:</span> <span class="string">Warning</span></span><br><span class="line"><span class="attr">      team:</span> <span class="string">operations</span></span><br><span class="line"><span class="attr">    annotations:</span></span><br><span class="line"><span class="attr">      description:</span> <span class="string">"Environment: <span class="template-variable">&#123;&#123; $labels.env &#125;&#125;</span> Instance: <span class="template-variable">&#123;&#123; $labels.instance &#125;&#125;</span> memory usage above <span class="template-variable">&#123;&#123; $value &#125;&#125;</span> ! ! !"</span></span><br><span class="line"><span class="attr">      summary:</span>  <span class="string">"node os memory usage status"</span></span><br></pre></td></tr></table></figure>
+<p>调整好rules以后，我们可以使用 <code>curl -XPOST http://localhost:9090/-/reload</code> 或者 对Prometheus服务重启，让警报规则生效。</p>
+<p>这个时候，我们可以把阈值调整为 <code>50</code> 来进行故障模拟操作，这时在去访问UI的时候，当持续1分钟满足警报条件，实际警报状态已转换为 <code>Firing</code>，可以在 Annotations中看到模板信息 <code>summary</code> 与 <code>description</code> 已经成功显示。</p>
+<p><img src="/images/prometheus-prometheus-18.png" alt="img"></p>
+<p>需要注意的是，一个稳定健壮的Prometheus监控系统中，要尽量使用模板化，这样会降低性能开销（Debug调试信息等），同时也易于维护。</p>
+<p><strong>下面网站收录了当前大部分的rules规则，大家可以对应自己的环境，配置相关服务的Rules。</strong></p>
+<p>Prometheus警报规则收集(<a href="https://links.jianshu.com/go?to=https%3A%2F%2Fawesome-prometheus-alerts.grep.to%2F" target="_blank" rel="external">https://awesome-prometheus-alerts.grep.to/</a>)</p>
+<h1 id="rules-源码分析"><a href="#rules-源码分析" class="headerlink" title="rules 源码分析"></a>rules 源码分析</h1><p>入口还是在 prometheus 的 <code>main.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// notifier 是用于向 alertmanager 发送告警的</span></span><br><span class="line">notifierManager = notifier.NewManager(&amp;cfg.notifier, log.With(logger, <span class="string">"component"</span>, <span class="string">"notifier"</span>))</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 声明 ruleManager</span></span><br><span class="line">ruleManager = rules.NewManager(&amp;rules.ManagerOptions&#123;</span><br><span class="line">	Appendable:      fanoutStorage,</span><br><span class="line">	Queryable:       localStorage,</span><br><span class="line">	QueryFunc:       rules.EngineQueryFunc(queryEngine, fanoutStorage),</span><br><span class="line">	<span class="comment">// 若触发告警规则,则通过sendAlerts发送告警信息</span></span><br><span class="line">	NotifyFunc:      sendAlerts(notifierManager, cfg.web.ExternalURL.String()),</span><br><span class="line">	Context:         ctxRule,</span><br><span class="line">	ExternalURL:     cfg.web.ExternalURL,</span><br><span class="line">	Registerer:      prometheus.DefaultRegisterer,</span><br><span class="line">	Logger:          log.With(logger, <span class="string">"component"</span>, <span class="string">"rule manager"</span>),</span><br><span class="line">	OutageTolerance: time.Duration(cfg.outageTolerance),</span><br><span class="line">	ForGracePeriod:  time.Duration(cfg.forGracePeriod),</span><br><span class="line">	ResendDelay:     time.Duration(cfg.resendDelay),</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>主要看下这里两个 <code>manager</code> 的初始化，<code>ruleManager</code> 主要是根据定义的告警规则进行定时的计算，<code>notifierManager</code> 主要是在生成告警之后会告警的内容进行发送，与 <code>alertmanager</code> 进行交互，将告警信息交给 <code>alertmanager</code> 进行处理之后再根据配置的发送方式，将内容发送给 <code>receivers</code>。下面分别看下：</p>
+<h2 id="ruleManager"><a href="#ruleManager" class="headerlink" title="ruleManager"></a>ruleManager</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	name: <span class="string">"rules"</span>,</span><br><span class="line">	reloader: <span class="function"><span class="keyword">func</span><span class="params">(cfg *config.Config)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		<span class="comment">// Get all rule files matching the configuration paths.</span></span><br><span class="line">		<span class="keyword">var</span> files []<span class="keyword">string</span></span><br><span class="line">		<span class="comment">// 列出配置的所有rules文件,比如 /tmp/*.rules</span></span><br><span class="line">		<span class="keyword">for</span> _, pat := <span class="keyword">range</span> cfg.RuleFiles &#123;</span><br><span class="line">			fs, err := filepath.Glob(pat)</span><br><span class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">				<span class="comment">// The only error can be a bad pattern.</span></span><br><span class="line">				<span class="keyword">return</span> errors.Wrapf(err, <span class="string">"error retrieving rule files for %s"</span>, pat)</span><br><span class="line">			&#125;</span><br><span class="line">			files = <span class="built_in">append</span>(files, fs...)</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// files["/tmp/kubelet.rules","nodes.rules"]</span></span><br><span class="line">		<span class="keyword">return</span> ruleManager.Update(</span><br><span class="line">			time.Duration(cfg.GlobalConfig.EvaluationInterval),</span><br><span class="line">			files,</span><br><span class="line">			cfg.GlobalConfig.ExternalLabels,</span><br><span class="line">		)</span><br><span class="line">	&#125;,</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+<p>遍历配置的苏欧欧 <code>rules</code> 文件，进行解析，并将其加入 <code>files</code> 切片</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Update the rule manager's state as the config requires. If</span></span><br><span class="line"><span class="comment">// loading the new rules failed the old rule set is restored.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Manager)</span> <span class="title">Update</span><span class="params">(interval time.Duration, files []<span class="keyword">string</span>, externalLabels labels.Labels)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	m.mtx.Lock()</span><br><span class="line">	<span class="keyword">defer</span> m.mtx.Unlock()</span><br><span class="line"></span><br><span class="line">	groups, errs := m.LoadGroups(interval, externalLabels, files...)</span><br><span class="line">	<span class="keyword">if</span> errs != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">for</span> _, e := <span class="keyword">range</span> errs &#123;</span><br><span class="line">			level.Error(m.logger).Log(<span class="string">"msg"</span>, <span class="string">"loading groups failed"</span>, <span class="string">"err"</span>, e)</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> errors.New(<span class="string">"error loading rules, previous rule set restored"</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	m.restored = <span class="literal">true</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line">	<span class="keyword">for</span> _, newg := <span class="keyword">range</span> groups &#123;</span><br><span class="line">		<span class="comment">// If there is an old group with the same identifier,</span></span><br><span class="line">		<span class="comment">// check if new group equals with the old group, if yes then skip it.</span></span><br><span class="line">		<span class="comment">// If not equals, stop it and wait for it to finish the current iteration.</span></span><br><span class="line">		<span class="comment">// Then copy it into the new group.</span></span><br><span class="line">		gn := GroupKey(newg.file, newg.name)</span><br><span class="line">		oldg, ok := m.groups[gn]</span><br><span class="line">		<span class="built_in">delete</span>(m.groups, gn)</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> ok &amp;&amp; oldg.Equals(newg) &#123;</span><br><span class="line">			groups[gn] = oldg</span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		wg.Add(<span class="number">1</span>)</span><br><span class="line">		<span class="comment">// 每一个 group 开一个协程去 run</span></span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(newg *Group)</span></span> &#123;</span><br><span class="line">			<span class="keyword">if</span> ok &#123;</span><br><span class="line">				oldg.stop()</span><br><span class="line">				newg.CopyState(oldg)</span><br><span class="line">			&#125;</span><br><span class="line">			wg.Done()</span><br><span class="line">			<span class="comment">// Wait with starting evaluation until the rule manager</span></span><br><span class="line">			<span class="comment">// is told to run. This is necessary to avoid running</span></span><br><span class="line">			<span class="comment">// queries against a bootstrapping storage.</span></span><br><span class="line">			&lt;-m.block</span><br><span class="line">			newg.run(m.opts.Context)</span><br><span class="line">		&#125;(newg)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Stop remaining old groups.</span></span><br><span class="line">	wg.Add(<span class="built_in">len</span>(m.groups))</span><br><span class="line">	<span class="keyword">for</span> n, oldg := <span class="keyword">range</span> m.groups &#123;</span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(n <span class="keyword">string</span>, g *Group)</span></span> &#123;</span><br><span class="line">			g.markStale = <span class="literal">true</span></span><br><span class="line">			g.stop()</span><br><span class="line">			<span class="keyword">if</span> m := g.metrics; m != <span class="literal">nil</span> &#123;</span><br><span class="line">				m.IterationsMissed.DeleteLabelValues(n)</span><br><span class="line">				m.IterationsScheduled.DeleteLabelValues(n)</span><br><span class="line">				m.EvalTotal.DeleteLabelValues(n)</span><br><span class="line">				m.EvalFailures.DeleteLabelValues(n)</span><br><span class="line">				m.GroupInterval.DeleteLabelValues(n)</span><br><span class="line">				m.GroupLastEvalTime.DeleteLabelValues(n)</span><br><span class="line">				m.GroupLastDuration.DeleteLabelValues(n)</span><br><span class="line">				m.GroupRules.DeleteLabelValues(n)</span><br><span class="line">				m.GroupSamples.DeleteLabelValues((n))</span><br><span class="line">			&#125;</span><br><span class="line">			wg.Done()</span><br><span class="line">		&#125;(n, oldg)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	wg.Wait()</span><br><span class="line">	m.groups = groups</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结合上面的初始化看，到这里为止主要做了如下几件事情：</p>
+<ol>
+<li>列出配置的所有rules文件</li>
+<li>解析rules文件</li>
+<li>按groupName分组</li>
+<li>group.Run()，此处会启动定时任务，按照配置的频率evaluation_interval执行告警或者汇总规则</li>
+</ol>
+<p>看下 <code>run</code> 方法</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(g *Group)</span> <span class="title">run</span><span class="params">(ctx context.Context)</span></span> &#123;</span><br><span class="line">	<span class="keyword">defer</span> <span class="built_in">close</span>(g.terminated)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Wait an initial amount to have consistently slotted intervals.</span></span><br><span class="line">	evalTimestamp := g.EvalTimestamp(time.Now().UnixNano()).Add(g.interval)</span><br><span class="line">	<span class="keyword">select</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> &lt;-time.After(time.Until(evalTimestamp)):</span><br><span class="line">	<span class="keyword">case</span> &lt;-g.done:</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	ctx = promql.NewOriginContext(ctx, <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>&#123;&#125;&#123;</span><br><span class="line">		<span class="string">"ruleGroup"</span>: <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>&#123;</span><br><span class="line">			<span class="string">"file"</span>: g.File(),</span><br><span class="line">			<span class="string">"name"</span>: g.Name(),</span><br><span class="line">		&#125;,</span><br><span class="line">	&#125;)</span><br><span class="line"></span><br><span class="line">	iter := <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		g.metrics.IterationsScheduled.WithLabelValues(GroupKey(g.file, g.name)).Inc()</span><br><span class="line"></span><br><span class="line">		start := time.Now()</span><br><span class="line">		<span class="comment">// 将循环当前group的所有rule，并执行eval</span></span><br><span class="line">		g.Eval(ctx, evalTimestamp)</span><br><span class="line">		timeSinceStart := time.Since(start)</span><br><span class="line"></span><br><span class="line">		g.metrics.IterationDuration.Observe(timeSinceStart.Seconds())</span><br><span class="line">		g.setEvaluationTime(timeSinceStart)</span><br><span class="line">		g.setLastEvaluation(start)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// The assumption here is that since the ticker was started after having</span></span><br><span class="line">	<span class="comment">// waited for `evalTimestamp` to pass, the ticks will trigger soon</span></span><br><span class="line">	<span class="comment">// after each `evalTimestamp + N * g.interval` occurrence.</span></span><br><span class="line">	tick := time.NewTicker(g.interval)</span><br><span class="line">	<span class="keyword">defer</span> tick.Stop()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="keyword">if</span> !g.markStale &#123;</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(now time.Time)</span></span> &#123;</span><br><span class="line">			<span class="keyword">for</span> _, rule := <span class="keyword">range</span> g.seriesInPreviousEval &#123;</span><br><span class="line">				<span class="keyword">for</span> _, r := <span class="keyword">range</span> rule &#123;</span><br><span class="line">					g.staleSeries = <span class="built_in">append</span>(g.staleSeries, r)</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// That can be garbage collected at this point.</span></span><br><span class="line">			g.seriesInPreviousEval = <span class="literal">nil</span></span><br><span class="line">			<span class="comment">// Wait for 2 intervals to give the opportunity to renamed rules</span></span><br><span class="line">			<span class="comment">// to insert new series in the tsdb. At this point if there is a</span></span><br><span class="line">			<span class="comment">// renamed rule, it should already be started.</span></span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> &lt;-g.managerDone:</span><br><span class="line">			<span class="keyword">case</span> &lt;-time.After(<span class="number">2</span> * g.interval):</span><br><span class="line">				g.cleanupStaleSeries(ctx, now)</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;(time.Now())</span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 第一次运行iter，先进行一次rules判断</span></span><br><span class="line">	iter()</span><br><span class="line">	<span class="comment">// 如果我们需要恢复的话，我们等待另一个 Eval 完成。</span></span><br><span class="line">	<span class="comment">// 原因是，在第一次评估期间（或之前），我们可能没有充足的数据，</span></span><br><span class="line">	<span class="comment">// 并且记录规则没有更新某些警报可能依赖的最新值</span></span><br><span class="line">	<span class="keyword">if</span> g.shouldRestore &#123;</span><br><span class="line">		<span class="comment">// If we have to restore, we wait for another Eval to finish.</span></span><br><span class="line">		<span class="comment">// The reason behind this is, during first eval (or before it)</span></span><br><span class="line">		<span class="comment">// we might not have enough data scraped, and recording rules would not</span></span><br><span class="line">		<span class="comment">// have updated the latest values, on which some alerts might depend.</span></span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-g.done:</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		<span class="keyword">case</span> &lt;-tick.C:</span><br><span class="line">			missed := (time.Since(evalTimestamp) / g.interval) - <span class="number">1</span></span><br><span class="line">			<span class="keyword">if</span> missed &gt; <span class="number">0</span> &#123;</span><br><span class="line">				g.metrics.IterationsMissed.WithLabelValues(GroupKey(g.file, g.name)).Add(<span class="keyword">float64</span>(missed))</span><br><span class="line">				g.metrics.IterationsScheduled.WithLabelValues(GroupKey(g.file, g.name)).Add(<span class="keyword">float64</span>(missed))</span><br><span class="line">			&#125;</span><br><span class="line">			evalTimestamp = evalTimestamp.Add((missed + <span class="number">1</span>) * g.interval)</span><br><span class="line">			iter()</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		g.RestoreForState(time.Now())</span><br><span class="line">		g.shouldRestore = <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-g.done:</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		<span class="keyword">default</span>:</span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> &lt;-g.done:</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			<span class="keyword">case</span> &lt;-tick.C:</span><br><span class="line">				<span class="comment">// 之后按照 interval 周期循环rules判断是否发送告警</span></span><br><span class="line">				missed := (time.Since(evalTimestamp) / g.interval) - <span class="number">1</span></span><br><span class="line">				<span class="keyword">if</span> missed &gt; <span class="number">0</span> &#123;</span><br><span class="line">					g.metrics.IterationsMissed.WithLabelValues(GroupKey(g.file, g.name)).Add(<span class="keyword">float64</span>(missed))</span><br><span class="line">					g.metrics.IterationsScheduled.WithLabelValues(GroupKey(g.file, g.name)).Add(<span class="keyword">float64</span>(missed))</span><br><span class="line">				&#125;</span><br><span class="line">				evalTimestamp = evalTimestamp.Add((missed + <span class="number">1</span>) * g.interval)</span><br><span class="line">				iter()</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里面主要就是根据rules的内容进行定时的计算，判断是否需要生成告警信息，然后将其交给 <code>notifierManager</code> 组件进行处理</p>
+<p>通过<code>g.Eval()</code>，遍历rules去匹配</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Eval runs a single evaluation cycle in which all rules are evaluated sequentially.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(g *Group)</span> <span class="title">Eval</span><span class="params">(ctx context.Context, ts time.Time)</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> samplesTotal <span class="keyword">float64</span></span><br><span class="line">	<span class="comment">// 循环所有的rules</span></span><br><span class="line">	<span class="keyword">for</span> i, rule := <span class="keyword">range</span> g.rules &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-g.done:</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		<span class="keyword">default</span>:</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 循环所有的rules，将每个rule拿出来执行匿名函数</span></span><br><span class="line">		<span class="function"><span class="keyword">func</span><span class="params">(i <span class="keyword">int</span>, rule Rule)</span></span> &#123;</span><br><span class="line">			sp, ctx := opentracing.StartSpanFromContext(ctx, <span class="string">"rule"</span>)</span><br><span class="line">			sp.SetTag(<span class="string">"name"</span>, rule.Name())</span><br><span class="line">			<span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">(t time.Time)</span></span> &#123;</span><br><span class="line">				sp.Finish()</span><br><span class="line"></span><br><span class="line">				since := time.Since(t)</span><br><span class="line">				g.metrics.EvalDuration.Observe(since.Seconds())</span><br><span class="line">				rule.SetEvaluationDuration(since)</span><br><span class="line">				rule.SetEvaluationTimestamp(t)</span><br><span class="line">			&#125;(time.Now())</span><br><span class="line"></span><br><span class="line">			g.metrics.EvalTotal.WithLabelValues(GroupKey(g.File(), g.Name())).Inc()</span><br><span class="line"></span><br><span class="line">			<span class="comment">// AlertingRule.Eval()，通过Engine拉取数据，计算告警表达式，创建告警状态 pending or firing</span></span><br><span class="line">			vector, err := rule.Eval(ctx, ts, g.opts.QueryFunc, g.opts.ExternalURL)</span><br><span class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">				rule.SetHealth(HealthBad)</span><br><span class="line">				rule.SetLastError(err)</span><br><span class="line">				g.metrics.EvalFailures.WithLabelValues(GroupKey(g.File(), g.Name())).Inc()</span><br><span class="line"></span><br><span class="line">				<span class="comment">// Canceled queries are intentional termination of queries. This normally</span></span><br><span class="line">				<span class="comment">// happens on shutdown and thus we skip logging of any errors here.</span></span><br><span class="line">				<span class="keyword">if</span> _, ok := err.(promql.ErrQueryCanceled); !ok &#123;</span><br><span class="line">					level.Warn(g.logger).Log(<span class="string">"msg"</span>, <span class="string">"Evaluating rule failed"</span>, <span class="string">"rule"</span>, rule, <span class="string">"err"</span>, err)</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			&#125;</span><br><span class="line">			samplesTotal += <span class="keyword">float64</span>(<span class="built_in">len</span>(vector))</span><br><span class="line"></span><br><span class="line">			<span class="comment">// 判断是否需要发送告警给 alertmanager</span></span><br><span class="line">			<span class="keyword">if</span> ar, ok := rule.(*AlertingRule); ok &#123;</span><br><span class="line">				ar.sendAlerts(ctx, ts, g.opts.ResendDelay, g.interval, g.opts.NotifyFunc)</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">var</span> (</span><br><span class="line">				numOutOfOrder = <span class="number">0</span></span><br><span class="line">				numDuplicates = <span class="number">0</span></span><br><span class="line">			)</span><br><span class="line"></span><br><span class="line">			app := g.opts.Appendable.Appender(ctx)</span><br><span class="line">			seriesReturned := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]labels.Labels, <span class="built_in">len</span>(g.seriesInPreviousEval[i]))</span><br><span class="line">			<span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">				<span class="keyword">if</span> err := app.Commit(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">					rule.SetHealth(HealthBad)</span><br><span class="line">					rule.SetLastError(err)</span><br><span class="line">					g.metrics.EvalFailures.WithLabelValues(GroupKey(g.File(), g.Name())).Inc()</span><br><span class="line"></span><br><span class="line">					level.Warn(g.logger).Log(<span class="string">"msg"</span>, <span class="string">"Rule sample appending failed"</span>, <span class="string">"err"</span>, err)</span><br><span class="line">					<span class="keyword">return</span></span><br><span class="line">				&#125;</span><br><span class="line">				g.seriesInPreviousEval[i] = seriesReturned</span><br><span class="line">			&#125;()</span><br><span class="line"></span><br><span class="line">			<span class="keyword">for</span> _, s := <span class="keyword">range</span> vector &#123;</span><br><span class="line">				<span class="keyword">if</span> _, err := app.Append(<span class="number">0</span>, s.Metric, s.T, s.V); err != <span class="literal">nil</span> &#123;</span><br><span class="line">					rule.SetHealth(HealthBad)</span><br><span class="line">					rule.SetLastError(err)</span><br><span class="line"></span><br><span class="line">					<span class="keyword">switch</span> errors.Cause(err) &#123;</span><br><span class="line">					<span class="keyword">case</span> storage.ErrOutOfOrderSample:</span><br><span class="line">						numOutOfOrder++</span><br><span class="line">						level.Debug(g.logger).Log(<span class="string">"msg"</span>, <span class="string">"Rule evaluation result discarded"</span>, <span class="string">"err"</span>, err, <span class="string">"sample"</span>, s)</span><br><span class="line">					<span class="keyword">case</span> storage.ErrDuplicateSampleForTimestamp:</span><br><span class="line">						numDuplicates++</span><br><span class="line">						level.Debug(g.logger).Log(<span class="string">"msg"</span>, <span class="string">"Rule evaluation result discarded"</span>, <span class="string">"err"</span>, err, <span class="string">"sample"</span>, s)</span><br><span class="line">					<span class="keyword">default</span>:</span><br><span class="line">						level.Warn(g.logger).Log(<span class="string">"msg"</span>, <span class="string">"Rule evaluation result discarded"</span>, <span class="string">"err"</span>, err, <span class="string">"sample"</span>, s)</span><br><span class="line">					&#125;</span><br><span class="line">				&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">					seriesReturned[s.Metric.String()] = s.Metric</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">if</span> numOutOfOrder &gt; <span class="number">0</span> &#123;</span><br><span class="line">				level.Warn(g.logger).Log(<span class="string">"msg"</span>, <span class="string">"Error on ingesting out-of-order result from rule evaluation"</span>, <span class="string">"numDropped"</span>, numOutOfOrder)</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">if</span> numDuplicates &gt; <span class="number">0</span> &#123;</span><br><span class="line">				level.Warn(g.logger).Log(<span class="string">"msg"</span>, <span class="string">"Error on ingesting results from rule evaluation with different value but same timestamp"</span>, <span class="string">"numDropped"</span>, numDuplicates)</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			<span class="keyword">for</span> metric, lset := <span class="keyword">range</span> g.seriesInPreviousEval[i] &#123;</span><br><span class="line">				<span class="keyword">if</span> _, ok := seriesReturned[metric]; !ok &#123;</span><br><span class="line">					<span class="comment">// Series no longer exposed, mark it stale.</span></span><br><span class="line">					_, err = app.Append(<span class="number">0</span>, lset, timestamp.FromTime(ts), math.Float64frombits(value.StaleNaN))</span><br><span class="line">					<span class="keyword">switch</span> errors.Cause(err) &#123;</span><br><span class="line">					<span class="keyword">case</span> <span class="literal">nil</span>:</span><br><span class="line">					<span class="keyword">case</span> storage.ErrOutOfOrderSample, storage.ErrDuplicateSampleForTimestamp:</span><br><span class="line">						<span class="comment">// Do not count these in logging, as this is expected if series</span></span><br><span class="line">						<span class="comment">// is exposed from a different rule.</span></span><br><span class="line">					<span class="keyword">default</span>:</span><br><span class="line">						level.Warn(g.logger).Log(<span class="string">"msg"</span>, <span class="string">"Adding stale sample failed"</span>, <span class="string">"sample"</span>, metric, <span class="string">"err"</span>, err)</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;(i, rule)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> g.metrics != <span class="literal">nil</span> &#123;</span><br><span class="line">		g.metrics.GroupSamples.WithLabelValues(GroupKey(g.File(), g.Name())).Set(samplesTotal)</span><br><span class="line">	&#125;</span><br><span class="line">	g.cleanupStaleSeries(ctx, ts)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>AlertingRule.Eval()</code>，通过<code>Engine</code>拉取数据，计算告警表达式，创建告警状态<code>pending or firing</code>，然后判断是否需要发送告警给 <code>alertmanager</code></p>
+<p>如果需要发送的话，执行 <code>sendAlerts</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *AlertingRule)</span> <span class="title">sendAlerts</span><span class="params">(ctx context.Context, ts time.Time, resendDelay time.Duration, interval time.Duration, notifyFunc NotifyFunc)</span></span> &#123;</span><br><span class="line">	alerts := []*Alert&#123;&#125;</span><br><span class="line">	r.ForEachActiveAlert(<span class="function"><span class="keyword">func</span><span class="params">(alert *Alert)</span></span> &#123;</span><br><span class="line">		<span class="keyword">if</span> alert.needsSending(ts, resendDelay) &#123;</span><br><span class="line">			alert.LastSentAt = ts</span><br><span class="line">			<span class="comment">// Allow for two Eval or Alertmanager send failures.</span></span><br><span class="line">			delta := resendDelay</span><br><span class="line">			<span class="keyword">if</span> interval &gt; resendDelay &#123;</span><br><span class="line">				delta = interval</span><br><span class="line">			&#125;</span><br><span class="line">			alert.ValidUntil = ts.Add(<span class="number">4</span> * delta)</span><br><span class="line">			anew := *alert</span><br><span class="line">			alerts = <span class="built_in">append</span>(alerts, &amp;anew)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;)</span><br><span class="line">	notifyFunc(ctx, r.vector.String(), alerts...)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到这边就是将 <code>alert</code> 整合一下，通过 <code>notifyFunc</code> 发送出去，那么这里的 notifyFunc 是什么呢？还记得我们初始化的时候定义的变量吗，回忆一下</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">ruleManager = rules.NewManager(&amp;rules.ManagerOptions&#123;</span><br><span class="line">	Appendable:      fanoutStorage,</span><br><span class="line">	Queryable:       localStorage,</span><br><span class="line">	QueryFunc:       rules.EngineQueryFunc(queryEngine, fanoutStorage),</span><br><span class="line">	<span class="comment">// 若触发告警规则,则通过sendAlerts发送告警信息</span></span><br><span class="line">	NotifyFunc:      sendAlerts(notifierManager, cfg.web.ExternalURL.String()),</span><br><span class="line">	Context:         ctxRule,</span><br><span class="line">	ExternalURL:     cfg.web.ExternalURL,</span><br><span class="line">	Registerer:      prometheus.DefaultRegisterer,</span><br><span class="line">	Logger:          log.With(logger, <span class="string">"component"</span>, <span class="string">"rule manager"</span>),</span><br><span class="line">	OutageTolerance: time.Duration(cfg.outageTolerance),</span><br><span class="line">	ForGracePeriod:  time.Duration(cfg.forGracePeriod),</span><br><span class="line">	ResendDelay:     time.Duration(cfg.resendDelay),</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>没错就是 <code>sendAlerts(notifierManager, cfg.web.ExternalURL.String())</code> ，具体实现在</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// sendAlerts implements the rules.NotifyFunc for a Notifier.</span></span><br><span class="line"><span class="comment">// sendAlerts方法主要作用是把规则管理(ruleManager)把告警信息转换成notifier.Alert类型</span></span><br><span class="line"><span class="comment">// 遍历告警信息,构造告警,告警信息长度大于0, 则发送告警</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">sendAlerts</span><span class="params">(s sender, externalURL <span class="keyword">string</span>)</span> <span class="title">rules</span>.<span class="title">NotifyFunc</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(ctx context.Context, expr <span class="keyword">string</span>, alerts ...*rules.Alert)</span></span> &#123;</span><br><span class="line">		<span class="keyword">var</span> res []*notifier.Alert</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 遍历告警信息</span></span><br><span class="line">		<span class="keyword">for</span> _, alert := <span class="keyword">range</span> alerts &#123;</span><br><span class="line">			a := &amp;notifier.Alert&#123;</span><br><span class="line">				StartsAt:     alert.FiredAt,</span><br><span class="line">				Labels:       alert.Labels,</span><br><span class="line">				Annotations:  alert.Annotations,</span><br><span class="line">				GeneratorURL: externalURL + strutil.TableLinkForExpression(expr),</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// 若告警结束,设置告警结束时间为ResolverdAt时间</span></span><br><span class="line">			<span class="keyword">if</span> !alert.ResolvedAt.IsZero() &#123;</span><br><span class="line">				a.EndsAt = alert.ResolvedAt</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				<span class="comment">// 若告警还是active状态,设置告警结束时间为当前时间</span></span><br><span class="line">				a.EndsAt = alert.ValidUntil</span><br><span class="line">			&#125;</span><br><span class="line">			res = <span class="built_in">append</span>(res, a)</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 若是有告警信息, 则发送告警</span></span><br><span class="line">		<span class="keyword">if</span> <span class="built_in">len</span>(alerts) &gt; <span class="number">0</span> &#123;</span><br><span class="line">			s.Send(res...)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到这里的 <code>sender</code> 就是 <code>norifierManager</code> ，规则管理(ruleManager)把告警信息转换成notifier.Alert类型，遍历告警信息，如果存在告警，则发送告警。</p>
+<p><code>notifier.go</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Send queues the given notification requests for processing.</span></span><br><span class="line"><span class="comment">// Panics if called on a handler that is not running.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n *Manager)</span> <span class="title">Send</span><span class="params">(alerts ...*Alert)</span></span> &#123;</span><br><span class="line">	n.mtx.Lock()</span><br><span class="line">	<span class="keyword">defer</span> n.mtx.Unlock()</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Attach external labels before relabelling and sending.</span></span><br><span class="line">	<span class="comment">// 根据配置文件prometheus.yml的alert_relabel_configs下的relabel_config对告警的label进行重置</span></span><br><span class="line">	<span class="keyword">for</span> _, a := <span class="keyword">range</span> alerts &#123;</span><br><span class="line">		lb := labels.NewBuilder(a.Labels)</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> _, l := <span class="keyword">range</span> n.opts.ExternalLabels &#123;</span><br><span class="line">			<span class="keyword">if</span> a.Labels.Get(l.Name) == <span class="string">""</span> &#123;</span><br><span class="line">				lb.Set(l.Name, l.Value)</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		a.Labels = lb.Labels()</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	alerts = n.relabelAlerts(alerts)</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(alerts) == <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Queue capacity should be significantly larger than a single alert</span></span><br><span class="line">	<span class="comment">// batch could be.</span></span><br><span class="line">	<span class="comment">// 若待告警信息的数量大于队列总容量,则移除待告警信息中最早的告警信息, 依据的规则是先进先移除</span></span><br><span class="line">	<span class="keyword">if</span> d := <span class="built_in">len</span>(alerts) - n.opts.QueueCapacity; d &gt; <span class="number">0</span> &#123;</span><br><span class="line">		alerts = alerts[d:]</span><br><span class="line"></span><br><span class="line">		level.Warn(n.logger).Log(<span class="string">"msg"</span>, <span class="string">"Alert batch larger than queue capacity, dropping alerts"</span>, <span class="string">"num_dropped"</span>, d)</span><br><span class="line">		n.metrics.dropped.Add(<span class="keyword">float64</span>(d))</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// If the queue is full, remove the oldest alerts in favor</span></span><br><span class="line">	<span class="comment">// of newer ones.</span></span><br><span class="line">	<span class="comment">// 若队列中已有的告警信息和待发送的告警信息大于队列的总容量,则从队列中移除最早的告警信息, 依据是先进先移除</span></span><br><span class="line">	<span class="keyword">if</span> d := (<span class="built_in">len</span>(n.queue) + <span class="built_in">len</span>(alerts)) - n.opts.QueueCapacity; d &gt; <span class="number">0</span> &#123;</span><br><span class="line">		n.queue = n.queue[d:]</span><br><span class="line"></span><br><span class="line">		level.Warn(n.logger).Log(<span class="string">"msg"</span>, <span class="string">"Alert notification queue full, dropping alerts"</span>, <span class="string">"num_dropped"</span>, d)</span><br><span class="line">		n.metrics.dropped.Add(<span class="keyword">float64</span>(d))</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 把待发送的告警信息加入队列</span></span><br><span class="line">	n.queue = <span class="built_in">append</span>(n.queue, alerts...)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Notify sending goroutine that there are alerts to be processed.</span></span><br><span class="line">	<span class="comment">// 告知通知管理(notifierManager)有告警信息需要处理</span></span><br><span class="line">	<span class="comment">// setMore方法相当于一个触发器，向管道n.more发送触发信息, 告知通知管理(notifierManager)有告警信息需要处理，</span></span><br><span class="line">	<span class="comment">// 是连接规则管理(ruleManager)和通知管理(notifierManager)的桥梁</span></span><br><span class="line">	n.setMore()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下面看下 <code>notifierManager</code> 的处理</p>
+<h2 id="notifierManager"><a href="#notifierManager" class="headerlink" title="notifierManager"></a>notifierManager</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// notifier 是用于向 alertmanager 发送告警的</span></span><br><span class="line">notifierManager = notifier.NewManager(&amp;cfg.notifier, log.With(logger, <span class="string">"component"</span>, <span class="string">"notifier"</span>))</span><br></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	name:     <span class="string">"notify"</span>,</span><br><span class="line">	reloader: notifierManager.ApplyConfig,</span><br><span class="line">&#123;</span><br></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ApplyConfig updates the status state as the new config requires.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n *Manager)</span> <span class="title">ApplyConfig</span><span class="params">(conf *config.Config)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	n.mtx.Lock()</span><br><span class="line">	<span class="keyword">defer</span> n.mtx.Unlock()</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 配置文件prometheus.yml中global下的external_labels, 用于外部系统标签的，不是用于metrics数据</span></span><br><span class="line">	n.opts.ExternalLabels = conf.GlobalConfig.ExternalLabels</span><br><span class="line">	<span class="comment">// 配置文件prometheus.yml中alertingl下alert_relabel_configs, 动态修改 alert 属性的规则配置</span></span><br><span class="line">	n.opts.RelabelConfigs = conf.AlertingConfig.AlertRelabelConfigs</span><br><span class="line"></span><br><span class="line">	amSets := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]*alertmanagerSet)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 遍历告警相关的配置,即配置文件prometheus.yml的alerting</span></span><br><span class="line">	<span class="keyword">for</span> k, cfg := <span class="keyword">range</span> conf.AlertingConfig.AlertmanagerConfigs.ToMap() &#123;</span><br><span class="line">		<span class="comment">// 把alerting下每个配置项, 转换成结构实例:alertmanagerSet</span></span><br><span class="line">		ams, err := newAlertmanagerSet(cfg, n.logger, n.metrics)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> err</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		amSets[k] = ams</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	n.alertmanagers = amSets</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>看下正式启动的地方：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="comment">// When the notifier manager receives a new targets list</span></span><br><span class="line">	<span class="comment">// it needs to read a valid config for each job.</span></span><br><span class="line">	<span class="comment">// It depends on the config being in sync with the discovery manager</span></span><br><span class="line">	<span class="comment">// so we wait until the config is fully loaded.</span></span><br><span class="line">	&lt;-reloadReady.C</span><br><span class="line"></span><br><span class="line">	notifierManager.Run(discoveryManagerNotify.SyncCh())</span><br><span class="line">	level.Info(logger).Log(<span class="string">"msg"</span>, <span class="string">"Notifier manager stopped"</span>)</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;,</span><br><span class="line"><span class="function"><span class="keyword">func</span><span class="params">(err error)</span></span> &#123;</span><br><span class="line">	notifierManager.Stop()</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Run dispatches notifications continuously.</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">Run方法, 监听n.more管道. 若规则管理(ruleManager)向管道n.more发送信号,</span></span><br><span class="line"><span class="comment">	告知通知管理(notifierManager)有告警信息需要发送，则触发接下来的告警信息处理</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">Run方法和指标采集(scrapeManager)的Run方法共用服务发现 (serviceDiscover)的处理逻辑,</span></span><br><span class="line"><span class="comment">	检测目标(targets)是否有变动, 不同的是通知管理(notifierManager)只监听告警服务的变动</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">指标采集(scrapeManager)的tset为map类型, key为job_name, value为targetgroup.Group．</span></span><br><span class="line"><span class="comment">	而通知管理(notifierManager)的tset也为map类型，不同的是key为AlertmanagerConfig, value为targetgroup.Group</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n *Manager)</span> <span class="title">Run</span><span class="params">(tsets &lt;-<span class="keyword">chan</span> <span class="keyword">map</span>[<span class="keyword">string</span>][]*targetgroup.Group)</span></span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-n.ctx.Done():</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		<span class="comment">// 发现告警服务有更新,重新加载配置. 参考服务发现(discoveryManager)</span></span><br><span class="line">		<span class="keyword">case</span> ts := &lt;-tsets:</span><br><span class="line">			n.reload(ts)</span><br><span class="line">		<span class="comment">// 告警信号,这个channel在ruleManager服务在产生告警时，会发出信号</span></span><br><span class="line">		<span class="keyword">case</span> &lt;-n.more:</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// 利用告警队列, 获取告警信息</span></span><br><span class="line">		alerts := n.nextBatch()</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 如果全部am都没发送成功，就记录丢弃数量指标</span></span><br><span class="line">		<span class="keyword">if</span> !n.sendAll(alerts...) &#123;</span><br><span class="line">			n.metrics.dropped.Add(<span class="keyword">float64</span>(<span class="built_in">len</span>(alerts)))</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// If the queue still has items left, kick off the next iteration.</span></span><br><span class="line">		<span class="comment">// 若告警队列中还有告警信息,则再次想n.more传入信号,发送告警信息</span></span><br><span class="line">		<span class="keyword">if</span> n.queueLen() &gt; <span class="number">0</span> &#123;</span><br><span class="line">			n.setMore()</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里就是通过 <code>n.more</code> channel与 ruleManager 做交互，当那边产生告警的时候，这边会接收到这个信号，进行处理，然后发送</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// sendAll sends the alerts to all configured Alertmanagers concurrently.</span></span><br><span class="line"><span class="comment">// It returns true if the alerts could be sent successfully to at least one Alertmanager.</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">将告警发送给全部当前配置的 Alertmanager。至少成功发送给一个 Alertmanager 就返回 true。</span></span><br><span class="line"><span class="comment">	1. 如果 alerts 为空就返回 true</span></span><br><span class="line"><span class="comment">	2. 记录函数执行开始时间</span></span><br><span class="line"><span class="comment">	3. 声明 v1Payload, v2Payload 两个字节数组，他们是 alerts 序列化的结果，提前声明是作为缓存，避免在循环中反复声明降低性能</span></span><br><span class="line"><span class="comment">	4. 加锁读取 Alertmanager 集合</span></span><br><span class="line"><span class="comment">	5. 声明一个 WaitGroup 用于同步等待每个 am 都发送完毕后退出函数</span></span><br><span class="line"><span class="comment">	6. 循环 amSets 中的每个 ams，amSet 是不同的服务发现方式配置的am集合，每个 amSet 里面可能有多个 am</span></span><br><span class="line"><span class="comment">	7. 根据 ams 的 API 版本对 alerts 进行序列化成 payload</span></span><br><span class="line"><span class="comment">	8. 循环 ams 中的每个 am，启一个 goroutine，调用 sendOne() 函数将 payload 发送过去，根据成功或者失败的结果记录观测指标</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n *Manager)</span> <span class="title">sendAll</span><span class="params">(alerts ...*Alert)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(alerts) == <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	begin := time.Now()</span><br><span class="line"></span><br><span class="line">	<span class="comment">// v1Payload and v2Payload represent 'alerts' marshaled for Alertmanager API</span></span><br><span class="line">	<span class="comment">// v1 or v2. Marshaling happens below. Reference here is for caching between</span></span><br><span class="line">	<span class="comment">// for loop iterations.</span></span><br><span class="line">	<span class="keyword">var</span> v1Payload, v2Payload []<span class="keyword">byte</span></span><br><span class="line"></span><br><span class="line">	n.mtx.RLock()</span><br><span class="line">	<span class="comment">// 获取当前最新的告警服务列表</span></span><br><span class="line">	amSets := n.alertmanagers</span><br><span class="line">	n.mtx.RUnlock()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> (</span><br><span class="line">		wg         sync.WaitGroup</span><br><span class="line">		numSuccess atomic.Uint64</span><br><span class="line">	)</span><br><span class="line">	<span class="comment">// 遍历告警服务列表</span></span><br><span class="line">	<span class="keyword">for</span> _, ams := <span class="keyword">range</span> amSets &#123;</span><br><span class="line">		<span class="keyword">var</span> (</span><br><span class="line">			payload []<span class="keyword">byte</span></span><br><span class="line">			err     error</span><br><span class="line">		)</span><br><span class="line"></span><br><span class="line">		ams.mtx.RLock()</span><br><span class="line"></span><br><span class="line">		<span class="keyword">switch</span> ams.cfg.APIVersion &#123;</span><br><span class="line">		<span class="keyword">case</span> config.AlertmanagerAPIVersionV1:</span><br><span class="line">			&#123;</span><br><span class="line">				<span class="keyword">if</span> v1Payload == <span class="literal">nil</span> &#123;</span><br><span class="line">					v1Payload, err = json.Marshal(alerts)</span><br><span class="line">					<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">						level.Error(n.logger).Log(<span class="string">"msg"</span>, <span class="string">"Encoding alerts for Alertmanager API v1 failed"</span>, <span class="string">"err"</span>, err)</span><br><span class="line">						ams.mtx.RUnlock()</span><br><span class="line">						<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line"></span><br><span class="line">				payload = v1Payload</span><br><span class="line">			&#125;</span><br><span class="line">		<span class="keyword">case</span> config.AlertmanagerAPIVersionV2:</span><br><span class="line">			&#123;</span><br><span class="line">				<span class="keyword">if</span> v2Payload == <span class="literal">nil</span> &#123;</span><br><span class="line">					openAPIAlerts := alertsToOpenAPIAlerts(alerts)</span><br><span class="line"></span><br><span class="line">					v2Payload, err = json.Marshal(openAPIAlerts)</span><br><span class="line">					<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">						level.Error(n.logger).Log(<span class="string">"msg"</span>, <span class="string">"Encoding alerts for Alertmanager API v2 failed"</span>, <span class="string">"err"</span>, err)</span><br><span class="line">						ams.mtx.RUnlock()</span><br><span class="line">						<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line"></span><br><span class="line">				payload = v2Payload</span><br><span class="line">			&#125;</span><br><span class="line">		<span class="keyword">default</span>:</span><br><span class="line">			&#123;</span><br><span class="line">				level.Error(n.logger).Log(</span><br><span class="line">					<span class="string">"msg"</span>, fmt.Sprintf(<span class="string">"Invalid Alertmanager API version '%v', expected one of '%v'"</span>, ams.cfg.APIVersion, config.SupportedAlertmanagerAPIVersions),</span><br><span class="line">					<span class="string">"err"</span>, err,</span><br><span class="line">				)</span><br><span class="line">				ams.mtx.RUnlock()</span><br><span class="line">				<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> _, am := <span class="keyword">range</span> ams.ams &#123;</span><br><span class="line">			wg.Add(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">			ctx, cancel := context.WithTimeout(n.ctx, time.Duration(ams.cfg.Timeout))</span><br><span class="line">			<span class="keyword">defer</span> cancel()</span><br><span class="line"></span><br><span class="line">			<span class="comment">// 起一个协程发送告警信息</span></span><br><span class="line">			<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(client *http.Client, url <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">				<span class="keyword">if</span> err := n.sendOne(ctx, client, url, payload); err != <span class="literal">nil</span> &#123;</span><br><span class="line">					level.Error(n.logger).Log(<span class="string">"alertmanager"</span>, url, <span class="string">"count"</span>, <span class="built_in">len</span>(alerts), <span class="string">"msg"</span>, <span class="string">"Error sending alert"</span>, <span class="string">"err"</span>, err)</span><br><span class="line">					n.metrics.errors.WithLabelValues(url).Inc()</span><br><span class="line">				&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">					numSuccess.Inc()</span><br><span class="line">				&#125;</span><br><span class="line">				n.metrics.latency.WithLabelValues(url).Observe(time.Since(begin).Seconds())</span><br><span class="line">				n.metrics.sent.WithLabelValues(url).Add(<span class="keyword">float64</span>(<span class="built_in">len</span>(alerts)))</span><br><span class="line"></span><br><span class="line">				wg.Done()</span><br><span class="line">			&#125;(ams.client, am.url().String())</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		ams.mtx.RUnlock()</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	wg.Wait()</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 若至少成功发送给一个告警服务，则返回true</span></span><br><span class="line">	<span class="keyword">return</span> numSuccess.Load() &gt; <span class="number">0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里发送成功之后就到 <code>alertmanager</code> 服务了，如果发送失败了，就将这个指标丢弃了，若告警队列中还有告警信息，则再次想n.more传入信号，再次发送告警信息处理。</p>
+<p>参考：</p>
+<p><a href="https://blog.csdn.net/u010278923/article/details/70946469?locationNum=9&amp;fps=1" target="_blank" rel="external">Prometheus 实战于源码分析之alert</a></p>
+<p><a href="https://www.jianshu.com/p/1697e09e99ac" target="_blank" rel="external">Prometheus监控神器-Rules篇</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+<blockquote class="blockquote-center" style="color: #ccc;">
+    -------------本文结束 <i class="fa fa-apple"></i> 感谢您的阅读-------------
+</blockquote>
+
+  <span id="inline-green" style="border-radius:3px;">作者</span>：<a class="link-blue" href="https://github.com/magiceses" target="_blank">Magiceses</a><br/>有问题请 <a class="link-blue" href="https://magiceses.github.io/guestbook" target="_blank">留言</a> 或者私信我的 <a class="link-blue" href="https://weibo.com/u/3069595351" target="_blank">微博</a>。
+
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>满分是10分的话，这篇文章你给几分</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/reward/reward_wechat.png" alt="magiceses WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/reward/reward_alipay.png" alt="magiceses Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Prometheus/" rel="tag"><i class="fa fa-tag"></i> Prometheus</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/10/05/prometheus-prometheus-4-指标抓取源码分析/" rel="next" title="Prometheus 指标抓取源码分析">
+                <i class="fa fa-chevron-left"></i> Prometheus 指标抓取源码分析
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/10/07/prometheus-prometheus-6-PromQL分析/" rel="prev" title="Prometheus PromQL使用">
+                Prometheus PromQL使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar/avatar.png"
+               alt="magiceses" />
+          <p class="site-author-name" itemprop="name">magiceses</p>
+          <p class="site-description motion-element" itemprop="description">Stay Hungry,Stay Foolish</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">36</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/magiceses" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://blog.csdn.net/weixin_43700106" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-chrome"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/weblog" title="建站日志" target="_blank">建站日志</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/reward" title="打赏" target="_blank">打赏</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#rules-配置和使用"><span class="nav-number">1.</span> <span class="nav-text">rules 配置和使用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#告警规则"><span class="nav-number">1.2.</span> <span class="nav-text">告警规则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Rules-类型"><span class="nav-number">1.3.</span> <span class="nav-text">Rules 类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#alerting-rules"><span class="nav-number">1.3.1.</span> <span class="nav-text">alerting rules</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#recording-rules"><span class="nav-number">1.3.2.</span> <span class="nav-text">recording rules</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用模板"><span class="nav-number">1.4.</span> <span class="nav-text">使用模板</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#rules-源码分析"><span class="nav-number">2.</span> <span class="nav-text">rules 源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ruleManager"><span class="nav-number">2.1.</span> <span class="nav-text">ruleManager</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#notifierManager"><span class="nav-number">2.2.</span> <span class="nav-text">notifierManager</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+      
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="busuanzi-count">
+
+  <!-- <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script> -->
+  <!-- 上面这个是之前的，不知道为什么失效了，改成下面这个 -->
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">您是第<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>个小伙伴</span>
+  
+
+  
+    <span class="site-pv">本站总浏览<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">magiceses</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Pisces
+  </a>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count" style="color: #e90f92;">全站共 685k 字</span>
+</div>
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+  <!-- 按需加载背景 -->
+  <!-- 背景动画 -->
+<script type="text/javascript">
+  // 按需加载背景
+  // 如果是all，就直接加载了
+  if("pc" == "all") {
+    $.getScript("/js/src/particle.js?v=5.0.1");
+  }
+  // 识别手机或电脑的js开始
+  (function(){
+    var res = GetRequest();
+    var par = res['index'];
+    if(par!='gfan'){
+      var ua=navigator.userAgent.toLowerCase();
+      var contains=function (a, b){
+          if(a.indexOf(b)!=-1){return true;}
+      };
+      if((contains(ua,"android") && contains(ua,"mobile"))||(contains(ua,"android") && contains(ua,"mozilla"))||(contains(ua,"android") && contains(ua,"opera"))||contains(ua,"ucweb7")||contains(ua,"iphone")){
+        return false;
+      } else {
+        $.getScript("/js/src/particle.js?v=5.0.1");
+      }
+    }
+  })();
+  function GetRequest() {
+    var url = location.search;
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+      var str = url.substr(1);
+      strs = str.split("&");
+      for(var i = 0; i < strs.length; i ++) {
+        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+      }
+    }
+    return theRequest;
+  }
+</script>
+<!-- 识别手机或电脑的js结束 -->  
+
+  <!-- 页面点击小红心 -->
+  <!-- 页面点击小红心 -->
+
+  <script type="text/javascript" src="/js/src/love.js?v=5.0.1"></script>
+
+
+  <!-- 鼠标移动，效果 -->
+  <!-- 鼠标移动特效 -->
+
+  <script type="text/javascript" src="/js/src/jquery-stars.js?v=5.0.1"></script>
+  <script type="text/javascript">
+  jQuery('body').jstars({
+  	image_path: '/images',
+  	image: 'candy-cane-stars.png',
+  	style: 'white',
+  	width: 34,
+  	height: 34,
+  	delay: 700,
+  	frequency: 5
+  });
+  </script>
+
+
+  <!-- 页面 title 进入/离开 效果 -->
+
+  <script type="text/javascript">var OriginTitile=document.title,st;document.addEventListener("visibilitychange",function(){document.hidden?(document.title="Waiting for you back！",clearTimeout(st)):(document.title="Thanks for visit~ "+OriginTitile,st=setTimeout(function(){document.title=OriginTitile},4e3))})</script>
+
+
+</body>
+</html>

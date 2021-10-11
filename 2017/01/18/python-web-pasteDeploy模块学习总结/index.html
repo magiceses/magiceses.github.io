@@ -1,0 +1,1374 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Courier New:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Python,PythonWeb," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="天青色等烟雨" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="人生在世，有得就有失，有付出就有回报，鱼和熊掌不能兼得。有时你的付出不一定能得到回报，但自己要想明白一些，不要太苛求自己，生命总有它的轮回，上帝是公平的，它对每个人都是一样的垂青。人生苦短，就好好的潇洒走一回。
+
+简介官方文档把PasteDeploy介绍为一个发现并配置WSGI应用和服务的一个系统，通过loadapp(一个简单的函数)就可以部署WSGI，而且不需要知道WSGI应用的细节。
+我们先来">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PasteDeploy 模块学习总结">
+<meta property="og:url" content="https://magiceses.github.io/2017/01/18/python-web-pasteDeploy模块学习总结/index.html">
+<meta property="og:site_name" content="天青色等烟雨">
+<meta property="og:description" content="人生在世，有得就有失，有付出就有回报，鱼和熊掌不能兼得。有时你的付出不一定能得到回报，但自己要想明白一些，不要太苛求自己，生命总有它的轮回，上帝是公平的，它对每个人都是一样的垂青。人生苦短，就好好的潇洒走一回。
+
+简介官方文档把PasteDeploy介绍为一个发现并配置WSGI应用和服务的一个系统，通过loadapp(一个简单的函数)就可以部署WSGI，而且不需要知道WSGI应用的细节。
+我们先来">
+<meta property="og:image" content="https://magiceses.github.io/images/python-web-pastedeploy-1.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-web-pastedeploy-2.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-web-pastedeploy-3.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-web-pastedeploy-4.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-web-pastedeploy-5.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-web-pastedeploy-6.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-web-pastedeploy-7.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-web-pastedeploy-8.png">
+<meta property="og:updated_time" content="2021-10-01T01:16:07.133Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PasteDeploy 模块学习总结">
+<meta name="twitter:description" content="人生在世，有得就有失，有付出就有回报，鱼和熊掌不能兼得。有时你的付出不一定能得到回报，但自己要想明白一些，不要太苛求自己，生命总有它的轮回，上帝是公平的，它对每个人都是一样的垂青。人生苦短，就好好的潇洒走一回。
+
+简介官方文档把PasteDeploy介绍为一个发现并配置WSGI应用和服务的一个系统，通过loadapp(一个简单的函数)就可以部署WSGI，而且不需要知道WSGI应用的细节。
+我们先来">
+<meta name="twitter:image" content="https://magiceses.github.io/images/python-web-pastedeploy-1.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://magiceses.github.io/2017/01/18/python-web-pasteDeploy模块学习总结/"/>
+
+
+<!-- 网页加载条 -->
+<script src="/js/src/pace.min.js"></script>
+  <title> PasteDeploy 模块学习总结 | 天青色等烟雨 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">天青色等烟雨</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">而我在等你</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-guestbook">
+          <a href="/guestbook" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-commenting"></i> <br />
+            
+            留言
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+      
+      
+        <li class="menu-item"> <a title="把这个链接拖到你的工具栏中,任何网页都可以High" href='javascript:(
+/*
+ * Copyright (C) 2016 Never_yu (Neveryu.github.io) <React.dong.yu@gmail.com>
+ * Sina Weibo (http://weibo.com/Neveryu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function go() {
+
+var songs = [
+  "http://dl.stream.qqmusic.qq.com/C400001Qu4I30eVFYb.m4a?vkey=2127178E4405E7B8B268F20F05232485735CCF4FF8C1432F0360D2626D0B6C9564B5627C7AB481BBC685FEDB0946A50E97C66F0D1B008226&guid=7175649092&uin=0&fromtag=66",
+  "",
+  "",
+  ""
+];
+
+function c() {
+  var e = document.createElement("link");
+  e.setAttribute("type", "text/css");
+  e.setAttribute("rel", "stylesheet");
+  e.setAttribute("href", f);
+  e.setAttribute("class", l);
+  document.body.appendChild(e)
+}
+
+function h() {
+  var e = document.getElementsByClassName(l);
+  for (var t = 0; t < e.length; t++) {
+    document.body.removeChild(e[t])
+  }
+}
+
+function p() {
+  var e = document.createElement("div");
+  e.setAttribute("class", a);
+  document.body.appendChild(e);
+  setTimeout(function() {
+    document.body.removeChild(e)
+  }, 100)
+}
+
+function d(e) {
+  return {
+    height : e.offsetHeight,
+    width : e.offsetWidth
+  }
+}
+
+function v(i) {
+  var s = d(i);
+  return s.height > e && s.height < n && s.width > t && s.width < r
+}
+
+function m(e) {
+  var t = e;
+  var n = 0;
+  while (!!t) {
+    n += t.offsetTop;
+    t = t.offsetParent
+  }
+  return n
+}
+
+function g() {
+  var e = document.documentElement;
+  if (!!window.innerWidth) {
+    return window.innerHeight
+  } else if (e && !isNaN(e.clientHeight)) {
+    return e.clientHeight
+  }
+  return 0
+}
+
+function y() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  }
+  return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+}
+
+function E(e) {
+  var t = m(e);
+  return t >= w && t <= b + w
+}
+
+function S() {
+  var e = document.getElementById("audio_element_id");
+  if(e != null){
+    var index = parseInt(e.getAttribute("curSongIndex"));
+    if(index > songs.length - 2) {
+      index = 0;
+    } else {
+      index++;
+    }
+    e.setAttribute("curSongIndex", index);
+    N();
+  }
+
+  e.src = i;
+  e.play()
+}
+
+function x(e) {
+  e.className += " " + s + " " + o
+}
+
+function T(e) {
+  e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+}
+
+function N() {
+  var e = document.getElementsByClassName(s);
+  var t = new RegExp("\\b" + s + "\\b");
+  for (var n = 0; n < e.length; ) {
+    e[n].className = e[n].className.replace(t, "")
+  }
+}
+
+function initAudioEle() {
+  var e = document.getElementById("audio_element_id");
+  if(e === null){
+    e = document.createElement("audio");
+    e.setAttribute("class", l);
+    e.setAttribute("curSongIndex", 0);
+    e.id = "audio_element_id";
+    e.loop = false;
+    e.bgcolor = 0;
+    e.addEventListener("canplay", function() {
+      setTimeout(function() {
+        x(k)
+      }, 500);
+      setTimeout(function() {
+        N();
+        p();
+        for (var e = 0; e < O.length; e++) {
+          T(O[e])
+        }
+      }, 15500)
+    }, true);
+    e.addEventListener("ended", function() {
+      N();
+      h();
+      go();
+    }, true);
+    e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+    document.body.appendChild(e);
+  }
+}
+
+initAudioEle();
+var e = 30;
+var t = 30;
+var n = 350;
+var r = 350;
+
+var curSongIndex = parseInt(document.getElementById("audio_element_id").getAttribute("curSongIndex"));
+var i = songs[curSongIndex];
+
+var s = "mw-harlem_shake_me";
+var o = "im_first";
+var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+var a = "mw-strobe_light";
+
+/* harlem-shake-style.css，替换成你的位置，也可以直接使用：//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css */
+var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+
+var l = "mw_added_css";
+var b = g();
+var w = y();
+var C = document.getElementsByTagName("*");
+var k = null;
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    if (E(A)) {
+      k = A;
+      break
+    }
+  }
+}
+if (A === null) {
+  console.warn("Could not find a node of the right size. Please try a different page.");
+  return
+}
+c();
+S();
+var O = [];
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    O.push(A)
+  }
+}
+})()'><i class="menu-item-icon fa fa-music fa-fw"></i> High一下</a></li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search fa-lg"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                PasteDeploy 模块学习总结
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-01-18T13:25:24+08:00" content="2017-01-18">
+              2017-01-18
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv">热度
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p id="div-border-top-green">人生在世，有得就有失，有付出就有回报，鱼和熊掌不能兼得。有时你的付出不一定能得到回报，但自己要想明白一些，不要太苛求自己，生命总有它的轮回，上帝是公平的，它对每个人都是一样的垂青。人生苦短，就好好的潇洒走一回。<br></p>
+
+<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>官方文档把PasteDeploy介绍为一个发现并配置WSGI应用和服务的一个系统，通过loadapp(一个简单的函数)就可以部署WSGI，而且不需要知道WSGI应用的细节。</p>
+<p>我们先来看下，在WSGI简单的模型中，如果有多个URL，一般是怎么做的呢？直接在代码判断请求方和请求路径的然后分别处理不同的URL。<br><a id="more"></a></p>
+<p>处理函数 app.py</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">application</span><span class="params">(environ, start_response)</span>:</span></span><br><span class="line">    method = environ[<span class="string">'REQUEST_METHOD'</span>]  <span class="comment">#从环境变量中提取请求方法</span></span><br><span class="line">    path = environ[<span class="string">'PATH_INFO'</span>]         <span class="comment">#从环境变量中提取请求路径</span></span><br><span class="line">    <span class="keyword">if</span> method==<span class="string">'GET'</span> <span class="keyword">and</span> path==<span class="string">'/'</span>:     <span class="comment">#通过判断的方法来确定处理的函数</span></span><br><span class="line">        return &lt;h1&gt;path = /&lt;/h1&gt; #该函数对应的URL是 "/"</span><br><span class="line">    <span class="keyword">if</span> method==<span class="string">'POST'</span> <span class="keyword">and</span> path=<span class="string">'/signin'</span>:</span><br><span class="line">        return &lt;h1&gt;path = /signin &lt;/h1&gt; #该函数对应URL的是 "/sigin"</span><br></pre></td></tr></table></figure>
+<p>服务器函数 server.py</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 从wsgiref模块导入:</span></span><br><span class="line"><span class="keyword">from</span> wsgiref.simple_server <span class="keyword">import</span> make_server</span><br><span class="line"><span class="comment"># 导入我们自己编写的application函数:</span></span><br><span class="line"><span class="keyword">from</span> hello <span class="keyword">import</span> application</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建一个服务器，IP地址为空，端口是8000，处理函数是application:</span></span><br><span class="line">httpd = make_server(<span class="string">''</span>, <span class="number">8000</span>, application)</span><br><span class="line"><span class="keyword">print</span> <span class="string">"Serving HTTP on port 8000..."</span></span><br><span class="line"><span class="comment"># 开始监听HTTP请求:</span></span><br><span class="line">httpd.serve_forever()</span><br></pre></td></tr></table></figure>
+<p>这种方法是简单，直接的，但也是可重复性差，不可维护的。一个restful中有可能50个以上的URL路径，如果这么写下去，那维护的人要抓狂。</p>
+<p>所以要以一种简单清晰，可维护性好的方式去解析URL，这种方式便是使用PasteDeploy模型。</p>
+<p>PasteDeploy的工作模式是使用一个配置文件configure.ini去解析URL。</p>
+<h1 id="paste-配置分析"><a href="#paste-配置分析" class="headerlink" title="paste 配置分析"></a>paste 配置分析</h1><p>PasteDeploy配置文件由若干section组成，section的声明格式如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[type:name]</span><br></pre></td></tr></table></figure>
+<p>其中，方括号括起的section声明一个新section的开始，section的声明由两部分组成，section的类型（type）和section的名称（name），如：[app:main]等。section的type可以有：app、composite、filter、pipeline、filter-app等。</p>
+<p>每个section中具体配置项的格式就是基本的ini格式：key = value，此外，PasteDeploy的配置文件中使用“#”标注注释。</p>
+<p>在基本了解PasteDeploy配置文件的书写格式后，我们不妨看一个实例，来具体了解不同type的section。</p>
+<p>先从一个PasteDeploy的配置文件(config.ini)入手分析</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[composite:main]</span></span><br><span class="line"><span class="attr">use</span> = egg:Paste#urlmap</span><br><span class="line">/ = home</span><br><span class="line">/blog = blog</span><br><span class="line">/wiki = wiki</span><br><span class="line">/cms = config:cms.ini</span><br><span class="line"></span><br><span class="line"><span class="section">[app:home]</span></span><br><span class="line"><span class="attr">use</span> = egg:Paste#static</span><br><span class="line"><span class="attr">document_root</span> = %(here)s/htdocs</span><br><span class="line"></span><br><span class="line"><span class="section">[filter-app:blog]</span></span><br><span class="line"><span class="attr">use</span> = egg:Authentication#auth</span><br><span class="line"><span class="attr">next</span> = blogapp</span><br><span class="line"><span class="attr">roles</span> = admin</span><br><span class="line"><span class="attr">htpasswd</span> = /home/me/users.htpasswd</span><br><span class="line"></span><br><span class="line"><span class="section">[app:blogapp]</span></span><br><span class="line"><span class="attr">use</span> = egg:BlogApp</span><br><span class="line"><span class="attr">database</span> = sqlite:/home/me/blog.db</span><br><span class="line"></span><br><span class="line"><span class="section">[app:wiki]</span></span><br><span class="line"><span class="attr">use</span> = call:mywiki.main:application</span><br><span class="line"><span class="attr">database</span> = sqlite:/home/me/wiki.db</span><br></pre></td></tr></table></figure>
+<p>上面的示例文件列出了若干不同type的section示意，下面就一一探讨PasteDeploy可定义的section type。</p>
+<h2 id="Type-composite（组合应用）"><a href="#Type-composite（组合应用）" class="headerlink" title="Type = composite（组合应用）"></a>Type = composite（组合应用）</h2><p>顾名思义，组合应用由若干WSGI应用组成，composite为这些应用提供更高一层的分配工作。</p>
+<p>我们具体分析示例1中的如下部分：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[composite:main]</span></span><br><span class="line"><span class="attr">use</span> = egg:Paste#urlmap</span><br><span class="line">/ = home</span><br><span class="line">/blog = blog</span><br><span class="line">/wiki = wiki</span><br><span class="line">/cms = config:cms.ini</span><br></pre></td></tr></table></figure>
+<p>该段配置文件定义了一个名为main、类型为composite的section，方括号的声明以下是该section的具体配置，遵循 key = value 的统一格式。</p>
+<p>Composite类型的section将URL请求分配给其他的WSGI应用。</p>
+<p>use = egg:Paste#urlmap 意味着使用 Paste 包中的 urlmap 应用。urlmap是Paste提供的一套通用的composite应用，作用就是根据用户请求的URL前缀，将用户请求映射到对应的WSGI应用上去。这里的WSGI应用有：“home”, “blog”, “wiki” 和 “config:cms.ini”。</p>
+<p>最后一项仅仅是参考了同一个目录中的另一个文件”cms.ini”。</p>
+<h2 id="Type-app（WSGI应用）"><a href="#Type-app（WSGI应用）" class="headerlink" title="Type = app（WSGI应用）"></a>Type = app（WSGI应用）</h2><p>回到示例1中的下一部分：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[app:home]</span></span><br><span class="line"><span class="attr">use</span> = egg:Paste#static</span><br><span class="line"><span class="attr">document_root</span> = %(here)s/htdocs</span><br><span class="line"></span><br><span class="line"><span class="section">[app:wiki]</span> </span><br><span class="line"><span class="attr">use</span> = call:mywiki.main:application </span><br><span class="line"><span class="attr">database</span> = sqlite:/home/me/wiki.db</span><br></pre></td></tr></table></figure>
+<p>app类型的section声明一个具体的WSGI应用。调用哪个python module中的app代码则由的use后的值指定。</p>
+<p>这里的 egg:Paste#static 是另一个简单应用，作用仅仅是呈现静态页面。它接收了一个配置项： document_root ，后面的值可以从全局配置<a href="https://blog.csdn.net/gyshun/article/details/大小写敏感" target="_blank" rel="external">DEFAULT</a>中提取，提取方法s是使用变量替换：比如 %(var_name)s 的形式。</p>
+<p>这里 %(here)s 的意思是这个示例配置文件所在的目录，因为相对路径在不同服务器中的解释方法不同，出于移植性的考虑，官方文档上推荐当前这种写法。</p>
+<p>示例中定义了多个app类型的section，因为PasteDeploy的配置文件中允许定义多个app类型的section，同时要求每个WSGI应用也都应该拥有自己的section。这样，每一个WSGI应用在配置文件中都有一个app类型的section与之对应，默认地，”main”应用对应于 app:main 或 app 。</p>
+<p>应用的具体实现要在section中配置，有两种方法专门用于指出应用对应的代码：使用URI（用use标识）或 直接指向实现代码（用protocol标识）。</p>
+<h3 id="使用另一个URI"><a href="#使用另一个URI" class="headerlink" title="使用另一个URI"></a>使用另一个URI</h3><p>采用该方法的特点是指出应用的实现代码的那一条 key = value 配置项采用”use”作为键，该方法也有许多变种，官方的示例中给出了一些介绍：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[app:myapp]</span></span><br><span class="line"><span class="attr">use</span> = config:another_config_file.ini#app_name</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或任意URI:</span></span><br><span class="line"><span class="section">[app:myotherapp]</span></span><br><span class="line"><span class="attr">use</span> = egg:MyApp</span><br><span class="line"><span class="comment"># 或指明某个模块中的可调用:</span></span><br><span class="line"><span class="section">[app:mythirdapp]</span></span><br><span class="line"><span class="attr">use</span> = call:my.project:myapplication</span><br><span class="line"><span class="comment"># 甚至是其他的section:</span></span><br><span class="line"><span class="section">[app:mylastapp]</span></span><br><span class="line"><span class="attr">use</span> = myotherapp</span><br></pre></td></tr></table></figure>
+<p>最后指向其他的section的那个例子，看起来似乎没有什么意义，似乎只是两个相同的WSGI应用。但是这样的定义允许我们在 [app:mylastapp] 这个应用中定义一些局部的配置项，从而在重用代码的同时覆写它引用的应用配置。</p>
+<h3 id="直接指向应用的实现代码"><a href="#直接指向应用的实现代码" class="headerlink" title="直接指向应用的实现代码"></a>直接指向应用的实现代码</h3><p>采用该方法的特点是指出实现代码的那一条 key = value 配置项采用“协议”作为键，所谓“协议”即protocol，告诉PasteDeploy即将加载的对象类型，如：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[app:myapp]</span></span><br><span class="line">paste.app_factory = myapp.modulename:app_factory</span><br></pre></td></tr></table></figure>
+<p>该例的protocol paste.app_factory 是一个应用的工厂函数，指明import对象的类型；值 myapp.modulename:app_factory 指明具体加载的模块和方法。</p>
+<p>除了app_factory外还有composite_facory，fliter_factory， fliter_app_factory，server_factory，server_runner等，后面跟上myapp.modulename模块下的app_factory类，不同协议其app_factory也不一样。</p>
+<p>那么这几种工厂模式，配置了之后在代码中怎么使用呢？</p>
+<h3 id="实现factory"><a href="#实现factory" class="headerlink" title="实现factory"></a>实现factory</h3><h4 id="app-factory"><a href="#app-factory" class="headerlink" title="app_factory"></a>app_factory</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">app_factory</span><span class="params">(global_config, **local_conf)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> wsgi_app</span><br></pre></td></tr></table></figure>
+<p>global_config传入的是字典参数，local_conf传入的是key-value参数，返回一个wsgi application</p>
+<h4 id="composite-factory"><a href="#composite-factory" class="headerlink" title="composite_factory"></a>composite_factory</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">composite_factory</span><span class="params">(loader, global_config, **local_conf)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> wsgi_app</span><br></pre></td></tr></table></figure>
+<p>loader调用一些特殊函数， get_app(name_or_uri, global_conf=None) return a WSGI application with the given name. get_filter and get_server work the same way。如下使用方案：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">pipeline_factory</span><span class="params">(loader, global_config, pipeline)</span>:</span></span><br><span class="line">    <span class="comment"># space-separated list of filter and app names:</span></span><br><span class="line">    pipeline = pipeline.split()</span><br><span class="line">    filters = [loader.get_filter(n) <span class="keyword">for</span> n <span class="keyword">in</span> pipeline[:<span class="number">-1</span>]]</span><br><span class="line">    app = loader.get_app(pipeline[<span class="number">-1</span>])</span><br><span class="line">    filters.reverse() <span class="comment"># apply in reverse order!</span></span><br><span class="line">    <span class="keyword">for</span> filter <span class="keyword">in</span> filters:</span><br><span class="line">        app = filter(app)</span><br><span class="line">    <span class="keyword">return</span> app</span><br></pre></td></tr></table></figure>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[composite:main]</span></span><br><span class="line"><span class="attr">use</span> = &lt;pipeline_factory_uri&gt;</span><br><span class="line"><span class="attr">pipeline</span> = egg:Paste#printdebug session myapp</span><br><span class="line"></span><br><span class="line"><span class="section">[filter:session]</span></span><br><span class="line"><span class="attr">use</span> = egg:Paste#session</span><br><span class="line"><span class="attr">store</span> = memory</span><br><span class="line"></span><br><span class="line"><span class="section">[app:myapp]</span></span><br><span class="line"><span class="attr">use</span> = egg:MyApp</span><br></pre></td></tr></table></figure>
+<p>将数据读取传入，将filter printdebug,session读入并付给filter,读取app为pipeline参数的最后一个myapp,翻转filter先运行session(myapp)，再运行egg:Paste#printdebug(myapp)。</p>
+<h4 id="fliter-factory"><a href="#fliter-factory" class="headerlink" title="fliter_factory"></a>fliter_factory</h4><p>类似app_factroy但返回的是filter对象，而且仅仅接受WSGI application为唯一的参数，如下所示</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">auth_filter_factory</span><span class="params">(global_conf, req_usernames)</span>:</span></span><br><span class="line">    <span class="comment"># space-separated list of usernames:</span></span><br><span class="line">    req_usernames = req_usernames.split()</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">filter</span><span class="params">(app)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> AuthFilter(app, req_usernames)</span><br><span class="line">    <span class="keyword">return</span> filter</span><br><span class="line"> </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AuthFilter</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, app, req_usernames)</span>:</span></span><br><span class="line">        self.app = app</span><br><span class="line">        self.req_usernames = req_usernames</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self, environ, start_response)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> environ.get(<span class="string">'REMOTE_USER'</span>) <span class="keyword">in</span> self.req_usernames:</span><br><span class="line">            <span class="keyword">return</span> self.app(environ, start_response)</span><br><span class="line">        start_response(</span><br><span class="line">            <span class="string">'403 Forbidden'</span>, [(<span class="string">'Content-type'</span>, <span class="string">'text/html'</span>)])</span><br><span class="line">        <span class="keyword">return</span> [<span class="string">'You are forbidden to view this resource'</span>]</span><br></pre></td></tr></table></figure>
+<p>定义了AuthFilter对象实现请求变量’REMOTE_USER’下的变量和req_usernames是否一致，filter(app)调用唯一对象app，再里面再做处理并返回信息，通过<strong>call</strong>把类像函数一样调用。</p>
+<h4 id="fliter-app-factory"><a href="#fliter-app-factory" class="headerlink" title="fliter_app_factory"></a>fliter_app_factory</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AuthFilter</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, app, global_conf, req_usernames)</span>:</span></span><br><span class="line">        ....</span><br></pre></td></tr></table></figure>
+<p>除了参数包括app，返回对象为WSGI application外，其他不变。</p>
+<h4 id="server-factory"><a href="#server-factory" class="headerlink" title="server_factory"></a>server_factory</h4><p>一个参数 wsgi_app，返回serve</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">server_factory</span><span class="params">(global_conf, host, port)</span>:</span></span><br><span class="line">    port = int(port)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">serve</span><span class="params">(app)</span>:</span></span><br><span class="line">        s = Server(app, host=host, port=port)</span><br><span class="line">        s.serve_forever()</span><br><span class="line">    <span class="keyword">return</span> serve</span><br></pre></td></tr></table></figure>
+<h4 id="server-runner"><a href="#server-runner" class="headerlink" title="server_runner"></a>server_runner</h4><p>官方文档说不传wsgi_app，其他和server_factory一样，没给例子</p>
+<h2 id="Type-filter-（过滤器）"><a href="#Type-filter-（过滤器）" class="headerlink" title="Type = filter*（过滤器）"></a>Type = filter*（过滤器）</h2><p>filter是作用于WSGI应用上的函数或方法，以app为唯一的参数，并返回一个“过滤”后的app。归功于WSGI接口的规范，不同的filter可以依次“过滤”某一app，事实上多个filter处理一个app也就是下文中提到的管道（pipeline）。</p>
+<p>主要有三种方法进行filter，第一种是fliter-with,第二种是filter-app,第三种是pipeline,多说一句，openstack用的最多的是pipeline。</p>
+<h3 id="Type-filter（过滤器）"><a href="#Type-filter（过滤器）" class="headerlink" title="Type = filter（过滤器）"></a>Type = filter（过滤器）</h3><p>第一种，通过fliter-with指向下一个fliter应用</p>
+<p>在PasteDeploy的配置文件中有多种方法来“过滤”应用，比如示例1中：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[app:main]</span></span><br><span class="line"><span class="attr">use</span> = egg:MyEgg</span><br><span class="line"><span class="attr">filter-with</span> = printdebug</span><br><span class="line"></span><br><span class="line"><span class="section">[filter:printdebug]</span> </span><br><span class="line"><span class="attr">use</span> = egg:Paste#printdebug</span><br><span class="line"><span class="comment"># and you could have another filter-with here, and so on...</span></span><br></pre></td></tr></table></figure>
+<p>在 [app:main] 的 filter-with 字段指明用来处理该应用的filter，就指定了名为”printdebug”的filter来处理应用”main”。在 [filter:printdebug] 中还可以定义新的 filter-with 字段，从而将处理关系延续下去。</p>
+<h3 id="Type-filter-app"><a href="#Type-filter-app" class="headerlink" title="Type = filter-app"></a>Type = filter-app</h3><p>第二种，通过next配置指向下一个filter应用</p>
+<p>同样是处理应用，在PasteDeploy配置文件中可以有着不同的写法，比如示例1中的下面部分，就是使用filter-app类型的section来声明一个filter：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[filter-app:blog]</span> </span><br><span class="line"><span class="attr">use</span> = egg:Authentication#auth </span><br><span class="line"><span class="attr">next</span> = blogapp </span><br><span class="line"><span class="attr">roles</span> = admin </span><br><span class="line"><span class="attr">htpasswd</span> = /home/me/users.htpasswd </span><br><span class="line"></span><br><span class="line"><span class="section">[app:blogapp]</span></span><br><span class="line"><span class="attr">use</span> = egg:BlogApp</span><br><span class="line"><span class="attr">database</span> = sqlite:/home/me/blog.db</span><br></pre></td></tr></table></figure>
+<p>该部分采用了[filter-app:NAME]类型的section声明了一个filter，指定使用的代码，以及要处理的应用： next 字段的值。从而PasteDeploy会自动地将过滤器”blog”作用在应用”blogapp”上。</p>
+<h3 id="Type-pipeline"><a href="#Type-pipeline" class="headerlink" title="Type = pipeline"></a>Type = pipeline</h3><p>第三种，pipeline依次列出filter即可</p>
+<p>pipeline便于对一个应用添加多个过滤器，比如示例1中：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[pipeline:main]</span></span><br><span class="line"><span class="attr">pipeline</span> = filter1 egg:FilterEgg#filter2 filter3 app</span><br><span class="line"></span><br><span class="line"><span class="section">[filter:filter1]</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>就指定了在app上施加三个filter进行处理。</p>
+<p>总结起来，想要在某个应用前添加多个filter，共有 [filter-app:…] [pipeline：…] 和 [app:…] filter-with = … 等方法。</p>
+<blockquote>
+<p>egg模式，通过setuptools打包python源文件，类似java jar的格式;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&gt; setup(</span><br><span class="line">&gt;     name=&apos;MyApp&apos;,</span><br><span class="line">&gt;     ...</span><br><span class="line">&gt;     entry_points=&#123;</span><br><span class="line">&gt;         &apos;paste.app_factory&apos;: [</span><br><span class="line">&gt;             &apos;main=myapp.mymodule:app_factory&apos;,</span><br><span class="line">&gt;             &apos;ob2=myapp.mymodule:ob_factory&apos;],</span><br><span class="line">&gt;         &#125;,</span><br><span class="line">&gt;     )</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>&gt;</p>
+<blockquote>
+<p>通过上面配置安装egg，use=egg:MyApp#main或者use=egg:MyApp#ob2,可以分别找到myapp.mymodule下的app_factory对象和ob_factory对象</p>
+</blockquote>
+<h1 id="局部配置与全局配置"><a href="#局部配置与全局配置" class="headerlink" title="局部配置与全局配置"></a>局部配置与全局配置</h1><h2 id="局部配置与全局配置的格式"><a href="#局部配置与全局配置的格式" class="headerlink" title="局部配置与全局配置的格式"></a>局部配置与全局配置的格式</h2><p>PasteDeploy配置文件的所有配置项均使用 key = value 格式，但是局部配置项和全局配置项定义的位置不同。如：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[app:blog]</span></span><br><span class="line"><span class="attr">use</span> = egg:MyBlog</span><br><span class="line"><span class="attr">database</span> = mysql://localhost/blogdb</span><br><span class="line"><span class="attr">blogname</span> = This Is My Blog!</span><br><span class="line"></span><br><span class="line"><span class="section">[app:otherblog]</span></span><br><span class="line"><span class="attr">use</span> = blog</span><br><span class="line"><span class="attr">blogname</span> = The other face of my blog</span><br></pre></td></tr></table></figure>
+<p>每一个section内设置具体的键值关系，构成这些section自己的局部配置。</p>
+<p>为了便于不同的应用读取某些固定的系统信息，PasteDeploy允许设置全局配置变量，所有的全局配置必须放在[DEFAULT]字段下设置，如：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[DEFAULT]</span></span><br><span class="line"><span class="attr">admin_email</span> = webmaster@example.com</span><br><span class="line"></span><br><span class="line"><span class="section">[app:main]</span></span><br><span class="line"><span class="attr">use</span> = ...</span><br><span class="line">set admin_email = bob@example.com</span><br></pre></td></tr></table></figure>
+<p>注意[DEFAULT]段名是大小写敏感的，因此必须严格大写。</p>
+<h2 id="局部配置和全局配置的覆写"><a href="#局部配置和全局配置的覆写" class="headerlink" title="局部配置和全局配置的覆写"></a>局部配置和全局配置的覆写</h2><p>上面的两个例子，实际上展示了局部配置和全局配置的覆写，这里详细介绍，首先看局部配置的覆写：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[app:blog]</span></span><br><span class="line"><span class="attr">use</span> = egg:MyBlog</span><br><span class="line"><span class="attr">database</span> = mysql://localhost/blogdb</span><br><span class="line"><span class="attr">blogname</span> = This Is My Blog!</span><br><span class="line"></span><br><span class="line"><span class="section">[app:otherblog]</span></span><br><span class="line"><span class="attr">use</span> = blog</span><br><span class="line"><span class="attr">blogname</span> = The other face of my blog</span><br></pre></td></tr></table></figure>
+<p>已经知道，一些section可以直接复用其他section的代码，并定制配置信息，这里 [app:otherblog] 就采用了 [app:blog] 的代码，同时将配置项 blogname 改为自己特定的。</p>
+<p>另一方面，应用在本地可以修改全局配置项的值：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[DEFAULT]</span></span><br><span class="line"><span class="attr">admin_email</span> = webmaster@example.com</span><br><span class="line"></span><br><span class="line"><span class="section">[app:main]</span></span><br><span class="line"><span class="attr">use</span> = ...</span><br><span class="line">set admin_email = bob@example.com</span><br></pre></td></tr></table></figure>
+<p>只需要在要覆写的键前加 set 即可。</p>
+<p>至于为什么要探讨局部配置与全局配置，是因为二者在传递给不同类型的factory function时对应的参数不同，这些将在下文详细探讨。</p>
+<h1 id="paste-使用"><a href="#paste-使用" class="headerlink" title="paste 使用"></a>paste 使用</h1><h2 id="使用示例-1"><a href="#使用示例-1" class="headerlink" title="使用示例 1"></a>使用示例 1</h2><p>借鉴一个例子来讲解，原文 <a href="http://blog.csdn.net/li_101357/article/details/52755367" target="_blank" rel="external">http://blog.csdn.net/li_101357/article/details/52755367</a></p>
+<p>在家里水系统的模型大概如下图,以及对应的模拟路径：</p>
+<p><img src="/images/python-web-pastedeploy-1.png" alt="img"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">总开关      /main</span><br><span class="line">淋浴器      /main/boiler/shower</span><br><span class="line">水龙头      /main/tap</span><br></pre></td></tr></table></figure>
+<p>PasteDeploy模型中大致可分部件，分别是：</p>
+<p><img src="/images/python-web-pastedeploy-2.png" alt="img"><img src="/images/python-web-pastedeploy-3.png" alt="img"></p>
+<p><img src="/images/python-web-pastedeploy-4.png" alt="img"><img src="/images/python-web-pastedeploy-5.png" alt="img"></p>
+<p>对应到上例：</p>
+<ol>
+<li>app       水龙头 淋浴器</li>
+<li>filter       热水器</li>
+<li>pipeline   热水器 + 淋浴器</li>
+<li>composite 总开关</li>
+</ol>
+<p>确定了对应的URL之后，使用PasteDeploy组件来构造解析文件configure.ini：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[composite:main]</span></span><br><span class="line"><span class="attr">use</span> = egg:Paste#urlmap</span><br><span class="line">/main/tap = tap</span><br><span class="line">/main/boil/shower = pip_to_shower</span><br><span class="line"> </span><br><span class="line"><span class="section">[app:tap]</span></span><br><span class="line">paste.app_factory = tap:app_factory</span><br><span class="line"><span class="attr">in_arg</span> = water</span><br><span class="line"> </span><br><span class="line"><span class="section">[pipeline:pip_to_shower]</span></span><br><span class="line"><span class="attr">pipeline</span> = boiler shower</span><br><span class="line"> </span><br><span class="line"><span class="section">[filter:boiler]</span></span><br><span class="line">paste.filter_app_factory = boiler:filter_app_factory</span><br><span class="line"><span class="attr">in_arg</span> = water</span><br><span class="line"> </span><br><span class="line"><span class="section">[app:shower]</span></span><br><span class="line">paste.app_factory = shower:app_factory</span><br><span class="line"><span class="attr">in_arg</span> = hot_water</span><br></pre></td></tr></table></figure>
+<p>我们再一一分析下，顺便复习一下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[composite:main]</span></span><br><span class="line"><span class="attr">use</span> = egg:Paste#urlmap</span><br><span class="line">/main/tap = tap</span><br><span class="line">/main/boil/shower = pip_to_shower</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>Paste#urlmap 表示，默认使用Paste.urlmap。</p>
+<p>use = egg:Paste#urlmap 意味着直接使用来自于Paste包的urlmap的composite应用。 urlmap是特别常见的composite应用——它使用路径前缀来映射将你的请求与其他应用对应起来。</p>
+<p>基本含义就是说，这是Paste已经提供好的一个composite，如果你想自定义就需要另外写一个composite_factory了。</p>
+</blockquote>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[app:tap]</span></span><br><span class="line">paste.app_factory = tap:app_factory</span><br><span class="line"><span class="attr">in_arg</span> = water</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>表示路径”/tap”的处理方法paste.app_factory存在于tap.py文件的的app_factory中，这是一个方法。</p>
+</blockquote>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[pipeline:pip_to_shower]</span></span><br><span class="line"><span class="attr">pipeline</span> = boiler shower</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>pipeline</strong> 主要起到组合的作用，将filter(过滤器)和app(应用)组合起来，形成一条管道。</p>
+</blockquote>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[filter:boiler]</span></span><br><span class="line">paste.filter_app_factory = boiler:filter_app_factory</span><br><span class="line"><span class="attr">in_arg</span> = water</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>filter类似app，只不过换成了paste.filter_app_factory，filter首先执行过滤功能，然后执行app。</p>
+</blockquote>
+<p>配置文件中将路径的处理都配置好：</p>
+<p><code>/main/tap</code> 路径对应的处理函数 tap ，tap是文件tap.py的app_factory方法。</p>
+<p><code>/main/boil/shower</code> 路径对应的处理函数是管道 pip_to_shower 。管道由过滤器 boiler和应用shower组成。首次经过boiler的过滤，然后调用shower函数处理。</p>
+<p>下面完成tap、shower和filter文件：</p>
+<p>tap.py</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Tap</span><span class="params">(object)</span>:</span> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, in_arg)</span>:</span> </span><br><span class="line">        self.in_arg = in_arg </span><br><span class="line">   </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self, environ, start_response)</span>:</span> </span><br><span class="line">        <span class="keyword">print</span> <span class="string">'Tap'</span> </span><br><span class="line">        start_response(<span class="string">'200 ok'</span>, [(<span class="string">'Content-Type'</span>, <span class="string">'text/html'</span>)]) </span><br><span class="line">        <span class="keyword">return</span> <span class="string">"&lt;h1&gt; Tap! &lt;/h1&gt;"</span></span><br><span class="line">   </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">app_factory</span><span class="params">(global_config, in_arg)</span>:</span> </span><br><span class="line">    <span class="keyword">return</span> Tap(in_arg)</span><br></pre></td></tr></table></figure>
+<p>app_factory是tap对应的处理方法，返回时调用了Tap方法，Tap对应的是类Tap的<strong>call</strong>方法，在该方法中打印一个”Tap”，然后发送报文头，最后返回一个字符串。</p>
+<p>shower.py</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Shower</span><span class="params">(object)</span>:</span> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, in_arg)</span>:</span> </span><br><span class="line">        self.in_arg = in_arg </span><br><span class="line">   </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self, environ, start_response)</span>:</span> </span><br><span class="line">        <span class="keyword">print</span> <span class="string">'Shower'</span> </span><br><span class="line">        start_response(<span class="string">'200 ok'</span>, [(<span class="string">'Content Type'</span>, <span class="string">'text/html'</span>)]) </span><br><span class="line">        <span class="keyword">return</span> <span class="string">"&lt;h1&gt; Shower! &lt;/h1&gt;"</span> </span><br><span class="line">   </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">app_factory</span><span class="params">(global_config, in_arg)</span>:</span> </span><br><span class="line">    <span class="keyword">return</span> Shower(in_arg)</span><br></pre></td></tr></table></figure>
+<p>shower的分析同上</p>
+<p>boiler.py</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Boiler</span><span class="params">(object)</span>:</span> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, app, in_arg)</span>:</span> </span><br><span class="line">        self.app = app </span><br><span class="line">        self.in_arg = in_arg </span><br><span class="line">   </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self, environ, start_response)</span>:</span> </span><br><span class="line">        <span class="keyword">print</span> <span class="string">'Boiler'</span> </span><br><span class="line">        <span class="keyword">return</span> self.app(environ, start_response) </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">filter_app_factory</span><span class="params">(app, global_config, in_arg)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> Boiler(app, in_arg)</span><br></pre></td></tr></table></figure>
+<p>filter_app_factory是boiler对应的处理方法，其中传入的参数中有一个app，返回时调用了Boiler,并传入参数app。</p>
+<p>Boiler是类Boiler的<strong>call</strong>方法，首先打印了字符串”Boiler”，然后返回时调用了函数app。这个app具体到本例就是调用了shower</p>
+<p>所有的文件都准备齐全了，接下来开启WSGI服务，让程序跑起来。</p>
+<p>server.py</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> wsgiref.simple_server <span class="keyword">import</span> make_server </span><br><span class="line"><span class="keyword">from</span> paste <span class="keyword">import</span> httpserver </span><br><span class="line"><span class="keyword">from</span> paste.deploy <span class="keyword">import</span> loadapp </span><br><span class="line"><span class="keyword">import</span> os </span><br><span class="line">   </span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>: </span><br><span class="line">    configfile = <span class="string">'configure.ini'</span> <span class="comment">#定义配置文件</span></span><br><span class="line">    appname = <span class="string">'main'</span>             <span class="comment">#composite的名称</span></span><br><span class="line">    wsgi_app = loadapp(<span class="string">'config:%s'</span> % os.path.abspath(configfile), appname) <span class="comment">#载入配置文件 </span></span><br><span class="line">    　　　　　<span class="keyword">print</span> <span class="string">"start the server listening on 8080"</span></span><br><span class="line">    server = make_server(<span class="string">'0.0.0.0'</span>, <span class="number">8080</span>, wsgi_app) </span><br><span class="line">    server.serve_forever()</span><br></pre></td></tr></table></figure>
+<p>运行server程序。</p>
+<p><img src="/images/python-web-pastedeploy-6.png" alt="img"></p>
+<p>在浏览器中请求URL <a href="http://[ip" target="_blank" rel="external">http://[ip</a> ]:8080/main/tap</p>
+<p><img src="/images/python-web-pastedeploy-7.png" alt="img"></p>
+<p>在浏览器中请求URL <a href="http://[ip" target="_blank" rel="external">http://[ip</a> ]:8080/main/boiler/shower</p>
+<p><img src="/images/python-web-pastedeploy-8.png" alt="img"></p>
+<h2 id="小结-1"><a href="#小结-1" class="headerlink" title="小结 1"></a>小结 1</h2><p>使用PasteDeploy模块将URL解析从判断的方式转变到文件配置的方式。</p>
+<p>使用configuer.ini文件配置了URL /main/tap 对应处理函数 app_factory和/main/boiler/shower 对应处理函数 shower.py中的app_factory。</p>
+<p>这个案例讲的就是使用PasteDeploy模块去配置WSGI解析URL。在openstack源码中就是基于这样的模型去完成restful 的解析，处理等。当一条restful的请求如：<a href="http://192.168.252.177:5000/v2.0/token" target="_blank" rel="external">http://192.168.252.177:5000/v2.0/token</a></p>
+<p>到达服务器时，服务器处理的流程就是如上，通过配置文件查找URL处理函数，然后调用处理函数返回处理结果。</p>
+<h2 id="使用示例-2"><a href="#使用示例-2" class="headerlink" title="使用示例 2"></a>使用示例 2</h2><p>paste.ini</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[composite:main]</span></span><br><span class="line"><span class="attr">use</span> = egg:Paste#urlmap</span><br><span class="line">/blog = blog</span><br><span class="line">/wiki = wiki</span><br><span class="line"></span><br><span class="line"><span class="section">[app:blog]</span></span><br><span class="line">paste.app_factory = example:Blog.factory</span><br><span class="line"></span><br><span class="line"><span class="section">[app:wiki]</span></span><br><span class="line">paste.app_factory = example:Wiki.factory</span><br></pre></td></tr></table></figure>
+<p>wsgi_server.py</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> paste <span class="keyword">import</span> deploy</span><br><span class="line"><span class="keyword">from</span> wsgiref.simple_server <span class="keyword">import</span> make_server</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Blog</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        print(<span class="string">"Init Blog."</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self, environ, start_response)</span>:</span></span><br><span class="line">        status_code = <span class="string">"200 OK"</span></span><br><span class="line">        response_headers = [(<span class="string">"Content-Type"</span>, <span class="string">"text/plain"</span>)]</span><br><span class="line">        response_body = <span class="string">"This is Blog's response body."</span>.encode(<span class="string">'utf-8'</span>)</span><br><span class="line"></span><br><span class="line">        start_response(status_code, response_headers)</span><br><span class="line">        <span class="keyword">return</span> [response_body]</span><br><span class="line"></span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">factory</span><span class="params">(cls, global_conf, **kwargs)</span>:</span></span><br><span class="line">        print(<span class="string">"Blog factory."</span>)</span><br><span class="line">        <span class="keyword">return</span> Blog()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Wiki</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        print(<span class="string">"Init Wiki."</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self, environ, start_response)</span>:</span></span><br><span class="line">        status_code = <span class="string">"200 OK"</span></span><br><span class="line">        response_headers = [(<span class="string">"Content-Type"</span>, <span class="string">"text/plain"</span>)]</span><br><span class="line">        response_body = <span class="string">"This is Wiki's response body."</span>.encode(<span class="string">'utf-8'</span>)</span><br><span class="line"></span><br><span class="line">        start_response(status_code, response_headers)</span><br><span class="line">        <span class="keyword">return</span> [response_body]</span><br><span class="line"></span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">factory</span><span class="params">(cls, global_conf, **kwargs)</span>:</span></span><br><span class="line">        print(<span class="string">"Wiki factory."</span>)</span><br><span class="line">        <span class="keyword">return</span> Wiki()</span><br><span class="line">      </span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    app = <span class="string">"main"</span></span><br><span class="line">    port = <span class="number">22800</span></span><br><span class="line">    conf_path = os.path.abspath(<span class="string">'paste.ini'</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 加载 app</span></span><br><span class="line">    applications = deploy.loadapp(<span class="string">"config:&#123;&#125;"</span>.format(conf_path) , app)</span><br><span class="line">    server = make_server(<span class="string">"localhost"</span>, port, applications)</span><br><span class="line"></span><br><span class="line">    print(<span class="string">'Started web server at port &#123;&#125;'</span>.format(port))</span><br><span class="line">    server.serve_forever()</span><br></pre></td></tr></table></figure>
+<p>一切都准备好后，在终端执行 <code>python wsgi_server.py</code>来启动 web server</p>
+<p>如果像上图一样一切正常，那么打开浏览器</p>
+<ul>
+<li>访问<a href="http://127.0.0.1:8000/blog，应该显示：This" target="_blank" rel="external">http://127.0.0.1:8000/blog，应该显示：This</a> is Blog’s response body.</li>
+<li>访问<a href="http://127.0.0.1:8000/wiki，应该显示：This" target="_blank" rel="external">http://127.0.0.1:8000/wiki，应该显示：This</a> is Wiki’s response body.。</li>
+</ul>
+<p>注意：urlmap对url的大小写是敏感的，例如如果访问<a href="http://127.0.0.1:8000/BLOG，在url映射中未能找到大写的BLOG。" target="_blank" rel="external">http://127.0.0.1:8000/BLOG，在url映射中未能找到大写的BLOG。</a></p>
+<h2 id="小结-2"><a href="#小结-2" class="headerlink" title="小结 2"></a>小结 2</h2><p>掌握 PasteDeploy ，你只要按照以下三个步骤逐个完成即可。</p>
+<p>1、配置 PasteDeploy使用的ini文件；</p>
+<p>2、定义WSGI应用；</p>
+<p>3、通过loadapp函数加载WSGI应用；</p>
+<p><br><br>参考：</p>
+<p><a href="https://www.cnblogs.com/Security-Darren/p/4087587.html" target="_blank" rel="external">详解Paste deploy</a></p>
+<p><a href="https://my.oschina.net/crooner/blog/606895" target="_blank" rel="external">Paste模块的世界</a></p>
+<p><a href="https://www.cnblogs.com/goldsunshine/p/7756153.html" target="_blank" rel="external">PasteDeploy分析</a></p>
+<p><a href="https://blog.csdn.net/bluefire1991/article/details/13289485" target="_blank" rel="external">Openstack源代码分析之paste.deploy</a></p>
+<p><a href="https://blog.csdn.net/gyshun/article/details/85055173" target="_blank" rel="external">paste deploy 解说和使用</a></p>
+<p><a href="https://blog.csdn.net/tantexian/article/details/37739363?utm_medium=distribute.pc_relevant.none-task-blog-baidujs_title-1&amp;spm=1001.2101.3001.4242" target="_blank" rel="external">Python.Paste指南之Deploy-概念</a></p>
+<p><a href="https://blog.csdn.net/meisanggou/article/details/88179254?utm_medium=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.baidujs&amp;depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.baidujs" target="_blank" rel="external">python Paste Deployment PasteDeploy模块介绍 中文翻译版</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+<blockquote class="blockquote-center" style="color: #ccc;">
+    -------------本文结束 <i class="fa fa-apple"></i> 感谢您的阅读-------------
+</blockquote>
+
+  <span id="inline-green" style="border-radius:3px;">作者</span>：<a class="link-blue" href="https://github.com/magiceses" target="_blank">Magiceses</a><br/>有问题请 <a class="link-blue" href="https://magiceses.github.io/guestbook" target="_blank">留言</a> 或者私信我的 <a class="link-blue" href="https://weibo.com/u/3069595351" target="_blank">微博</a>。
+
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>满分是10分的话，这篇文章你给几分</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/reward/reward_wechat.png" alt="magiceses WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/reward/reward_alipay.png" alt="magiceses Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"><i class="fa fa-tag"></i> Python</a>
+          
+            <a href="/tags/PythonWeb/" rel="tag"><i class="fa fa-tag"></i> PythonWeb</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/12/15/hexo-next-four/" rel="next" title="Hexo-NexT搭建个人博客（四）">
+                <i class="fa fa-chevron-left"></i> Hexo-NexT搭建个人博客（四）
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/03/07/python-with语句和上下文管理器对象/" rel="prev" title="Python with语句和上下文管理器对象">
+                Python with语句和上下文管理器对象 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar/avatar.png"
+               alt="magiceses" />
+          <p class="site-author-name" itemprop="name">magiceses</p>
+          <p class="site-description motion-element" itemprop="description">Stay Hungry,Stay Foolish</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">36</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/magiceses" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://blog.csdn.net/weixin_43700106" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-chrome"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/weblog" title="建站日志" target="_blank">建站日志</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/reward" title="打赏" target="_blank">打赏</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#paste-配置分析"><span class="nav-number">2.</span> <span class="nav-text">paste 配置分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Type-composite（组合应用）"><span class="nav-number">2.1.</span> <span class="nav-text">Type = composite（组合应用）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Type-app（WSGI应用）"><span class="nav-number">2.2.</span> <span class="nav-text">Type = app（WSGI应用）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用另一个URI"><span class="nav-number">2.2.1.</span> <span class="nav-text">使用另一个URI</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#直接指向应用的实现代码"><span class="nav-number">2.2.2.</span> <span class="nav-text">直接指向应用的实现代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现factory"><span class="nav-number">2.2.3.</span> <span class="nav-text">实现factory</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#app-factory"><span class="nav-number">2.2.3.1.</span> <span class="nav-text">app_factory</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#composite-factory"><span class="nav-number">2.2.3.2.</span> <span class="nav-text">composite_factory</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#fliter-factory"><span class="nav-number">2.2.3.3.</span> <span class="nav-text">fliter_factory</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#fliter-app-factory"><span class="nav-number">2.2.3.4.</span> <span class="nav-text">fliter_app_factory</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#server-factory"><span class="nav-number">2.2.3.5.</span> <span class="nav-text">server_factory</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#server-runner"><span class="nav-number">2.2.3.6.</span> <span class="nav-text">server_runner</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Type-filter-（过滤器）"><span class="nav-number">2.3.</span> <span class="nav-text">Type = filter*（过滤器）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Type-filter（过滤器）"><span class="nav-number">2.3.1.</span> <span class="nav-text">Type = filter（过滤器）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Type-filter-app"><span class="nav-number">2.3.2.</span> <span class="nav-text">Type = filter-app</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Type-pipeline"><span class="nav-number">2.3.3.</span> <span class="nav-text">Type = pipeline</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#局部配置与全局配置"><span class="nav-number">3.</span> <span class="nav-text">局部配置与全局配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#局部配置与全局配置的格式"><span class="nav-number">3.1.</span> <span class="nav-text">局部配置与全局配置的格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#局部配置和全局配置的覆写"><span class="nav-number">3.2.</span> <span class="nav-text">局部配置和全局配置的覆写</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#paste-使用"><span class="nav-number">4.</span> <span class="nav-text">paste 使用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#使用示例-1"><span class="nav-number">4.1.</span> <span class="nav-text">使用示例 1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结-1"><span class="nav-number">4.2.</span> <span class="nav-text">小结 1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用示例-2"><span class="nav-number">4.3.</span> <span class="nav-text">使用示例 2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结-2"><span class="nav-number">4.4.</span> <span class="nav-text">小结 2</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+      
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="busuanzi-count">
+
+  <!-- <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script> -->
+  <!-- 上面这个是之前的，不知道为什么失效了，改成下面这个 -->
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">您是第<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>个小伙伴</span>
+  
+
+  
+    <span class="site-pv">本站总浏览<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">magiceses</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Pisces
+  </a>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count" style="color: #e90f92;">全站共 685k 字</span>
+</div>
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+  <!-- 按需加载背景 -->
+  <!-- 背景动画 -->
+<script type="text/javascript">
+  // 按需加载背景
+  // 如果是all，就直接加载了
+  if("pc" == "all") {
+    $.getScript("/js/src/particle.js?v=5.0.1");
+  }
+  // 识别手机或电脑的js开始
+  (function(){
+    var res = GetRequest();
+    var par = res['index'];
+    if(par!='gfan'){
+      var ua=navigator.userAgent.toLowerCase();
+      var contains=function (a, b){
+          if(a.indexOf(b)!=-1){return true;}
+      };
+      if((contains(ua,"android") && contains(ua,"mobile"))||(contains(ua,"android") && contains(ua,"mozilla"))||(contains(ua,"android") && contains(ua,"opera"))||contains(ua,"ucweb7")||contains(ua,"iphone")){
+        return false;
+      } else {
+        $.getScript("/js/src/particle.js?v=5.0.1");
+      }
+    }
+  })();
+  function GetRequest() {
+    var url = location.search;
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+      var str = url.substr(1);
+      strs = str.split("&");
+      for(var i = 0; i < strs.length; i ++) {
+        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+      }
+    }
+    return theRequest;
+  }
+</script>
+<!-- 识别手机或电脑的js结束 -->  
+
+  <!-- 页面点击小红心 -->
+  <!-- 页面点击小红心 -->
+
+  <script type="text/javascript" src="/js/src/love.js?v=5.0.1"></script>
+
+
+  <!-- 鼠标移动，效果 -->
+  <!-- 鼠标移动特效 -->
+
+  <script type="text/javascript" src="/js/src/jquery-stars.js?v=5.0.1"></script>
+  <script type="text/javascript">
+  jQuery('body').jstars({
+  	image_path: '/images',
+  	image: 'candy-cane-stars.png',
+  	style: 'white',
+  	width: 34,
+  	height: 34,
+  	delay: 700,
+  	frequency: 5
+  });
+  </script>
+
+
+  <!-- 页面 title 进入/离开 效果 -->
+
+  <script type="text/javascript">var OriginTitile=document.title,st;document.addEventListener("visibilitychange",function(){document.hidden?(document.title="Waiting for you back！",clearTimeout(st)):(document.title="Thanks for visit~ "+OriginTitile,st=setTimeout(function(){document.title=OriginTitile},4e3))})</script>
+
+
+</body>
+</html>

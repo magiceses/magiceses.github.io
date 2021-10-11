@@ -1,0 +1,1275 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Courier New:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Python," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="天青色等烟雨" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="就算没有天分，只要你愿意每天花一点时间，做同样一件事情，不知不觉间，你就会走得很远。
+
+上篇博文介绍了multiprocessing模块的内存共享，下面讲进程池。有些情况下，所要完成的工作可以上篇博文介绍了multiprocessing模块的内存共享，下面讲进程池。有些情况下，所要完成的工作可以分解并独立地分布到多个工作进程，对于这种简单的情况，可以用Pool类来管理固定数目的工作进程。作业的返回">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python 进程线程协程(4)--multiprocessing模块(下)">
+<meta property="og:url" content="https://magiceses.github.io/2019/10/12/python-进程线程协程-4.2/index.html">
+<meta property="og:site_name" content="天青色等烟雨">
+<meta property="og:description" content="就算没有天分，只要你愿意每天花一点时间，做同样一件事情，不知不觉间，你就会走得很远。
+
+上篇博文介绍了multiprocessing模块的内存共享，下面讲进程池。有些情况下，所要完成的工作可以上篇博文介绍了multiprocessing模块的内存共享，下面讲进程池。有些情况下，所要完成的工作可以分解并独立地分布到多个工作进程，对于这种简单的情况，可以用Pool类来管理固定数目的工作进程。作业的返回">
+<meta property="og:updated_time" content="2021-10-02T03:03:07.644Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python 进程线程协程(4)--multiprocessing模块(下)">
+<meta name="twitter:description" content="就算没有天分，只要你愿意每天花一点时间，做同样一件事情，不知不觉间，你就会走得很远。
+
+上篇博文介绍了multiprocessing模块的内存共享，下面讲进程池。有些情况下，所要完成的工作可以上篇博文介绍了multiprocessing模块的内存共享，下面讲进程池。有些情况下，所要完成的工作可以分解并独立地分布到多个工作进程，对于这种简单的情况，可以用Pool类来管理固定数目的工作进程。作业的返回">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://magiceses.github.io/2019/10/12/python-进程线程协程-4.2/"/>
+
+
+<!-- 网页加载条 -->
+<script src="/js/src/pace.min.js"></script>
+  <title> Python 进程线程协程(4)--multiprocessing模块(下) | 天青色等烟雨 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">天青色等烟雨</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">而我在等你</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-guestbook">
+          <a href="/guestbook" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-commenting"></i> <br />
+            
+            留言
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+      
+      
+        <li class="menu-item"> <a title="把这个链接拖到你的工具栏中,任何网页都可以High" href='javascript:(
+/*
+ * Copyright (C) 2016 Never_yu (Neveryu.github.io) <React.dong.yu@gmail.com>
+ * Sina Weibo (http://weibo.com/Neveryu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function go() {
+
+var songs = [
+  "http://dl.stream.qqmusic.qq.com/C400001Qu4I30eVFYb.m4a?vkey=2127178E4405E7B8B268F20F05232485735CCF4FF8C1432F0360D2626D0B6C9564B5627C7AB481BBC685FEDB0946A50E97C66F0D1B008226&guid=7175649092&uin=0&fromtag=66",
+  "",
+  "",
+  ""
+];
+
+function c() {
+  var e = document.createElement("link");
+  e.setAttribute("type", "text/css");
+  e.setAttribute("rel", "stylesheet");
+  e.setAttribute("href", f);
+  e.setAttribute("class", l);
+  document.body.appendChild(e)
+}
+
+function h() {
+  var e = document.getElementsByClassName(l);
+  for (var t = 0; t < e.length; t++) {
+    document.body.removeChild(e[t])
+  }
+}
+
+function p() {
+  var e = document.createElement("div");
+  e.setAttribute("class", a);
+  document.body.appendChild(e);
+  setTimeout(function() {
+    document.body.removeChild(e)
+  }, 100)
+}
+
+function d(e) {
+  return {
+    height : e.offsetHeight,
+    width : e.offsetWidth
+  }
+}
+
+function v(i) {
+  var s = d(i);
+  return s.height > e && s.height < n && s.width > t && s.width < r
+}
+
+function m(e) {
+  var t = e;
+  var n = 0;
+  while (!!t) {
+    n += t.offsetTop;
+    t = t.offsetParent
+  }
+  return n
+}
+
+function g() {
+  var e = document.documentElement;
+  if (!!window.innerWidth) {
+    return window.innerHeight
+  } else if (e && !isNaN(e.clientHeight)) {
+    return e.clientHeight
+  }
+  return 0
+}
+
+function y() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  }
+  return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+}
+
+function E(e) {
+  var t = m(e);
+  return t >= w && t <= b + w
+}
+
+function S() {
+  var e = document.getElementById("audio_element_id");
+  if(e != null){
+    var index = parseInt(e.getAttribute("curSongIndex"));
+    if(index > songs.length - 2) {
+      index = 0;
+    } else {
+      index++;
+    }
+    e.setAttribute("curSongIndex", index);
+    N();
+  }
+
+  e.src = i;
+  e.play()
+}
+
+function x(e) {
+  e.className += " " + s + " " + o
+}
+
+function T(e) {
+  e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+}
+
+function N() {
+  var e = document.getElementsByClassName(s);
+  var t = new RegExp("\\b" + s + "\\b");
+  for (var n = 0; n < e.length; ) {
+    e[n].className = e[n].className.replace(t, "")
+  }
+}
+
+function initAudioEle() {
+  var e = document.getElementById("audio_element_id");
+  if(e === null){
+    e = document.createElement("audio");
+    e.setAttribute("class", l);
+    e.setAttribute("curSongIndex", 0);
+    e.id = "audio_element_id";
+    e.loop = false;
+    e.bgcolor = 0;
+    e.addEventListener("canplay", function() {
+      setTimeout(function() {
+        x(k)
+      }, 500);
+      setTimeout(function() {
+        N();
+        p();
+        for (var e = 0; e < O.length; e++) {
+          T(O[e])
+        }
+      }, 15500)
+    }, true);
+    e.addEventListener("ended", function() {
+      N();
+      h();
+      go();
+    }, true);
+    e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+    document.body.appendChild(e);
+  }
+}
+
+initAudioEle();
+var e = 30;
+var t = 30;
+var n = 350;
+var r = 350;
+
+var curSongIndex = parseInt(document.getElementById("audio_element_id").getAttribute("curSongIndex"));
+var i = songs[curSongIndex];
+
+var s = "mw-harlem_shake_me";
+var o = "im_first";
+var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+var a = "mw-strobe_light";
+
+/* harlem-shake-style.css，替换成你的位置，也可以直接使用：//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css */
+var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+
+var l = "mw_added_css";
+var b = g();
+var w = y();
+var C = document.getElementsByTagName("*");
+var k = null;
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    if (E(A)) {
+      k = A;
+      break
+    }
+  }
+}
+if (A === null) {
+  console.warn("Could not find a node of the right size. Please try a different page.");
+  return
+}
+c();
+S();
+var O = [];
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    O.push(A)
+  }
+}
+})()'><i class="menu-item-icon fa fa-music fa-fw"></i> High一下</a></li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search fa-lg"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Python 进程线程协程(4)--multiprocessing模块(下)
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2019-10-12T01:25:24+08:00" content="2019-10-12">
+              2019-10-12
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv">热度
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p id="div-border-top-green">就算没有天分，只要你愿意每天花一点时间，做同样一件事情，不知不觉间，你就会走得很远。<br></p>
+
+<p>上篇博文介绍了multiprocessing模块的内存共享，下面讲进程池。有些情况下，所要完成的工作可以上篇博文介绍了multiprocessing模块的内存共享，下面讲进程池。有些情况下，所要完成的工作可以分解并独立地分布到多个工作进程，对于这种简单的情况，可以用Pool类来管理固定数目的工作进程。作业的返回值会收集并作为一个列表返回。Pool可以提供指定数量的进程，供用户调用，当有新的请求提交到pool中时，如果池还没有满，那么就会创建一个新的进程用来执行该请求；但如果池中的进程数已经达到规定最大值，那么该请求就会等待，直到池中有进程结束，才会创建新的进程来它。</p>
+<p>在网上找到了一篇非常好的分析进程池源码的文章，在这里跟大家分享下，篇幅比较长，希望大家能够有耐心的看完它，仔细体会。</p>
+<p>进程池使用multiprocessing.pool，pool的构造如下：</p>
+<a id="more"></a>
+<p><strong>multiprocessing.Pool([processes[, initializer[, initargs[, maxtasksperchild]]]])</strong></p>
+<ul>
+<li>processes表示pool中进程的数目，默认地为当前CPU的核数可以通过multiprocessing.cpu_count()方法参考你机器上cpu数量；</li>
+<li>initializer表示工作进程start时调用的初始化函数；</li>
+<li>initargs表示initializer函数的参数，如果initializer不为None，在每个工作进程start之前会调用；</li>
+<li>maxtasksperchild表示每个工作进程在退出/被其他新的进程替代前，需要完成的工作任务数，默认为None，表示工作进程存活时间与pool相同，即不会自动退出/被替换。</li>
+</ul>
+<p>主要方法：</p>
+<ul>
+<li>apply(func[, args[, kwds]]) ：apply用于传递不定参数，同python中的apply函数一致（不过内置的apply函数从2.3以后就不建议使用了），主进程会阻塞于函数，主进程的执行流程同单进程一致；</li>
+<li>apply_async(func[, args[, kwds[, callback]]]) ：与apply用法一致，但它是非阻塞的且支持结果返回后进行回调；</li>
+</ul>
+<p>主进程循环运行过程中不等待apply_async的返回结果，在主进程结束后，即使子进程还未返回整个程序也会退出。虽然apply_async是非阻塞的，但其返回结果的get方法却是阻塞的，如使用result.get()会阻塞主进程。</p>
+<p>如果我们对返回结果不感兴趣， 那么可以在主进程中使用pool.close与pool.join来防止主进程退出。注意join方法一定要在close或terminate之后调用。</p>
+<ul>
+<li>map(func, iterable[, chunksize]) ：map方法与在功能上等价与内置的map()，只不过单个任务会并行运行。它会使进程阻塞直到结果返回。但需注意的是其第二个参数虽然描述的为iterable, 但在实际使用中发现只有在整个队列全部就绪后，程序才会运行子进程；</li>
+<li>map_async(func, iterable[, chunksize[, callback]]) ：与map用法一致，但是它是非阻塞的。其有关事项见apply_async；</li>
+<li>imap(func, iterable[, chunksize]) ：与map不同的是， imap的返回结果为iter，需要在主进程中主动使用next来驱动子进程的调用。即使子进程没有返回结果，主进程对于gen_list(l)的 iter还是会继续进行， 另外根据python2.6文档的描述，对于大数据量的iterable而言，将chunksize设置大一些比默认的1要好；</li>
+<li>imap_unordered(func, iterable[, chunksize]) ：同imap一致，只不过其并不保证返回结果与迭代传入的顺序一致；</li>
+<li>close() ：关闭pool，使其不再接受新的任务；</li>
+<li>terminate() ：结束工作进程，不再处理未处理的任务；</li>
+<li>join() ：主进程阻塞等待子进程的退出， join方法要在close或terminate之后使用。</li>
+</ul>
+<p>它的源码在multiprocessing包pool.py里，Pool对象的初始化函数如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Pool</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="string">'''</span></span><br><span class="line"><span class="string">    Class which supports an async version of the `apply()` builtin</span></span><br><span class="line"><span class="string">    '''</span></span><br><span class="line">    Process = Process</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, processes=None, initializer=None, initargs=<span class="params">()</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">                 maxtasksperchild=None)</span>:</span></span><br><span class="line">        self._setup_queues()</span><br><span class="line">        self._taskqueue = Queue.Queue()</span><br><span class="line">        self._cache = &#123;&#125;</span><br><span class="line">        self._state = RUN</span><br><span class="line">        self._maxtasksperchild = maxtasksperchild</span><br><span class="line">        self._initializer = initializer</span><br><span class="line">        self._initargs = initargs</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> processes <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                processes = cpu_count()</span><br><span class="line">            <span class="keyword">except</span> NotImplementedError:</span><br><span class="line">                processes = <span class="number">1</span></span><br><span class="line">        <span class="keyword">if</span> processes &lt; <span class="number">1</span>:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(<span class="string">"Number of processes must be at least 1"</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> initializer <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span> <span class="keyword">and</span> <span class="keyword">not</span> hasattr(initializer, <span class="string">'__call__'</span>):</span><br><span class="line">            <span class="keyword">raise</span> TypeError(<span class="string">'initializer must be a callable'</span>)</span><br><span class="line"></span><br><span class="line">        self._processes = processes</span><br><span class="line">        self._pool = []</span><br><span class="line">        self._repopulate_pool()</span><br><span class="line"></span><br><span class="line">        self._worker_handler = threading.Thread(</span><br><span class="line">            target=Pool._handle_workers,</span><br><span class="line">            args=(self, )</span><br><span class="line">            )</span><br><span class="line">        self._worker_handler.daemon = <span class="keyword">True</span></span><br><span class="line">        self._worker_handler._state = RUN</span><br><span class="line">        self._worker_handler.start()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        self._task_handler = threading.Thread(</span><br><span class="line">            target=Pool._handle_tasks,</span><br><span class="line">            args=(self._taskqueue, self._quick_put, self._outqueue,</span><br><span class="line">                  self._pool, self._cache)</span><br><span class="line">            )</span><br><span class="line">        self._task_handler.daemon = <span class="keyword">True</span></span><br><span class="line">        self._task_handler._state = RUN</span><br><span class="line">        self._task_handler.start()</span><br><span class="line"></span><br><span class="line">        self._result_handler = threading.Thread(</span><br><span class="line">            target=Pool._handle_results,</span><br><span class="line">            args=(self._outqueue, self._quick_get, self._cache)</span><br><span class="line">            )</span><br><span class="line">        self._result_handler.daemon = <span class="keyword">True</span></span><br><span class="line">        self._result_handler._state = RUN</span><br><span class="line">        self._result_handler.start()</span><br><span class="line"></span><br><span class="line">        self._terminate = Finalize(</span><br><span class="line">            self, self._terminate_pool,</span><br><span class="line">            args=(self._taskqueue, self._inqueue, self._outqueue, self._pool,</span><br><span class="line">                  self._worker_handler, self._task_handler,</span><br><span class="line">                  self._result_handler, self._cache),</span><br><span class="line">            exitpriority=<span class="number">15</span></span><br><span class="line">            )</span><br></pre></td></tr></table></figure>
+<p>主要数据结构有：</p>
+<ul>
+<li>self._inqueue  接收任务队列（SimpleQueue），用于主进程将任务发送给worker进程;</li>
+<li>self._outqueue  发送结果队列（SimpleQueue），用于worker进程将结果发送给主进程;</li>
+<li>self._taskqueue  同步的任务队列，保存线程池分配给主进程的任务;</li>
+<li>self._cache = {}  任务缓存;</li>
+<li>self._processes  worker进程个数;</li>
+<li>self._pool = []  woker进程队列。</li>
+</ul>
+<p>进程池工作时，任务的接收、分配。结果的返回，均由进程池内部的各个线程合作完成，来看看进程池内部由那些线程：</p>
+<p><code>_work_handler</code>线程，负责保证进程池中的worker进程在有退出的情况下，创建出新的worker进程，并添加到进程队列（pools）中，保持进程池中的worker进程数始终为processes个。</p>
+<p>_<code>worker_handler</code>线程回调函数为Pool.<code>_handler_workers</code>方法，在进程池state==RUN时，循环调用<code>_maintain_pool</code>方法，监控是否有进程退出，并创建新的进程，append到进程池pools中，保持进程池中的worker进程数始终为processes个。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">self._worker_handler = threading.Thread(</span><br><span class="line">            target=Pool._handle_workers,</span><br><span class="line">            args=(self, )</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Pool._handle_workers方法在_worker_handler线程状态为运行时(status==RUN)，循环调用_maintain_pool方法：</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_maintain_pool</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> self._join_exited_workers():</span><br><span class="line">        self._repopulate_pool()</span><br><span class="line"></span><br><span class="line"><span class="comment"># _join_exited_workers()监控pools队列中的进程是否有结束的，有则等待其结束，并从pools中删除，当有进程结束时，调用_repopulate_pool()，创建新的进程：</span></span><br><span class="line">w = self.Process(target=worker,</span><br><span class="line">            　　  args=(self._inqueue, self._outqueue,</span><br><span class="line">                    　 self._initializer, self._initargs,      　　　　　　　　　　 </span><br><span class="line">                       self._maxtasksperchild)</span><br><span class="line">                 )</span><br><span class="line">self._pool.append(w)</span><br><span class="line"></span><br><span class="line"><span class="comment"># w是新创建的进程，它是用来处理实际任务的进程，worker是它的回调函数：</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">worker</span><span class="params">(inqueue, outqueue, initializer=None, initargs=<span class="params">()</span>, maxtasks=None)</span>:</span></span><br><span class="line">    <span class="keyword">assert</span> maxtasks <span class="keyword">is</span> <span class="keyword">None</span> <span class="keyword">or</span> (type(maxtasks) == int <span class="keyword">and</span> maxtasks &gt; <span class="number">0</span>)</span><br><span class="line">    put = outqueue.put</span><br><span class="line">    get = inqueue.get</span><br><span class="line">    <span class="keyword">if</span> hasattr(inqueue, <span class="string">'_writer'</span>):</span><br><span class="line">        inqueue._writer.close()</span><br><span class="line">        outqueue._reader.close()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> initializer <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>:</span><br><span class="line">        initializer(*initargs)</span><br><span class="line"></span><br><span class="line">    completed = <span class="number">0</span></span><br><span class="line">    <span class="keyword">while</span> maxtasks <span class="keyword">is</span> <span class="keyword">None</span> <span class="keyword">or</span> (maxtasks <span class="keyword">and</span> completed &lt; maxtasks):</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            task = get()</span><br><span class="line">        <span class="keyword">except</span> (EOFError, IOError):</span><br><span class="line">            debug(<span class="string">'worker got EOFError or IOError -- exiting'</span>)</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> task <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">            debug(<span class="string">'worker got sentinel -- exiting'</span>)</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">        job, i, func, args, kwds = task</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            result = (<span class="keyword">True</span>, func(*args, **kwds))</span><br><span class="line">        <span class="keyword">except</span> Exception, e:</span><br><span class="line">            result = (<span class="keyword">False</span>, e)</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            put((job, i, result))</span><br><span class="line">        <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">            wrapped = MaybeEncodingError(e, result[<span class="number">1</span>])</span><br><span class="line">            debug(<span class="string">"Possible encoding error while sending result: %s"</span> % (</span><br><span class="line">                wrapped))</span><br><span class="line">            put((job, i, (<span class="keyword">False</span>, wrapped)))</span><br><span class="line">        completed += <span class="number">1</span></span><br><span class="line">    debug(<span class="string">'worker exiting after %d tasks'</span> % completed)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 所有worker进程都使用worker回调函数对任务进行统一的处理，从源码中可以看出：</span></span><br><span class="line"><span class="comment"># 它的功能是从接入任务队列中（inqueue）读取出task任务，然后根据任务的函数、参数进行调用（result = (True, func(*args, **kwds)，</span></span><br><span class="line"><span class="comment"># 再将结果放入结果队列中（outqueue)，如果有最大处理上限的限制maxtasks，那么当进程处理到任务数上限时退出。</span></span><br></pre></td></tr></table></figure>
+<p><code>_task_handler</code>线程，负责从进程池中的task_queue中，将任务取出，放入接收任务队列（Pipe）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">self._task_handler = threading.Thread(</span><br><span class="line">            target=Pool._handle_tasks,</span><br><span class="line">            args=(self._taskqueue, self._quick_put, self._outqueue, self._pool)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>Pool._handle_tasks方法不断从task_queue中获取任务，并放入接受任务队列（in_queue)，以此触发worker进程进行任务处理。当从task_queue读取到None元素时，表示进程池将要被终止（terminate)，不再处理之后的任务请求，同时向接受任务队列和结果任务队列put None元素，通知其他线程结束。</p>
+<p>_handle_results线程，负责将处理完的任务结果，从outqueue（Pipe）中读取出来，放在任务缓存cache中，</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">self._result_handler = threading.Thread(</span><br><span class="line">        target=Pool._handle_results,</span><br><span class="line">        args=(self._outqueue, self._quick_get, self._cache)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p><code>_terminate</code>，这里的<code>_terminate</code>并不是一个线程，而是一个Finalize对象</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">self._terminate = Finalize(</span><br><span class="line">            self, self._terminate_pool,</span><br><span class="line">            args=(self._taskqueue, self._inqueue, self._outqueue, self._pool,</span><br><span class="line">                  self._worker_handler, self._task_handler,</span><br><span class="line">                  self._result_handler, self._cache),</span><br><span class="line">            exitpriority=<span class="number">15</span></span><br><span class="line">)</span><br><span class="line"><span class="comment"># Finalize类的构造函数与线程构造函数类似，_terminate_pool是它的回调函数，args回调函数的参数。</span></span><br><span class="line"><span class="comment"># _terminate_pool函数负责终止进程池的工作：终止上述的三个线程，终止进程池中的worker进程，清除队列中的数据。</span></span><br><span class="line"><span class="comment"># _terminate是个对象而非线程，那么它如何像线程调用start()方法一样，来执行回调函数_terminate_pool呢？查看Pool源码，发现进程池的终止函数：</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">terminate</span><span class="params">(self)</span>:</span></span><br><span class="line">    debug(<span class="string">'terminating pool'</span>)</span><br><span class="line">    self._state = TERMINATE</span><br><span class="line">    self._worker_handler._state = TERMINATE</span><br><span class="line">    self._terminate()</span><br><span class="line"><span class="comment"># 函数中最后将_terminate对象当做一个方法来执行，而_terminate本身是一个Finalize对象，我们看一下Finalize类的定义，发现它实现了__call__方法：</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self, wr=None)</span>:</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">del</span> _finalizer_registry[self._key]</span><br><span class="line">    <span class="keyword">except</span> KeyError:</span><br><span class="line">        sub_debug(<span class="string">'finalizer no longer registered'</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">if</span> self._pid != os.getpid():</span><br><span class="line">            res = <span class="keyword">None</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            res = self._callback(*self._args, **self._kwargs)</span><br><span class="line">        self._weakref = self._callback = self._args = \</span><br><span class="line">                        self._kwargs = self._key = <span class="keyword">None</span></span><br><span class="line">        <span class="keyword">return</span> res</span><br><span class="line"><span class="comment"># 而方法中 self._callback(*self._args, **self._kwargs) 这条语句，就执行了_terminate_pool函数，进而将进程池终止。</span></span><br></pre></td></tr></table></figure>
+<p>下面接着看下客户端如何对向进程池分配任务，并获取结果的。</p>
+<p>我们知道，当进程池中任务队列非空时，才会触发worker进程去工作，那么如何向进程池中的任务队列中添加任务呢，进程池类有两组关键方法来创建任务，分别是apply/apply_async和map/map_async，实际上进程池类的apply和map方法与python内建的两个同名方法类似，apply_async和map_async分别为它们的非阻塞版本。</p>
+<p>首先来看apply_async方法，源码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">apply_async</span><span class="params">(self, func, args=<span class="params">()</span>, kwds=&#123;&#125;, callback=None)</span>:</span></span><br><span class="line">    <span class="keyword">assert</span> self._state == RUN</span><br><span class="line">    result = ApplyResult(self._cache, callback)</span><br><span class="line">    self._taskqueue.put(([(result._job, <span class="keyword">None</span>, func, args, kwds)], <span class="keyword">None</span>))</span><br><span class="line">    <span class="keyword">return</span> result</span><br><span class="line"><span class="comment"># func表示执行此任务的方法</span></span><br><span class="line"><span class="comment"># args、kwds分别表func的位置参数和关键字参数</span></span><br><span class="line"><span class="comment"># callback表示一个单参数的方法，当有结果返回时，callback方法会被调用，参数即为任务执行后的结果</span></span><br></pre></td></tr></table></figure>
+<p>每调用一次apply_result方法，实际上就向<code>_taskqueue</code>中添加了一条任务，注意这里采用了非阻塞（异步）的调用方式，即apply_async方法中新建的任务只是被添加到任务队列中，还并未执行，不需要等待，直接返回创建的ApplyResult对象，注意在创建ApplyResult对象时，将它放入进程池的缓存<code>_cache</code>中。</p>
+<p>任务队列中有了新创建的任务，那么根据上节分析的处理流程，进程池的<code>_task_handler</code>线程，将任务从taskqueue中获取出来，放入<code>_inqueue</code>中，触发worker进程根据args和kwds调用func，运行结束后，将结果放入<code>_outqueue</code>，再由进程池中的<code>_handle_results</code>线程，将运行结果从<code>_outqueue</code>中取出，并找到<code>_cache</code>缓存中的ApplyResult对象，<code>_set</code>其运行结果，等待调用端获取。</p>
+<p>apply_async方法既然是异步的，那么它如何知道任务结束，并获取结果呢？这里需要了解ApplyResult类中的两个主要方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get</span><span class="params">(self, timeout=None)</span>:</span></span><br><span class="line">    self.wait(timeout)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> self._ready:</span><br><span class="line">        <span class="keyword">raise</span> TimeoutError</span><br><span class="line">    <span class="keyword">if</span> self._success:</span><br><span class="line">        <span class="keyword">return</span> self._value</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">raise</span> self._value</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_set</span><span class="params">(self, i, obj)</span>:</span></span><br><span class="line">    self._success, self._value = obj</span><br><span class="line">    <span class="keyword">if</span> self._callback <span class="keyword">and</span> self._success:</span><br><span class="line">        self._callback(self._value)</span><br><span class="line">    self._cond.acquire()</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        self._ready = <span class="keyword">True</span></span><br><span class="line">        self._cond.notify()</span><br><span class="line">    <span class="keyword">finally</span>:</span><br><span class="line">        self._cond.release()</span><br><span class="line">    <span class="keyword">del</span> self._cache[self._job]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 从这两个方法名可以看出，get方法是提供给客户端获取worker进程运行结果的，而运行的结果是通过_handle_result线程调用_set方法，存放在ApplyResult对象中。</span></span><br><span class="line"><span class="comment"># _set方法将运行结果保存在ApplyResult._value中，唤醒阻塞在条件变量上的get方法。客户端通过调用get方法，返回运行结果。</span></span><br></pre></td></tr></table></figure>
+<p>apply方法是以阻塞的方式运行获取进程结果，它的实现很简单，同样是调用apply_async，只不过不返回ApplyResult，而是直接返回worker进程运行的结果：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">apply</span><span class="params">(self, func, args=<span class="params">()</span>, kwds=&#123;&#125;)</span>:</span>     </span><br><span class="line">   <span class="keyword">assert</span> self._state == RUN       </span><br><span class="line">   <span class="keyword">return</span> self.apply_async(func, args, kwds).get()</span><br></pre></td></tr></table></figure>
+<p>以上的apply/apply_async方法，每次只能向进程池分配一个任务，那如果想一次分配多个任务到进程池中，可以使用map/map_async方法。首先来看下map_async方法是如何定义的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">map_async</span><span class="params">(self, func, iterable, chunksize=None, callback=None)</span>:</span></span><br><span class="line">    <span class="keyword">assert</span> self._state == RUN</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> hasattr(iterable, <span class="string">'__len__'</span>):</span><br><span class="line">        iterable = list(iterable)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> chunksize <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">        chunksize, extra = divmod(len(iterable), len(self._pool) * <span class="number">4</span>)</span><br><span class="line">        <span class="keyword">if</span> extra:</span><br><span class="line">            chunksize += <span class="number">1</span></span><br><span class="line">        <span class="keyword">if</span> len(iterable) == <span class="number">0</span>:</span><br><span class="line">            chunksize = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    task_batches = Pool._get_tasks(func, iterable, chunksize)</span><br><span class="line">    result = MapResult(self._cache, chunksize, len(iterable), callback)</span><br><span class="line">    self._taskqueue.put((((result._job, i, mapstar, (x,), &#123;&#125;)</span><br><span class="line">                              <span class="keyword">for</span> i, x <span class="keyword">in</span> enumerate(task_batches)), <span class="keyword">None</span>))</span><br><span class="line">    <span class="keyword">return</span> result</span><br><span class="line"></span><br><span class="line"><span class="comment"># func表示执行此任务的方法</span></span><br><span class="line"><span class="comment"># iterable表示任务参数序列</span></span><br><span class="line"><span class="comment"># chunksize表示将iterable序列按每组chunksize的大小进行分割，每个分割后的序列提交给进程池中的一个任务进行处理</span></span><br><span class="line"><span class="comment"># callback表示一个单参数的方法，当有结果返回时，callback方法会被调用，参数即为任务执行后的结果</span></span><br></pre></td></tr></table></figure>
+<p>从源码可以看出，map_async要比apply_async复杂，首先它会根据chunksize对任务参数序列进行分组，chunksize表示每组中的任务个数，当默认chunksize=None时，根据任务参数序列和进程池中进程数计算分组数：chunk, extra = divmod(len(iterable), len(self._pool) * 4)。假设进程池中进程数为len(self._pool)=4，任务参数序列iterable=range(123)，那么chunk=7, extra=11，向下执行，得出chunksize=8，表示将任务参数序列分为8组。任务实际分组：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">task_batches = Pool._get_tasks(func, iterable, chunksize)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_get_tasks</span><span class="params">(func, it, size)</span>:</span></span><br><span class="line">    it = iter(it)</span><br><span class="line">    <span class="keyword">while</span> <span class="number">1</span>:</span><br><span class="line">        x = tuple(itertools.islice(it, size))</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> x:</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        <span class="keyword">yield</span> (func, x)</span><br><span class="line"></span><br><span class="line">这里使用<span class="keyword">yield</span>将_get_tasks方法编译成生成器。实际上对于range(<span class="number">123</span>)这样的序列，按照chunksize=<span class="number">8</span>进行分组后，一共<span class="number">16</span>组每组的元素如下：</span><br><span class="line">(func, (<span class="number">0</span>,   <span class="number">1</span>,   <span class="number">2</span>,   <span class="number">3</span>,   <span class="number">4</span>,   <span class="number">5</span>,   <span class="number">6</span>,   <span class="number">7</span>))</span><br><span class="line">(func, (<span class="number">8</span>,   <span class="number">9</span>,   <span class="number">10</span>,  <span class="number">11</span>,  <span class="number">12</span>,  <span class="number">13</span>,  <span class="number">14</span>,  <span class="number">15</span>))</span><br><span class="line">(func, (<span class="number">16</span>,  <span class="number">17</span>,  <span class="number">18</span>,  <span class="number">19</span>,  <span class="number">20</span>,  <span class="number">21</span>,  <span class="number">22</span>,  <span class="number">23</span>))</span><br><span class="line">...</span><br><span class="line">(func, (<span class="number">112</span>, <span class="number">113</span>, <span class="number">114</span>, <span class="number">115</span>, <span class="number">116</span>, <span class="number">117</span>, <span class="number">118</span>, <span class="number">119</span>))</span><br><span class="line">(func, (<span class="number">120</span>, <span class="number">121</span>, <span class="number">122</span>))</span><br></pre></td></tr></table></figure>
+<p>分组之后，这里定义了一个MapResult对象：result = MapResult(self._cache, chunksize, len(iterable), callback)它继承自AppyResult类，同样提供get和_set方法接口。将分组后的任务放入任务队列中，然后就返回刚刚创建的result对象。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">self._taskqueue.put((((result._job, i, mapstar, (x,), &#123;&#125;)</span><br><span class="line">                              <span class="keyword">for</span> i, x <span class="keyword">in</span> enumerate(task_batches)), <span class="keyword">None</span>))</span><br><span class="line">以任务参数序列=range(<span class="number">123</span>)为例，实际上这里向任务队列中put了一个<span class="number">16</span>组元组元素的集合，元组依次为：</span><br><span class="line">(result._job, <span class="number">0</span>, mapstar, ((func, (<span class="number">0</span>,   <span class="number">1</span>,   <span class="number">2</span>,   <span class="number">3</span>,   <span class="number">4</span>,   <span class="number">5</span>,   <span class="number">6</span>,   <span class="number">7</span>)),), &#123;&#125;, <span class="keyword">None</span>)</span><br><span class="line">(result._job, <span class="number">1</span>, mapstar, ((func, (<span class="number">8</span>,   <span class="number">9</span>,   <span class="number">10</span>,  <span class="number">11</span>,  <span class="number">12</span>,  <span class="number">13</span>,  <span class="number">14</span>,  <span class="number">15</span>)),), &#123;&#125;, <span class="keyword">None</span>)</span><br><span class="line">……</span><br><span class="line">(result._job, <span class="number">15</span>, mapstar, ((func, (<span class="number">120</span>, <span class="number">121</span>, <span class="number">122</span>）),), &#123;&#125;, <span class="keyword">None</span>)</span><br><span class="line">注意每一个元组中的 i，它表示当前元组在整个任务元组集合中的位置，通过它，_handle_result线程才能将worker进程运行的结果，以正确的顺序填入到MapResult对象中。</span><br></pre></td></tr></table></figure>
+<p>注意这里只调用了一次put方法，将16组元组作为一个整体序列放入任务队列，那么这个任务是否<code>_task_handler</code>线程是否也会像apply_async方法一样，将整个任务序列传递给<code>_inqueue</code>，这样就会导致进程池中的只有一个worker进程获取到任务序列，而并非起到多进程的处理方式。我们来看下<code>_task_handler</code>线程是怎样处理的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_handle_tasks</span><span class="params">(taskqueue, put, outqueue, pool, cache)</span>:</span></span><br><span class="line">    thread = threading.current_thread()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> taskseq, set_length <span class="keyword">in</span> iter(taskqueue.get, <span class="keyword">None</span>):</span><br><span class="line">        i = <span class="number">-1</span></span><br><span class="line">        <span class="keyword">for</span> i, task <span class="keyword">in</span> enumerate(taskseq):</span><br><span class="line">            <span class="keyword">if</span> thread._state:</span><br><span class="line">                debug(<span class="string">'task handler found thread._state != RUN'</span>)</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                put(task)</span><br><span class="line">            <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">                job, ind = task[:<span class="number">2</span>]</span><br><span class="line">                <span class="keyword">try</span>:</span><br><span class="line">                    cache[job]._set(ind, (<span class="keyword">False</span>, e))</span><br><span class="line">                <span class="keyword">except</span> KeyError:</span><br><span class="line">                    <span class="keyword">pass</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">if</span> set_length:</span><br><span class="line">                debug(<span class="string">'doing set_length()'</span>)</span><br><span class="line">                set_length(i+<span class="number">1</span>)</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        debug(<span class="string">'task handler got sentinel'</span>)</span><br></pre></td></tr></table></figure>
+<p>注意到语句 for i, task in enumerate(taskseq)，原来<code>_task_handler</code>线程在通过taskqueue获取到任务序列后，并不是直接放入<code>_inqueue</code>中的，而是将序列中任务按照之前分好的组，依次放入<code>_inqueue</code>中的，而循环中的task即上述的每个任务元组：(result._job, 0, mapstar, ((func, (0,  1,  2,  3,  4,  5,  6,  7)),), {}, None)。接着触发worker进程。worker进程获取出每组任务，进行任务的处理：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">job, i, func, args, kwds = task </span><br><span class="line"><span class="keyword">try</span>: 　　</span><br><span class="line">    result = (<span class="keyword">True</span>, func(*args, **kwds))</span><br><span class="line"><span class="keyword">except</span> Exception, e:</span><br><span class="line">    result = (<span class="keyword">False</span>, e)</span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    put((job, i, result))</span><br><span class="line"><span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">    wrapped = MaybeEncodingError(e, result[<span class="number">1</span>])</span><br><span class="line">    debug(<span class="string">"Possible encoding error while sending result: %s"</span> % (</span><br><span class="line">        wrapped))</span><br><span class="line">    put((job, i, (<span class="keyword">False</span>, wrapped)))</span><br><span class="line"></span><br><span class="line">根据之前放入_inqueue的顺序对应关系：</span><br><span class="line">(result._job, <span class="number">0</span>, mapstar, ((func, (<span class="number">0</span>,   <span class="number">1</span>,   <span class="number">2</span>,   <span class="number">3</span>,   <span class="number">4</span>,   <span class="number">5</span>,   <span class="number">6</span>,   <span class="number">7</span>)),), &#123;&#125;, <span class="keyword">None</span>)</span><br><span class="line">job, i, func, args, kwds = task</span><br><span class="line">可以看出，元组中 mapstar 表示这里的回调函数func，((func, (<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>)),)和&#123;&#125;分别表示args和kwds参数。</span><br><span class="line">执行result = (<span class="keyword">True</span>, func(*args, **kwds))</span><br><span class="line">再来看下mapstar是如何定义的：</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">mapstar</span><span class="params">(args)</span>:</span> </span><br><span class="line"><span class="keyword">return</span> map(*args)</span><br><span class="line">这里mapstar表示回调函数func，它的定义只有一个参数，而在worker进程执行回调时，使用的是func(*args, **kwds)语句，这里多一个参数能够正确执行吗？答案时肯定的，在调用mapstar时，如果kwds为空字典，那么传入第二个参数不会影响函数的调用，而一个无参函数func_with_none_params，在调用时使用func_with_none_params(*(), **&#123;&#125;)也是没有问题的，python会自动忽视传入的两个空参数。</span><br><span class="line">看到这里，我们明白了，实际上对任务参数分组后，每一组的任务是通过内建的map方法来进行调用的。</span><br><span class="line">运行之后调用put(job, i, result)将结果放入_outqueue中，_handle_result线程会从_outqueue中将结果取出，并找到_cache缓存中的MapResult对象，_set其运行结果</span><br></pre></td></tr></table></figure>
+<p>现在来我们来总结下，进程池的map_async方法是如何运行的，我们将range(123)这个任务序列，将它传入map_async方法，假设不指定chunksize，并且cpu为四核，那么方法内部会分为16个组（0~14组每组8个元素，最后一组3个元素）。将分组后的任务放入任务队列，一共16组，那么每个进程需要运行4次来处理，每次通过内建的map方法，顺序将组中8个任务执行，再将结果放入<code>_outqueue</code>，找到<code>_cache</code>缓存中的MapResult对象，<code>_set</code>其运行结果，等待客户端获取。使用map_async方法会调用多个worker进程处理任务，每个worler进程运行结束，会将结果传入<code>_outqueue</code>，再有<code>_handle_result</code>线程将结果写入MapResult对象，那如何保证结果序列的顺序与调用map_async时传入的任务参数序列一致呢，我们来看看MapResult的构造函数和<code>_set</code>方法的实现。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, cache, chunksize, length, callback)</span>:</span></span><br><span class="line">    ApplyResult.__init__(self, cache, callback)</span><br><span class="line">    self._success = <span class="keyword">True</span></span><br><span class="line">    self._value = [<span class="keyword">None</span>] * length</span><br><span class="line">    self._chunksize = chunksize</span><br><span class="line">    <span class="keyword">if</span> chunksize &lt;= <span class="number">0</span>:</span><br><span class="line">        self._number_left = <span class="number">0</span></span><br><span class="line">        self._ready = <span class="keyword">True</span></span><br><span class="line">        <span class="keyword">del</span> cache[self._job]</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        self._number_left = length//chunksize + bool(length % chunksize)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_set</span><span class="params">(self, i, success_result)</span>:</span></span><br><span class="line">    success, result = success_result</span><br><span class="line">    <span class="keyword">if</span> success:</span><br><span class="line">        self._value[i*self._chunksize:(i+<span class="number">1</span>)*self._chunksize] = result</span><br><span class="line">        self._number_left -= <span class="number">1</span></span><br><span class="line">        <span class="keyword">if</span> self._number_left == <span class="number">0</span>:</span><br><span class="line">            <span class="keyword">if</span> self._callback:</span><br><span class="line">                self._callback(self._value)</span><br><span class="line">            <span class="keyword">del</span> self._cache[self._job]</span><br><span class="line">            self._cond.acquire()</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                self._ready = <span class="keyword">True</span></span><br><span class="line">                self._cond.notify()</span><br><span class="line">            <span class="keyword">finally</span>:</span><br><span class="line">                self._cond.release()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        self._success = <span class="keyword">False</span></span><br><span class="line">        self._value = result</span><br><span class="line">        <span class="keyword">del</span> self._cache[self._job]</span><br><span class="line">        self._cond.acquire()</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            self._ready = <span class="keyword">True</span></span><br><span class="line">            self._cond.notify()</span><br><span class="line">        <span class="keyword">finally</span>:</span><br><span class="line">            self._cond.release()</span><br></pre></td></tr></table></figure>
+<p>MapResult类中，<code>_value</code>保存map_async的运行结果，初始化时为一个元素为None的list，list的长度与任务参数序列的长度相同，<code>_chunksize</code>表示将任务分组后，每组有多少个任务，<code>_number_left</code>表示整个任务序列被分为多少个组。<code>_handle_result</code>线程会通过<code>_set</code>方法将worker进程的运行结果保存到<code>_value</code>中，那么如何将worker进程运行的结果填入到<code>_value</code>中正确的位置呢，还记得在map_async在向task_queue填入任务时，每组中的 i吗，i表示的就是当前任务组的组号，<code>_set</code>方法会根据当前任务的组号即参数 i，并且递减<code>_number_left</code>，当<code>_number_left</code>递减为0时，表示任务参数序列中的所有任务都已被woker进程处理，<code>_value</code>全部被计算出，唤醒阻塞在get方法上的条件变量，是客户端可以获取运行结果。</p>
+<p>map函数为map_async的阻塞版本，它在map_async的基础上，调用get方法，直接阻塞到结果全部返回：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">map</span><span class="params">(self, func, iterable, chunksize=None)</span>:</span>  </span><br><span class="line">  <span class="keyword">assert</span> self._state == RUN    </span><br><span class="line">  <span class="keyword">return</span> self.map_async(func, iterable, chunksize).get()</span><br></pre></td></tr></table></figure>
+<p>我们知道，进程池内部由多个线程互相协作，向客户端提供可靠的服务，那么这些线程之间是怎样做到数据共享与同步的呢？在客户端使用apply/map函数向进程池分配任务时，使用<code>self._taskqueue</code>来存放任务元素，<code>_taskqueue</code>定义为Queue.Queue()，这是一个python标准库中的线程安全的同步队列，它保证通知时刻只有一个线程向队列添加或从队列获取元素。这样，主线程向进程池中分配任务（taskqueue.put），进程池中<code>_handle_tasks</code>线程读取<code>_taskqueue</code>队列中的元素，两个线程同时操作taskqueue，互不影响。进程池中有N个worker进程在等待任务下发，那么进程池中的<code>_handle_tasks</code>线程读取出任务后，又如何保证一个任务不被多个worker进程获取到呢？我们来看下<code>_handle_tasks</code>线程将任务读取出来之后如何交给worker进程的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> taskseq, set_length <span class="keyword">in</span> iter(taskqueue.get, <span class="keyword">None</span>):</span><br><span class="line">    i = <span class="number">-1</span></span><br><span class="line">    <span class="keyword">for</span> i, task <span class="keyword">in</span> enumerate(taskseq):</span><br><span class="line">        <span class="keyword">if</span> thread._state:</span><br><span class="line">            debug(<span class="string">'task handler found thread._state != RUN'</span>)</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            put(task)</span><br><span class="line">        <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">            job, ind = task[:<span class="number">2</span>]</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                cache[job]._set(ind, (<span class="keyword">False</span>, e))</span><br><span class="line">            <span class="keyword">except</span> KeyError:</span><br><span class="line">                <span class="keyword">pass</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">if</span> set_length:</span><br><span class="line">            debug(<span class="string">'doing set_length()'</span>)</span><br><span class="line">            set_length(i+<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    <span class="keyword">break</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    debug(<span class="string">'task handler got sentinel'</span>)</span><br><span class="line">在从taskqueue中get到任务之后，对任务中的每个task，调用了put函数，这个put函数实际上是将task放入了管道，而主进程与worker进程的交互，正是通过管道来完成的。</span><br><span class="line">再来看看worker进程的定义：</span><br><span class="line">w = self.Process(target=worker,</span><br><span class="line">                 args=(self._inqueue, self._outqueue,</span><br><span class="line">                         self._initializer,</span><br><span class="line">                   self._initargs, self._maxtasksperchild)</span><br><span class="line">            )</span><br><span class="line">其中self._inqueue和self._outqueue为SimpleQueue()对象，实际是带锁的管道，上述_handle_task线程调用的put函数，即为SimpleQueue对象的方法。我们看到，这里worker进程定义均相同，所以进程池中的worker进程共享self._inqueue和self._outqueue对象，那么当一个task元素被put到共享的_inqueue管道中时，如何确保只有一个worker获取到呢，答案同样是加锁，在SimpleQueue()类的定义中，put以及get方法都带有锁，进行同步，唯一不同的是，这里的锁是用于进程间同步的。这样就保证了多个worker之间能够确保任务的同步。与分配任务类似，在worker进程运行完之后，会将结果put会_outqueue，_outqueue同样是SimpleQueue类对象，可以在多个进程之间进行互斥。</span><br></pre></td></tr></table></figure>
+<p>在worker进程运行结束之后，会将执行结果通过管道传回，进程池中有<code>_handle_result</code>线程来负责接收result，取出之后，通过调用<code>_set</code>方法将结果写回ApplyResult/MapResult对象，客户端可以通过get方法取出结果，这里通过使用条件变量进行同步，当<code>_set</code>函数执行之后，通过条件变量唤醒阻塞在get函数的主进程。</p>
+<p>进程池终止工作通过调用Pool.terminate()来实现，这里的实现很巧妙，用了一个可调用对象，将终止Pool时的需要执行的回调函数先注册好，等到需要终止时，直接调用对象即可。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">self._terminate = Finalize(</span><br><span class="line">            　　　　self, self._terminate_pool,</span><br><span class="line">            　　　　args=(self._taskqueue, self._inqueue, self._outqueue, self._pool,</span><br><span class="line">                   self._worker_handler, self._task_handler,</span><br><span class="line">                   self._result_handler, self._cache),</span><br><span class="line">            　　　　exitpriority=<span class="number">15</span></span><br><span class="line">            )</span><br><span class="line">在Finalize类的实现了__call__方法，在运行self._terminate()时，就会调用构造self._terminate时传入的self._terminate_pool对象。</span><br></pre></td></tr></table></figure>
+<p>使用map/map_async函数向进程池中批量分配任务时，使用了生成器表达式：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">self._taskqueue.put((((result._job, i, mapstar, (x,), &#123;&#125;) <span class="keyword">for</span> i, x <span class="keyword">in</span> enumerate(task_batches)), <span class="keyword">None</span>))</span><br><span class="line">生成器表达式很简单，只需把列表解析的的[]换成()即可，上述表达的列表解析表示为：</span><br><span class="line">[(result._job, i, mapstar, (x,), &#123;&#125;) <span class="keyword">for</span> i, x <span class="keyword">in</span> enumerate(task_batches)]</span><br><span class="line">这里使用生成器表达式的好处是，它相当于列表解析的扩展，是对内存有好的，因为它只是生成了一个生成器，当我们需要使用该生成器对应的逻辑目标数据时，它才会通过既定逻辑去生成该数据，所以不会大量占用内存。</span><br></pre></td></tr></table></figure>
+<p>在Pool中，_worker_handler线程负责监控、创建新的工作进程，在监控工作进程退出时，同时将退出的进程从进程池中删除掉。这类似于，一边遍历一边删除列表。我们来看下下面代码的实现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>l = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">5</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">for</span> i <span class="keyword">in</span> l:</span><br><span class="line">    <span class="keyword">if</span> i <span class="keyword">in</span> [<span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]:</span><br><span class="line">        l.remove(i)</span><br><span class="line"></span><br><span class="line">        </span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>l</span><br><span class="line">[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]</span><br></pre></td></tr></table></figure>
+<p>我们看到l没有将所有的3和4都删除掉，这是因为remove改变了l的大小。再看下面的实现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>l = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">5</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">for</span> i <span class="keyword">in</span> range(len(l)):</span><br><span class="line">    <span class="keyword">if</span> l[i] <span class="keyword">in</span> [<span class="number">3</span>, <span class="number">4</span>]:</span><br><span class="line">        <span class="keyword">del</span> l[i]</span><br><span class="line"></span><br><span class="line">        </span><br><span class="line"></span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File <span class="string">"&lt;pyshell#37&gt;"</span>, line <span class="number">2</span>, <span class="keyword">in</span> &lt;module&gt;</span><br><span class="line">    <span class="keyword">if</span> l[i] <span class="keyword">in</span> [<span class="number">3</span>, <span class="number">4</span>]:</span><br><span class="line">IndexError: list index out of range</span><br><span class="line">&gt;&gt;&gt;</span><br></pre></td></tr></table></figure>
+<p>同样因为del l[i]时，l的大小改变，继续访问下去导致访问越界。而标准库中的进程池给出了遍历删除的一个正确示例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> reversed(range(len(self._pool))):</span><br><span class="line">    worker = self._pool[i]   </span><br><span class="line">    <span class="keyword">if</span> worker.exitcode <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>:</span><br><span class="line">        worker.join()</span><br><span class="line">        cleaned = <span class="keyword">True</span>       </span><br><span class="line">        <span class="keyword">del</span> self._pool[i]</span><br></pre></td></tr></table></figure>
+<p>使用reversed，从后向前删除list中的元素，这样会保证所有符合删除条件的元素被删除掉：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>l = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">5</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">for</span> i <span class="keyword">in</span> reversed(range(len(l))):</span><br><span class="line">    <span class="keyword">if</span> l[i] <span class="keyword">in</span> [<span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]:</span><br><span class="line">        <span class="keyword">del</span> l[i]</span><br><span class="line"></span><br><span class="line">        </span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>l</span><br><span class="line">[<span class="number">1</span>, <span class="number">2</span>]</span><br></pre></td></tr></table></figure>
+<p>原文：<a href="https://blog.51cto.com/u_11026142/1876989" target="_blank" rel="external">https://blog.51cto.com/u_11026142/1876989</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+<blockquote class="blockquote-center" style="color: #ccc;">
+    -------------本文结束 <i class="fa fa-apple"></i> 感谢您的阅读-------------
+</blockquote>
+
+  <span id="inline-green" style="border-radius:3px;">作者</span>：<a class="link-blue" href="https://github.com/magiceses" target="_blank">Magiceses</a><br/>有问题请 <a class="link-blue" href="https://magiceses.github.io/guestbook" target="_blank">留言</a> 或者私信我的 <a class="link-blue" href="https://weibo.com/u/3069595351" target="_blank">微博</a>。
+
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>满分是10分的话，这篇文章你给几分</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/reward/reward_wechat.png" alt="magiceses WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/reward/reward_alipay.png" alt="magiceses Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"><i class="fa fa-tag"></i> Python</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/10/11/python-进程线程协程-4.1/" rel="next" title="Python 进程线程协程(4)--multiprocessing模块(中)">
+                <i class="fa fa-chevron-left"></i> Python 进程线程协程(4)--multiprocessing模块(中)
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/03/31/prometheus-alertmanager-使用原理和源码分析/" rel="prev" title="Alertmanager 使用原理和源码分析">
+                Alertmanager 使用原理和源码分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar/avatar.png"
+               alt="magiceses" />
+          <p class="site-author-name" itemprop="name">magiceses</p>
+          <p class="site-description motion-element" itemprop="description">Stay Hungry,Stay Foolish</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">36</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/magiceses" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://blog.csdn.net/weixin_43700106" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-chrome"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/weblog" title="建站日志" target="_blank">建站日志</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/reward" title="打赏" target="_blank">打赏</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <p class="post-toc-empty">此文章未包含目录</p>
+            
+          </div>
+        </section>
+      
+
+      
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="busuanzi-count">
+
+  <!-- <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script> -->
+  <!-- 上面这个是之前的，不知道为什么失效了，改成下面这个 -->
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">您是第<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>个小伙伴</span>
+  
+
+  
+    <span class="site-pv">本站总浏览<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">magiceses</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Pisces
+  </a>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count" style="color: #e90f92;">全站共 685k 字</span>
+</div>
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+  <!-- 按需加载背景 -->
+  <!-- 背景动画 -->
+<script type="text/javascript">
+  // 按需加载背景
+  // 如果是all，就直接加载了
+  if("pc" == "all") {
+    $.getScript("/js/src/particle.js?v=5.0.1");
+  }
+  // 识别手机或电脑的js开始
+  (function(){
+    var res = GetRequest();
+    var par = res['index'];
+    if(par!='gfan'){
+      var ua=navigator.userAgent.toLowerCase();
+      var contains=function (a, b){
+          if(a.indexOf(b)!=-1){return true;}
+      };
+      if((contains(ua,"android") && contains(ua,"mobile"))||(contains(ua,"android") && contains(ua,"mozilla"))||(contains(ua,"android") && contains(ua,"opera"))||contains(ua,"ucweb7")||contains(ua,"iphone")){
+        return false;
+      } else {
+        $.getScript("/js/src/particle.js?v=5.0.1");
+      }
+    }
+  })();
+  function GetRequest() {
+    var url = location.search;
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+      var str = url.substr(1);
+      strs = str.split("&");
+      for(var i = 0; i < strs.length; i ++) {
+        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+      }
+    }
+    return theRequest;
+  }
+</script>
+<!-- 识别手机或电脑的js结束 -->  
+
+  <!-- 页面点击小红心 -->
+  <!-- 页面点击小红心 -->
+
+  <script type="text/javascript" src="/js/src/love.js?v=5.0.1"></script>
+
+
+  <!-- 鼠标移动，效果 -->
+  <!-- 鼠标移动特效 -->
+
+  <script type="text/javascript" src="/js/src/jquery-stars.js?v=5.0.1"></script>
+  <script type="text/javascript">
+  jQuery('body').jstars({
+  	image_path: '/images',
+  	image: 'candy-cane-stars.png',
+  	style: 'white',
+  	width: 34,
+  	height: 34,
+  	delay: 700,
+  	frequency: 5
+  });
+  </script>
+
+
+  <!-- 页面 title 进入/离开 效果 -->
+
+  <script type="text/javascript">var OriginTitile=document.title,st;document.addEventListener("visibilitychange",function(){document.hidden?(document.title="Waiting for you back！",clearTimeout(st)):(document.title="Thanks for visit~ "+OriginTitile,st=setTimeout(function(){document.title=OriginTitile},4e3))})</script>
+
+
+</body>
+</html>

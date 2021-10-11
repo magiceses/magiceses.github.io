@@ -1,0 +1,1287 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Courier New:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Prometheus," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="天青色等烟雨" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="我不知道萧红可有类似的体验，是否担心华美的袍上爬满虱子，也许她知道，但她不在乎，她更想要取暖，即使将虱子一道披挂上身。她像忍耐虱子一样，忍耐着世界的冷眼，还装成一派天真模样，仿佛因不谙世事而无从察觉，就可以不受伤害。
+
+服务发现简介云原生、容器场景下按需的资源使用方式对于监控系统而言就意味着没有了一个固定的监控目标，所有的监控对象(基础设施、应用、服
+务)都在动态的变化，这对基于Push模式传统监">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Prometheus 服务发现源码分析">
+<meta property="og:url" content="https://magiceses.github.io/2020/10/04/prometheus-prometheus-3-服务发现源码分析/index.html">
+<meta property="og:site_name" content="天青色等烟雨">
+<meta property="og:description" content="我不知道萧红可有类似的体验，是否担心华美的袍上爬满虱子，也许她知道，但她不在乎，她更想要取暖，即使将虱子一道披挂上身。她像忍耐虱子一样，忍耐着世界的冷眼，还装成一派天真模样，仿佛因不谙世事而无从察觉，就可以不受伤害。
+
+服务发现简介云原生、容器场景下按需的资源使用方式对于监控系统而言就意味着没有了一个固定的监控目标，所有的监控对象(基础设施、应用、服
+务)都在动态的变化，这对基于Push模式传统监">
+<meta property="og:image" content="https://magiceses.github.io/images/prometheus-prometheus-8.png">
+<meta property="og:updated_time" content="2021-10-02T07:49:30.954Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Prometheus 服务发现源码分析">
+<meta name="twitter:description" content="我不知道萧红可有类似的体验，是否担心华美的袍上爬满虱子，也许她知道，但她不在乎，她更想要取暖，即使将虱子一道披挂上身。她像忍耐虱子一样，忍耐着世界的冷眼，还装成一派天真模样，仿佛因不谙世事而无从察觉，就可以不受伤害。
+
+服务发现简介云原生、容器场景下按需的资源使用方式对于监控系统而言就意味着没有了一个固定的监控目标，所有的监控对象(基础设施、应用、服
+务)都在动态的变化，这对基于Push模式传统监">
+<meta name="twitter:image" content="https://magiceses.github.io/images/prometheus-prometheus-8.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://magiceses.github.io/2020/10/04/prometheus-prometheus-3-服务发现源码分析/"/>
+
+
+<!-- 网页加载条 -->
+<script src="/js/src/pace.min.js"></script>
+  <title> Prometheus 服务发现源码分析 | 天青色等烟雨 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">天青色等烟雨</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">而我在等你</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-guestbook">
+          <a href="/guestbook" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-commenting"></i> <br />
+            
+            留言
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+      
+      
+        <li class="menu-item"> <a title="把这个链接拖到你的工具栏中,任何网页都可以High" href='javascript:(
+/*
+ * Copyright (C) 2016 Never_yu (Neveryu.github.io) <React.dong.yu@gmail.com>
+ * Sina Weibo (http://weibo.com/Neveryu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function go() {
+
+var songs = [
+  "http://dl.stream.qqmusic.qq.com/C400001Qu4I30eVFYb.m4a?vkey=2127178E4405E7B8B268F20F05232485735CCF4FF8C1432F0360D2626D0B6C9564B5627C7AB481BBC685FEDB0946A50E97C66F0D1B008226&guid=7175649092&uin=0&fromtag=66",
+  "",
+  "",
+  ""
+];
+
+function c() {
+  var e = document.createElement("link");
+  e.setAttribute("type", "text/css");
+  e.setAttribute("rel", "stylesheet");
+  e.setAttribute("href", f);
+  e.setAttribute("class", l);
+  document.body.appendChild(e)
+}
+
+function h() {
+  var e = document.getElementsByClassName(l);
+  for (var t = 0; t < e.length; t++) {
+    document.body.removeChild(e[t])
+  }
+}
+
+function p() {
+  var e = document.createElement("div");
+  e.setAttribute("class", a);
+  document.body.appendChild(e);
+  setTimeout(function() {
+    document.body.removeChild(e)
+  }, 100)
+}
+
+function d(e) {
+  return {
+    height : e.offsetHeight,
+    width : e.offsetWidth
+  }
+}
+
+function v(i) {
+  var s = d(i);
+  return s.height > e && s.height < n && s.width > t && s.width < r
+}
+
+function m(e) {
+  var t = e;
+  var n = 0;
+  while (!!t) {
+    n += t.offsetTop;
+    t = t.offsetParent
+  }
+  return n
+}
+
+function g() {
+  var e = document.documentElement;
+  if (!!window.innerWidth) {
+    return window.innerHeight
+  } else if (e && !isNaN(e.clientHeight)) {
+    return e.clientHeight
+  }
+  return 0
+}
+
+function y() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  }
+  return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+}
+
+function E(e) {
+  var t = m(e);
+  return t >= w && t <= b + w
+}
+
+function S() {
+  var e = document.getElementById("audio_element_id");
+  if(e != null){
+    var index = parseInt(e.getAttribute("curSongIndex"));
+    if(index > songs.length - 2) {
+      index = 0;
+    } else {
+      index++;
+    }
+    e.setAttribute("curSongIndex", index);
+    N();
+  }
+
+  e.src = i;
+  e.play()
+}
+
+function x(e) {
+  e.className += " " + s + " " + o
+}
+
+function T(e) {
+  e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+}
+
+function N() {
+  var e = document.getElementsByClassName(s);
+  var t = new RegExp("\\b" + s + "\\b");
+  for (var n = 0; n < e.length; ) {
+    e[n].className = e[n].className.replace(t, "")
+  }
+}
+
+function initAudioEle() {
+  var e = document.getElementById("audio_element_id");
+  if(e === null){
+    e = document.createElement("audio");
+    e.setAttribute("class", l);
+    e.setAttribute("curSongIndex", 0);
+    e.id = "audio_element_id";
+    e.loop = false;
+    e.bgcolor = 0;
+    e.addEventListener("canplay", function() {
+      setTimeout(function() {
+        x(k)
+      }, 500);
+      setTimeout(function() {
+        N();
+        p();
+        for (var e = 0; e < O.length; e++) {
+          T(O[e])
+        }
+      }, 15500)
+    }, true);
+    e.addEventListener("ended", function() {
+      N();
+      h();
+      go();
+    }, true);
+    e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+    document.body.appendChild(e);
+  }
+}
+
+initAudioEle();
+var e = 30;
+var t = 30;
+var n = 350;
+var r = 350;
+
+var curSongIndex = parseInt(document.getElementById("audio_element_id").getAttribute("curSongIndex"));
+var i = songs[curSongIndex];
+
+var s = "mw-harlem_shake_me";
+var o = "im_first";
+var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+var a = "mw-strobe_light";
+
+/* harlem-shake-style.css，替换成你的位置，也可以直接使用：//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css */
+var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+
+var l = "mw_added_css";
+var b = g();
+var w = y();
+var C = document.getElementsByTagName("*");
+var k = null;
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    if (E(A)) {
+      k = A;
+      break
+    }
+  }
+}
+if (A === null) {
+  console.warn("Could not find a node of the right size. Please try a different page.");
+  return
+}
+c();
+S();
+var O = [];
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    O.push(A)
+  }
+}
+})()'><i class="menu-item-icon fa fa-music fa-fw"></i> High一下</a></li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search fa-lg"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Prometheus 服务发现源码分析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2020-10-04T11:25:24+08:00" content="2020-10-04">
+              2020-10-04
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Prometheus/" itemprop="url" rel="index">
+                    <span itemprop="name">Prometheus</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv">热度
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p id="div-border-top-green">我不知道萧红可有类似的体验，是否担心华美的袍上爬满虱子，也许她知道，但她不在乎，她更想要取暖，即使将虱子一道披挂上身。她像忍耐虱子一样，忍耐着世界的冷眼，还装成一派天真模样，仿佛因不谙世事而无从察觉，就可以不受伤害。<br></p>
+
+<h2 id="服务发现简介"><a href="#服务发现简介" class="headerlink" title="服务发现简介"></a>服务发现简介</h2><p>云原生、容器场景下按需的资源使用方式对于监控系统而言就意味着没有了一个固定的监控目标，所有的监控对象(基础设施、应用、服</p>
+<p>务)都在动态的变化，这对基于Push模式传统监控软件带来挑战。</p>
+<a id="more"></a>
+<p>对于Prometheus这一类基于Pull模式的监控系统，显然也无法继续使用的static_configs的方式静态的定义监控目标。而对于</p>
+<p>Prometheus而言其解决方案就是引入一个中间的代理人（服务注册中心），这个代理人掌握着当前所有监控目标的访问信息，</p>
+<p>Prometheus只需要向这个代理人询问有哪些监控目标控即可， 这种模式被称为服务发现。</p>
+<p>通过服务发现的方式，管理员可以在不重启Prometheus服务的情况下动态的发现需要监控的Target实例信息。</p>
+<p>Prometheus 每个被控目标暴露一个 endpoint 供 server 抓取，要获知这些 endpoint 有多种方式，最简单的是在配置文件里静态配置，</p>
+<p>还有基于 k8s、consul、dns 等多种方式，基于文件的服务发现是比较灵活普遍的一种方式。</p>
+<p>Prometheus采用pull方式拉取监控数据，需要实时感知被监控服务(Target)的变化．服务发现(serviceDiscover)支持多种服务发现系统，</p>
+<p>这些系统可以动态感知被监控的服务(Target)的变化，把变化的被监控服务(Target)转换为targetgroup.Group的结构，通过管道up发送个</p>
+<p>服务发现(serviceDiscover)．以版本 v2.27为例，目前服务发现(serviceDiscover)支持的服务发现系统类型如下：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Package install has the side-effect of registering all builtin</span></span><br><span class="line"><span class="comment">// service discovery config types.</span></span><br><span class="line"><span class="keyword">package</span> install</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	_ <span class="string">"github.com/prometheus/prometheus/discovery/aws"</span>          <span class="comment">// register aws</span></span><br><span class="line">	_ <span class="string">"github.com/prometheus/prometheus/discovery/azure"</span>        <span class="comment">// register azure</span></span><br><span class="line">	_ <span class="string">"github.com/prometheus/prometheus/discovery/consul"</span>       <span class="comment">// register consul</span></span><br><span class="line">	_ <span class="string">"github.com/prometheus/prometheus/discovery/digitalocean"</span> <span class="comment">// register digitalocean</span></span><br><span class="line">	_ <span class="string">"github.com/prometheus/prometheus/discovery/dns"</span>          <span class="comment">// register dns</span></span><br><span class="line">	_ <span class="string">"github.com/prometheus/prometheus/discovery/eureka"</span>       <span class="comment">// register eureka</span></span><br><span class="line">	_ <span class="string">"github.com/prometheus/prometheus/discovery/file"</span>         <span class="comment">// register file</span></span><br><span class="line">	_ <span class="string">"github.com/prometheus/prometheus/discovery/gce"</span>          <span class="comment">// register gce</span></span><br><span class="line">	_ <span class="string">"github.com/prometheus/prometheus/discovery/hetzner"</span>      <span class="comment">// register hetzner</span></span><br><span class="line">	_ <span class="string">"github.com/prometheus/prometheus/discovery/kubernetes"</span>   <span class="comment">// register kubernetes</span></span><br><span class="line">	_ <span class="string">"github.com/prometheus/prometheus/discovery/marathon"</span>     <span class="comment">// register marathon</span></span><br><span class="line">	_ <span class="string">"github.com/prometheus/prometheus/discovery/moby"</span>         <span class="comment">// register moby</span></span><br><span class="line">	_ <span class="string">"github.com/prometheus/prometheus/discovery/openstack"</span>    <span class="comment">// register openstack</span></span><br><span class="line">	_ <span class="string">"github.com/prometheus/prometheus/discovery/scaleway"</span>     <span class="comment">// register scaleway</span></span><br><span class="line">	_ <span class="string">"github.com/prometheus/prometheus/discovery/triton"</span>       <span class="comment">// register triton</span></span><br><span class="line">	_ <span class="string">"github.com/prometheus/prometheus/discovery/zookeeper"</span>    <span class="comment">// register zookeeper</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<h2 id="服务发现接口"><a href="#服务发现接口" class="headerlink" title="服务发现接口"></a>服务发现接口</h2><p>服务发现(serviceDiscover)为了实现对以上服务发现系统的统一管理，提供了一个Discoverer接口，由各个服务发现系统来实现，然后把</p>
+<p>上线的服务(Target)通过up管道发送给服务发现(serviceDiscover)</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">prometheus/discovery/manager.<span class="keyword">go</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">type</span> Discoverer <span class="keyword">interface</span> &#123;</span><br><span class="line">	<span class="comment">// Run hands a channel to the discovery provider (Consul, DNS etc) through which it can send</span></span><br><span class="line">	<span class="comment">// updated target groups.</span></span><br><span class="line">	<span class="comment">// Must returns if the context gets canceled. It should not close the update</span></span><br><span class="line">	<span class="comment">// channel on returning.</span></span><br><span class="line">	Run(ctx context.Context, up <span class="keyword">chan</span>&lt;- []*targetgroup.Group)</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">prometheus/discovery/targetgroup/targetgroup.<span class="keyword">go</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// Group is a set of targets with a common label set(production , test, staging etc.).</span></span><br><span class="line"><span class="keyword">type</span> Group <span class="keyword">struct</span> &#123;</span><br><span class="line">	<span class="comment">// Targets is a list of targets identified by a label set. Each target is</span></span><br><span class="line">	<span class="comment">// uniquely identifiable in the group by its address label.</span></span><br><span class="line">	Targets []model.LabelSet <span class="comment">//服务(Target)主要标签，比如ip + port，示例："__address__": "localhost:9100"</span></span><br><span class="line">	<span class="comment">// Labels is a set of labels that is common across all targets in the group.</span></span><br><span class="line">	Labels model.LabelSet　<span class="comment">//服务(Target)其他标签，可以为空：</span></span><br><span class="line"> </span><br><span class="line">	<span class="comment">// Source is an identifier that describes a group of targets.</span></span><br><span class="line">	Source <span class="keyword">string</span> <span class="comment">//全局唯一个ID，示例：Source: "0"</span></span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">Group的一个示例：</span><br><span class="line">(dlv) p tg</span><br><span class="line">*github.com/prometheus/prometheus/discovery/targetgroup.Group &#123;</span><br><span class="line">	Targets: []github.com/prometheus/common/model.LabelSet <span class="built_in">len</span>: <span class="number">1</span>, <span class="built_in">cap</span>: <span class="number">1</span>, [</span><br><span class="line">	　　　　　　　[</span><br><span class="line">		　　　　　　　<span class="string">"__address__"</span>: <span class="string">"localhost:9100"</span>, </span><br><span class="line">	　　　　　　　],</span><br><span class="line">　　　　　　　　]</span><br><span class="line">	],</span><br><span class="line">	Labels: github.com/prometheus/common/model.LabelSet <span class="literal">nil</span>,</span><br><span class="line">	Source: <span class="string">"0"</span>,&#125;</span><br></pre></td></tr></table></figure>
+<p>除了静态服务发现系统(StaticConfigs)在prometheus/discovery/manager.go中实现了以上接口，其他动态服务发现系统，在</p>
+<p>prometheus/discovery/下都在有各自的目录下实现。</p>
+<h2 id="服务发现配置"><a href="#服务发现配置" class="headerlink" title="服务发现配置"></a>服务发现配置</h2><p>示例配置文件：prometheus.yml</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># my global config</span></span><br><span class="line"><span class="attr">global:</span></span><br><span class="line"><span class="attr">  scrape_interval:</span>     <span class="number">15</span><span class="string">s</span> <span class="comment"># Set the scrape interval to every 15 seconds. Default is every 1 minute.</span></span><br><span class="line"><span class="attr">  evaluation_interval:</span> <span class="number">15</span><span class="string">s</span> <span class="comment"># Evaluate rules every 15 seconds. The default is every 1 minute.</span></span><br><span class="line">  <span class="comment"># scrape_timeout is set to the global default (10s).</span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># Alertmanager configuration</span></span><br><span class="line"><span class="attr">alerting:</span></span><br><span class="line"><span class="attr">  alertmanagers:</span></span><br><span class="line"><span class="attr">  - static_configs:</span></span><br><span class="line"><span class="attr">    - targets:</span></span><br><span class="line"><span class="attr">       - alertmanager:</span><span class="number">9093</span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># Load rules once and periodically evaluate them according to the global 'evaluation_interval'.</span></span><br><span class="line"><span class="attr">rule_files:</span></span><br><span class="line">  <span class="comment"># - "first_rules.yml"</span></span><br><span class="line">  <span class="comment"># - "second_rules.yml"</span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># A scrape configuration containing exactly one endpoint to scrape:</span></span><br><span class="line"><span class="comment"># Here it's Prometheus itself.</span></span><br><span class="line"><span class="attr">scrape_configs:</span></span><br><span class="line">  <span class="comment"># The job name is added as a label `job=&lt;job_name&gt;` to any timeseries scraped from this config.</span></span><br><span class="line"><span class="attr">  - job_name:</span> <span class="string">'prometheus'</span></span><br><span class="line"> </span><br><span class="line">    <span class="comment"># metrics_path defaults to '/metrics'</span></span><br><span class="line">    <span class="comment"># scheme defaults to 'http'.</span></span><br><span class="line"><span class="attr">    scrape_interval:</span> <span class="number">5</span><span class="string">s</span></span><br><span class="line"><span class="attr">    static_configs:</span></span><br><span class="line"><span class="attr">    - targets:</span> <span class="string">['localhost:9090']</span></span><br><span class="line"> </span><br><span class="line"><span class="attr">  - job_name:</span> <span class="string">'node'</span></span><br><span class="line"><span class="attr">    scrape_interval:</span> <span class="number">10</span><span class="string">s</span></span><br><span class="line"><span class="attr">    static_configs:</span></span><br><span class="line"><span class="attr">      - targets:</span> <span class="string">['localhost:9100']</span></span><br></pre></td></tr></table></figure>
+<ol>
+<li><p>配置文件初始化</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">prometheus/cmd/prometheus/main.<span class="keyword">go</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">//discovery.Name("scrape")用于区分notify</span></span><br><span class="line">discoveryManagerScrape  = discovery.NewManager(ctxScrape, log.With(logger, <span class="string">"component"</span>, <span class="string">"discovery manager scrape"</span>), discovery.Name(<span class="string">"scrape"</span>))</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>调用NewManager方法，实例化Manager结构体</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">prometheus/discovery/manager.<span class="keyword">go</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// NewManager is the Discovery Manager constructor.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewManager</span><span class="params">(ctx context.Context, logger log.Logger, options ...<span class="keyword">func</span>(*Manager)</span>) *<span class="title">Manager</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> logger == <span class="literal">nil</span> &#123;</span><br><span class="line">		logger = log.NewNopLogger()</span><br><span class="line">	&#125;</span><br><span class="line">	mgr := &amp;Manager&#123;</span><br><span class="line">		logger:         logger,</span><br><span class="line">		syncCh:         <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">map</span>[<span class="keyword">string</span>][]*targetgroup.Group),</span><br><span class="line">		targets:        <span class="built_in">make</span>(<span class="keyword">map</span>[poolKey]<span class="keyword">map</span>[<span class="keyword">string</span>]*targetgroup.Group),</span><br><span class="line">		discoverCancel: []context.CancelFunc&#123;&#125;,</span><br><span class="line">		ctx:            ctx,</span><br><span class="line">		updatert:       <span class="number">5</span> * time.Second,</span><br><span class="line">		triggerSend:    <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, <span class="number">1</span>),</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> _, option := <span class="keyword">range</span> options &#123;</span><br><span class="line">		option(mgr)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> mgr</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结构体Manager定义如下</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">prometheus/discovery/manager.<span class="keyword">go</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// Manager maintains a set of discovery providers and sends each update to a map channel.</span></span><br><span class="line"><span class="comment">// Targets are grouped by the target set name.</span></span><br><span class="line"><span class="keyword">type</span> Manager <span class="keyword">struct</span> &#123;</span><br><span class="line">	logger         log.Logger <span class="comment">//日志</span></span><br><span class="line">	name           <span class="keyword">string</span>　　　<span class="comment">// 用于区分srape和notify，因为他们用的同一个discovery/manager.go</span></span><br><span class="line">	mtx            sync.RWMutex <span class="comment">//同步读写锁</span></span><br><span class="line">	ctx            context.Context <span class="comment">//协同控制，比如系统退出</span></span><br><span class="line">	discoverCancel []context.CancelFunc <span class="comment">// 处理服务下线</span></span><br><span class="line"> </span><br><span class="line">	<span class="comment">// Some Discoverers(eg. k8s) send only the updates for a given target group</span></span><br><span class="line">	<span class="comment">// so we use map[tg.Source]*targetgroup.Group to know which group to update.</span></span><br><span class="line">	targets <span class="keyword">map</span>[poolKey]<span class="keyword">map</span>[<span class="keyword">string</span>]*targetgroup.Group <span class="comment">//发现的服务(Targets)</span></span><br><span class="line">	<span class="comment">// providers keeps track of SD providers.</span></span><br><span class="line">	providers []*provider <span class="comment">// providers的类型可分为kubernetes，DNS等</span></span><br><span class="line">	<span class="comment">// The sync channel sends the updates as a map where the key is the job value from the scrape config.</span></span><br><span class="line">	<span class="comment">// key 是 prometheus 配置文件的 job_name，value 是其对应的 targetgroup</span></span><br><span class="line">  <span class="comment">// 把发现的服务Targets)通过管道形式通知给scrapeManager</span></span><br><span class="line">  syncCh <span class="keyword">chan</span> <span class="keyword">map</span>[<span class="keyword">string</span>][]*targetgroup.Group </span><br><span class="line"> </span><br><span class="line">	<span class="comment">// How long to wait before sending updates to the channel. The variable</span></span><br><span class="line">	<span class="comment">// should only be modified in unit tests.</span></span><br><span class="line">	updatert time.Duration</span><br><span class="line"> </span><br><span class="line">	<span class="comment">// The triggerSend channel signals to the manager that new updates have been received from providers.</span></span><br><span class="line">	<span class="comment">// 这是一个用于通知 manager 有 provider 进行了更新的 channel</span></span><br><span class="line">  triggerSend <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>比较重要的成员是 targets，它保存了全量的 target，poolKey 是一个结构体，由 job_name 和 provider_name 组成</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">prometheus/discovery/manager.<span class="keyword">go</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// poolKey定义了每个发现的服务的来源</span></span><br><span class="line"><span class="keyword">type</span> poolKey <span class="keyword">struct</span> &#123;</span><br><span class="line">	setName  <span class="keyword">string</span> <span class="comment">//对应系统名/索引值，比如：string/0(静态服务发现)，DNS/1(动态服务发现)</span></span><br><span class="line">	provider <span class="keyword">string</span> <span class="comment">//对应job_name</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过 m.registerProviders 可以看到 setName 就是 “file”/“dns”/“consul”…,provider 是 provider 对象的 name 字段，是 “file”/“dns”/</p>
+<p>“consul”… 后面跟上这个 m.provider 有多少个发现文件，比如 file_SD_discovrer 配置了3个yml文件，poolKey 的 provider 字段就</p>
+<p>是 “file/3”</p>
+</li>
+<li><p>通过匿名函数加载prometheus.yml的scrape_configs下对应配置</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">prometheus/cmd/prometheus/main.<span class="keyword">go</span></span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">func</span><span class="params">(cfg *config.Config)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    c := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]sd_config.ServiceDiscoveryConfig)</span><br><span class="line">    <span class="keyword">for</span> _, v := <span class="keyword">range</span> cfg.ScrapeConfigs &#123;</span><br><span class="line">        c[v.JobName] = v.ServiceDiscoveryConfig</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> discoveryManagerScrape.ApplyConfig(c)</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+<p>以示例配置文件prometheus.yml为例，包含两个jobs，job_name分别是prometheus和node，每个job可以包含多个targets．以job_name：node为例，匿名函数变量v输出如下:</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">(dlv) p v</span><br><span class="line">*github.com/prometheus/prometheus/config.ScrapeConfig &#123;</span><br><span class="line">	JobName: <span class="string">"node"</span>,</span><br><span class="line">	HonorLabels: <span class="literal">false</span>,</span><br><span class="line">	Params: net/url.Values <span class="literal">nil</span>,</span><br><span class="line">	ScrapeInterval: <span class="number">10000000000</span>,</span><br><span class="line">	ScrapeTimeout: <span class="number">10000000000</span>,</span><br><span class="line">	MetricsPath: <span class="string">"/metrics"</span>,</span><br><span class="line">	Scheme: <span class="string">"http"</span>,</span><br><span class="line">	SampleLimit: <span class="number">0</span>,</span><br><span class="line">	ServiceDiscoveryConfig: github.com/prometheus/prometheus/discovery/config.ServiceDiscoveryConfig &#123;</span><br><span class="line">		StaticConfigs: []*github.com/prometheus/prometheus/discovery/targetgroup.Group <span class="built_in">len</span>: <span class="number">1</span>, <span class="built_in">cap</span>: <span class="number">1</span>, [</span><br><span class="line">			*(*<span class="string">"github.com/prometheus/prometheus/discovery/targetgroup.Group"</span>)(<span class="number">0xc0018a27b0</span>),</span><br><span class="line">		],</span><br><span class="line">		DNSSDConfigs: []*github.com/prometheus/prometheus/discovery/dns.SDConfig <span class="built_in">len</span>: <span class="number">0</span>, <span class="built_in">cap</span>: <span class="number">0</span>, <span class="literal">nil</span>,</span><br><span class="line">		FileSDConfigs: []*github.com/prometheus/prometheus/discovery/file.SDConfig <span class="built_in">len</span>: <span class="number">0</span>, <span class="built_in">cap</span>: <span class="number">0</span>, <span class="literal">nil</span>,</span><br><span class="line">        ．．．．．．</span><br><span class="line">        ．．．．．．</span><br><span class="line">        ．．．．．．</span><br><span class="line">		AzureSDConfigs: []*github.com/prometheus/prometheus/discovery/azure.SDConfig <span class="built_in">len</span>: <span class="number">0</span>, <span class="built_in">cap</span>: <span class="number">0</span>, <span class="literal">nil</span>,</span><br><span class="line">		TritonSDConfigs: []*github.com/prometheus/prometheus/discovery/triton.SDConfig <span class="built_in">len</span>: <span class="number">0</span>, <span class="built_in">cap</span>: <span class="number">0</span>, <span class="literal">nil</span>,&#125;,</span><br><span class="line">	HTTPClientConfig: github.com/prometheus/common/config.HTTPClientConfig &#123;</span><br><span class="line">		BasicAuth: *github.com/prometheus/common/config.BasicAuth <span class="literal">nil</span>,</span><br><span class="line">		BearerToken: <span class="string">""</span>,</span><br><span class="line">		BearerTokenFile: <span class="string">""</span>,</span><br><span class="line">		ProxyURL: (*<span class="string">"github.com/prometheus/common/config.URL"</span>)(<span class="number">0xc000458cf</span>8),</span><br><span class="line">		TLSConfig: (*<span class="string">"github.com/prometheus/common/config.TLSConfig"</span>)(<span class="number">0xc000458d</span>00),&#125;,</span><br><span class="line">	RelabelConfigs: []*github.com/prometheus/prometheus/pkg/relabel.Config <span class="built_in">len</span>: <span class="number">0</span>, <span class="built_in">cap</span>: <span class="number">0</span>, <span class="literal">nil</span>,</span><br><span class="line">	MetricRelabelConfigs: []*github.com/prometheus/prometheus/pkg/relabel.Config <span class="built_in">len</span>: <span class="number">0</span>, <span class="built_in">cap</span>: <span class="number">0</span>, <span class="literal">nil</span>,&#125;</span><br></pre></td></tr></table></figure>
+<p>由以上结果可知，job_name：node对应静态服务发现系统(StaticConfigs)．其实，在配置文件prometheus.yml中的两个job_names</p>
+<p>都对应静态服务发现系统(StaticConfigs)</p>
+</li>
+<li><p>ApplyConfig方法实现逻辑比较清晰：先实现每个job的Discoverer接口，然后启动该job对应的服务发现系统</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">prometheus/discovery/manager.<span class="keyword">go</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// ApplyConfig removes all running discovery providers and starts new ones using the provided config.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Manager)</span> <span class="title">ApplyConfig</span><span class="params">(cfg <span class="keyword">map</span>[<span class="keyword">string</span>]sd_config.ServiceDiscoveryConfig)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	m.mtx.Lock()</span><br><span class="line">	<span class="keyword">defer</span> m.mtx.Unlock()</span><br><span class="line"> </span><br><span class="line">	<span class="keyword">for</span> pk := <span class="keyword">range</span> m.targets &#123;</span><br><span class="line">		<span class="keyword">if</span> _, ok := cfg[pk.setName]; !ok &#123;</span><br><span class="line">			discoveredTargets.DeleteLabelValues(m.name, pk.setName)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">  <span class="comment">// 先把所有的Discoverer取消掉，这样做比较简单，毕竟配置文件修改频率非常低，没大毛病</span></span><br><span class="line">  <span class="comment">// 实现方式就是我们上面提到的Manager.discoverCancel这个取消函数的数组，遍历调用就是了</span></span><br><span class="line">	m.cancelDiscoverers()</span><br><span class="line">  <span class="comment">// name对应job_name，scfg是给出该job_name对应的服务发现系统类型，每个job_name下可以包含多种服务发现系统类型，但用的比较少</span></span><br><span class="line">	<span class="keyword">for</span> name, scfg := <span class="keyword">range</span> cfg &#123;</span><br><span class="line">		m.registerProviders(scfg, name)</span><br><span class="line">		discoveredTargets.WithLabelValues(m.name, name).Set(<span class="number">0</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> _, prov := <span class="keyword">range</span> m.providers &#123;</span><br><span class="line">　　　　<span class="comment">//启动每个job下对应的服务发现系统</span></span><br><span class="line">		m.startProvider(m.ctx, prov)</span><br><span class="line">	&#125;</span><br><span class="line"> </span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>ApplyConfig方法主要通过调用方法：registerProviders()和startProvider()实现以上功能</p>
+<ul>
+<li><p>registerProviders方法先判断每个job_name下包含所有的服务发现系统类型，接着由其对应的服务发现系统实现Discoverer接口，并构建provider和TargetGroups</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// registerProviders returns a number of failed SD config.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Manager)</span> <span class="title">registerProviders</span><span class="params">(cfgs Configs, setName <span class="keyword">string</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> (</span><br><span class="line">        failed <span class="keyword">int</span></span><br><span class="line">        added  <span class="keyword">bool</span></span><br><span class="line">    )</span><br><span class="line">    add := <span class="function"><span class="keyword">func</span><span class="params">(cfg Config)</span></span> &#123;</span><br><span class="line">        <span class="keyword">for</span> _, p := <span class="keyword">range</span> m.providers &#123;</span><br><span class="line">            <span class="keyword">if</span> reflect.DeepEqual(cfg, p.config) &#123;</span><br><span class="line">                p.subs = <span class="built_in">append</span>(p.subs, setName)</span><br><span class="line">                added = <span class="literal">true</span></span><br><span class="line">                <span class="keyword">return</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        typ := cfg.Name()</span><br><span class="line">        d, err := cfg.NewDiscoverer(DiscovererOptions&#123;</span><br><span class="line">            Logger: log.With(m.logger, <span class="string">"discovery"</span>, typ),</span><br><span class="line">        &#125;)</span><br><span class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">            level.Error(m.logger).Log(<span class="string">"msg"</span>, <span class="string">"Cannot create service discovery"</span>, <span class="string">"err"</span>, err, <span class="string">"type"</span>, typ)</span><br><span class="line">            failed++</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        &#125;</span><br><span class="line">        m.providers = <span class="built_in">append</span>(m.providers, &amp;provider&#123;</span><br><span class="line">            name:   fmt.Sprintf(<span class="string">"%s/%d"</span>, typ, <span class="built_in">len</span>(m.providers)),</span><br><span class="line">            d:      d,</span><br><span class="line">            config: cfg,</span><br><span class="line">            subs:   []<span class="keyword">string</span>&#123;setName&#125;,</span><br><span class="line">        &#125;)</span><br><span class="line">        added = <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> _, cfg := <span class="keyword">range</span> cfgs &#123;</span><br><span class="line">        add(cfg)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> !added &#123;</span><br><span class="line">        <span class="comment">// Add an empty target group to force the refresh of the corresponding</span></span><br><span class="line">        <span class="comment">// scrape pool and to notify the receiver that this target set has no</span></span><br><span class="line">        <span class="comment">// current targets.</span></span><br><span class="line">        <span class="comment">// It can happen because the combined set of SD configurations is empty</span></span><br><span class="line">        <span class="comment">// or because we fail to instantiate all the SD configurations.</span></span><br><span class="line">        add(StaticConfig&#123;&#123;&#125;&#125;)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> failed</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>StaticConfigs对应TargetGroups， 以job_name：node为例，TargetGroups对应输出如下:</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">(dlv) p setName</span><br><span class="line"><span class="string">"node"</span></span><br><span class="line">(dlv) p StaticConfigs</span><br><span class="line">[]*github.com/prometheus/prometheus/discovery/targetgroup.Group <span class="built_in">len</span>: <span class="number">1</span>, <span class="built_in">cap</span>: <span class="number">1</span>, [</span><br><span class="line">    *&#123;</span><br><span class="line">        Targets: []github.com/prometheus/common/model.LabelSet <span class="built_in">len</span>: <span class="number">1</span>, <span class="built_in">cap</span>: <span class="number">1</span>, [</span><br><span class="line">    　　　　　　　　　　[</span><br><span class="line">        　　　　　　　　　　<span class="string">"__address__"</span>: <span class="string">"localhost:9100"</span>, </span><br><span class="line">    　　　　　　　　　　],</span><br><span class="line">        ],</span><br><span class="line">        Labels: github.com/prometheus/common/model.LabelSet <span class="literal">nil</span>,</span><br><span class="line">        Source: <span class="string">"0"</span>,&#125;,</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>每个job_name对应一个TargetGroups，而每个TargetGroups可以包含多个provider，每个provider包含实现对应的Discoverer接口和job_name等．所以，对应关系：job_name －&gt; TargetGroups －&gt; 多个targets －&gt; 多个provider －&gt; 多个Discover．部分示例如下：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">(dlv) p m.providers</span><br><span class="line">[]*github.com/prometheus/prometheus/discovery.provider <span class="built_in">len</span>: <span class="number">2</span>, <span class="built_in">cap</span>: <span class="number">2</span>, [</span><br><span class="line">    *&#123;</span><br><span class="line">        name: <span class="string">"string/0"</span>,</span><br><span class="line">        d: github.com/prometheus/prometheus/discovery.Discoverer(*github.com/prometheus/prometheus/discovery.StaticProvider) ...,</span><br><span class="line">        subs: []<span class="keyword">string</span> <span class="built_in">len</span>: <span class="number">1</span>, <span class="built_in">cap</span>: <span class="number">1</span>, [</span><br><span class="line">            <span class="string">"prometheus"</span>,</span><br><span class="line">        ],</span><br><span class="line">        config: <span class="keyword">interface</span> &#123;&#125;(<span class="keyword">string</span>) *(*<span class="keyword">interface</span> &#123;&#125;)(<span class="number">0xc000536268</span>),&#125;,</span><br><span class="line">    *&#123;</span><br><span class="line">        name: <span class="string">"string/1"</span>,</span><br><span class="line">        d: github.com/prometheus/prometheus/discovery.Discoverer(*github.com/prometheus/prometheus/discovery.StaticProvider) ...,</span><br><span class="line">        subs: []<span class="keyword">string</span> <span class="built_in">len</span>: <span class="number">1</span>, <span class="built_in">cap</span>: <span class="number">1</span>, [<span class="string">"node"</span>],</span><br><span class="line">        config: <span class="keyword">interface</span> &#123;&#125;(<span class="keyword">string</span>) *(*<span class="keyword">interface</span> &#123;&#125;)(<span class="number">0xc000518b78</span>),&#125;,</span><br><span class="line">]</span><br><span class="line">(dlv) p m.providers[<span class="number">0</span>].d</span><br><span class="line">github.com/prometheus/prometheus/discovery.Discoverer(*github.com/prometheus/prometheus/discovery.StaticProvider) *&#123;</span><br><span class="line">    TargetGroups: []*github.com/prometheus/prometheus/discovery/targetgroup.Group <span class="built_in">len</span>: <span class="number">1</span>, <span class="built_in">cap</span>: <span class="number">1</span>, [</span><br><span class="line">        *(*<span class="string">"github.com/prometheus/prometheus/discovery/targetgroup.Group"</span>)(<span class="number">0xc000ce09f</span>0),</span><br><span class="line">    ],&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>startProvider方法逐一启动job_name对应的所有服务发现系统</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">prometheus/discovery/manager.<span class="keyword">go</span></span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Manager)</span> <span class="title">startProvider</span><span class="params">(ctx context.Context, p *provider)</span></span> &#123;</span><br><span class="line">    level.Debug(m.logger).Log(<span class="string">"msg"</span>, <span class="string">"Starting provider"</span>, <span class="string">"provider"</span>, p.name, <span class="string">"subs"</span>, fmt.Sprintf(<span class="string">"%v"</span>, p.subs))</span><br><span class="line">    ctx, cancel := context.WithCancel(ctx)</span><br><span class="line">    updates := <span class="built_in">make</span>(<span class="keyword">chan</span> []*targetgroup.Group)</span><br><span class="line"> </span><br><span class="line">    m.discoverCancel = <span class="built_in">append</span>(m.discoverCancel, cancel)</span><br><span class="line">    </span><br><span class="line">  <span class="comment">// 第一个协程启动具体的发现的服务，作为[]*targetgroup.Group的生产者</span></span><br><span class="line">    <span class="keyword">go</span> p.d.Run(ctx, updates)</span><br><span class="line">  <span class="comment">// 第二个协程是[]*targetgroup.Group的消费者</span></span><br><span class="line">    <span class="keyword">go</span> m.updater(ctx, p, updates)</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="comment">// 备注：Run方法调用位置是实现Discoverer的服务发现系统中．若是静态服务发现，Run方法在prometheus/discovery/manager.go中实现，若是动态服务发现系统，则在对应系统的目录下实现．</span></span><br></pre></td></tr></table></figure>
+<p>Run方法从结构体StaticProvider中取值，传递给[]*targetgroup.Group，作为服务发现的生产者</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">prometheus/discovery/discovery.<span class="keyword">go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Discoverer <span class="keyword">interface</span> &#123;</span><br><span class="line">    <span class="comment">// Run hands a channel to the discovery provider (Consul, DNS, etc.) through which</span></span><br><span class="line">    <span class="comment">// it can send updated target groups. It must return when the context is canceled.</span></span><br><span class="line">    <span class="comment">// It should not close the update channel on returning.</span></span><br><span class="line">    Run(ctx context.Context, up <span class="keyword">chan</span>&lt;- []*targetgroup.Group)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">prometheus/discovery/manager.<span class="keyword">go</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// StaticProvider holds a list of target groups that never change.</span></span><br><span class="line"><span class="keyword">type</span> StaticProvider <span class="keyword">struct</span> &#123;</span><br><span class="line">    TargetGroups []*targetgroup.Group</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="comment">// Run implements the Worker interface.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(sd *StaticProvider)</span> <span class="title">Run</span><span class="params">(ctx context.Context, ch <span class="keyword">chan</span>&lt;- []*targetgroup.Group)</span></span> &#123;</span><br><span class="line">    <span class="comment">// We still have to consider that the consumer exits right away in which case</span></span><br><span class="line">    <span class="comment">// the context will be canceled.</span></span><br><span class="line">    <span class="keyword">select</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> ch &lt;- sd.TargetGroups:</span><br><span class="line">    <span class="keyword">case</span> &lt;-ctx.Done():</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">close</span>(ch)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>updater方法从[]*targetgroup.Group获取TargetGroups，并把它发传给结构体Manager中对应的Targets，Manager中对应的Targets是map类型</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">prometheus/discovery/manager.<span class="keyword">go</span></span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Manager)</span> <span class="title">updater</span><span class="params">(ctx context.Context, p *provider, updates <span class="keyword">chan</span> []*targetgroup.Group)</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        <span class="keyword">select</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> &lt;-ctx.Done(): <span class="comment">//退出</span></span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        <span class="keyword">case</span> tgs, ok := &lt;-updates: <span class="comment">// 从[]*targetgroup.Group取TargetGroups</span></span><br><span class="line">            receivedUpdates.WithLabelValues(m.name).Inc()</span><br><span class="line">            <span class="keyword">if</span> !ok &#123;</span><br><span class="line">                level.Debug(m.logger).Log(<span class="string">"msg"</span>, <span class="string">"discoverer channel closed"</span>, <span class="string">"provider"</span>, p.name)</span><br><span class="line">                <span class="keyword">return</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// subs对应job_names，p.name对应系统名/索引值，比如：string/0</span></span><br><span class="line">            <span class="keyword">for</span> _, s := <span class="keyword">range</span> p.subs &#123;</span><br><span class="line">                m.updateGroup(poolKey&#123;setName: s, provider: p.name&#125;, tgs)</span><br><span class="line">            &#125;</span><br><span class="line"> </span><br><span class="line">            <span class="keyword">select</span> &#123;</span><br><span class="line">            <span class="keyword">case</span> m.triggerSend &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;:</span><br><span class="line">            <span class="keyword">default</span>:</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>更新结构体Manager对应的targets，key是结构体poolKey，value是传递过来的TargetGroups，其中包含targets</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">prometheus/discovery/manager.<span class="keyword">go</span></span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Manager)</span> <span class="title">updateGroup</span><span class="params">(poolKey poolKey, tgs []*targetgroup.Group)</span></span> &#123;</span><br><span class="line">    m.mtx.Lock()</span><br><span class="line">    <span class="keyword">defer</span> m.mtx.Unlock()</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">for</span> _, tg := <span class="keyword">range</span> tgs &#123;</span><br><span class="line">        <span class="keyword">if</span> tg != <span class="literal">nil</span> &#123; <span class="comment">// Some Discoverers send nil target group so need to check for it to avoid panics.</span></span><br><span class="line">            <span class="keyword">if</span> _, ok := m.targets[poolKey]; !ok &#123;</span><br><span class="line">                m.targets[poolKey] = <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]*targetgroup.Group)</span><br><span class="line">            &#125;</span><br><span class="line">            m.targets[poolKey][tg.Source] = tg <span class="comment">//一个tg对应一个job，在map类型targets中，结构体poolkey和tg.Source可以确定一个tg，即job</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="服务发现启动"><a href="#服务发现启动" class="headerlink" title="服务发现启动"></a>服务发现启动</h2><p>在main.go方法中启一个协程，运行Run()方法</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">prometheus/cmd/prometheus/main.<span class="keyword">go</span></span><br><span class="line"> </span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// Scrape discovery manager.</span></span><br><span class="line">    g.Add(</span><br><span class="line">        <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">            err := discoveryManagerScrape.Run()</span><br><span class="line">            level.Info(logger).Log(<span class="string">"msg"</span>, <span class="string">"Scrape discovery manager stopped"</span>)</span><br><span class="line">            <span class="keyword">return</span> err</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="function"><span class="keyword">func</span><span class="params">(err error)</span></span> &#123;</span><br><span class="line">            level.Info(logger).Log(<span class="string">"msg"</span>, <span class="string">"Stopping scrape discovery manager..."</span>)</span><br><span class="line">            cancelScrape()</span><br><span class="line">        &#125;,</span><br><span class="line">    )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Run starts the background processing</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Manager)</span> <span class="title">Run</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">go</span> m.sender()</span><br><span class="line">	<span class="keyword">for</span> <span class="keyword">range</span> m.ctx.Done() &#123;</span><br><span class="line">		m.cancelDiscoverers()</span><br><span class="line">		<span class="keyword">return</span> m.ctx.Err()</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Run方法再起一个协程，运行sender()方法，sender方法的主要功能是处理结构体Manager中map类型的targets，然后传给结构</p>
+<p>体Manager中的map类型<code>syncCh：syncCh chan map[string][]*targetgroup.Group</code></p>
+<p>sender 通过一个计时器达到限制更新速率的目的，因为有些 discoverer 可能会过于频繁的更新 target。每次 Run() 都会根据 context 执</p>
+<p>行取消发现的操作。周期计时器用法值得学，注意创建以后要延迟关闭。</p>
+<p>每5秒检查一次 m.triggerSend 中有没有更新的信号，如果有更新的信号，就组装 <code>map[string][]*targetgroup.Group</code> 发送到</p>
+<p>m.SyncCh 中，由于 m.SyncCh 是无缓冲通道，如果没能接收的话，就等到下次检查到更新信号再重试发送，这里的嵌套 select case 非</p>
+<p>常值得学习</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Manager)</span> <span class="title">sender</span><span class="params">()</span></span> &#123;</span><br><span class="line">	ticker := time.NewTicker(m.updatert)</span><br><span class="line">	<span class="keyword">defer</span> ticker.Stop()</span><br><span class="line"> </span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-m.ctx.Done():</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		<span class="keyword">case</span> &lt;-ticker.C: <span class="comment">// Some discoverers send updates too often so we throttle these with the ticker.</span></span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> &lt;-m.triggerSend:</span><br><span class="line">				sentUpdates.WithLabelValues(m.name).Inc()</span><br><span class="line">				<span class="keyword">select</span> &#123;</span><br><span class="line">　　　　　<span class="comment">//方法allGroups负责类型转换，并传给syncCh</span></span><br><span class="line">				<span class="keyword">case</span> m.syncCh &lt;- m.allGroups(): </span><br><span class="line">				<span class="keyword">default</span>:</span><br><span class="line">					delayedUpdates.WithLabelValues(m.name).Inc()</span><br><span class="line">					level.Debug(m.logger).Log(<span class="string">"msg"</span>, <span class="string">"discovery receiver's channel was full so will retry the next cycle"</span>)</span><br><span class="line">					<span class="keyword">select</span> &#123;</span><br><span class="line">					<span class="keyword">case</span> m.triggerSend &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;:</span><br><span class="line">					<span class="keyword">default</span>:</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">			<span class="keyword">default</span>:</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>负责转换的allGroups()方法，<code>m.allGroups</code> 方法读取自身的 <code>targets</code> 成员变量中的值组装成 map 返回给调用者，用于向自身的 <code>syncCh</code> 发送这个 map，最终通知给 scraper；</p>
+<p>当 SD 发现删除了某个 target group 时会发送一个空的 target group，此处对这个动作的意义做了说明，空的 target group 会通知</p>
+<p>scraper 停止再抓取这些 target</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Manager)</span> <span class="title">allGroups</span><span class="params">()</span> <span class="title">map</span>[<span class="title">string</span>][]*<span class="title">targetgroup</span>.<span class="title">Group</span></span> &#123;</span><br><span class="line">	m.mtx.Lock()</span><br><span class="line">	<span class="keyword">defer</span> m.mtx.Unlock()</span><br><span class="line"> </span><br><span class="line">	tSets := <span class="keyword">map</span>[<span class="keyword">string</span>][]*targetgroup.Group&#123;&#125;</span><br><span class="line">	<span class="keyword">for</span> pkey, tsets := <span class="keyword">range</span> m.targets &#123;</span><br><span class="line">		<span class="keyword">var</span> n <span class="keyword">int</span></span><br><span class="line">		<span class="keyword">for</span> _, tg := <span class="keyword">range</span> tsets &#123;</span><br><span class="line">			<span class="comment">// Even if the target group 'tg' is empty we still need to send it to the 'Scrape manager'</span></span><br><span class="line">			<span class="comment">// to signal that it needs to stop all scrape loops for this target set.</span></span><br><span class="line">			tSets[pkey.setName] = <span class="built_in">append</span>(tSets[pkey.setName], tg)</span><br><span class="line">			n += <span class="built_in">len</span>(tg.Targets)</span><br><span class="line">		&#125;</span><br><span class="line">		discoveredTargets.WithLabelValues(m.name, pkey.setName).Set(<span class="keyword">float64</span>(n))</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> tSets</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="服务发现和指标采集通信"><a href="#服务发现和指标采集通信" class="headerlink" title="服务发现和指标采集通信"></a>服务发现和指标采集通信</h2><p>服务发现 (serviceDiscover)和指标采集 (scrapeManager)通信，负责指标采集的服务监听的正是结构体Manager中的syncCh，由此实现了两个服务的通信</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">prometheus/cmd/prometheus/main.<span class="keyword">go</span></span><br><span class="line"> </span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">// Scrape manager.</span></span><br><span class="line">		g.Add(</span><br><span class="line">			<span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">				<span class="comment">// When the scrape manager receives a new targets list</span></span><br><span class="line">				<span class="comment">// it needs to read a valid config for each job.</span></span><br><span class="line">				<span class="comment">// It depends on the config being in sync with the discovery manager so</span></span><br><span class="line">				<span class="comment">// we wait until the config is fully loaded.</span></span><br><span class="line">				&lt;-reloadReady.C</span><br><span class="line"> </span><br><span class="line">				err := scrapeManager.Run(discoveryManagerScrape.SyncCh())</span><br><span class="line">				level.Info(logger).Log(<span class="string">"msg"</span>, <span class="string">"Scrape manager stopped"</span>)</span><br><span class="line">				<span class="keyword">return</span> err</span><br><span class="line">			&#125;,</span><br><span class="line">			<span class="function"><span class="keyword">func</span><span class="params">(err error)</span></span> &#123;</span><br><span class="line">				<span class="comment">// Scrape manager needs to be stopped before closing the local TSDB</span></span><br><span class="line">				<span class="comment">// so that it doesn't try to write samples to a closed storage.</span></span><br><span class="line">				level.Info(logger).Log(<span class="string">"msg"</span>, <span class="string">"Stopping scrape manager..."</span>)</span><br><span class="line">				scrapeManager.Stop()</span><br><span class="line">			&#125;,</span><br><span class="line">		)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">prometheus/discovery/manager.<span class="keyword">go</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// SyncCh returns a read only channel used by all the clients to receive target updates.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Manager)</span> <span class="title">SyncCh</span><span class="params">()</span> &lt;-<span class="title">chan</span> <span class="title">map</span>[<span class="title">string</span>][]*<span class="title">targetgroup</span>.<span class="title">Group</span></span> &#123;</span><br><span class="line">    <span class="comment">//结构体Manager中的syncCh</span></span><br><span class="line">	<span class="keyword">return</span> m.syncCh</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>至此，服务发现的主要功能就梳理出来了</p>
+<p><img src="/images/prometheus-prometheus-8.png" alt="在这里插入图片描述"></p>
+<ol>
+<li><p>主程序调用 NewManager() Manager 实例</p>
+</li>
+<li><p>主程序调用 m.ApplyConfig() 根据配置文件配置并启动 Manager 实例，Manager 实例包括一组 Provider，其持有具体的 Discoverer，Discoverer 在运行时定期刷新target group，通过 channel 发送给 Manager 将其保存在 m.targets 中，并向 m.triggerSend channel 发送通知信号</p>
+</li>
+<li><p>m.Run() 按照 m.updatert 设定的时间间隔检查有没有更新的信号，有的话就把自己的 targets 字段中的 targets 发送给自身的 m.syncCh channel</p>
+</li>
+<li><p>主程序调用 m.SyncCh() 方法获取 channel 并从中取得 target</p>
+</li>
+</ol>
+<p>参考：</p>
+<p><a href="https://blog.csdn.net/dengxiafubi/article/details/102741656?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522162311811516780265424839%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fblog.%2522%257D&amp;request_id=162311811516780265424839&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~blog~first_rank_v2~rank_v29-5-102741656.pc_v2_rank_blog_default&amp;utm_term=Prometheus%E6%BA%90%E7%A0%81%E7%B3%BB%E5%88%97&amp;spm=1018.2226.3001.4450" target="_blank" rel="external">https://blog.csdn.net/dengxiafubi/article/details/102741656?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522162311811516780265424839%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fblog.%2522%257D&amp;request_id=162311811516780265424839&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~blog~first_rank_v2~rank_v29-5-102741656.pc_v2_rank_blog_default&amp;utm_term=Prometheus%E6%BA%90%E7%A0%81%E7%B3%BB%E5%88%97&amp;spm=1018.2226.3001.4450</a></p>
+<p><a href="https://blog.csdn.net/qq_35753140/article/details/112999768?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522162304613116780269873364%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fblog.%2522%257D&amp;request_id=162304613116780269873364&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~blog~first_rank_v2~rank_v29-4-112999768.pc_v2_rank_blog_default&amp;utm_term=Prometheus%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0&amp;spm=1018.2226.3001.4450" target="_blank" rel="external">https://blog.csdn.net/qq_35753140/article/details/112999768?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522162304613116780269873364%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fblog.%2522%257D&amp;request_id=162304613116780269873364&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~blog~first_rank_v2~rank_v29-4-112999768.pc_v2_rank_blog_default&amp;utm_term=Prometheus%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0&amp;spm=1018.2226.3001.4450</a></p>
+<p><a href="https://blog.csdn.net/weixin_42663840/article/details/81450705?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-13.baidujs&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-13.baidujs" target="_blank" rel="external">https://blog.csdn.net/weixin_42663840/article/details/81450705?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-13.baidujs&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-13.baidujs</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+<blockquote class="blockquote-center" style="color: #ccc;">
+    -------------本文结束 <i class="fa fa-apple"></i> 感谢您的阅读-------------
+</blockquote>
+
+  <span id="inline-green" style="border-radius:3px;">作者</span>：<a class="link-blue" href="https://github.com/magiceses" target="_blank">Magiceses</a><br/>有问题请 <a class="link-blue" href="https://magiceses.github.io/guestbook" target="_blank">留言</a> 或者私信我的 <a class="link-blue" href="https://weibo.com/u/3069595351" target="_blank">微博</a>。
+
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>满分是10分的话，这篇文章你给几分</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/reward/reward_wechat.png" alt="magiceses WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/reward/reward_alipay.png" alt="magiceses Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Prometheus/" rel="tag"><i class="fa fa-tag"></i> Prometheus</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/10/03/prometheus-prometheus-2-源码分析总览/" rel="next" title="Prometheus 源码分析-总览">
+                <i class="fa fa-chevron-left"></i> Prometheus 源码分析-总览
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/10/05/prometheus-prometheus-4-指标抓取源码分析/" rel="prev" title="Prometheus 指标抓取源码分析">
+                Prometheus 指标抓取源码分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar/avatar.png"
+               alt="magiceses" />
+          <p class="site-author-name" itemprop="name">magiceses</p>
+          <p class="site-description motion-element" itemprop="description">Stay Hungry,Stay Foolish</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">36</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/magiceses" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://blog.csdn.net/weixin_43700106" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-chrome"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/weblog" title="建站日志" target="_blank">建站日志</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/reward" title="打赏" target="_blank">打赏</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#服务发现简介"><span class="nav-number">1.</span> <span class="nav-text">服务发现简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#服务发现接口"><span class="nav-number">2.</span> <span class="nav-text">服务发现接口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#服务发现配置"><span class="nav-number">3.</span> <span class="nav-text">服务发现配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#服务发现启动"><span class="nav-number">4.</span> <span class="nav-text">服务发现启动</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#服务发现和指标采集通信"><span class="nav-number">5.</span> <span class="nav-text">服务发现和指标采集通信</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结"><span class="nav-number">6.</span> <span class="nav-text">小结</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+      
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="busuanzi-count">
+
+  <!-- <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script> -->
+  <!-- 上面这个是之前的，不知道为什么失效了，改成下面这个 -->
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">您是第<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>个小伙伴</span>
+  
+
+  
+    <span class="site-pv">本站总浏览<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">magiceses</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Pisces
+  </a>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count" style="color: #e90f92;">全站共 685k 字</span>
+</div>
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+  <!-- 按需加载背景 -->
+  <!-- 背景动画 -->
+<script type="text/javascript">
+  // 按需加载背景
+  // 如果是all，就直接加载了
+  if("pc" == "all") {
+    $.getScript("/js/src/particle.js?v=5.0.1");
+  }
+  // 识别手机或电脑的js开始
+  (function(){
+    var res = GetRequest();
+    var par = res['index'];
+    if(par!='gfan'){
+      var ua=navigator.userAgent.toLowerCase();
+      var contains=function (a, b){
+          if(a.indexOf(b)!=-1){return true;}
+      };
+      if((contains(ua,"android") && contains(ua,"mobile"))||(contains(ua,"android") && contains(ua,"mozilla"))||(contains(ua,"android") && contains(ua,"opera"))||contains(ua,"ucweb7")||contains(ua,"iphone")){
+        return false;
+      } else {
+        $.getScript("/js/src/particle.js?v=5.0.1");
+      }
+    }
+  })();
+  function GetRequest() {
+    var url = location.search;
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+      var str = url.substr(1);
+      strs = str.split("&");
+      for(var i = 0; i < strs.length; i ++) {
+        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+      }
+    }
+    return theRequest;
+  }
+</script>
+<!-- 识别手机或电脑的js结束 -->  
+
+  <!-- 页面点击小红心 -->
+  <!-- 页面点击小红心 -->
+
+  <script type="text/javascript" src="/js/src/love.js?v=5.0.1"></script>
+
+
+  <!-- 鼠标移动，效果 -->
+  <!-- 鼠标移动特效 -->
+
+  <script type="text/javascript" src="/js/src/jquery-stars.js?v=5.0.1"></script>
+  <script type="text/javascript">
+  jQuery('body').jstars({
+  	image_path: '/images',
+  	image: 'candy-cane-stars.png',
+  	style: 'white',
+  	width: 34,
+  	height: 34,
+  	delay: 700,
+  	frequency: 5
+  });
+  </script>
+
+
+  <!-- 页面 title 进入/离开 效果 -->
+
+  <script type="text/javascript">var OriginTitile=document.title,st;document.addEventListener("visibilitychange",function(){document.hidden?(document.title="Waiting for you back！",clearTimeout(st)):(document.title="Thanks for visit~ "+OriginTitile,st=setTimeout(function(){document.title=OriginTitile},4e3))})</script>
+
+
+</body>
+</html>

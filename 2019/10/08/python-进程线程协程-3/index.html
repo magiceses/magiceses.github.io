@@ -1,0 +1,1252 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Courier New:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Python," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="天青色等烟雨" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="就算孤独，也不能一个人哭泣，无论走在哪，都要高傲地挺立；就算是挫败，也不能窝囊地依靠，无论在何时，都要倔强地站起。前面的路过于平坦，惬意久了难以找到方向；唯有脚下布满了荆棘，前方或许才是生机。
+
+简介Queue模块是提供队列操作的模块，队列是线程间最常用的交换数据的形式。该模块提供了三种队列：
+
+Queue.Queue(maxsize):先进先出，maxsize是队列的大小，其值为非正数时为无线循">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python 进程线程协程(3)--Queue模块及源码分析">
+<meta property="og:url" content="https://magiceses.github.io/2019/10/08/python-进程线程协程-3/index.html">
+<meta property="og:site_name" content="天青色等烟雨">
+<meta property="og:description" content="就算孤独，也不能一个人哭泣，无论走在哪，都要高傲地挺立；就算是挫败，也不能窝囊地依靠，无论在何时，都要倔强地站起。前面的路过于平坦，惬意久了难以找到方向；唯有脚下布满了荆棘，前方或许才是生机。
+
+简介Queue模块是提供队列操作的模块，队列是线程间最常用的交换数据的形式。该模块提供了三种队列：
+
+Queue.Queue(maxsize):先进先出，maxsize是队列的大小，其值为非正数时为无线循">
+<meta property="og:updated_time" content="2021-10-02T03:03:07.650Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python 进程线程协程(3)--Queue模块及源码分析">
+<meta name="twitter:description" content="就算孤独，也不能一个人哭泣，无论走在哪，都要高傲地挺立；就算是挫败，也不能窝囊地依靠，无论在何时，都要倔强地站起。前面的路过于平坦，惬意久了难以找到方向；唯有脚下布满了荆棘，前方或许才是生机。
+
+简介Queue模块是提供队列操作的模块，队列是线程间最常用的交换数据的形式。该模块提供了三种队列：
+
+Queue.Queue(maxsize):先进先出，maxsize是队列的大小，其值为非正数时为无线循">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://magiceses.github.io/2019/10/08/python-进程线程协程-3/"/>
+
+
+<!-- 网页加载条 -->
+<script src="/js/src/pace.min.js"></script>
+  <title> Python 进程线程协程(3)--Queue模块及源码分析 | 天青色等烟雨 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">天青色等烟雨</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">而我在等你</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-guestbook">
+          <a href="/guestbook" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-commenting"></i> <br />
+            
+            留言
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+      
+      
+        <li class="menu-item"> <a title="把这个链接拖到你的工具栏中,任何网页都可以High" href='javascript:(
+/*
+ * Copyright (C) 2016 Never_yu (Neveryu.github.io) <React.dong.yu@gmail.com>
+ * Sina Weibo (http://weibo.com/Neveryu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function go() {
+
+var songs = [
+  "http://dl.stream.qqmusic.qq.com/C400001Qu4I30eVFYb.m4a?vkey=2127178E4405E7B8B268F20F05232485735CCF4FF8C1432F0360D2626D0B6C9564B5627C7AB481BBC685FEDB0946A50E97C66F0D1B008226&guid=7175649092&uin=0&fromtag=66",
+  "",
+  "",
+  ""
+];
+
+function c() {
+  var e = document.createElement("link");
+  e.setAttribute("type", "text/css");
+  e.setAttribute("rel", "stylesheet");
+  e.setAttribute("href", f);
+  e.setAttribute("class", l);
+  document.body.appendChild(e)
+}
+
+function h() {
+  var e = document.getElementsByClassName(l);
+  for (var t = 0; t < e.length; t++) {
+    document.body.removeChild(e[t])
+  }
+}
+
+function p() {
+  var e = document.createElement("div");
+  e.setAttribute("class", a);
+  document.body.appendChild(e);
+  setTimeout(function() {
+    document.body.removeChild(e)
+  }, 100)
+}
+
+function d(e) {
+  return {
+    height : e.offsetHeight,
+    width : e.offsetWidth
+  }
+}
+
+function v(i) {
+  var s = d(i);
+  return s.height > e && s.height < n && s.width > t && s.width < r
+}
+
+function m(e) {
+  var t = e;
+  var n = 0;
+  while (!!t) {
+    n += t.offsetTop;
+    t = t.offsetParent
+  }
+  return n
+}
+
+function g() {
+  var e = document.documentElement;
+  if (!!window.innerWidth) {
+    return window.innerHeight
+  } else if (e && !isNaN(e.clientHeight)) {
+    return e.clientHeight
+  }
+  return 0
+}
+
+function y() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  }
+  return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+}
+
+function E(e) {
+  var t = m(e);
+  return t >= w && t <= b + w
+}
+
+function S() {
+  var e = document.getElementById("audio_element_id");
+  if(e != null){
+    var index = parseInt(e.getAttribute("curSongIndex"));
+    if(index > songs.length - 2) {
+      index = 0;
+    } else {
+      index++;
+    }
+    e.setAttribute("curSongIndex", index);
+    N();
+  }
+
+  e.src = i;
+  e.play()
+}
+
+function x(e) {
+  e.className += " " + s + " " + o
+}
+
+function T(e) {
+  e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+}
+
+function N() {
+  var e = document.getElementsByClassName(s);
+  var t = new RegExp("\\b" + s + "\\b");
+  for (var n = 0; n < e.length; ) {
+    e[n].className = e[n].className.replace(t, "")
+  }
+}
+
+function initAudioEle() {
+  var e = document.getElementById("audio_element_id");
+  if(e === null){
+    e = document.createElement("audio");
+    e.setAttribute("class", l);
+    e.setAttribute("curSongIndex", 0);
+    e.id = "audio_element_id";
+    e.loop = false;
+    e.bgcolor = 0;
+    e.addEventListener("canplay", function() {
+      setTimeout(function() {
+        x(k)
+      }, 500);
+      setTimeout(function() {
+        N();
+        p();
+        for (var e = 0; e < O.length; e++) {
+          T(O[e])
+        }
+      }, 15500)
+    }, true);
+    e.addEventListener("ended", function() {
+      N();
+      h();
+      go();
+    }, true);
+    e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+    document.body.appendChild(e);
+  }
+}
+
+initAudioEle();
+var e = 30;
+var t = 30;
+var n = 350;
+var r = 350;
+
+var curSongIndex = parseInt(document.getElementById("audio_element_id").getAttribute("curSongIndex"));
+var i = songs[curSongIndex];
+
+var s = "mw-harlem_shake_me";
+var o = "im_first";
+var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+var a = "mw-strobe_light";
+
+/* harlem-shake-style.css，替换成你的位置，也可以直接使用：//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css */
+var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+
+var l = "mw_added_css";
+var b = g();
+var w = y();
+var C = document.getElementsByTagName("*");
+var k = null;
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    if (E(A)) {
+      k = A;
+      break
+    }
+  }
+}
+if (A === null) {
+  console.warn("Could not find a node of the right size. Please try a different page.");
+  return
+}
+c();
+S();
+var O = [];
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    O.push(A)
+  }
+}
+})()'><i class="menu-item-icon fa fa-music fa-fw"></i> High一下</a></li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search fa-lg"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Python 进程线程协程(3)--Queue模块及源码分析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2019-10-08T01:01:00+08:00" content="2019-10-08">
+              2019-10-08
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv">热度
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p id="div-border-top-green">就算孤独，也不能一个人哭泣，无论走在哪，都要高傲地挺立；就算是挫败，也不能窝囊地依靠，无论在何时，都要倔强地站起。前面的路过于平坦，惬意久了难以找到方向；唯有脚下布满了荆棘，前方或许才是生机。<br></p>
+
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Queue模块是提供队列操作的模块，队列是线程间最常用的交换数据的形式。该模块提供了三种队列：</p>
+<ul>
+<li>Queue.Queue(maxsize):先进先出，maxsize是队列的大小，其值为非正数时为无线循环队列</li>
+<li>Queue.LifoQueue(maxsize)：后进先出，相当于栈</li>
+<li>Queue.PriorityQueue(maxsize):优先级队列。</li>
+</ul>
+<p>其中LifoQueue，PriorityQueue是Queue的子类。三者拥有以下共同的方法：<br><a id="more"></a></p>
+<ul>
+<li><code>qsize()</code>:返回近似的队列大小。为什么要加“近似”二字呢？因为当该值大于0的时候并不保证并发执行的时候get()方法不被阻塞，同样，对于put()方法有效。</li>
+<li><code>empty()</code>:返回布尔值，队列为空时，返回True，反之返回False。</li>
+<li><code>full()</code>：当设定了队列大小的时候，如果队列满了，则返回True，否则返回False。</li>
+<li><code>put(item[,block[,timeout]])</code>:向队列里添加元素item,block设置为False的时候，如果队列满了则抛出Full异常。如果block设置为True，timeout设置为None时，则会一种等到有空位的时候再添加进队列；否则会根据timeout设定的超时值抛出Full异常。</li>
+<li><code>put_nowwait(item)</code>:等价与put(item,False)。block设置为False的时候，如果队列为空，则抛出Empty异常。如果block设置为True，timeout设置为None时，则会一种等到有空位的时候再添加进队列；否则会根据timeout设定的超时值抛出Empty异常。</li>
+<li><code>get([block[,timeout]])</code>:从队列中删除元素并返回该元素的值，如果timeout是一个正数，它会阻塞最多超时秒数，并且如果在该时间内没有可用的项目，则引发Empty异常。</li>
+<li><code>get_nowwait()</code>：等价于get(False)</li>
+<li><code>task_done()</code>：发送信号表明入列任务已完成，经常在消费者线程中用到。</li>
+<li><code>join()</code>:阻塞直至队列所有元素处理完毕，然后再处理其它操作。</li>
+</ul>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>Queue模块用起来很简单很简单，但我觉得有必要把该模块的相关源代码贴出来分析下，会学到不少东西，看看大神们写的代码多么美观，多么结构化模块化，再想想自己写的代码，都是泪呀，来学习学习。为了缩减篇幅，源码的注释部分被删减掉。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span> time <span class="keyword">as</span> _time</span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    <span class="keyword">import</span> threading <span class="keyword">as</span> _threading</span><br><span class="line"><span class="keyword">except</span> ImportError:</span><br><span class="line">    <span class="keyword">import</span> dummy_threading <span class="keyword">as</span> _threading</span><br><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> deque</span><br><span class="line"><span class="keyword">import</span> heapq</span><br><span class="line"></span><br><span class="line">__all__ = [<span class="string">'Empty'</span>, <span class="string">'Full'</span>, <span class="string">'Queue'</span>, <span class="string">'PriorityQueue'</span>, <span class="string">'LifoQueue'</span>]</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Empty</span><span class="params">(Exception)</span>:</span></span><br><span class="line">    <span class="string">"Exception raised by Queue.get(block=0)/get_nowait()."</span></span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Full</span><span class="params">(Exception)</span>:</span></span><br><span class="line">    <span class="string">"Exception raised by Queue.put(block=0)/put_nowait()."</span></span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Queue</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, maxsize=<span class="number">0</span>)</span>:</span></span><br><span class="line">        self.maxsize = maxsize</span><br><span class="line">        self._init(maxsize)</span><br><span class="line">        self.mutex = _threading.Lock()</span><br><span class="line">        self.not_empty = _threading.Condition(self.mutex)</span><br><span class="line">        self.not_full = _threading.Condition(self.mutex)</span><br><span class="line">        self.all_tasks_done = _threading.Condition(self.mutex)</span><br><span class="line">        self.unfinished_tasks = </span><br><span class="line">      </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get_nowait</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self.get(<span class="keyword">False</span>)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_init</span><span class="params">(self, maxsize)</span>:</span></span><br><span class="line">        self.queue = deque()</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_qsize</span><span class="params">(self, len=len)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> len(self.queue)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_put</span><span class="params">(self, item)</span>:</span></span><br><span class="line">        self.queue.append(item)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_get</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self.queue.popleft()</span><br></pre></td></tr></table></figure>
+<p>通过后面的几个函数分析知道，Queue对象是在collections模块的queue基础上(关于collections模块参考<a href="http://11026142.blog.51cto.com/11016142/1851791" target="_blank" rel="external"> Python：使用Counter进行计数统计及collections模块</a>)，加上threading模块互斥锁和条件变量封装的。</p>
+<p>deque是一个双端队列，很适用于队列和栈。上面的Queue对象就是一个先进先出的队列，所以首先<code>_init()</code>函数定义了一个双端队列，然后它的定义了<code>_put()和_get()</code>函数，它们分别是从双端队列右边添加元素、左边删除元素，这就构成了一个先进先出队列，同理很容易想到LifoQueue（后进先出队列）的实现了，保证队列右边添加右边删除就可以。可以贴出源代码看看。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LifoQueue</span><span class="params">(Queue)</span>:</span></span><br><span class="line">    <span class="string">'''Variant of Queue that retrieves most recently added entries first.'''</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_init</span><span class="params">(self, maxsize)</span>:</span></span><br><span class="line">        self.queue = []</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_qsize</span><span class="params">(self, len=len)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> len(self.queue)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_put</span><span class="params">(self, item)</span>:</span></span><br><span class="line">        self.queue.append(item)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_get</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self.queue.pop()</span><br></pre></td></tr></table></figure>
+<p>虽然它的”queue”没有用queue()，用列表也是一样的，因为列表append()和pop()操作是在最右边添加元素和删除最右边元素。</p>
+<p>再来看看PriorityQueue，他是个优先级队列，这里用到了heapq模块的heappush()和heappop()两个函数。heapq模块对堆这种数据结构进行了模块化，可以建立这种数据结构，同时heapq模块也提供了相应的方法来对堆做操作。其中_init()函数里self.queue=[]可以看作是建立了一个空堆。heappush() 往堆中插入一条新的值 ，heappop() 从堆中弹出<strong>最小值</strong> ，这就可以实现优先级（关于heapq模块这里这是简单的介绍）。源代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PriorityQueue</span><span class="params">(Queue)</span>:</span></span><br><span class="line">    <span class="string">'''Variant of Queue that retrieves open entries in priority order (lowest first).</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Entries are typically tuples of the form:  (priority number, data).</span></span><br><span class="line"><span class="string">    '''</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_init</span><span class="params">(self, maxsize)</span>:</span></span><br><span class="line">        self.queue = []</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_qsize</span><span class="params">(self, len=len)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> len(self.queue)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_put</span><span class="params">(self, item, heappush=heapq.heappush)</span>:</span></span><br><span class="line">        heappush(self.queue, item)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_get</span><span class="params">(self, heappop=heapq.heappop)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> heappop(self.queue)</span><br></pre></td></tr></table></figure>
+<p>基本的数据结构分析完了，接着分析其它的部分。</p>
+<ul>
+<li>mutex 是个threading.Lock()对象，是互斥锁；not_empty、 not_full 、all_tasks_done这三个都是threading.Condition()对象，条件变量，而且维护的是同一把锁对象mutex(关于threading模块中Lock对象和Condition对象可参考上篇博文<a href="http://11026142.blog.51cto.com/11016142/1867519" target="_blank" rel="external"> Python：线程、进程与协程(2)——threading模块</a>)。</li>
+<li>其中：</li>
+<li>self.mutex互斥锁：任何获取队列的状态(empty(),qsize()等)，或者修改队列的内容的操作(get,put等)都必须持有该互斥锁。acquire()获取锁，release()释放锁。同时该互斥锁被三个条件变量共同维护。</li>
+<li>self.not_empty条件变量：线程添加数据到队列中后，会调用self.not_empty.notify()通知其它线程，然后唤醒一个移除元素的线程。</li>
+<li>self.not_full条件变量：当一个元素被移除出队列时，会唤醒一个添加元素的线程。</li>
+<li>self.all_tasks_done条件变量 ：在未完成任务的数量被删除至0时，通知所有任务完成</li>
+<li>self.unfinished_tasks  ： 定义未完成任务数量</li>
+</ul>
+<p>再来看看<strong>主要方法</strong>：</p>
+<h3 id="put"><a href="#put" class="headerlink" title="put()"></a>put()</h3><p>源代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">put</span><span class="params">(self, item, block=True, timeout=None)</span>:</span></span><br><span class="line">        self.not_full.acquire()                  <span class="comment">#not_full获得锁</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="keyword">if</span> self.maxsize &gt; <span class="number">0</span>:                 <span class="comment">#如果队列长度有限制</span></span><br><span class="line">                <span class="keyword">if</span> <span class="keyword">not</span> block:                    <span class="comment">#如果没阻塞</span></span><br><span class="line">                    <span class="keyword">if</span> self._qsize() == self.maxsize:   <span class="comment">#如果队列满了抛异常</span></span><br><span class="line">                        <span class="keyword">raise</span> Full</span><br><span class="line">                <span class="keyword">elif</span> timeout <span class="keyword">is</span> <span class="keyword">None</span>:           <span class="comment">#有阻塞且超时为空，等待</span></span><br><span class="line">                    <span class="keyword">while</span> self._qsize() == self.maxsize:</span><br><span class="line">                        self.not_full.wait()</span><br><span class="line">                <span class="keyword">elif</span> timeout &lt; <span class="number">0</span>:</span><br><span class="line">                    <span class="keyword">raise</span> ValueError(<span class="string">"'timeout' must be a non-negative number"</span>)</span><br><span class="line">                <span class="keyword">else</span>:        <span class="comment">#如果有阻塞，且超时非负时，结束时间=当前时间+超时时间</span></span><br><span class="line">                    endtime = _time() + timeout</span><br><span class="line">                    <span class="keyword">while</span> self._qsize() == self.maxsize:</span><br><span class="line">                        remaining = endtime - _time()</span><br><span class="line">                        <span class="keyword">if</span> remaining &lt;= <span class="number">0.0</span>:       <span class="comment">#到时后，抛异常</span></span><br><span class="line">                            <span class="keyword">raise</span> Full</span><br><span class="line">                            <span class="comment">#如果没到时，队列是满的就会一直被挂起，直到有“位置”腾出</span></span><br><span class="line">                        self.not_full.wait(remaining)</span><br><span class="line">            self._put(item)                    <span class="comment">#调用_put方法，添加元素</span></span><br><span class="line">            self.unfinished_tasks += <span class="number">1</span>         <span class="comment">#未完成任务+1</span></span><br><span class="line">            self.not_empty.notify()             <span class="comment">#通知非空，唤醒非空挂起的任务</span></span><br><span class="line">        <span class="keyword">finally</span>:</span><br><span class="line">            self.not_full.release()            <span class="comment">#not_full释放锁</span></span><br></pre></td></tr></table></figure>
+<p>默认情况下block为True，timeout为None。如果队列满则会等待，未满则会调用_put方法将进程加入deque中(后面介绍),并且未完成任务加1还会通知队列非空。</p>
+<p>如果设置block参数为Flase，队列满时则会抛异常。如果设置了超时那么在时间到之前进行阻塞，时间一到抛异常。这个方法使用not_full对象进行操作。</p>
+<h3 id="get"><a href="#get" class="headerlink" title="get()"></a>get()</h3><p>源码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get</span><span class="params">(self, block=True, timeout=None)</span>:</span></span><br><span class="line">        </span><br><span class="line">        self.not_empty.acquire()                <span class="comment">#not_empty获得锁</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> block:                       <span class="comment">#不阻塞时</span></span><br><span class="line">                <span class="keyword">if</span> <span class="keyword">not</span> self._qsize():           <span class="comment">#队列为空时抛异常</span></span><br><span class="line">                    <span class="keyword">raise</span> Empty</span><br><span class="line">            <span class="keyword">elif</span> timeout <span class="keyword">is</span> <span class="keyword">None</span>:               <span class="comment">#不限时时，队列为空则会等待</span></span><br><span class="line">                <span class="keyword">while</span> <span class="keyword">not</span> self._qsize():</span><br><span class="line">                    self.not_empty.wait()</span><br><span class="line">            <span class="keyword">elif</span> timeout &lt; <span class="number">0</span>:</span><br><span class="line">                <span class="keyword">raise</span> ValueError(<span class="string">"'timeout' must be a non-negative number"</span>)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                endtime = _time() + timeout</span><br><span class="line">                <span class="keyword">while</span> <span class="keyword">not</span> self._qsize():</span><br><span class="line">                    remaining = endtime - _time()</span><br><span class="line">                    <span class="keyword">if</span> remaining &lt;= <span class="number">0.0</span>:</span><br><span class="line">                        <span class="keyword">raise</span> Empty</span><br><span class="line">                    self.not_empty.wait(remaining)</span><br><span class="line">            item = self._get()                  <span class="comment">#调用_get方法，移除并获得项目</span></span><br><span class="line">            self.not_full.notify()              <span class="comment">#通知非满</span></span><br><span class="line">            <span class="keyword">return</span> item                        <span class="comment">#返回项目</span></span><br><span class="line">        <span class="keyword">finally</span>:</span><br><span class="line">            self.not_empty.release()            <span class="comment">#释放锁</span></span><br></pre></td></tr></table></figure>
+<p>逻辑跟put()函数一样，参数默认情况下队列空了则会等待，否则将会调用_get方法(往下看)移除并获得一个项，最后返回这个项。这个方法使用not_empty对象进行操作。</p>
+<p>不过我觉得put()与get()两个函数结合起来理解比较好。not_full与not_empty代表的是两种不同操作类型的线程，not_full可以理解成is-not-full，即队列是否满了，默认是没有满，没有满时not_full这个条件变量才能获取锁，并做一些条件判断，只有符合条件才能向队列里加元素，添加成功后就会通知not_empty条件变量队列里不是空的，“我”刚刚添加进了一个元素，满足可以执行删除动作的基本条件了（队列不是空的,想想如果是空的执行删除动作就没有意义了），同时唤醒一些被挂起的执行移除动作的线程，让这些线程重新判断条件，如果条件准许就会执行删除动作，然后又通知not_full条件变量，告诉“它”队列不是满的，因为“我”刚才删除了一个元素（想想如果队列满了添加元素就添加不进呀，就没意义了），满足了添加元素的基本条件（队列不是满的），同时唤醒一些被挂起的执行添加动作的线程，这些线程又会进行条件判断，符合条件就会添加元素，否则继续挂起，依次类推，同时这样也保证了线程的安全。正与前面所说，当一个元素被移除出队列时，会唤醒一个添加元素的线程；当添加一个元素时会唤醒一个删除元素的线程。</p>
+<h3 id="task-done"><a href="#task-done" class="headerlink" title="task_done()"></a>task_done()</h3><p>源码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">task_done</span><span class="params">(self)</span>:</span></span><br><span class="line">   </span><br><span class="line">        self.all_tasks_done.acquire()       <span class="comment">#获得锁</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            unfinished = self.unfinished_tasks - <span class="number">1</span>  <span class="comment">#判断队列中一个线程的任务是否全部完成</span></span><br><span class="line">            <span class="keyword">if</span> unfinished &lt;= <span class="number">0</span>:                     <span class="comment">#是则进行通知，或在过量调用时报异常</span></span><br><span class="line">                <span class="keyword">if</span> unfinished &lt; <span class="number">0</span>:</span><br><span class="line">                    <span class="keyword">raise</span> ValueError(<span class="string">'task_done() called too many times'</span>)</span><br><span class="line">                self.all_tasks_done.notify_all()</span><br><span class="line">            self.unfinished_tasks = unfinished      <span class="comment">#否则未完成任务数量-1</span></span><br><span class="line">        <span class="keyword">finally</span>:</span><br><span class="line">            self.all_tasks_done.release()           <span class="comment">#最后释放锁</span></span><br></pre></td></tr></table></figure>
+<p>这个方法判断队列中一个线程的任务是否全部完成，首先会通过all_tasks_done对象获得锁，如果是则进行通知，最后释放锁。</p>
+<h3 id="join"><a href="#join" class="headerlink" title="join()"></a>join()</h3><p>源码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">join</span><span class="params">(self)</span>:</span></span><br><span class="line"></span><br><span class="line">    self.all_tasks_done.acquire()</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">while</span> self.unfinished_tasks:        <span class="comment">#如果有未完成的任务，将调用wait()方法等待</span></span><br><span class="line">            self.all_tasks_done.wait()</span><br><span class="line">    <span class="keyword">finally</span>:</span><br><span class="line">        self.all_tasks_done.release()</span><br></pre></td></tr></table></figure>
+<p>阻塞方法，当队列中有未完成进程时，调用join方法来阻塞，直到他们都完成。</p>
+<p>其它的方法都比较简单，也比较好理解，有兴趣可以去看看Queue.py里的源码，要注意的是任何获取队列的状态(empty(),qsize()等)，或者修改队列的内容的操作(get,put等)都必须持有互斥锁mutex。</p>
+<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><h3 id="示例一"><a href="#示例一" class="headerlink" title="示例一"></a>示例一</h3><p>实现一个线程不断生成一个随机数到一个队列中</p>
+<p>实现一个线程从上面的队列里面不断的取出奇数</p>
+<p>实现另外一个线程从上面的队列里面不断取出偶数</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> random,threading,time</span><br><span class="line"><span class="keyword">from</span> Queue <span class="keyword">import</span> Queue</span><br><span class="line">is_product = <span class="keyword">True</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Producer</span><span class="params">(threading.Thread)</span>:</span></span><br><span class="line">    <span class="string">"""生产数据"""</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, t_name, queue)</span>:</span></span><br><span class="line">       threading.Thread.__init__(self,name=t_name)</span><br><span class="line">       self.data=queue</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">while</span> <span class="number">1</span>:</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> self.data.full():</span><br><span class="line">                <span class="keyword">global</span> is_product</span><br><span class="line">                is_product = <span class="keyword">False</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">if</span> self.data.qsize() &lt;= <span class="number">7</span>:<span class="comment">#队列长度小于等于7时添加元素</span></span><br><span class="line">                    is_product = <span class="keyword">True</span></span><br><span class="line">                    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">2</span>): <span class="comment">#每次向队列里添加两个元素</span></span><br><span class="line"></span><br><span class="line">                        randomnum=random.randint(<span class="number">1</span>,<span class="number">99</span>)</span><br><span class="line">                        <span class="keyword">print</span> <span class="string">"%s: %s is producing %d to the queue!"</span> % (time.ctime(), self.getName(), randomnum)</span><br><span class="line">                        self.data.put(randomnum，<span class="keyword">False</span>) <span class="comment">#将数据依次存入队列</span></span><br><span class="line">                        time.sleep(<span class="number">1</span>)</span><br><span class="line">                        <span class="keyword">print</span> <span class="string">"deque length is %s"</span>%self.data.qsize()</span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">if</span> is_product:</span><br><span class="line">                        <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">2</span>):  <span class="comment">#</span></span><br><span class="line"></span><br><span class="line">                            randomnum = random.randint(<span class="number">1</span>, <span class="number">99</span>)</span><br><span class="line">                            <span class="keyword">print</span> <span class="string">"%s: %s is producing %d to the queue!"</span> % (time.ctime(), self.getName(), randomnum)</span><br><span class="line">                            self.data.put(randomnum,<span class="keyword">False</span>)  <span class="comment"># 将数据依次存入队列</span></span><br><span class="line">                            time.sleep(<span class="number">1</span>)</span><br><span class="line">                            <span class="keyword">print</span> <span class="string">"deque length is %s"</span> % self.data.qsize()</span><br><span class="line">                    <span class="keyword">else</span>:</span><br><span class="line">                        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">print</span> <span class="string">"%s: %s finished!"</span> %(time.ctime(), self.getName())</span><br><span class="line"></span><br><span class="line"><span class="comment">#Consumer thread</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Consumer_even</span><span class="params">(threading.Thread)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self,t_name,queue)</span>:</span></span><br><span class="line">        threading.Thread.__init__(self,name=t_name)</span><br><span class="line">        self.data=queue</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">while</span> <span class="number">1</span>:</span><br><span class="line">            <span class="keyword">if</span> self.data.qsize() &gt; <span class="number">7</span>:<span class="comment">#队列长度大于7时开始取元素</span></span><br><span class="line">                val_even = self.data.get(<span class="keyword">False</span>)</span><br><span class="line">                <span class="keyword">if</span> val_even%<span class="number">2</span>==<span class="number">0</span>:</span><br><span class="line">                    <span class="keyword">print</span> <span class="string">"%s: %s is consuming. %d in the queue is consumed!"</span> % (time.ctime(),self.getName(),val_even)</span><br><span class="line">                    time.sleep(<span class="number">2</span>)</span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    self.data.put(val_even)</span><br><span class="line">                    time.sleep(<span class="number">2</span>)</span><br><span class="line">                <span class="keyword">print</span> <span class="string">"deque length is %s"</span> % self.data.qsize()</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Consumer_odd</span><span class="params">(threading.Thread)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self,t_name,queue)</span>:</span></span><br><span class="line">        threading.Thread.__init__(self, name=t_name)</span><br><span class="line">        self.data=queue</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">while</span> <span class="number">1</span>:</span><br><span class="line">            <span class="keyword">if</span> self.data.qsize() &gt; <span class="number">7</span>:</span><br><span class="line">                val_odd = self.data.get(<span class="keyword">False</span>)</span><br><span class="line">                <span class="keyword">if</span> val_odd%<span class="number">2</span>!=<span class="number">0</span>:</span><br><span class="line">                    <span class="keyword">print</span> <span class="string">"%s: %s is consuming. %d in the queue is consumed!"</span> % (time.ctime(), self.getName(), val_odd)</span><br><span class="line">                    time.sleep(<span class="number">2</span>)</span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    self.data.put(val_odd)</span><br><span class="line">                    time.sleep(<span class="number">2</span>)</span><br><span class="line">                <span class="keyword">print</span> <span class="string">"deque length is %s"</span> % self.data.qsize()</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#Main thread</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></span><br><span class="line">    queue = Queue(<span class="number">20</span>)</span><br><span class="line">    producer = Producer(<span class="string">'Pro.'</span>, queue)</span><br><span class="line">    consumer_even = Consumer_even(<span class="string">'Con_even.'</span>, queue)</span><br><span class="line">    consumer_odd = Consumer_odd(<span class="string">'Con_odd.'</span>,queue)</span><br><span class="line">    producer.start()</span><br><span class="line">    consumer_even.start()</span><br><span class="line">    consumer_odd.start()</span><br><span class="line">    producer.join()</span><br><span class="line">    consumer_even.join()</span><br><span class="line">    consumer_odd.join()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+<p>这个例子跟上篇博文<a href="http://11026142.blog.51cto.com/11016142/1867519" target="_blank" rel="external"> Python：线程、进程与协程(2)——threading模块</a>中介绍Condition的例子很像，就是构造了一个长度为20的队列，当队列1元素个数小于8时就忘队列中添加元素，当队列满后，就不再添加，当队列元素大于7个时，才会取元素，否则不取元素。有兴趣的可以动手试试，仔细体会下。</p>
+<h3 id="示例二"><a href="#示例二" class="headerlink" title="示例二"></a>示例二</h3><p>线程池</p>
+<p>在使用多线程处理任务时也不是线程越多越好，由于在切换线程的时候，需要切换上下文环境，依然会造成cpu的大量开销。为解决这个问题，线程池的概念被提出来了。预先创建好一个较为优化的数量的线程，让过来的任务立刻能够使用，就形成了线程池。在python中，没有内置的较好的线程池模块，需要自己实现或使用第三方模块。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="keyword">import</span> queue</span><br><span class="line"><span class="keyword">import</span> threading</span><br><span class="line"><span class="keyword">import</span> contextlib</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"> </span><br><span class="line">StopEvent = object() <span class="comment"># 创建空对象</span></span><br><span class="line"> </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ThreadPool</span><span class="params">(object)</span>:</span></span><br><span class="line"> </span><br><span class="line"> <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, max_num, max_task_num = None)</span>:</span></span><br><span class="line">  <span class="keyword">if</span> max_task_num:</span><br><span class="line">   self.q = queue.Queue(max_task_num)</span><br><span class="line">  <span class="keyword">else</span>:</span><br><span class="line">   self.q = queue.Queue()</span><br><span class="line">  self.max_num = max_num</span><br><span class="line">  self.cancel = <span class="keyword">False</span></span><br><span class="line">  self.terminal = <span class="keyword">False</span></span><br><span class="line">  self.generate_list = []</span><br><span class="line">  self.free_list = []</span><br><span class="line"> </span><br><span class="line"> <span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(self, func, args, callback=None)</span>:</span></span><br><span class="line">  <span class="string">"""</span></span><br><span class="line"><span class="string">  线程池执行一个任务</span></span><br><span class="line"><span class="string">  :param func: 任务函数</span></span><br><span class="line"><span class="string">  :param args: 任务函数所需参数</span></span><br><span class="line"><span class="string">  :param callback: 任务执行失败或成功后执行的回调函数，回调函数有两个参数1、任务函数执行状态；2、任务函数返回值（默认为None，即：不执行回调函数）</span></span><br><span class="line"><span class="string">  :return: 如果线程池已经终止，则返回True否则None</span></span><br><span class="line"><span class="string">  """</span></span><br><span class="line">  <span class="keyword">if</span> self.cancel:</span><br><span class="line">   <span class="keyword">return</span></span><br><span class="line">  <span class="keyword">if</span> len(self.free_list) == <span class="number">0</span> <span class="keyword">and</span> len(self.generate_list) &lt; self.max_num:</span><br><span class="line">   self.generate_thread()</span><br><span class="line">  w = (func, args, callback,)</span><br><span class="line">  self.q.put(w)</span><br><span class="line"> </span><br><span class="line"> <span class="function"><span class="keyword">def</span> <span class="title">generate_thread</span><span class="params">(self)</span>:</span></span><br><span class="line">  <span class="string">"""</span></span><br><span class="line"><span class="string">  创建一个线程</span></span><br><span class="line"><span class="string">  """</span></span><br><span class="line">  t = threading.Thread(target=self.call)</span><br><span class="line">  t.start()</span><br><span class="line"> </span><br><span class="line"> <span class="function"><span class="keyword">def</span> <span class="title">call</span><span class="params">(self)</span>:</span></span><br><span class="line">  <span class="string">"""</span></span><br><span class="line"><span class="string">  循环去获取任务函数并执行任务函数</span></span><br><span class="line"><span class="string">  """</span></span><br><span class="line">  current_thread = threading.currentThread</span><br><span class="line">  self.generate_list.append(current_thread)</span><br><span class="line"> </span><br><span class="line">  event = self.q.get()</span><br><span class="line">  <span class="keyword">while</span> event != StopEvent:</span><br><span class="line"> </span><br><span class="line">   func, arguments, callback = event</span><br><span class="line">   <span class="keyword">try</span>:</span><br><span class="line">    result = func(*arguments)</span><br><span class="line">    success = <span class="keyword">True</span></span><br><span class="line">   <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">    success = <span class="keyword">False</span></span><br><span class="line">    result = <span class="keyword">None</span></span><br><span class="line"> </span><br><span class="line">   <span class="keyword">if</span> callback <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>:</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">     callback(success, result)</span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">     <span class="keyword">pass</span></span><br><span class="line"> </span><br><span class="line">   <span class="keyword">with</span> self.worker_state(self.free_list, current_thread):</span><br><span class="line">    <span class="keyword">if</span> self.terminal:</span><br><span class="line">     event = StopEvent</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">     event = self.q.get()</span><br><span class="line">  <span class="keyword">else</span>:</span><br><span class="line"> </span><br><span class="line">   self.generate_list.remove(current_thread)</span><br><span class="line"> </span><br><span class="line"> <span class="function"><span class="keyword">def</span> <span class="title">close</span><span class="params">(self)</span>:</span></span><br><span class="line">  <span class="string">"""</span></span><br><span class="line"><span class="string">  执行完所有的任务后，所有线程停止</span></span><br><span class="line"><span class="string">  """</span></span><br><span class="line">  self.cancel = <span class="keyword">True</span></span><br><span class="line">  full_size = len(self.generate_list)</span><br><span class="line">  <span class="keyword">while</span> full_size:</span><br><span class="line">   self.q.put(StopEvent)</span><br><span class="line">   full_size -= <span class="number">1</span></span><br><span class="line"> </span><br><span class="line"> <span class="function"><span class="keyword">def</span> <span class="title">terminate</span><span class="params">(self)</span>:</span></span><br><span class="line">  <span class="string">"""</span></span><br><span class="line"><span class="string">  无论是否还有任务，终止线程</span></span><br><span class="line"><span class="string">  """</span></span><br><span class="line">  self.terminal = <span class="keyword">True</span></span><br><span class="line"> </span><br><span class="line">  <span class="keyword">while</span> self.generate_list:</span><br><span class="line">   self.q.put(StopEvent)</span><br><span class="line"> </span><br><span class="line">  self.q.empty()</span><br><span class="line"> </span><br><span class="line"><span class="meta"> @contextlib.contextmanager</span></span><br><span class="line"> <span class="function"><span class="keyword">def</span> <span class="title">worker_state</span><span class="params">(self, state_list, worker_thread)</span>:</span></span><br><span class="line">  <span class="string">"""</span></span><br><span class="line"><span class="string">  用于记录线程中正在等待的线程数</span></span><br><span class="line"><span class="string">  """</span></span><br><span class="line">  state_list.append(worker_thread)</span><br><span class="line">  <span class="keyword">try</span>:</span><br><span class="line">   <span class="keyword">yield</span></span><br><span class="line">  <span class="keyword">finally</span>:</span><br><span class="line">   state_list.remove(worker_thread)</span><br><span class="line"> </span><br><span class="line"><span class="comment"># How to use</span></span><br><span class="line">pool = ThreadPool(<span class="number">5</span>)</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">callback</span><span class="params">(status, result)</span>:</span></span><br><span class="line"> <span class="comment"># status, execute action status</span></span><br><span class="line"> <span class="comment"># result, execute action return value</span></span><br><span class="line"> <span class="keyword">pass</span></span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">action</span><span class="params">(i)</span>:</span></span><br><span class="line"> print(i)</span><br><span class="line"> </span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">30</span>):</span><br><span class="line"> ret = pool.run(action, (i,), callback)</span><br><span class="line"> </span><br><span class="line">time.sleep(<span class="number">5</span>)</span><br><span class="line">print(len(pool.generate_list), len(pool.free_list))</span><br><span class="line">print(len(pool.generate_list), len(pool.free_list))</span><br><span class="line"><span class="comment"># pool.close()</span></span><br><span class="line"><span class="comment"># pool.terminate()</span></span><br></pre></td></tr></table></figure>
+<p><br><br>原文： <a href="https://blog.51cto.com/u_11026142/1867877" target="_blank" rel="external">https://blog.51cto.com/u_11026142/1867877</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+<blockquote class="blockquote-center" style="color: #ccc;">
+    -------------本文结束 <i class="fa fa-apple"></i> 感谢您的阅读-------------
+</blockquote>
+
+  <span id="inline-green" style="border-radius:3px;">作者</span>：<a class="link-blue" href="https://github.com/magiceses" target="_blank">Magiceses</a><br/>有问题请 <a class="link-blue" href="https://magiceses.github.io/guestbook" target="_blank">留言</a> 或者私信我的 <a class="link-blue" href="https://weibo.com/u/3069595351" target="_blank">微博</a>。
+
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>满分是10分的话，这篇文章你给几分</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/reward/reward_wechat.png" alt="magiceses WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/reward/reward_alipay.png" alt="magiceses Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"><i class="fa fa-tag"></i> Python</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/05/01/python-web-wsgi详解/" rel="next" title="WSGI uWSGI uwsgi你搞清楚了吗">
+                <i class="fa fa-chevron-left"></i> WSGI uWSGI uwsgi你搞清楚了吗
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/10/08/python-进程线程协程-2/" rel="prev" title="Python 进程线程协程(2)--threading模块">
+                Python 进程线程协程(2)--threading模块 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar/avatar.png"
+               alt="magiceses" />
+          <p class="site-author-name" itemprop="name">magiceses</p>
+          <p class="site-description motion-element" itemprop="description">Stay Hungry,Stay Foolish</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">36</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/magiceses" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://blog.csdn.net/weixin_43700106" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-chrome"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/weblog" title="建站日志" target="_blank">建站日志</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/reward" title="打赏" target="_blank">打赏</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#源码分析"><span class="nav-number">2.</span> <span class="nav-text">源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#put"><span class="nav-number">2.1.</span> <span class="nav-text">put()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#get"><span class="nav-number">2.2.</span> <span class="nav-text">get()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#task-done"><span class="nav-number">2.3.</span> <span class="nav-text">task_done()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#join"><span class="nav-number">2.4.</span> <span class="nav-text">join()</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#示例"><span class="nav-number">3.</span> <span class="nav-text">示例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#示例一"><span class="nav-number">3.1.</span> <span class="nav-text">示例一</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#示例二"><span class="nav-number">3.2.</span> <span class="nav-text">示例二</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+      
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="busuanzi-count">
+
+  <!-- <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script> -->
+  <!-- 上面这个是之前的，不知道为什么失效了，改成下面这个 -->
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">您是第<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>个小伙伴</span>
+  
+
+  
+    <span class="site-pv">本站总浏览<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">magiceses</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Pisces
+  </a>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count" style="color: #e90f92;">全站共 685k 字</span>
+</div>
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+  <!-- 按需加载背景 -->
+  <!-- 背景动画 -->
+<script type="text/javascript">
+  // 按需加载背景
+  // 如果是all，就直接加载了
+  if("pc" == "all") {
+    $.getScript("/js/src/particle.js?v=5.0.1");
+  }
+  // 识别手机或电脑的js开始
+  (function(){
+    var res = GetRequest();
+    var par = res['index'];
+    if(par!='gfan'){
+      var ua=navigator.userAgent.toLowerCase();
+      var contains=function (a, b){
+          if(a.indexOf(b)!=-1){return true;}
+      };
+      if((contains(ua,"android") && contains(ua,"mobile"))||(contains(ua,"android") && contains(ua,"mozilla"))||(contains(ua,"android") && contains(ua,"opera"))||contains(ua,"ucweb7")||contains(ua,"iphone")){
+        return false;
+      } else {
+        $.getScript("/js/src/particle.js?v=5.0.1");
+      }
+    }
+  })();
+  function GetRequest() {
+    var url = location.search;
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+      var str = url.substr(1);
+      strs = str.split("&");
+      for(var i = 0; i < strs.length; i ++) {
+        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+      }
+    }
+    return theRequest;
+  }
+</script>
+<!-- 识别手机或电脑的js结束 -->  
+
+  <!-- 页面点击小红心 -->
+  <!-- 页面点击小红心 -->
+
+  <script type="text/javascript" src="/js/src/love.js?v=5.0.1"></script>
+
+
+  <!-- 鼠标移动，效果 -->
+  <!-- 鼠标移动特效 -->
+
+  <script type="text/javascript" src="/js/src/jquery-stars.js?v=5.0.1"></script>
+  <script type="text/javascript">
+  jQuery('body').jstars({
+  	image_path: '/images',
+  	image: 'candy-cane-stars.png',
+  	style: 'white',
+  	width: 34,
+  	height: 34,
+  	delay: 700,
+  	frequency: 5
+  });
+  </script>
+
+
+  <!-- 页面 title 进入/离开 效果 -->
+
+  <script type="text/javascript">var OriginTitile=document.title,st;document.addEventListener("visibilitychange",function(){document.hidden?(document.title="Waiting for you back！",clearTimeout(st)):(document.title="Thanks for visit~ "+OriginTitile,st=setTimeout(function(){document.title=OriginTitile},4e3))})</script>
+
+
+</body>
+</html>

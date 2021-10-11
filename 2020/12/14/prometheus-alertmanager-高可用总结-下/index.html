@@ -1,0 +1,1277 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Courier New:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Prometheus,Alertmanager," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="天青色等烟雨" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="我们每个人都不能抱怨自己的出身，没有好的家世，那就去创造好的家世。要知道，那些在雨里奔跑的，从来都是没有伞的孩子。
+
+回顾gossip先理解一下gossip协议：在一个有界网络中，每个节点都随机地与其他节点通信，经过一番杂乱无章的通信，最终所有节点的状态都会达成一致。每个节点可能知道所有其他节点，也可能仅知道几个邻居节点，只要这些节可以通过网络连通，最终他们的状态都是一致的，当然这也是疫情传播的特">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Alertmanager 高可用总结-下">
+<meta property="og:url" content="https://magiceses.github.io/2020/12/14/prometheus-alertmanager-高可用总结-下/index.html">
+<meta property="og:site_name" content="天青色等烟雨">
+<meta property="og:description" content="我们每个人都不能抱怨自己的出身，没有好的家世，那就去创造好的家世。要知道，那些在雨里奔跑的，从来都是没有伞的孩子。
+
+回顾gossip先理解一下gossip协议：在一个有界网络中，每个节点都随机地与其他节点通信，经过一番杂乱无章的通信，最终所有节点的状态都会达成一致。每个节点可能知道所有其他节点，也可能仅知道几个邻居节点，只要这些节可以通过网络连通，最终他们的状态都是一致的，当然这也是疫情传播的特">
+<meta property="og:updated_time" content="2021-10-02T07:58:41.106Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Alertmanager 高可用总结-下">
+<meta name="twitter:description" content="我们每个人都不能抱怨自己的出身，没有好的家世，那就去创造好的家世。要知道，那些在雨里奔跑的，从来都是没有伞的孩子。
+
+回顾gossip先理解一下gossip协议：在一个有界网络中，每个节点都随机地与其他节点通信，经过一番杂乱无章的通信，最终所有节点的状态都会达成一致。每个节点可能知道所有其他节点，也可能仅知道几个邻居节点，只要这些节可以通过网络连通，最终他们的状态都是一致的，当然这也是疫情传播的特">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://magiceses.github.io/2020/12/14/prometheus-alertmanager-高可用总结-下/"/>
+
+
+<!-- 网页加载条 -->
+<script src="/js/src/pace.min.js"></script>
+  <title> Alertmanager 高可用总结-下 | 天青色等烟雨 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">天青色等烟雨</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">而我在等你</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-guestbook">
+          <a href="/guestbook" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-commenting"></i> <br />
+            
+            留言
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+      
+      
+        <li class="menu-item"> <a title="把这个链接拖到你的工具栏中,任何网页都可以High" href='javascript:(
+/*
+ * Copyright (C) 2016 Never_yu (Neveryu.github.io) <React.dong.yu@gmail.com>
+ * Sina Weibo (http://weibo.com/Neveryu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function go() {
+
+var songs = [
+  "http://dl.stream.qqmusic.qq.com/C400001Qu4I30eVFYb.m4a?vkey=2127178E4405E7B8B268F20F05232485735CCF4FF8C1432F0360D2626D0B6C9564B5627C7AB481BBC685FEDB0946A50E97C66F0D1B008226&guid=7175649092&uin=0&fromtag=66",
+  "",
+  "",
+  ""
+];
+
+function c() {
+  var e = document.createElement("link");
+  e.setAttribute("type", "text/css");
+  e.setAttribute("rel", "stylesheet");
+  e.setAttribute("href", f);
+  e.setAttribute("class", l);
+  document.body.appendChild(e)
+}
+
+function h() {
+  var e = document.getElementsByClassName(l);
+  for (var t = 0; t < e.length; t++) {
+    document.body.removeChild(e[t])
+  }
+}
+
+function p() {
+  var e = document.createElement("div");
+  e.setAttribute("class", a);
+  document.body.appendChild(e);
+  setTimeout(function() {
+    document.body.removeChild(e)
+  }, 100)
+}
+
+function d(e) {
+  return {
+    height : e.offsetHeight,
+    width : e.offsetWidth
+  }
+}
+
+function v(i) {
+  var s = d(i);
+  return s.height > e && s.height < n && s.width > t && s.width < r
+}
+
+function m(e) {
+  var t = e;
+  var n = 0;
+  while (!!t) {
+    n += t.offsetTop;
+    t = t.offsetParent
+  }
+  return n
+}
+
+function g() {
+  var e = document.documentElement;
+  if (!!window.innerWidth) {
+    return window.innerHeight
+  } else if (e && !isNaN(e.clientHeight)) {
+    return e.clientHeight
+  }
+  return 0
+}
+
+function y() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  }
+  return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+}
+
+function E(e) {
+  var t = m(e);
+  return t >= w && t <= b + w
+}
+
+function S() {
+  var e = document.getElementById("audio_element_id");
+  if(e != null){
+    var index = parseInt(e.getAttribute("curSongIndex"));
+    if(index > songs.length - 2) {
+      index = 0;
+    } else {
+      index++;
+    }
+    e.setAttribute("curSongIndex", index);
+    N();
+  }
+
+  e.src = i;
+  e.play()
+}
+
+function x(e) {
+  e.className += " " + s + " " + o
+}
+
+function T(e) {
+  e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+}
+
+function N() {
+  var e = document.getElementsByClassName(s);
+  var t = new RegExp("\\b" + s + "\\b");
+  for (var n = 0; n < e.length; ) {
+    e[n].className = e[n].className.replace(t, "")
+  }
+}
+
+function initAudioEle() {
+  var e = document.getElementById("audio_element_id");
+  if(e === null){
+    e = document.createElement("audio");
+    e.setAttribute("class", l);
+    e.setAttribute("curSongIndex", 0);
+    e.id = "audio_element_id";
+    e.loop = false;
+    e.bgcolor = 0;
+    e.addEventListener("canplay", function() {
+      setTimeout(function() {
+        x(k)
+      }, 500);
+      setTimeout(function() {
+        N();
+        p();
+        for (var e = 0; e < O.length; e++) {
+          T(O[e])
+        }
+      }, 15500)
+    }, true);
+    e.addEventListener("ended", function() {
+      N();
+      h();
+      go();
+    }, true);
+    e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+    document.body.appendChild(e);
+  }
+}
+
+initAudioEle();
+var e = 30;
+var t = 30;
+var n = 350;
+var r = 350;
+
+var curSongIndex = parseInt(document.getElementById("audio_element_id").getAttribute("curSongIndex"));
+var i = songs[curSongIndex];
+
+var s = "mw-harlem_shake_me";
+var o = "im_first";
+var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+var a = "mw-strobe_light";
+
+/* harlem-shake-style.css，替换成你的位置，也可以直接使用：//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css */
+var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+
+var l = "mw_added_css";
+var b = g();
+var w = y();
+var C = document.getElementsByTagName("*");
+var k = null;
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    if (E(A)) {
+      k = A;
+      break
+    }
+  }
+}
+if (A === null) {
+  console.warn("Could not find a node of the right size. Please try a different page.");
+  return
+}
+c();
+S();
+var O = [];
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    O.push(A)
+  }
+}
+})()'><i class="menu-item-icon fa fa-music fa-fw"></i> High一下</a></li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search fa-lg"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Alertmanager 高可用总结-下
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2020-12-14T01:25:24+08:00" content="2020-12-14">
+              2020-12-14
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Prometheus/" itemprop="url" rel="index">
+                    <span itemprop="name">Prometheus</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv">热度
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p id="div-border-top-green">我们每个人都不能抱怨自己的出身，没有好的家世，那就去创造好的家世。要知道，那些在雨里奔跑的，从来都是没有伞的孩子。<br></p>
+
+<h2 id="回顾"><a href="#回顾" class="headerlink" title="回顾"></a>回顾</h2><h3 id="gossip"><a href="#gossip" class="headerlink" title="gossip"></a>gossip</h3><p>先理解一下gossip协议：在一个有界网络中，每个节点都随机地与其他节点通信，经过一番杂乱无章的通信，最终所有节点的状态都会达成一致。每个节点可能知道所有其他节点，也可能仅知道几个邻居节点，只要这些节可以通过网络连通，最终他们的状态都是一致的，当然这也是疫情传播的特点。</p>
+<p>简单的描述下这个协议，首先要传播谣言就要有种子节点。种子节点每秒都会随机向其他节点发送自己所拥有的节点列表，以及需要传播的消息。任何新加入的节点，就在这种传播方式下很快地被全网所知道。这个协议的神奇就在于它从设计开始就没想到信息一定要传递给所有的节点，但是随着时间的增长，在最终的某一时刻，全网会得到相同的信息。当然这个时刻可能仅仅存在于理论，永远不可达。</p>
+<h3 id="memberlist"><a href="#memberlist" class="headerlink" title="memberlist"></a>memberlist</h3><p>回忆一下memberlist的总体流程：</p>
+<a id="more"></a>
+<ul>
+<li><p>项目在memberlist.go 函数Create启动，调用sate.go中函数schedule</p>
+</li>
+<li><p>Schedule函数开启probe协程、pushpull协程、gossip协程</p>
+</li>
+<li><p>probe协程：进行节点状态维护</p>
+</li>
+<li><p>push/pull协程：进行节点状态、用户数据同步</p>
+</li>
+<li><p>gossip协程：进行udp广播发送消息。</p>
+</li>
+</ul>
+<p>memberlist利用点对点随机探测机制实现成员的故障检测，因此将节点的状态分为3种：</p>
+<ul>
+<li>StateAlive：活动节点</li>
+<li>StateSuspect：可疑节点</li>
+<li>StateDead：死亡节点</li>
+</ul>
+<p>probe协程通过点对点随机探测实现成员的故障检测，强化系统的高可用。整体流程如下：</p>
+<ul>
+<li>随机探测：节点启动后，每隔一定时间间隔，会选取一个节点对其发送PING消息。</li>
+<li>重试与间隔探测请求：PING消息失败后，会随机选取N（由config中IndirectChecks设置）个节点发起间接PING请求和再发起一个TCP PING消息。</li>
+<li>间隔探测：收到间接PING请求的节点会根据请求中的地址发起一个PING消息，将PING的结果返回给间接请求的源节点。</li>
+<li>探测超时标识可疑：如果探测超时之间内，本节点没有收到任何一个要探测节点的ACK消息，则标记要探测的节点状态为suspect。</li>
+<li>可疑节点广播：启动一个定时器用于发出一个suspect广播，此期间内如果收到其他节点发来的相同的suspect信息时，将本地suspect的 确认数+1，当定时器超时后，该节点信息仍然不是alive的，且确认数达到要求，会将该节点标记为dead。</li>
+<li>可疑消除：当本节点收到别的节点发来的suspect消息时，会发送alive广播，从而清除其他节点上的suspect标记。。</li>
+<li>死亡通知:当本节点离开集群时或者本地探测的其他节点超时被标记死亡，会向集群发送本节点dead广播</li>
+<li>死亡消除:如果从其他节点收到自身的dead广播消息时，说明本节点相对于其他节点网络分区，此时会发起一个alive广播以修正其他节点上存储的本节点数据。</li>
+</ul>
+<p>Memberlist在整个生命周期内，总的有两种类型的消息：</p>
+<ul>
+<li><strong>udp**</strong>协议消息：**传输PING消息、间接PING消息、ACK消息、NACK消息、Suspect消息、 Alive消息、Dead消息、消息广播；</li>
+<li><strong>tcp协议消息：</strong>用户数据同步、节点状态同步、PUSH-PULL消息。</li>
+</ul>
+<p>push/pull协程周期性的从已知的alive的集群节点中选1个节点进行push/pull交换信息。交换的信息包含2种：</p>
+<ul>
+<li>集群信息：节点数据</li>
+<li>用户自定义的信息：实现Delegate接口的struct。</li>
+</ul>
+<p>push/pull协程可以加速集群内信息的收敛速度，整体流程为：</p>
+<ul>
+<li>建立TCP链接：每隔一个时间间隔，随机选取一个节点，跟它建立tcp连接，</li>
+<li>将本地的全部节点 状态、用户数据发送过去，</li>
+<li>对端将其掌握的全部节点状态、用户数据发送回来，然后完成2份数据的合并。</li>
+</ul>
+<p>Gossip协程通过udp协议向K个节点发送消息，节点从广播队列里面获取消息，广播队列里的消息发送失败超过一定次数后，消息就会被丢弃。</p>
+<h3 id="使用示例"><a href="#使用示例" class="headerlink" title="使用示例"></a>使用示例</h3><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"encoding/json"</span></span><br><span class="line">    <span class="string">"flag"</span></span><br><span class="line">    <span class="string">"fmt"</span></span><br><span class="line">    <span class="string">"net/http"</span></span><br><span class="line">    <span class="string">"os"</span></span><br><span class="line">    <span class="string">"strings"</span></span><br><span class="line">    <span class="string">"sync"</span></span><br><span class="line"></span><br><span class="line">    <span class="string">"github.com/hashicorp/memberlist"</span></span><br><span class="line">    <span class="string">"github.com/pborman/uuid"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> (</span><br><span class="line">    mtx        sync.RWMutex</span><br><span class="line">    members    = flag.String(<span class="string">"members"</span>, <span class="string">""</span>, <span class="string">"comma seperated list of members"</span>)</span><br><span class="line">    port       = flag.Int(<span class="string">"port"</span>, <span class="number">4001</span>, <span class="string">"http port"</span>)</span><br><span class="line">    items      = <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>&#123;&#125;</span><br><span class="line">    broadcasts *memberlist.TransmitLimitedQueue</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> broadcast <span class="keyword">struct</span> &#123;</span><br><span class="line">    msg    []<span class="keyword">byte</span></span><br><span class="line">    notify <span class="keyword">chan</span>&lt;- <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> delegate <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> update <span class="keyword">struct</span> &#123;</span><br><span class="line">    Action <span class="keyword">string</span> <span class="comment">// add, del</span></span><br><span class="line">    Data   <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">init</span><span class="params">()</span></span> &#123;</span><br><span class="line">    flag.Parse()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b *broadcast)</span> <span class="title">Invalidates</span><span class="params">(other memberlist.Broadcast)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b *broadcast)</span> <span class="title">Message</span><span class="params">()</span> []<span class="title">byte</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> b.msg</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b *broadcast)</span> <span class="title">Finished</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> b.notify != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="built_in">close</span>(b.notify)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(d *delegate)</span> <span class="title">NodeMeta</span><span class="params">(limit <span class="keyword">int</span>)</span> []<span class="title">byte</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> []<span class="keyword">byte</span>&#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(d *delegate)</span> <span class="title">NotifyMsg</span><span class="params">(b []<span class="keyword">byte</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(b) == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">switch</span> b[<span class="number">0</span>] &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="string">'d'</span>: <span class="comment">// data</span></span><br><span class="line">        <span class="keyword">var</span> updates []*update</span><br><span class="line">        <span class="keyword">if</span> err := json.Unmarshal(b[<span class="number">1</span>:], &amp;updates); err != <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        &#125;</span><br><span class="line">        mtx.Lock()</span><br><span class="line">        <span class="keyword">for</span> _, u := <span class="keyword">range</span> updates &#123;</span><br><span class="line">            <span class="keyword">for</span> k, v := <span class="keyword">range</span> u.Data &#123;</span><br><span class="line">                <span class="keyword">switch</span> u.Action &#123;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">"add"</span>:</span><br><span class="line">                    items[k] = v</span><br><span class="line">                <span class="keyword">case</span> <span class="string">"del"</span>:</span><br><span class="line">                    <span class="built_in">delete</span>(items, k)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        mtx.Unlock()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(d *delegate)</span> <span class="title">GetBroadcasts</span><span class="params">(overhead, limit <span class="keyword">int</span>)</span> [][]<span class="title">byte</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> broadcasts.GetBroadcasts(overhead, limit)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(d *delegate)</span> <span class="title">LocalState</span><span class="params">(join <span class="keyword">bool</span>)</span> []<span class="title">byte</span></span> &#123;</span><br><span class="line">    mtx.RLock()</span><br><span class="line">    m := items</span><br><span class="line">    mtx.RUnlock()</span><br><span class="line">    b, _ := json.Marshal(m)</span><br><span class="line">    <span class="keyword">return</span> b</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(d *delegate)</span> <span class="title">MergeRemoteState</span><span class="params">(buf []<span class="keyword">byte</span>, join <span class="keyword">bool</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(buf) == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> !join &#123;</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">var</span> m <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span></span><br><span class="line">    <span class="keyword">if</span> err := json.Unmarshal(buf, &amp;m); err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    mtx.Lock()</span><br><span class="line">    <span class="keyword">for</span> k, v := <span class="keyword">range</span> m &#123;</span><br><span class="line">        items[k] = v</span><br><span class="line">    &#125;</span><br><span class="line">    mtx.Unlock()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addHandler</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> &#123;</span><br><span class="line">    r.ParseForm()</span><br><span class="line">    key := r.Form.Get(<span class="string">"key"</span>)</span><br><span class="line">    val := r.Form.Get(<span class="string">"val"</span>)</span><br><span class="line">    mtx.Lock()</span><br><span class="line">    items[key] = val</span><br><span class="line">    mtx.Unlock()</span><br><span class="line"></span><br><span class="line">    b, err := json.Marshal([]*update&#123;</span><br><span class="line">        &amp;update&#123;</span><br><span class="line">            Action: <span class="string">"add"</span>,</span><br><span class="line">            Data: <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>&#123;</span><br><span class="line">                key: val,</span><br><span class="line">            &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        http.Error(w, err.Error(), <span class="number">500</span>)</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//广播数据</span></span><br><span class="line">    broadcasts.QueueBroadcast(&amp;broadcast&#123;</span><br><span class="line">        msg:    <span class="built_in">append</span>([]<span class="keyword">byte</span>(<span class="string">"d"</span>), b...),</span><br><span class="line">        notify: <span class="literal">nil</span>,</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">delHandler</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> &#123;</span><br><span class="line">    r.ParseForm()</span><br><span class="line">    key := r.Form.Get(<span class="string">"key"</span>)</span><br><span class="line">    mtx.Lock()</span><br><span class="line">    <span class="built_in">delete</span>(items, key)</span><br><span class="line">    mtx.Unlock()</span><br><span class="line"></span><br><span class="line">    b, err := json.Marshal([]*update&#123;</span><br><span class="line">        &amp;update&#123;</span><br><span class="line">            Action: <span class="string">"del"</span>,</span><br><span class="line">            Data: <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>&#123;</span><br><span class="line">                key: <span class="string">""</span>,</span><br><span class="line">            &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        http.Error(w, err.Error(), <span class="number">500</span>)</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    broadcasts.QueueBroadcast(&amp;broadcast&#123;</span><br><span class="line">        msg:    <span class="built_in">append</span>([]<span class="keyword">byte</span>(<span class="string">"d"</span>), b...),</span><br><span class="line">        notify: <span class="literal">nil</span>,</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">getHandler</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> &#123;</span><br><span class="line">    r.ParseForm()</span><br><span class="line">    key := r.Form.Get(<span class="string">"key"</span>)</span><br><span class="line">    mtx.RLock()</span><br><span class="line">    val := items[key]</span><br><span class="line">    mtx.RUnlock()</span><br><span class="line">    w.Write([]<span class="keyword">byte</span>(val))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">start</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    hostname, _ := os.Hostname()</span><br><span class="line">    c := memberlist.DefaultLocalConfig()</span><br><span class="line">    c.Delegate = &amp;delegate&#123;&#125;</span><br><span class="line">    c.BindPort = <span class="number">0</span></span><br><span class="line">    c.Name = hostname + <span class="string">"-"</span> + uuid.NewUUID().String()</span><br><span class="line">    <span class="comment">//创建gossip网络</span></span><br><span class="line">    m, err := memberlist.Create(c)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> err</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//第一个节点没有member，但从第二个开始就有member了</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(*members) &gt; <span class="number">0</span> &#123;</span><br><span class="line">        parts := strings.Split(*members, <span class="string">","</span>)</span><br><span class="line">        _, err := m.Join(parts)</span><br><span class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> err</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    broadcasts = &amp;memberlist.TransmitLimitedQueue&#123;</span><br><span class="line">        NumNodes: <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">int</span></span> &#123;</span><br><span class="line">            <span class="keyword">return</span> m.NumMembers()</span><br><span class="line">        &#125;,</span><br><span class="line">        RetransmitMult: <span class="number">3</span>,</span><br><span class="line">    &#125;</span><br><span class="line">    node := m.LocalNode()</span><br><span class="line">    fmt.Printf(<span class="string">"Local member %s:%d\n"</span>, node.Addr, node.Port)</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> err := start(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">        fmt.Println(err)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    http.HandleFunc(<span class="string">"/add"</span>, addHandler)</span><br><span class="line">    http.HandleFunc(<span class="string">"/del"</span>, delHandler)</span><br><span class="line">    http.HandleFunc(<span class="string">"/get"</span>, getHandler)</span><br><span class="line">    fmt.Printf(<span class="string">"Listening on :%d\n"</span>, *port)</span><br><span class="line">    <span class="keyword">if</span> err := http.ListenAndServe(fmt.Sprintf(<span class="string">":%d"</span>, *port), <span class="literal">nil</span>); err != <span class="literal">nil</span> &#123;</span><br><span class="line">        fmt.Println(err)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里通过一个简单的http服务查询和插入数据，找两台机器，第一台执行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">memberlist</span><br></pre></td></tr></table></figure>
+<p>会生成gossip监听的服务ip和端口<br>使用上面的ip和端口在第二台执行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">memberlist --members=xxx.xxx.xxx.xxx:xxxx</span><br></pre></td></tr></table></figure>
+<p>那么一个gossip的网络就搭建完成了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># add</span><br><span class="line">curl &quot;http://localhost:4001/add?key=foo&amp;val=bar&quot;</span><br><span class="line"></span><br><span class="line"># get</span><br><span class="line">curl &quot;http://另一台机器:4001/get?key=foo&quot;</span><br><span class="line"></span><br><span class="line"># delete</span><br><span class="line">curl &quot;http://localhost:4001/del?key=foo&quot;</span><br></pre></td></tr></table></figure>
+<h2 id="alertmanager-高可用实现"><a href="#alertmanager-高可用实现" class="headerlink" title="alertmanager 高可用实现"></a>alertmanager 高可用实现</h2><p>上文我们说到，alertmanager在初始化时调用了memberlist的create方法，返回了Peer结构体：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Peer is a single peer in a gossip cluster.</span></span><br><span class="line"><span class="keyword">type</span> Peer <span class="keyword">struct</span> &#123;</span><br><span class="line">	mlist    *memberlist.Memberlist</span><br><span class="line">	delegate *delegate</span><br><span class="line"></span><br><span class="line">	resolvedPeers []<span class="keyword">string</span></span><br><span class="line"></span><br><span class="line">	mtx    sync.RWMutex</span><br><span class="line">	states <span class="keyword">map</span>[<span class="keyword">string</span>]State</span><br><span class="line">	stopc  <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line">	readyc <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">	peerLock    sync.RWMutex</span><br><span class="line">	peers       <span class="keyword">map</span>[<span class="keyword">string</span>]peer</span><br><span class="line">	failedPeers []peer</span><br><span class="line"></span><br><span class="line">	knownPeers    []<span class="keyword">string</span></span><br><span class="line">	advertiseAddr <span class="keyword">string</span></span><br><span class="line"></span><br><span class="line">	failedReconnectionsCounter prometheus.Counter</span><br><span class="line">	reconnectionsCounter       prometheus.Counter</span><br><span class="line">	failedRefreshCounter       prometheus.Counter</span><br><span class="line">	refreshCounter             prometheus.Counter</span><br><span class="line">	peerLeaveCounter           prometheus.Counter</span><br><span class="line">	peerUpdateCounter          prometheus.Counter</span><br><span class="line">	peerJoinCounter            prometheus.Counter</span><br><span class="line"></span><br><span class="line">	logger log.Logger</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后加入集群和初始化状态</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 集群peer的状态监听器已经进行注册成功，现在可以进行加入集群和初始化状态。</span></span><br><span class="line"><span class="comment">// Peer state listeners have been registered, now we can join and get the initial state.</span></span><br><span class="line"><span class="keyword">if</span> peer != <span class="literal">nil</span> &#123;</span><br><span class="line">	err = peer.Join(</span><br><span class="line">		*reconnectInterval,</span><br><span class="line">		*peerReconnectTimeout,</span><br><span class="line">	)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		level.Warn(logger).Log(<span class="string">"msg"</span>, <span class="string">"unable to join gossip mesh"</span>, <span class="string">"err"</span>, err)</span><br><span class="line">	&#125;</span><br><span class="line">	ctx, cancel := context.WithTimeout(context.Background(), *settleTimeout)</span><br><span class="line">	<span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		cancel()</span><br><span class="line">		<span class="keyword">if</span> err := peer.Leave(<span class="number">10</span> * time.Second); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			level.Warn(logger).Log(<span class="string">"msg"</span>, <span class="string">"unable to leave gossip mesh"</span>, <span class="string">"err"</span>, err)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line">	<span class="keyword">go</span> peer.Settle(ctx, *gossipInterval*<span class="number">10</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Join is used to take an existing Memberlist and attempt to join a cluster</span></span><br><span class="line"><span class="comment">// by contacting all the given hosts and performing a state sync. Initially,</span></span><br><span class="line"><span class="comment">// the Memberlist only contains our own state, so doing this will cause</span></span><br><span class="line"><span class="comment">// remote nodes to become aware of the existence of this node, effectively</span></span><br><span class="line"><span class="comment">// joining the cluster.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// This returns the number of hosts successfully contacted and an error if</span></span><br><span class="line"><span class="comment">// none could be reached. If an error is returned, the node did not successfully</span></span><br><span class="line"><span class="comment">// join the cluster.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Memberlist)</span> <span class="title">Join</span><span class="params">(existing []<span class="keyword">string</span>)</span> <span class="params">(<span class="keyword">int</span>, error)</span></span> &#123;</span><br><span class="line">	numSuccess := <span class="number">0</span></span><br><span class="line">	<span class="keyword">var</span> errs error</span><br><span class="line">	<span class="keyword">for</span> _, exist := <span class="keyword">range</span> existing &#123;</span><br><span class="line">		addrs, err := m.resolveAddr(exist)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			err = fmt.Errorf(<span class="string">"Failed to resolve %s: %v"</span>, exist, err)</span><br><span class="line">			errs = multierror.Append(errs, err)</span><br><span class="line">			m.logger.Printf(<span class="string">"[WARN] memberlist: %v"</span>, err)</span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> _, addr := <span class="keyword">range</span> addrs &#123;</span><br><span class="line">			hp := joinHostPort(addr.ip.String(), addr.port)</span><br><span class="line">			a := Address&#123;Addr: hp, Name: addr.nodeName&#125;</span><br><span class="line">			<span class="keyword">if</span> err := m.pushPullNode(a, <span class="literal">true</span>); err != <span class="literal">nil</span> &#123;</span><br><span class="line">				err = fmt.Errorf(<span class="string">"Failed to join %s: %v"</span>, addr.ip, err)</span><br><span class="line">				errs = multierror.Append(errs, err)</span><br><span class="line">				m.logger.Printf(<span class="string">"[DEBUG] memberlist: %v"</span>, err)</span><br><span class="line">				<span class="keyword">continue</span></span><br><span class="line">			&#125;</span><br><span class="line">			numSuccess++</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> numSuccess &gt; <span class="number">0</span> &#123;</span><br><span class="line">		errs = <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> numSuccess, errs</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>join的注释很详细了，最后起了一个协程 <code>go peer.Settle(ctx, *gossipInterval*10)</code>，用于同步集群状态，如果同步完成就关闭 <code>channel p.readyc</code>，后面判断集群状态是否OK，都是根据该 <code>channel</code> 判断的。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Settle waits until the mesh is ready (and sets the appropriate internal state when it is).</span></span><br><span class="line"><span class="comment">// The idea is that we don't want to start "working" before we get a chance to know most of the alerts and/or silences.</span></span><br><span class="line"><span class="comment">// Inspired from https://github.com/apache/cassandra/blob/7a40abb6a5108688fb1b10c375bb751cbb782ea4/src/java/org/apache/cassandra/gms/Gossiper.java</span></span><br><span class="line"><span class="comment">// This is clearly not perfect or strictly correct but should prevent the alertmanager to send notification before it is obviously not ready.</span></span><br><span class="line"><span class="comment">// This is especially important for those that do not have persistent storage.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Peer)</span> <span class="title">Settle</span><span class="params">(ctx context.Context, interval time.Duration)</span></span> &#123;</span><br><span class="line">	<span class="keyword">const</span> NumOkayRequired = <span class="number">3</span></span><br><span class="line">	level.Info(p.logger).Log(<span class="string">"msg"</span>, <span class="string">"Waiting for gossip to settle..."</span>, <span class="string">"interval"</span>, interval)</span><br><span class="line">	start := time.Now()</span><br><span class="line">	nPeers := <span class="number">0</span></span><br><span class="line">	nOkay := <span class="number">0</span></span><br><span class="line">	totalPolls := <span class="number">0</span></span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-ctx.Done():</span><br><span class="line">			elapsed := time.Since(start)</span><br><span class="line">			level.Info(p.logger).Log(<span class="string">"msg"</span>, <span class="string">"gossip not settled but continuing anyway"</span>, <span class="string">"polls"</span>, totalPolls, <span class="string">"elapsed"</span>, elapsed)</span><br><span class="line">			<span class="built_in">close</span>(p.readyc)</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		<span class="keyword">case</span> &lt;-time.After(interval):</span><br><span class="line">		&#125;</span><br><span class="line">		elapsed := time.Since(start)</span><br><span class="line">		n := <span class="built_in">len</span>(p.Peers())</span><br><span class="line">		<span class="keyword">if</span> nOkay &gt;= NumOkayRequired &#123;</span><br><span class="line">			level.Info(p.logger).Log(<span class="string">"msg"</span>, <span class="string">"gossip settled; proceeding"</span>, <span class="string">"elapsed"</span>, elapsed)</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> n == nPeers &#123;</span><br><span class="line">			nOkay++</span><br><span class="line">			level.Debug(p.logger).Log(<span class="string">"msg"</span>, <span class="string">"gossip looks settled"</span>, <span class="string">"elapsed"</span>, elapsed)</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			nOkay = <span class="number">0</span></span><br><span class="line">			level.Info(p.logger).Log(<span class="string">"msg"</span>, <span class="string">"gossip not settled"</span>, <span class="string">"polls"</span>, totalPolls, <span class="string">"before"</span>, nPeers, <span class="string">"now"</span>, n, <span class="string">"elapsed"</span>, elapsed)</span><br><span class="line">		&#125;</span><br><span class="line">		nPeers = n</span><br><span class="line">		totalPolls++</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="built_in">close</span>(p.readyc)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到上面这里是个死循环，实现了一个类似心跳机制，定时检测集群是否已经同步完成，接着往下看</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">	waitFunc := <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">time</span>.<span class="title">Duration</span></span> &#123; <span class="keyword">return</span> <span class="number">0</span> &#125;</span><br><span class="line">	<span class="keyword">if</span> peer != <span class="literal">nil</span> &#123;</span><br><span class="line">		waitFunc = clusterWait(peer, *peerTimeout)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// clusterWait returns a function that inspects the current peer state and returns</span></span><br><span class="line"><span class="comment">// a duration of one base timeout for each peer with a higher ID than ourselves.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">clusterWait</span><span class="params">(p *cluster.Peer, timeout time.Duration)</span> <span class="title">func</span><span class="params">()</span> <span class="title">time</span>.<span class="title">Duration</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">time</span>.<span class="title">Duration</span></span> &#123;</span><br><span class="line">		<span class="keyword">return</span> time.Duration(p.Position()) * timeout</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">		pipeline := pipelineBuilder.New(</span><br><span class="line">			receivers,</span><br><span class="line">			waitFunc,</span><br><span class="line">			inhibitor,</span><br><span class="line">			silencer,</span><br><span class="line">			notificationLog,</span><br><span class="line">			peer,</span><br><span class="line">		)</span><br><span class="line"></span><br><span class="line"><span class="comment">// New returns a map of receivers to Stages.</span></span><br><span class="line"><span class="comment">// --------------------------------------------------------</span></span><br><span class="line"><span class="comment">// New 返回一个接收人map运行的Stages，每个接收人，都会经历固定的Gossip，</span></span><br><span class="line"><span class="comment">// 抑制和静默阶段。然后根据receiver的不同，创建各自的分组阶段。</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(pb *PipelineBuilder)</span> <span class="title">New</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">	receivers <span class="keyword">map</span>[<span class="keyword">string</span>][]Integration,</span></span></span><br><span class="line"><span class="function"><span class="params">	wait <span class="keyword">func</span>()</span> <span class="title">time</span>.<span class="title">Duration</span>,</span></span><br><span class="line"><span class="function">	<span class="title">inhibitor</span> *<span class="title">inhibit</span>.<span class="title">Inhibitor</span>,</span></span><br><span class="line"><span class="function">	<span class="title">silencer</span> *<span class="title">silence</span>.<span class="title">Silencer</span>,</span></span><br><span class="line"><span class="function">	<span class="title">notificationLog</span> <span class="title">NotificationLog</span>,</span></span><br><span class="line"><span class="function">	<span class="title">peer</span> *<span class="title">cluster</span>.<span class="title">Peer</span>,</span></span><br><span class="line"><span class="function">) <span class="title">RoutingStage</span></span> &#123;</span><br><span class="line">	rs := <span class="built_in">make</span>(RoutingStage, <span class="built_in">len</span>(receivers))</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 创建gossip协议检查就绪阶段，和抑制和静默的静音阶段。</span></span><br><span class="line">	ms := NewGossipSettleStage(peer)</span><br><span class="line">	is := NewMuteStage(inhibitor)</span><br><span class="line">	ss := NewMuteStage(silencer)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 根据接收人创建，分组等待，去重，重试，通知阶段。</span></span><br><span class="line">	<span class="comment">// 这里每个接收人都有一个独立的接收人阶段，并且</span></span><br><span class="line">	<span class="comment">// 它们公用gossip就绪和静音阶段。</span></span><br><span class="line">	<span class="keyword">for</span> name := <span class="keyword">range</span> receivers &#123;</span><br><span class="line">		<span class="comment">// 为每一个接收方式的所有接收人创建扇出的阶段</span></span><br><span class="line">		st := createReceiverStage(name, receivers[name], wait, notificationLog, pb.metrics)</span><br><span class="line">		rs[name] = MultiStage&#123;ms, is, ss, st&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> rs</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里很重要，在pipeline中创建gossip协议检查就绪阶段，<code>ms := NewGossipSettleStage(peer)</code>，和其他一些需要处理message的阶段</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// NewGossipSettleStage returns a new GossipSettleStage.</span></span><br><span class="line"><span class="comment">// ------------------------------------------------------------------------------</span></span><br><span class="line"><span class="comment">// NewGossipSettleStage 返回一个gossip检查就绪阶段，正如我们所知集群内的节点，</span></span><br><span class="line"><span class="comment">// 通过gossip协议进行通讯。</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewGossipSettleStage</span><span class="params">(p *cluster.Peer)</span> *<span class="title">GossipSettleStage</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;GossipSettleStage&#123;peer: p&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// GossipSettleStage waits until the Gossip has settled to forward alerts.</span></span><br><span class="line"><span class="comment">// ------------------------------------------------------------------------------</span></span><br><span class="line"><span class="comment">// GossipSettleStage 此阶段，一直等待gossip协议准备就绪状态，等待其他的节点就绪。</span></span><br><span class="line"><span class="keyword">type</span> GossipSettleStage <span class="keyword">struct</span> &#123;</span><br><span class="line">	peer *cluster.Peer</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>那么这个就绪阶段是干嘛的呢？往下看</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">go</span> disp.Run()</span><br><span class="line"></span><br><span class="line"><span class="comment">// Run starts dispatching alerts incoming via the updates channel.</span></span><br><span class="line"><span class="comment">// ----------------------------------------------------------------</span></span><br><span class="line"><span class="comment">// 运行调度器，初始化分组列表map和普罗米修斯分组计数指标。</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(d *Dispatcher)</span> <span class="title">Run</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">// 初始化结束通道</span></span><br><span class="line">	d.done = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line"></span><br><span class="line">	d.mtx.Lock()</span><br><span class="line">	d.aggrGroups = <span class="keyword">map</span>[*Route]<span class="keyword">map</span>[model.Fingerprint]*aggrGroup&#123;&#125;</span><br><span class="line">	d.metrics.aggrGroups.Set(<span class="number">0</span>)</span><br><span class="line">	d.ctx, d.cancel = context.WithCancel(context.Background())</span><br><span class="line">	d.mtx.Unlock()</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 运行调度器子运行函数</span></span><br><span class="line">	d.run(d.alerts.Subscribe())</span><br><span class="line">	<span class="built_in">close</span>(d.done)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>看下这个方法 <code>d.run(d.alerts.Subscribe())</code>，其中 <code>d.alerts.Subscribe()</code> 返回一个告警遍历器接口。遍历器会返回还没有解决和还没有被成功通知出来的告警。遍历器所返回的告警，并不能保证是按照时间顺序来进行排序的。</p>
+<p>看下 <code>run</code> 中的 <code>d.processAlert(alert, r)</code></p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(d *Dispatcher)</span> <span class="title">processAlert</span><span class="params">(alert *types.Alert, route *Route)</span></span> &#123;</span><br><span class="line">	<span class="comment">// 根据分组路由的信息，获得此分组下的匹配中的labels。</span></span><br><span class="line">	<span class="comment">// 并根据所得labels得到唯一id(指纹 finger print)。</span></span><br><span class="line">	groupLabels := getGroupLabels(alert, route)</span><br><span class="line">	fp := groupLabels.Fingerprint()</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 加锁进行hashmap操作</span></span><br><span class="line">	d.mtx.Lock()</span><br><span class="line">	<span class="keyword">defer</span> d.mtx.Unlock()</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 通过分组路由获得分组map，如果分组列表hashmap不存在这个分组，</span></span><br><span class="line">	<span class="comment">// 则进行创建。分组map里面key为分组finger print，value为具</span></span><br><span class="line">	<span class="comment">// 体唯一标识的分组。</span></span><br><span class="line">	group, ok := d.aggrGroups[route]</span><br><span class="line">	<span class="keyword">if</span> !ok &#123;</span><br><span class="line">		group = <span class="keyword">map</span>[model.Fingerprint]*aggrGroup&#123;&#125;</span><br><span class="line">		d.aggrGroups[route] = group</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// If the group does not exist, create it.</span></span><br><span class="line">	<span class="comment">// ----------------------------------------------------</span></span><br><span class="line">	<span class="comment">// 假如当前告警的group labels的指纹在这个告警分组map里找不到，</span></span><br><span class="line">	<span class="comment">// 则进行分组的创建。</span></span><br><span class="line">	ag, ok := group[fp]</span><br><span class="line">	<span class="keyword">if</span> !ok &#123;</span><br><span class="line">		ag = newAggrGroup(d.ctx, groupLabels, route, d.timeout, d.logger)</span><br><span class="line">		group[fp] = ag</span><br><span class="line">		<span class="comment">// 普罗米修斯的分组数量指标进行加一</span></span><br><span class="line">		d.metrics.aggrGroups.Inc()</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 开启新的协成，运行此告警指纹的分组</span></span><br><span class="line">		<span class="keyword">go</span> ag.run(<span class="function"><span class="keyword">func</span><span class="params">(ctx context.Context, alerts ...*types.Alert)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">			<span class="comment">// 根据当前context的状态，来进行告警的处理。</span></span><br><span class="line">			_, _, err := d.stage.Exec(ctx, d.logger, alerts...)</span><br><span class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">				lvl := level.Error(d.logger)</span><br><span class="line">				<span class="keyword">if</span> ctx.Err() == context.Canceled &#123;</span><br><span class="line">					<span class="comment">// It is expected for the context to be canceled on</span></span><br><span class="line">					<span class="comment">// configuration reload or shutdown. In this case, the</span></span><br><span class="line">					<span class="comment">// message should only be logged at the debug level.</span></span><br><span class="line">					<span class="comment">// ---------------------------------------------------</span></span><br><span class="line">					<span class="comment">// 假如错误是因为reload或者关闭而导致的，那样日志等级为debug</span></span><br><span class="line">					lvl = level.Debug(d.logger)</span><br><span class="line">				&#125;</span><br><span class="line">				lvl.Log(<span class="string">"msg"</span>, <span class="string">"Notify for alerts failed"</span>, <span class="string">"num_alerts"</span>, <span class="built_in">len</span>(alerts), <span class="string">"err"</span>, err)</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">return</span> err == <span class="literal">nil</span></span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 插入alert到这个唯一标识的分组里。</span></span><br><span class="line">	ag.insert(alert)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>主要看下这个方法 <code>_, _, err := d.stage.Exec(ctx, d.logger, alerts...)</code></p>
+<blockquote>
+<p>Exec 循环执行 MultiStage 里面的每一个阶段。MultiStage 主要使用两个场景。<br>场景一： RoutingStage 的map[receiver name] MultiStage。<br>       里面有集群Gossip阶段，静默Mute阶段，抑制Mute阶段，Receiver阶段。<br>场景二： FanoutStage 的切片，里面每个元素是一个 MultiStage。<br>       里面有分组等待阶段，去重阶段，重试阶段，设置通知阶段。</p>
+</blockquote>
+<p>也就是说每次有新告警过来的时候都会经历同步集群状态的阶段，保证当前集群状态是OK的。</p>
+<p>同时当有多个prometheus往alertmanager发送消息的时候，可能发生告警重复的情况，在alertmanager中有个去重阶段(DedupStage)是处理这样的情况：</p>
+<p>DedupStage用于管理告警的去重，传递的参数中包含了一个NotificationLog,用来保存告警的发送记录。当有多个机器组成集群的时候，NotificationLog会通过协议去进行通信，传递彼此的记录信息，加入集群中的A如果发送了告警，该记录会传递给B机器，并进行merge操作，这样B机器在发送告警的时候如果查询已经发送，则不再进行告警发送。关于NotificationLog的实现nflog可以查看nflog/nflog.go文件。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// DedupStage filters alerts.</span></span><br><span class="line"><span class="comment">// Filtering happens based on a notification log.</span></span><br><span class="line"><span class="keyword">type</span> DedupStage <span class="keyword">struct</span> &#123;</span><br><span class="line">    nflog NotificationLog</span><br><span class="line">    recv  *nflogpb.Receiver</span><br><span class="line">    conf  notifierConfig</span><br><span class="line"></span><br><span class="line">    now  <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">time</span>.<span class="title">Time</span></span></span><br><span class="line"><span class="function">    <span class="title">hash</span> <span class="title">func</span><span class="params">(*types.Alert)</span> <span class="title">uint64</span></span></span><br><span class="line"><span class="function">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>具体的处理逻辑如下：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n *DedupStage)</span> <span class="title">Exec</span><span class="params">(ctx context.Context, l log.Logger, alerts ...*types.Alert)</span> <span class="params">(context.Context, []*types.Alert, error)</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line">    entries, err := n.nflog.Query(nflog.QGroupKey(gkey), nflog.QReceiver(n.recv))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &amp;&amp; err != nflog.ErrNotFound &#123;</span><br><span class="line">        <span class="keyword">return</span> ctx, <span class="literal">nil</span>, err</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">var</span> entry *nflogpb.Entry</span><br><span class="line">    <span class="keyword">switch</span> <span class="built_in">len</span>(entries) &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">0</span>:</span><br><span class="line">    <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">        entry = entries[<span class="number">0</span>]</span><br><span class="line">    <span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">        <span class="keyword">return</span> ctx, <span class="literal">nil</span>, fmt.Errorf(<span class="string">"unexpected entry result size %d"</span>, <span class="built_in">len</span>(entries))</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> n.needsUpdate(entry, firingSet, resolvedSet, repeatInterval) &#123;</span><br><span class="line">        <span class="keyword">return</span> ctx, alerts, <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">		<span class="keyword">return</span> ctx, <span class="literal">nil</span>, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中的nflog.Query将根据接收和group key进行查询，一旦查找到，则不再返回对应的alerts. nflog设置了GC用来删除过期的日志记录。防止一直存在log中导致告警无法继续发送.</p>
+<p>这里有个疑问？上面我们看到判断集群状态是否OK的是用的 <code>p.readyc</code> 这个channel，这个channel在 <code>go peer.Settle(ctx, *gossipInterval*10)</code> 同步完成之后就关闭了，也就是说后面读取这个channel的话，都是同步成功的状态，如果中途有个alertmanager实例挂掉了，这个还会是集群组建成功的状态吗？</p>
+<p>参考：</p>
+<p><a href="https://yunlzheng.gitbook.io/prometheus-book/part-ii-prometheus-jin-jie/readmd/alertmanager-high-availability" target="_blank" rel="external">Alertmanager高可用</a></p>
+<p><a href="https://blog.csdn.net/jianxian89/article/details/107482423" target="_blank" rel="external">一致性算法-Gossip协议实践(Memberlist)</a></p>
+<p><a href="https://chenxy.blog.csdn.net/article/details/79698757?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-2.control&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-2.control" target="_blank" rel="external">gossip协议的原理和实战应用</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+<blockquote class="blockquote-center" style="color: #ccc;">
+    -------------本文结束 <i class="fa fa-apple"></i> 感谢您的阅读-------------
+</blockquote>
+
+  <span id="inline-green" style="border-radius:3px;">作者</span>：<a class="link-blue" href="https://github.com/magiceses" target="_blank">Magiceses</a><br/>有问题请 <a class="link-blue" href="https://magiceses.github.io/guestbook" target="_blank">留言</a> 或者私信我的 <a class="link-blue" href="https://weibo.com/u/3069595351" target="_blank">微博</a>。
+
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>满分是10分的话，这篇文章你给几分</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/reward/reward_wechat.png" alt="magiceses WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/reward/reward_alipay.png" alt="magiceses Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Prometheus/" rel="tag"><i class="fa fa-tag"></i> Prometheus</a>
+          
+            <a href="/tags/Alertmanager/" rel="tag"><i class="fa fa-tag"></i> Alertmanager</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/10/08/prometheus-prometheus-7-storage/" rel="next" title="Prometheus Local storage和Remote storage">
+                <i class="fa fa-chevron-left"></i> Prometheus Local storage和Remote storage
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/12/24/prometheus-alertmanager-高可用总结-上/" rel="prev" title="Alertmanager 高可用总结-上">
+                Alertmanager 高可用总结-上 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar/avatar.png"
+               alt="magiceses" />
+          <p class="site-author-name" itemprop="name">magiceses</p>
+          <p class="site-description motion-element" itemprop="description">Stay Hungry,Stay Foolish</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">36</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/magiceses" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://blog.csdn.net/weixin_43700106" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-chrome"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/weblog" title="建站日志" target="_blank">建站日志</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/reward" title="打赏" target="_blank">打赏</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#回顾"><span class="nav-number">1.</span> <span class="nav-text">回顾</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#gossip"><span class="nav-number">1.1.</span> <span class="nav-text">gossip</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#memberlist"><span class="nav-number">1.2.</span> <span class="nav-text">memberlist</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用示例"><span class="nav-number">1.3.</span> <span class="nav-text">使用示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#alertmanager-高可用实现"><span class="nav-number">2.</span> <span class="nav-text">alertmanager 高可用实现</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+      
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="busuanzi-count">
+
+  <!-- <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script> -->
+  <!-- 上面这个是之前的，不知道为什么失效了，改成下面这个 -->
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">您是第<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>个小伙伴</span>
+  
+
+  
+    <span class="site-pv">本站总浏览<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">magiceses</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Pisces
+  </a>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count" style="color: #e90f92;">全站共 685k 字</span>
+</div>
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+  <!-- 按需加载背景 -->
+  <!-- 背景动画 -->
+<script type="text/javascript">
+  // 按需加载背景
+  // 如果是all，就直接加载了
+  if("pc" == "all") {
+    $.getScript("/js/src/particle.js?v=5.0.1");
+  }
+  // 识别手机或电脑的js开始
+  (function(){
+    var res = GetRequest();
+    var par = res['index'];
+    if(par!='gfan'){
+      var ua=navigator.userAgent.toLowerCase();
+      var contains=function (a, b){
+          if(a.indexOf(b)!=-1){return true;}
+      };
+      if((contains(ua,"android") && contains(ua,"mobile"))||(contains(ua,"android") && contains(ua,"mozilla"))||(contains(ua,"android") && contains(ua,"opera"))||contains(ua,"ucweb7")||contains(ua,"iphone")){
+        return false;
+      } else {
+        $.getScript("/js/src/particle.js?v=5.0.1");
+      }
+    }
+  })();
+  function GetRequest() {
+    var url = location.search;
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+      var str = url.substr(1);
+      strs = str.split("&");
+      for(var i = 0; i < strs.length; i ++) {
+        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+      }
+    }
+    return theRequest;
+  }
+</script>
+<!-- 识别手机或电脑的js结束 -->  
+
+  <!-- 页面点击小红心 -->
+  <!-- 页面点击小红心 -->
+
+  <script type="text/javascript" src="/js/src/love.js?v=5.0.1"></script>
+
+
+  <!-- 鼠标移动，效果 -->
+  <!-- 鼠标移动特效 -->
+
+  <script type="text/javascript" src="/js/src/jquery-stars.js?v=5.0.1"></script>
+  <script type="text/javascript">
+  jQuery('body').jstars({
+  	image_path: '/images',
+  	image: 'candy-cane-stars.png',
+  	style: 'white',
+  	width: 34,
+  	height: 34,
+  	delay: 700,
+  	frequency: 5
+  });
+  </script>
+
+
+  <!-- 页面 title 进入/离开 效果 -->
+
+  <script type="text/javascript">var OriginTitile=document.title,st;document.addEventListener("visibilitychange",function(){document.hidden?(document.title="Waiting for you back！",clearTimeout(st)):(document.title="Thanks for visit~ "+OriginTitile,st=setTimeout(function(){document.title=OriginTitile},4e3))})</script>
+
+
+</body>
+</html>

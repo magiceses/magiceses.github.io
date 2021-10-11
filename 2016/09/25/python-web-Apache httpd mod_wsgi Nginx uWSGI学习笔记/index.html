@@ -1,0 +1,1567 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Courier New:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Python,PythonWeb," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="天青色等烟雨" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="这座城市人很多，每天在路上都能看到好多拉着行李箱的人，不管他们是来到这座城市还是离开这座城市，至少他们都曾努力过。
+
+
+Apache httpd mod_wsgi Nginx uWSGI学习笔记以下所总结仅是学习记录，如有不对的部分，还请及时指出，十分感谢参考文档目录较多，都在末尾列出，有兴趣的可以直接访问">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Apache httpd mod_wsgi Nginx uWSGI学习笔记">
+<meta property="og:url" content="https://magiceses.github.io/2016/09/25/python-web-Apache httpd mod_wsgi Nginx uWSGI学习笔记/index.html">
+<meta property="og:site_name" content="天青色等烟雨">
+<meta property="og:description" content="这座城市人很多，每天在路上都能看到好多拉着行李箱的人，不管他们是来到这座城市还是离开这座城市，至少他们都曾努力过。
+
+
+Apache httpd mod_wsgi Nginx uWSGI学习笔记以下所总结仅是学习记录，如有不对的部分，还请及时指出，十分感谢参考文档目录较多，都在末尾列出，有兴趣的可以直接访问">
+<meta property="og:image" content="https://magiceses.github.io/images/python-apache-1.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-apache-2.png">
+<meta property="og:updated_time" content="2021-10-02T07:58:41.128Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Apache httpd mod_wsgi Nginx uWSGI学习笔记">
+<meta name="twitter:description" content="这座城市人很多，每天在路上都能看到好多拉着行李箱的人，不管他们是来到这座城市还是离开这座城市，至少他们都曾努力过。
+
+
+Apache httpd mod_wsgi Nginx uWSGI学习笔记以下所总结仅是学习记录，如有不对的部分，还请及时指出，十分感谢参考文档目录较多，都在末尾列出，有兴趣的可以直接访问">
+<meta name="twitter:image" content="https://magiceses.github.io/images/python-apache-1.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://magiceses.github.io/2016/09/25/python-web-Apache httpd mod_wsgi Nginx uWSGI学习笔记/"/>
+
+
+<!-- 网页加载条 -->
+<script src="/js/src/pace.min.js"></script>
+  <title> Apache httpd mod_wsgi Nginx uWSGI学习笔记 | 天青色等烟雨 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">天青色等烟雨</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">而我在等你</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-guestbook">
+          <a href="/guestbook" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-commenting"></i> <br />
+            
+            留言
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+      
+      
+        <li class="menu-item"> <a title="把这个链接拖到你的工具栏中,任何网页都可以High" href='javascript:(
+/*
+ * Copyright (C) 2016 Never_yu (Neveryu.github.io) <React.dong.yu@gmail.com>
+ * Sina Weibo (http://weibo.com/Neveryu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function go() {
+
+var songs = [
+  "http://dl.stream.qqmusic.qq.com/C400001Qu4I30eVFYb.m4a?vkey=2127178E4405E7B8B268F20F05232485735CCF4FF8C1432F0360D2626D0B6C9564B5627C7AB481BBC685FEDB0946A50E97C66F0D1B008226&guid=7175649092&uin=0&fromtag=66",
+  "",
+  "",
+  ""
+];
+
+function c() {
+  var e = document.createElement("link");
+  e.setAttribute("type", "text/css");
+  e.setAttribute("rel", "stylesheet");
+  e.setAttribute("href", f);
+  e.setAttribute("class", l);
+  document.body.appendChild(e)
+}
+
+function h() {
+  var e = document.getElementsByClassName(l);
+  for (var t = 0; t < e.length; t++) {
+    document.body.removeChild(e[t])
+  }
+}
+
+function p() {
+  var e = document.createElement("div");
+  e.setAttribute("class", a);
+  document.body.appendChild(e);
+  setTimeout(function() {
+    document.body.removeChild(e)
+  }, 100)
+}
+
+function d(e) {
+  return {
+    height : e.offsetHeight,
+    width : e.offsetWidth
+  }
+}
+
+function v(i) {
+  var s = d(i);
+  return s.height > e && s.height < n && s.width > t && s.width < r
+}
+
+function m(e) {
+  var t = e;
+  var n = 0;
+  while (!!t) {
+    n += t.offsetTop;
+    t = t.offsetParent
+  }
+  return n
+}
+
+function g() {
+  var e = document.documentElement;
+  if (!!window.innerWidth) {
+    return window.innerHeight
+  } else if (e && !isNaN(e.clientHeight)) {
+    return e.clientHeight
+  }
+  return 0
+}
+
+function y() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  }
+  return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+}
+
+function E(e) {
+  var t = m(e);
+  return t >= w && t <= b + w
+}
+
+function S() {
+  var e = document.getElementById("audio_element_id");
+  if(e != null){
+    var index = parseInt(e.getAttribute("curSongIndex"));
+    if(index > songs.length - 2) {
+      index = 0;
+    } else {
+      index++;
+    }
+    e.setAttribute("curSongIndex", index);
+    N();
+  }
+
+  e.src = i;
+  e.play()
+}
+
+function x(e) {
+  e.className += " " + s + " " + o
+}
+
+function T(e) {
+  e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+}
+
+function N() {
+  var e = document.getElementsByClassName(s);
+  var t = new RegExp("\\b" + s + "\\b");
+  for (var n = 0; n < e.length; ) {
+    e[n].className = e[n].className.replace(t, "")
+  }
+}
+
+function initAudioEle() {
+  var e = document.getElementById("audio_element_id");
+  if(e === null){
+    e = document.createElement("audio");
+    e.setAttribute("class", l);
+    e.setAttribute("curSongIndex", 0);
+    e.id = "audio_element_id";
+    e.loop = false;
+    e.bgcolor = 0;
+    e.addEventListener("canplay", function() {
+      setTimeout(function() {
+        x(k)
+      }, 500);
+      setTimeout(function() {
+        N();
+        p();
+        for (var e = 0; e < O.length; e++) {
+          T(O[e])
+        }
+      }, 15500)
+    }, true);
+    e.addEventListener("ended", function() {
+      N();
+      h();
+      go();
+    }, true);
+    e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+    document.body.appendChild(e);
+  }
+}
+
+initAudioEle();
+var e = 30;
+var t = 30;
+var n = 350;
+var r = 350;
+
+var curSongIndex = parseInt(document.getElementById("audio_element_id").getAttribute("curSongIndex"));
+var i = songs[curSongIndex];
+
+var s = "mw-harlem_shake_me";
+var o = "im_first";
+var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+var a = "mw-strobe_light";
+
+/* harlem-shake-style.css，替换成你的位置，也可以直接使用：//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css */
+var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+
+var l = "mw_added_css";
+var b = g();
+var w = y();
+var C = document.getElementsByTagName("*");
+var k = null;
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    if (E(A)) {
+      k = A;
+      break
+    }
+  }
+}
+if (A === null) {
+  console.warn("Could not find a node of the right size. Please try a different page.");
+  return
+}
+c();
+S();
+var O = [];
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    O.push(A)
+  }
+}
+})()'><i class="menu-item-icon fa fa-music fa-fw"></i> High一下</a></li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search fa-lg"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Apache httpd mod_wsgi Nginx uWSGI学习笔记
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-09-25T23:25:24+08:00" content="2016-09-25">
+              2016-09-25
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv">热度
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p id="div-border-top-green">这座城市人很多，每天在路上都能看到好多拉着行李箱的人，不管他们是来到这座城市还是离开这座城市，至少他们都曾努力过。<br></p>
+
+<p><br></p>
+<h1 id="Apache-httpd-mod-wsgi-Nginx-uWSGI学习笔记"><a href="#Apache-httpd-mod-wsgi-Nginx-uWSGI学习笔记" class="headerlink" title="Apache httpd mod_wsgi Nginx uWSGI学习笔记"></a>Apache httpd mod_wsgi Nginx uWSGI学习笔记</h1><p>以下所总结仅是学习记录，如有不对的部分，还请及时指出，十分感谢<br>参考文档目录较多，都在末尾列出，有兴趣的可以直接访问<br><a id="more"></a></p>
+<h2 id="Apache-httpd-简介"><a href="#Apache-httpd-简介" class="headerlink" title="Apache httpd 简介"></a>Apache httpd 简介</h2><p>Apache HTTPD又可以简称为httpd或者Apache，它是Internet使用最广泛的web服务器之一，使用Apache提供的web服务器是由守护进程httpd，通过http协议进行文本传输，默认使用80端口的明文传输方式，当然，后来，为了保证数据的安全和可靠性，又添加了443的加密传输的方式，Apache提供的服务器又被称为：补丁服务器，原因很简单，它是一款高度模块化的软件，想要给它添加相应的功能只需添加相应的模块，让其Apache主程序加载相应的模块，不需要的模块也可以不用加载，保证了Apache的简洁，轻便，高效性，当出现大量访问一个服务器是可以使用多种复用模式，保证了服务器能快速回应客户端的请求，如MPM，端口复用技术。</p>
+<h3 id="apache和httpd区别"><a href="#apache和httpd区别" class="headerlink" title="apache和httpd区别"></a>apache和httpd区别</h3><p>从我们仅仅web服务器使用者的角度说的话，它们是同一个东西。在 Apache 的网站上有两种安装包下载<br>httpd-2.0.50-i686-pc-linux-gnu.tar.gz  和 apache_1.3.33-i686-whatever-linux22.tar.gz<br>其实都是提供Web服务的，只是一个是早期版一个是新的版本模式。httpd是apache开源项目的一部分，如果只需要web服务器，现在只需安装httpd2.*就可以了。</p>
+<p>和 “Apache” 的历史有关。可以参考官方介绍：<a href="http://httpd.apache.org/ABOUT_APACHE.html" target="_blank" rel="external">http://httpd.apache.org/ABOUT_APACHE.html</a></p>
+<p>早 期的Apache小组，现在已经成为一个拥有巨大力量的Apache软件基金会，而apache现在成为  apache基金会下几十种开源项目的标识。其中有一个项目做HTTP Server，httpd是HTTP  Server的守护进程，在Linux下最常用的是Apache，所以一提到httpd就会想到Apache HTTP Server。<br>他们把起 家的apache更名为httpd，也更符合其http server的特性。以前apache的http  server在1.3的时候直接叫apache_1.3.37，现在2.*版本的都叫httpd_2.2.3。在Linux下最常用的是Apache，所 以一提到httpd就会想到Apache HTTP Server。</p>
+<p>对于nginx/mod_wsgi，请确保阅读：</p>
+<p><a href="http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html" target="_blank" rel="external">http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html</a></p>
+<h3 id="httpd配置相关目录"><a href="#httpd配置相关目录" class="headerlink" title="httpd配置相关目录"></a>httpd配置相关目录</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# cd /etc/httpd</span><br><span class="line">[root@localhost httpd]# tree .</span><br><span class="line">.</span><br><span class="line">|-- conf</span><br><span class="line">|   |-- httpd.conf</span><br><span class="line">|   `-- magic</span><br><span class="line">|-- conf.d</span><br><span class="line">|   |-- README</span><br><span class="line">|   |-- proxy_ajp.conf</span><br><span class="line">|   `-- welcome.conf</span><br><span class="line">|-- logs -&gt; ../../var/log/httpd</span><br><span class="line">|-- modules -&gt; ../../usr/lib/httpd/modules</span><br><span class="line">`-- run -&gt; ../../var/run</span><br><span class="line"></span><br><span class="line">第一，httpd的主配置文件是/etc/httpd/conf/httpd.conf</span><br><span class="line"></span><br><span class="line">第二，在httpd.conf文件中通过include指令将conf.d/*.conf进行包含，也就是说，以后我们可以在conf.d目录下新增自己的配置文件。</span><br><span class="line"></span><br><span class="line">第三，对于WEB服务器而言，都有一个功能，那就是记录访问，错误日志。HTTPD的日志目录在/var/log/httpd下。</span><br><span class="line"></span><br><span class="line">第四，HTTPD的一个特性，就是模块化设计。我们可以增加模块来添加功能。</span><br></pre></td></tr></table></figure>
+<h3 id="httpd配置文件"><a href="#httpd配置文件" class="headerlink" title="httpd配置文件"></a>httpd配置文件</h3><p>下面的三个文件分别是主配置文件和辅助配置文件，以及模块配置文件，对主配置文件进行分割方便管理，在重启服务或者重新加载配置文件时会一并加载</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">/etc/httpd/conf/httpd.conf 		# 主配置文件,这个是httpd最主要的配置文档</span><br><span class="line"></span><br><span class="line">/etc/httpd/conf.d/*.conf			 # 扩展配置文件,这个是httpd的额外配置文档</span><br><span class="line"></span><br><span class="line">/etc/httpd/conf.modules.d/*.conf		# 模块相关的配置文件</span><br><span class="line"></span><br><span class="line">/var/www/html							 # 文档根目录,这个是apache 首页的文档目录 ，即输入http://127.0.0.1 显示页面所在的目录</span><br><span class="line"></span><br><span class="line">/etc/rc.d/init.d/httpd				   # 服务脚本</span><br><span class="line"></span><br><span class="line">/var/www/error							# 错误目录,服务器设定错误，请求的资源错误或浏览器访问出现错误等错误文件的存储目录</span><br><span class="line"></span><br><span class="line">/var/www/cgi-bin/						# CGI目录,预设为CGI运行脚本的存储目录</span><br><span class="line"></span><br><span class="line">/etc/sysconfig/httpd					# 脚本配置文件</span><br><span class="line"></span><br><span class="line">/usr/sbin/apachectl ，/usr/sbin/httpd，/usr/bin/htpasswd			# 命令执行文件</span><br><span class="line"></span><br><span class="line">/var/run/httpd/httpd.pid			 # PID文件</span><br></pre></td></tr></table></figure>
+<p><strong>模块的加载格式为：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">LoadModule 模块名 模块存放路径</span><br><span class="line"></span><br><span class="line">UnitFile:/usr/lib/systemd/system/httpd.service  //Unit文件是rhel7之后的版本系统服务脚本启动文件</span><br></pre></td></tr></table></figure>
+<p><strong>模块文件目录：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/lib64/httpd/modules/</span><br></pre></td></tr></table></figure>
+<p><strong>站点主服务器根目录默认：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/var/www/httpd/</span><br></pre></td></tr></table></figure>
+<p><strong>日志文件：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/var/log/httpd/</span><br><span class="line"></span><br><span class="line">	error_log 错误日志</span><br><span class="line"></span><br><span class="line">	access_log 访问日志</span><br></pre></td></tr></table></figure>
+<p>下面是 <code>/etc/httpd/conf/httpd.conf</code>  简单配置的解释：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line"># 1. ServerRoot：服务器的基础目录，一般来说它将包含conf/和logs/子目录，其它配置文件的相对路径即基于此目录。默认为安装目录，不需更改。</span><br><span class="line"># 语法：ServerRoot directory-path</span><br><span class="line"># 如：　ServerRoot &quot;/usr/local/apache-2.2.6&quot;</span><br><span class="line">ServerRoot &quot;/etc/httpd&quot;</span><br><span class="line"></span><br><span class="line"># 加载其它配置文件，类似于C语言的头文件的加载，此处可以使用相对路径也可以使用绝对路径，相对路径是相对于ServerRoot的路径，可以使用glob通配符，此处的配置文件是用来加载DSO（dynamic shared object）模块</span><br><span class="line">Include conf.modules.d/*.conf</span><br><span class="line"></span><br><span class="line"># 程序运行时的用户名和组名，在安装Apache时已经创建了系统账号和组账号，程序启动时是以root身份启动，执行完root特权的所有操作后（例如启动监听80端口，低于1024的端口的监听需要root才有权力执行）会以非特权用户执行程序</span><br><span class="line">User apache</span><br><span class="line">Group apache</span><br><span class="line"></span><br><span class="line"># 管理员的邮箱地址，当httpd出问题时，联系该邮箱地址可以联系到管理员</span><br><span class="line">ServerAdmin root@localhost</span><br><span class="line"></span><br><span class="line"># 关于目录的一些配置，有关目录的访问权限等都是在这里定义，可以使用基于URL定义访问权限，但要使用&lt;Location “”&gt; …&lt;Location&gt;来定义</span><br><span class="line">&lt;Directory /&gt;</span><br><span class="line">		# AllowOverride参数就是指明Apache服务器是否去找.htacess文件作为配置文件，如果设置为none,那么服务器将忽略.htacess文件，如果设置为All,那么所有在.htaccess文件里有的指令都将被重写。对于AllowOverride，还可以对它指定如下一些能被重写的指令类型.</span><br><span class="line">    AllowOverride none</span><br><span class="line">    # 对目录的授权此处为拒绝所有访问</span><br><span class="line">    Require all denied</span><br><span class="line">&lt;/Directory&gt;</span><br><span class="line"></span><br><span class="line"># 定义目录的根位置类似于配置文件的根，不过此处是网页存放的根，在定义Directory目录时，那里的目录同样可以是绝对路径，也可以是相对于此处的路径</span><br><span class="line">DocumentRoot &quot;/var/www/html&quot;</span><br><span class="line"></span><br><span class="line"># 此处为仅在加载了模块dir_module 后才执行，DirectoryIndex配置指令后面的值可以跟多个，先后顺序很关键，值的含义为URL访问时进入目录是应该寻找哪一个文件，多个时按顺序寻找，找不到第一个然后寻找第二个值</span><br><span class="line">&lt;Directory &quot;/var/www&quot;&gt;</span><br><span class="line">    AllowOverride None</span><br><span class="line">    Require all granted</span><br><span class="line">&lt;/Directory&gt;</span><br><span class="line">&lt;Directory &quot;/var/www/html&quot;&gt;</span><br><span class="line">    Options Indexes FollowSymLinks</span><br><span class="line">    AllowOverride None</span><br><span class="line">    Require all granted</span><br><span class="line">&lt;/Directory&gt;</span><br><span class="line">&lt;IfModule dir_module&gt;</span><br><span class="line">    DirectoryIndex index.html</span><br><span class="line">&lt;/IfModule&gt;</span><br><span class="line"></span><br><span class="line"># 对所有安全相关的敏感文件设置为禁止，如目录下的.htaccess，.htpasswd</span><br><span class="line">&lt;Files &quot;.ht*&quot;&gt;</span><br><span class="line">    Require all denied</span><br><span class="line">&lt;/Files&gt;</span><br><span class="line"></span><br><span class="line"># 设置错误日志的存放路径，这里是一个软链接，指向/var/log/httpd/的符号链接</span><br><span class="line">ErrorLog &quot;logs/error_log&quot;</span><br><span class="line"></span><br><span class="line"># 设置日志级别，仅达到该级别才记录日志</span><br><span class="line">LogLevel warn</span><br><span class="line"></span><br><span class="line">&lt;IfModule log_config_module&gt;</span><br><span class="line">		# 下面定义了多种日志的记录格式，可以人为的修改自己想要定义的格式，LogFormat后面的双引号具体定义了日志的格式，后面有一个名字，在使用该定义好的格式可以使用后面的别名代替，当然也可以在使用时直接用双引号加相应的格式，访问日志也可以在虚拟主机中单独定义</span><br><span class="line">    LogFormat &quot;%h %l %u %t \&quot;%r\&quot; %&gt;s %b \&quot;%&#123;Referer&#125;i\&quot; \&quot;%&#123;User-Agent&#125;i\&quot;&quot; combined</span><br><span class="line">    LogFormat &quot;%h %l %u %t \&quot;%r\&quot; %&gt;s %b&quot; common</span><br><span class="line">    &lt;IfModule logio_module&gt;</span><br><span class="line">      LogFormat &quot;%h %l %u %t \&quot;%r\&quot; %&gt;s %b \&quot;%&#123;Referer&#125;i\&quot; \&quot;%&#123;User-Agent&#125;i\&quot; %I %O&quot; combinedio</span><br><span class="line">    &lt;/IfModule&gt;</span><br><span class="line">    # 下面定义问日志，和使用相应的格式为combined</span><br><span class="line">    CustomLog &quot;logs/access_log&quot; combined</span><br><span class="line">&lt;/IfModule&gt;</span><br><span class="line"></span><br><span class="line">&lt;IfModule alias_module&gt;</span><br><span class="line">		# ScriptAlias和Alias类似都是在此定义，两者的区别是ScriptAlias是作为服务器的运行文件，而不是发送到客户端的文件</span><br><span class="line">    ScriptAlias /cgi-bin/ &quot;/var/www/cgi-bin/&quot;</span><br><span class="line">&lt;/IfModule&gt;</span><br><span class="line"></span><br><span class="line">&lt;Directory &quot;/var/www/cgi-bin&quot;&gt;</span><br><span class="line">    AllowOverride None</span><br><span class="line">    Options None</span><br><span class="line">    Require all granted</span><br><span class="line">&lt;/Directory&gt;</span><br><span class="line"></span><br><span class="line"># mime多媒体英特网邮件扩展，这个模块是用来指定内容元数据，选择HTTP响应的映射模式中的URI或文件的元数据值的内容。如mime-type中的类型有语言，字符集，编码方式</span><br><span class="line">&lt;IfModule mime_module&gt;</span><br><span class="line">    TypesConfig /etc/mime.types</span><br><span class="line">    AddType application/x-compress .Z</span><br><span class="line">    AddType application/x-gzip .gz .tgz</span><br><span class="line">    AddType text/html .shtml</span><br><span class="line">    AddOutputFilter INCLUDES .shtml</span><br><span class="line">&lt;/IfModule&gt;</span><br><span class="line"></span><br><span class="line"># 下面的设置向text/plain和text/html 资源的content-type报头中添加charset部分。</span><br><span class="line">AddDefaultCharset UTF-8</span><br><span class="line">&lt;IfModule mime_magic_module&gt;</span><br><span class="line">    MIMEMagicFile conf/magic</span><br><span class="line">&lt;/IfModule&gt;</span><br><span class="line"></span><br><span class="line"># 控制httpd是否可以使用操作系统内核的sendfile支持来将文件发送到客户端。</span><br><span class="line">EnableSendfile on</span><br><span class="line"></span><br><span class="line">IncludeOptional conf.d/*.conf</span><br></pre></td></tr></table></figure>
+<p>更加具体的配置文件信息可见下面的链接，作者介绍的很详细</p>
+<p><a href="https://blog.csdn.net/number_chc/article/details/38978567?utm_medium=distribute.pc_relevant_t0.none-task-blog-OPENSEARCH-1.channel_param&amp;depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-OPENSEARCH-1.channel_param" target="_blank" rel="external">https://blog.csdn.net/number_chc/article/details/38978567?utm_medium=distribute.pc_relevant_t0.none-task-blog-OPENSEARCH-1.channel_param&amp;depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-OPENSEARCH-1.channel_param</a></p>
+<p><a href="https://blog.csdn.net/fzjw/article/details/87662?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param&amp;depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param" target="_blank" rel="external">https://blog.csdn.net/fzjw/article/details/87662?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param&amp;depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param</a></p>
+<h3 id="https运行模式–MPM"><a href="#https运行模式–MPM" class="headerlink" title="https运行模式–MPM"></a>https运行模式–MPM</h3><p>MPM模块在httpd-2.4中是动态共享模块的，没有编译如主程序当中，httpd-2. 2中是静态编译入主程序当中的。在这些模型中，默认使用第一个prefork模型，第二个模型因为出错不以排查，因此使用较少，在第三个模型当中因为是比较新的功能，只有在httpd-2.4之后的版本才有的功能，所以使用较少，因为在企业使用时稳定才是王道，绝非功能越新越好</p>
+<p>配置文件在：/etc/httpd/conf.modules.d/00-mpm.conf</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"># Select the MPM module which should be used by uncommenting exactly</span><br><span class="line"># one of the following LoadModule lines:</span><br><span class="line"></span><br><span class="line"># prefork MPM: Implements a non-threaded, pre-forking web server</span><br><span class="line"># See: http://httpd.apache.org/docs/2.4/mod/prefork.html</span><br><span class="line">LoadModule mpm_prefork_module modules/mod_mpm_prefork.so				# prefork</span><br><span class="line"></span><br><span class="line"># worker MPM: Multi-Processing Module implementing a hybrid</span><br><span class="line"># multi-threaded multi-process web server</span><br><span class="line"># See: http://httpd.apache.org/docs/2.4/mod/worker.html</span><br><span class="line">#</span><br><span class="line">#LoadModule mpm_worker_module modules/mod_mpm_worker.so					# worker</span><br><span class="line"></span><br><span class="line"># event MPM: A variant of the worker MPM with the goal of consuming</span><br><span class="line"># threads only for connections with active processing</span><br><span class="line"># See: http://httpd.apache.org/docs/2.4/mod/event.html</span><br><span class="line">#</span><br><span class="line">#LoadModule mpm_event_module modules/mod_mpm_event.so						# event</span><br></pre></td></tr></table></figure>
+<p>每种模式的详解：</p>
+<h4 id="prefork"><a href="#prefork" class="headerlink" title="prefork"></a>prefork</h4><p>简介：prefork模式可以算是很古老但是非常稳定的Apache模式。Apache在启动之初，就预先fork一些子进程，然后等待请求进来。之所以这样做，是为了减少频繁创建和销毁进程的开销。每个子进程只有一个线程，在一个时间点内，只能处理一个请求。<br>优点：成熟稳定，兼容所有新老模块。同时，不需要担心线程安全的问题。（我们常用的mod_php，PHP的拓展不需要支持线程安全）<br>缺点：一个进程相对占用更多的系统资源，消耗更多的内存。而且，它并不擅长处理高并发请求，在这种场景下，它会将请求放进队列中，一直等到有可用进程，请求才会被处理。</p>
+<p><strong>工作原理：</strong></p>
+<p>一个单独的控制进程(父进程)负责产生子进程，这些子进程用于监听请求并作出应答。Apache总是试图保持一些备用的 (spare)或是空闲的子进程用于迎接即将到来的请求。这样客户端就无需在得到服务前等候子进程的产生。在Unix系统中，父进程通常以root身份运行以便邦定80端口，而 Apache产生的子进程通常以一个低特权的用户运行。User和Group指令用于配置子进程的低特权用户。运行子进程的用户必须要对他所服务的内容有读取的权限，但是对服务内容之外的其他资源必须拥有尽可能少的权限。<br>这样可以减少频繁创建和销毁进程的开销，每个子进程只有一个线程，在一个时间点内，只能处理一个请求。这是一个成熟稳定，可以兼容新老模块，也不需要担心线程安全问题，但是一个进程相对占用资源，消耗大量内存，不擅长处理高并发的场景。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">     		-----&gt;		派生子进程		-----&gt;		子进程</span><br><span class="line">主进程		-----&gt;		派生子进程		-----&gt;		子进程</span><br><span class="line">		 		-----&gt;		派生子进程		-----&gt;		子进程</span><br></pre></td></tr></table></figure>
+<p><strong>配置说明：</strong></p>
+<p>如何配置在Apache的配置文件httpd.conf的配置方式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;IfModule mpm_prefork_module&gt;</span><br><span class="line">    StartServers             5</span><br><span class="line">    MinSpareServers          5</span><br><span class="line">    MaxSpareServers          10</span><br><span class="line">    MaxRequestWorkers        250</span><br><span class="line">    MaxConnectionsPerChild   1000</span><br><span class="line">&lt;/IfModule&gt;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>StartServers</strong>   服务器启动时建立的子进程数量，默认是5个</li>
+<li><strong>MinSpareServers</strong>    空闲子进程的最小数量，默认5个；如果当前空闲子进程数少于MinSpareServers ，那么Apache将以最大每秒一个的速度产生新的子进程。此参数不要设的太大。</li>
+<li><strong>MaxSpareServers</strong>   空闲子进程的最大数量，默认10；如果当前有超过MaxSpareServers数量的空闲子进程，那么父进程会杀死多余的子进程。次参数也不需要设置太大，如果你将其设置比MinSpareServers 小，Apache会自动将其修改为MinSpareServers +1的数量。</li>
+<li><strong>MaxRequestWorkers</strong>  限定服务器同一时间内客户端最大接入的请求数量，默认是256；任何超过了MaxRequestWorkers限制的请求都要进入等待队列，一旦一个个连接被释放，队列中的请求才将得到服务，如果要增大这个数值，必须先增大ServerLimit。在Apache2.3.1版本之前这参数MaxRequestWorkers被称为MaxClients。</li>
+<li><strong>MaxConnectionsPerChild</strong>   每个子进程在其生命周期内允许最大的请求数量，如果请求总数已经达到这个数值，子进程将会结束，如果设置为0，子进程将永远不会结束。在Apache2.3.9之前称之为MaxRequestsPerChild。</li>
+</ul>
+<h4 id="worker"><a href="#worker" class="headerlink" title="worker"></a>worker</h4><p>简介：worker模式比起上一个，是使用了多进程和多线程的混合模式。它也预先fork了几个子进程（数量比较少），然后每个子进程创建一些线程，同时包括一个监听线程。每个请求过来，会被分配到1个线程来服务。线程比起进程会更轻量，因为线程通常会共享父进程的内存空间，因此，内存的占用会减少一些。在高并发的场景下，因为比起prefork有更多的可用线程，表现会更优秀一些。<br>有些人会觉得奇怪，那么这里为什么不完全使用多线程呢，还要引入多进程？<br>原因主要是需要考虑稳定性，如果一个线程异常挂了，会导致父进程连同其他正常的子线程都挂了（它们都是同一个进程下的）。为了防止这场异常场景出现，就不能全部使用线程，使用多个进程再加多线程，如果某个线程出现异常，受影响的只是Apache的一部分服务，而不是整个服务。</p>
+<p>优点：占据更少的内存，高并发下表现更优秀。</p>
+<p>缺点：必须考虑线程安全的问题，因为多个子线程是共享父进程的内存地址的。如果使用keep-alive的长连接方式，某个线程会一直被占据，也许中间几乎没有请求，需要一直等待到超时才会被释放。如果过多的线程，被这样占据，也会导致在高并发场景下的无服务线程可用。（该问题在prefork模式下，同样会发生）</p>
+<p>注：keep-alive的长连接方式，是为了让下一次的socket通信复用之前创建的连接，从而，减少连接的创建和销毁的系统开销。保持连接，会让某个进程或者线程一直处于等待状态，即使没有数据过来。</p>
+<p><strong>工作原理：</strong></p>
+<p>和prefork模式相比，worker使用了多进程和多线程的混合模式，worker模式也同样会先预派生一些子进程，然后每个子进程创建一些线程，同时包括一个监听线程，每个请求过来会被分配到一个线程来服务。线程比起进程会更轻量，因为线程是通过共享父进程的内存空间，因此，内存的占用会减少一些，在高并发的场景下会比prefork有更多可用的线程，表现会更优秀一些；另外，如果一个线程出现了问题也会导致同一进程下的线程出现问题，如果是多个线程出现问题，也只是影响Apache的一部分，而不是全部。由于用到多进程多线程，需要考虑到线程的安全了，在使用keep-alive长连接的时候，某个线程会一直被占用，即使中间没有请求，需要等待到超时才会被释放（该问题在prefork模式下也存在）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">     		-----&gt;		派生子进程		-----&gt;		线程</span><br><span class="line">主进程		-----&gt;		派生子进程		-----&gt;		线程</span><br><span class="line">		 		-----&gt;		派生子进程		-----&gt;		线程</span><br></pre></td></tr></table></figure>
+<p><strong>配置说明：</strong></p>
+<p>配置在Apache的配置文件httpd.conf的配置方式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;IfModule mpm_worker_module&gt;</span><br><span class="line">    StartServers             3</span><br><span class="line">    ServerLimit              16</span><br><span class="line">    MinSpareThreads          75</span><br><span class="line">    MaxSpareThreads          250</span><br><span class="line">    ThreadsPerChild          25</span><br><span class="line">    MaxRequestWorkers        400</span><br><span class="line">    MaxConnectionsPerChild   1000</span><br><span class="line">&lt;/IfModule&gt;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>StartServers</strong> 服务器启动时建立的子进程数量,在workers模式下默认是3个.</li>
+<li><strong>ServerLimit</strong>系统配置的最大进程数量</li>
+<li><strong>MinSpareThreads</strong>空闲子进程的最小数量，默认75</li>
+<li><strong>MaxSpareThreads</strong> 空闲子进程的最大数量，默认250</li>
+<li><strong>ThreadsPerChild</strong>  每个子进程产生的线程数量，默认是64</li>
+<li><strong>MaxRequestWorkers</strong> /<strong>MaxClients</strong> 限定服务器同一时间内客户端最大接入的请求数量.</li>
+<li><strong>MaxConnectionsPerChild</strong> 每个子进程在其生命周期内允许最大的请求数量，如果请求总数已经达到这个数值，子进程将会结束，如果设置为0，子进程将永远不会结束。在Apache2.3.9之前称之为MaxRequestsPerChild。</li>
+</ul>
+<blockquote>
+<p>这里建议设置为非零，注意原因：<br> 1）能够防止(偶然的)内存泄漏无限进行，从而耗尽内存。<br> 2）给进程一个有限寿命，从而有助于当服务器负载减轻的时候减少活动进程的数量(重生的机会)。</p>
+</blockquote>
+<p>Worker模式下所能同时处理的请求总数是由子进程总数乘以ThreadsPerChild 值决定的，应该大于等于MaxRequestWorkers。如果负载很大，现有的子进程数不能满足时，控制进程会派生新的子进程。默认最大的子进程总数是16，加大时 也需要显式声明ServerLimit（最大值是20000）。需要注意的是，如果显式声明了ServerLimit，那么它乘以 ThreadsPerChild的值必须大于等于MaxRequestWorkers，而且MaxRequestWorkers必须是ThreadsPerChild的整数倍，否则 Apache将会自动调节到一个相应值。</p>
+<h4 id="event"><a href="#event" class="headerlink" title="event"></a>event</h4><p>简介：这个是Apache中最新的模式，在现在版本里的已经是稳定可用的模式。它和worker模式很像，最大的区别在于，它解决了keep-alive场景下，长期被占用的线程的资源浪费问题（某些线程因为被keep-alive，空挂在哪里等待，中间几乎没有请求过来，甚至等到超时）。event MPM中，会有一个专门的线程来管理这些keep-alive类型的线程，当有真实请求过来的时候，将请求传递给服务线程，执行完毕后，又允许它释放。这样增强了高并发场景下的请求处理能力。</p>
+<p>event MPM在遇到某些不兼容的模块时，会失效，将会回退到worker模式，一个工作线程处理一个请求。官方自带的模块，全部是支持event MPM的。</p>
+<p>注意一点，event MPM需要Linux系统（Linux 2.6+）对EPoll的支持，才能启用。</p>
+<p>还有，需要补充的是HTTPS的连接（SSL），它的运行模式仍然是类似worker的方式，线程会被一直占用，知道连接关闭。部分比较老的资料里，说event MPM不支持SSL，那个说法是几年前的说法，现在已经支持了。</p>
+<p><strong>工作原理：</strong></p>
+<p>这是Apache最新的工作模式，它和worker模式很像，不同的是在于它解决了keep-alive长连接的时候占用线程资源被浪费的问题，在event工作模式中，会有一些专门的线程用来管理这些keep-alive类型的线程，当有真实请求过来的时候，将请求传递给服务器的线程，执行完毕后，又允许它释放。这增强了在高并发场景下的请求处理。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">     		-----&gt;		子进程		-----&gt;		多线程		-----&gt;		管理&amp;分配线程		-----&gt;		HTTP请求</span><br><span class="line">主进程		-----&gt;		子进程		-----&gt;		线程</span><br><span class="line">		 		-----&gt;		子进程		-----&gt;		线程</span><br></pre></td></tr></table></figure>
+<p><strong>配置说明：</strong></p>
+<p>配置在Apache的配置文件httpd.conf的配置方式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;IfModule mpm_event_module&gt;</span><br><span class="line">    StartServers             3</span><br><span class="line">    ServerLimit              16</span><br><span class="line">    MinSpareThreads          75</span><br><span class="line">    MaxSpareThreads          250</span><br><span class="line">    ThreadsPerChild          25</span><br><span class="line">    MaxRequestWorkers        400</span><br><span class="line">    MaxConnectionsPerChild   1000</span><br><span class="line">&lt;/IfModule&gt;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>StartServers</strong> 服务器启动时建立的子进程数量,在workers模式下默认是3个.</li>
+<li><strong>ServerLimit</strong>系统配置的最大进程数量</li>
+<li><strong>MinSpareThreads</strong>空闲子进程的最小数量，默认75</li>
+<li><strong>MaxSpareThreads</strong> 空闲子进程的最大数量，默认250</li>
+<li><strong>ThreadsPerChild</strong>  每个子进程产生的线程数量，默认是64</li>
+<li><strong>MaxRequestWorkers</strong> /<strong>MaxClients</strong> 限定服务器同一时间内客户端最大接入的请求数量.</li>
+<li><strong>MaxConnectionsPerChild</strong> 每个子进程在其生命周期内允许最大的请求数量，如果请求总数已经达到这个数值，子进程将会结束，如果设置为0，子进程将永远不会结束。</li>
+</ul>
+<p>ps：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost httpd]# /usr/sbin/httpd</span><br><span class="line">You have new mail in /var/spool/mail/root</span><br><span class="line">[root@localhost httpd]# ps aux | grep httpd</span><br><span class="line">root      5589  0.0  0.6  10292  2820 ?        Ss   22:58   0:00 /usr/sbin/httpd</span><br><span class="line">apache    5590  0.0  0.4  10424  2060 ?        S    22:58   0:00 /usr/sbin/httpd</span><br><span class="line">apache    5591  0.0  0.4  10424  2060 ?        S    22:58   0:00 /usr/sbin/httpd</span><br><span class="line">apache    5592  0.0  0.4  10424  2060 ?        S    22:58   0:00 /usr/sbin/httpd</span><br><span class="line">apache    5593  0.0  0.4  10424  2060 ?        S    22:58   0:00 /usr/sbin/httpd</span><br><span class="line">apache    5594  0.0  0.4  10424  2060 ?        S    22:58   0:00 /usr/sbin/httpd</span><br><span class="line">apache    5595  0.0  0.4  10424  2060 ?        S    22:58   0:00 /usr/sbin/httpd</span><br><span class="line">apache    5596  0.0  0.4  10424  2060 ?        S    22:58   0:00 /usr/sbin/httpd</span><br><span class="line">apache    5597  0.0  0.4  10424  2060 ?        S    22:58   0:00 /usr/sbin/httpd</span><br><span class="line">root      5599  0.0  0.1   3896   664 pts/0    R+   22:59   0:00 grep httpd</span><br><span class="line">启动HTTPD，可以通过/usr/sbin/httpd来启动，或者service httpd start。</span><br><span class="line"></span><br><span class="line">默认，HTTPD的工作模型是perfork。</span><br><span class="line"></span><br><span class="line">通过上面的，可以知道，启动HTTPD后，由于HTTPD的特性【事先创建进程】，会有多个HTTPD的进程，其中会有一个HTTPD的进程的OWER:GROUP都是ROOT。【很显然，这是一个主导进程，用于创建，销毁其他HTTPD进程的 master process】。其他HTTPD进程可以成为工作进程，work process.</span><br><span class="line"></span><br><span class="line">说白了，就是每一个用户请求，由master process负责创建work process来响应。</span><br></pre></td></tr></table></figure>
+<h3 id="httpd虚拟主机的配置"><a href="#httpd虚拟主机的配置" class="headerlink" title="httpd虚拟主机的配置"></a>httpd虚拟主机的配置</h3><p><strong>基于IP地址的虚拟主机</strong></p>
+<p>在同一台服务器上，有多个IP地址，每一个IP地址负责一台虚拟主机的绑定，每个主机的主机名不一样如www.vhost1.com www.vhost2.com，使用较少，因为IP地址较为宝贵，而这种虚拟主机需要大量IP地址。</p>
+<p>配置示例：</p>
+<p>（1） 添加多个供虚拟主机使用的IP地址</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@cnode6_8conf.d]# ip a |grep 192  //此时eth2有一个IP地址</span><br><span class="line">    inet 192.168.66.142/24 scope global eth2</span><br></pre></td></tr></table></figure>
+<p>#使用ip命令添加三个临时IP地址</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@cnode6_8conf.d]# ip addr add 192.168.66.143/24 dev eth2</span><br><span class="line">[root@cnode6_8conf.d]# ip addr add 192.168.66.144/24 dev eth2</span><br><span class="line">[root@cnode6_8conf.d]# ip addr add 192.168.66.145/24 dev eth2</span><br><span class="line">[root@cnode6_8conf.d]# ip a | grep 192  //通过查看多了3个IP地址</span><br><span class="line">    inet 192.168.66.142/24 scope global eth2</span><br><span class="line">    inet 192.168.66.143/24 scope globalsecondary eth2</span><br><span class="line">    inet 192.168.66.144/24 scope globalsecondary eth2</span><br></pre></td></tr></table></figure>
+<p>（2）添加虚拟主机的配置文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[root@cnode6_8conf.d]# pwd</span><br><span class="line">/etc/httpd/conf.d</span><br><span class="line">[root@cnode6_8conf.d]# vim virtual.conf</span><br><span class="line">&lt;VirtualHost 192.168.66.143:80&gt; </span><br><span class="line">    ServerName www.vhost1.com</span><br><span class="line">    DocumentRoot &quot;/testdir/vhost1&quot;</span><br><span class="line">    &lt;Directory&quot;/testdir/vhost1&quot;&gt;</span><br><span class="line">             AllowOverride none</span><br><span class="line">             Allow from all</span><br><span class="line">             Order Allow,deny   </span><br><span class="line">    &lt;/Directory&gt;   </span><br><span class="line">&lt;/VirtualHost&gt;</span><br><span class="line"> </span><br><span class="line">&lt;VirtualHost 192.168.66.144:80&gt;</span><br><span class="line">    ServerName www.vhost2.com</span><br><span class="line">    DocumentRoot &quot;/testdir/vhost2&quot;</span><br><span class="line">    &lt;Directory&quot;/testdir/vhost2&quot;&gt;</span><br><span class="line">             AllowOverride none</span><br><span class="line">             Allow from all</span><br><span class="line">             Order Allow,deny   </span><br><span class="line">    &lt;/Directory&gt;   </span><br><span class="line">&lt;/VirtualHost&gt;</span><br></pre></td></tr></table></figure>
+<p>（3）修改/etc/hosts文件（此处不是必须的，因为这里没有DNS服务器解析域名，只好修改hosts文件以供测试！）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@cnode6_8conf.d]# grep &quot;^192&quot; /etc/hosts</span><br><span class="line">168.66.143  www.vhost1.com</span><br><span class="line">168.66.144  www.vhost2.com</span><br><span class="line">168.66.145 www.vhost3.com</span><br></pre></td></tr></table></figure>
+<p>（4）添加相应的目录和文件重启服务测试，添加的目录和文件都因该是配置文件定义的。这里省略这些步骤，测试结果应该为访问相应的域名，会被解析为相应的IP能访问到响应的网页</p>
+<p><strong>基于域名的虚拟主机</strong></p>
+<p>在同一台服务器上面，仅有一个IP地址，使用不同的主机名访问不同的网页内容，在虚拟主机块定义上面需要使用NameVirtualHost声明监听的IP地址，使用较多。需要注意在httpd-2.4的版本中不需要使用NameVirtualHost关键字指定监听IP地址和端口号，其余部分没有变化</p>
+<p>（1）修改配置文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">root@cnode6_8conf.d]# pwd</span><br><span class="line">/etc/httpd/conf.d</span><br><span class="line">[root@cnode6_8conf.d]# vim virtual.conf</span><br><span class="line">NameVirtualHost 192.168.66.142:80 //如果要监听主机所有IP可以使用通配符 *</span><br><span class="line">&lt;VirtualHost192.168.66.142:80&gt;</span><br><span class="line">    ServerNamewww.vhost1.com</span><br><span class="line">    DocumentRoot &quot;/testdir/vhost1&quot;</span><br><span class="line">    &lt;Directory&quot;/testdir/vhost1&quot;&gt;</span><br><span class="line">             AllowOverride none</span><br><span class="line">             Allow from all</span><br><span class="line">             Order Allow,deny   </span><br><span class="line">    &lt;/Directory&gt;   </span><br><span class="line">&lt;/VirtualHost&gt;</span><br><span class="line"> </span><br><span class="line">&lt;VirtualHost192.168.66.142:80&gt;</span><br><span class="line">    ServerNamewww.vhost2.com</span><br><span class="line">    DocumentRoot &quot;/testdir/vhost2&quot;</span><br><span class="line">    &lt;Directory&quot;/testdir/vhost2&quot;&gt;</span><br><span class="line">          AllowOverride none</span><br><span class="line">          Allow from all</span><br><span class="line">          Order Allow,deny   </span><br><span class="line">    &lt;/Directory&gt;   </span><br><span class="line">&lt;/VirtualHost&gt;</span><br></pre></td></tr></table></figure>
+<p>（2）修改/etc/hosts文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@cnode6_8 conf.d]# grep 192 /etc/hosts</span><br><span class="line">168.66.143 www.vhost1.com</span><br><span class="line">168.66.143 www.vhost2.com</span><br></pre></td></tr></table></figure>
+<p>（3）测试</p>
+<p>测试时访问不同的域名，虽然是被解析为相同的IP地址，但是能访问到不同的主页</p>
+<p><strong>基于不同端口的虚拟主机</strong></p>
+<p>在同一IP，同一主机名下，使用监听不同端口，访问时需要加访问的端口。使用不多，一般用来做内网测试使用</p>
+<p>（1）修改配置文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[root@cnode6_8conf.d]# cat virtual.conf</span><br><span class="line">Listen 8080   //添加监听的端口</span><br><span class="line">&lt;VirtualHost 192.168.66.142:8080&gt;</span><br><span class="line">    ServerName www.vhost1.com</span><br><span class="line">    DocumentRoot &quot;/testdir/vhost1&quot;</span><br><span class="line">    &lt;Directory&quot;/testdir/vhost1&quot;&gt;</span><br><span class="line">          AllowOverride none</span><br><span class="line">          Allow from all</span><br><span class="line">          Order Allow,deny   </span><br><span class="line">    &lt;/Directory&gt;   </span><br><span class="line">&lt;/VirtualHost&gt;</span><br><span class="line"> </span><br><span class="line">&lt;VirtualHost 192.168.66.142:80&gt;</span><br><span class="line">    ServerName www.vhost1.com</span><br><span class="line">    DocumentRoot &quot;/testdir/vhost2&quot;</span><br><span class="line">    &lt;Directory&quot;/testdir/vhost2&quot;&gt;</span><br><span class="line">             AllowOverride none</span><br><span class="line">             Allow from all</span><br><span class="line">             Order Allow,deny   </span><br><span class="line">    &lt;/Directory&gt;   </span><br><span class="line">&lt;/VirtualHost&gt;</span><br></pre></td></tr></table></figure>
+<p>（2）修改/etc/hosts文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@cnode6_8 conf.d]# grep 192 /etc/hosts</span><br><span class="line">168.66.142 www.vhost1.com</span><br></pre></td></tr></table></figure>
+<p>测试要注意默认的端口可以不加，但是非80的端口访问时要手动添加，在访问相同的域名，不同的端口的地址时，同样可以得到不同的网页</p>
+<h3 id="httpd命令使用"><a href="#httpd命令使用" class="headerlink" title="httpd命令使用"></a>httpd命令使用</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">httpd -M 用来列出基于当前配置加载的所有模块 </span><br><span class="line">httpd -l 输出一个静态编译在服务器中的模块的列表。它不会列出使用LoadModule指令动态加载的模块</span><br><span class="line">httpd -S 显示虚拟机的设置</span><br><span class="line">httpd -t 对配置文件执行语法检查</span><br><span class="line">httpd -v 显示httpd的版本</span><br><span class="line">httpd -V 显示httpd的版本和编译参数</span><br><span class="line">httpd -f 在启动中使用的配置文件</span><br><span class="line">httpd -e levle 在服务器启动时，设置LogLevel为level 。它用于在启动时，临时增加出错信息的详细程度，以帮助排错</span><br></pre></td></tr></table></figure>
+<h3 id="mod-wsgi介绍"><a href="#mod-wsgi介绍" class="headerlink" title="mod_wsgi介绍"></a>mod_wsgi介绍</h3><h4 id="apache-mod-wsgi"><a href="#apache-mod-wsgi" class="headerlink" title="apache mod_wsgi"></a>apache mod_wsgi</h4><p>在openstack中，所有提供API接口的服务都是python web server，而其本身性能很弱，目前已经将它们配置到了apache上。且加载了mod_wsgi模块</p>
+<p>Apache HTTP服务器的mod_wsgi扩展模块，实现了Python WSGI标准，可以支持任何兼容Python WSGI标准的Python应用。</p>
+<p>httpd中配置加载了Include conf.modules.d/?.conf和IncludeOptional conf.d/?.conf，其中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Include conf.modules.d/?.conf</span><br><span class="line"></span><br><span class="line">-rw-r--r-- 1 root root 3739 Oct 20  2017 00-base.conf</span><br><span class="line">-rw-r--r-- 1 root root  139 Oct 20  2017 00-dav.conf</span><br><span class="line">-rw-r--r-- 1 root root   41 Oct 20  2017 00-lua.conf</span><br><span class="line">-rw-r--r-- 1 root root  742 Oct 20  2017 00-mpm.conf</span><br><span class="line">-rw-r--r-- 1 root root  957 Oct 20  2017 00-proxy.conf</span><br><span class="line">-rw-r--r-- 1 root root   41 Oct 20  2017 00-ssl.conf</span><br><span class="line">-rw-r--r-- 1 root root   88 Oct 20  2017 00-systemd.conf</span><br><span class="line">-rw-r--r-- 1 root root  451 Oct 20  2017 01-cgi.conf</span><br><span class="line">-rw-r--r-- 1 root root   43 Aug 25  2014 10-wsgi.conf</span><br><span class="line"></span><br><span class="line">这里是加载的一些模块，加载的目录在/usr/lib64/httpd/modules/</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">IncludeOptional conf.d/?.conf</span><br><span class="line"></span><br><span class="line">-rw-r--r-- 1 root root 2926 Dec 25  2017 autoindex.conf</span><br><span class="line">-rw-r--r-- 1 root root  366 Dec 25  2017 README</span><br><span class="line">-rw-r--r-- 1 root root 9439 Aug  4 00:12 ssl.conf</span><br><span class="line">-rw-r--r-- 1 root root 1252 Oct 20  2017 userdir.conf</span><br><span class="line">-rw-r--r-- 1 root root  824 Oct 20  2017 welcome.conf</span><br><span class="line">-r--r--r-- 1 root root  738 Aug  7 14:56 wsgi-gnocchi.conf</span><br></pre></td></tr></table></figure>
+<p>mod_wsgi.go文件放在/usr/lib64/httpd/modules/</p>
+<p><strong>先介绍下mod_wsgi的两种工作模式：</strong></p>
+<p>第一种是嵌入模式，类似于mod_python，直接在apache进程中运行，这样的好处是不需要另外增加进程，但是坏处也很明显，所有内存都和apache共享，如果和mod_python一样造成内存漏洞的话，就会危害整个apache。而且如果apache是用worker mpm，mod_wsgi也就强制进入了线程模式，这样子对于非线程安全的程序来说就没法用了。</p>
+<p>这种模式下需要在apache的vhost中如下设置：</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">WSGIScriptAlias /path /path-to-wsgi</span><br></pre></td></tr></table></figure>
+<p>即可生效，对于小型脚本的话，直接用这种模式即可。</p>
+<p>第二种是后台模式，类似于FastCGI的后台，mod_wsgi会借apache的外壳，另外启动一个或多个进程，然后通过socket通信和apache的进程联系。</p>
+<p>这种方式只要使用以下配置即可：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#启动WSGI后台，site1是后台名字</span><br><span class="line">WSGIDaemonProcess site1 processes=1 threads=15 display-name=%&#123;GROUP&#125;</span><br><span class="line"></span><br><span class="line">#分配当前上下文应该使用哪个WSGI后台，可以放在Location里面指定</span><br><span class="line">WSGIProcessGroup site1</span><br><span class="line"></span><br><span class="line">#根据当前上下文的ProcessGroup分配到对应的后台</span><br><span class="line">WSGIScriptAlias /path /path-to-wsgi</span><br></pre></td></tr></table></figure>
+<p>在这种模式下，我们可以通过调节processes和threads的值来设置三种MPM的模式：prefork’, ‘worker’, ‘winnt’。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">winnt模式</span><br><span class="line">WSGIDaemonProcess example threads=25</span><br><span class="line"></span><br><span class="line">wsgi.multithread	True</span><br><span class="line">wsgi.multiprocess	False</span><br><span class="line"></span><br><span class="line">此时processes=1，但是multiprocess为false</span><br><span class="line">如果显式地指出processes为1那么：</span><br><span class="line">WSGIDaemonProcess example processes=1 threads=25</span><br><span class="line"></span><br><span class="line">wsgi.multithread	True</span><br><span class="line">wsgi.multiprocess	True</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">worker模式</span><br><span class="line">WSGIDaemonProcess example processes=2 threads=25</span><br><span class="line">wsgi.multithread	True</span><br><span class="line">wsgi.multiprocess	True</span><br><span class="line"></span><br><span class="line">preforker模式</span><br><span class="line">WSGIDaemonProcess example processes=5 threads=1</span><br><span class="line">wsgi.multithread	False</span><br><span class="line">wsgi.multiprocess	True</span><br></pre></td></tr></table></figure>
+<p>后台模式由于是与apache进程分离了，内存独立，而且可以独立重启，不会影响apache的进程，如果你有多个项目（django），可以选择建立多个后台或者共同使用一个后台。</p>
+<p>比如在同一个VirtualHost里面，不同的path对应不同的django项目，可以同时使用一个Daemon：</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">WSGIDaemonProcess <span class="keyword">default</span> processes=<span class="number">1</span> threads=<span class="number">1</span> display-name=%&#123;GROUP&#125;</span><br><span class="line"></span><br><span class="line">WSGIProcessGroup <span class="keyword">default</span></span><br><span class="line"></span><br><span class="line">WSGIScriptAlias /project1 “/home/website/project1.wsgi”</span><br><span class="line"></span><br><span class="line">WSGIScriptAlias /project2 “/home/website/project2.wsgi”</span><br></pre></td></tr></table></figure>
+<p>这样子两个django都使用同一个WSGI后台。</p>
+<p>也可以把不同的项目分开，分开使用不同的后台，这样开销比较大，但就不会耦合在一起了。</p>
+<p>display-name是后台进程的名字，这样方便重启对应的进程，而不需要全部杀掉。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">WSGIDaemonProcess site1 processes=1 threads=1 display-name=%&#123;GROUP&#125;</span><br><span class="line"></span><br><span class="line">WSGIDaemonProcess site2 processes=1 threads=1 display-name=%&#123;GROUP&#125;</span><br><span class="line"></span><br><span class="line">&lt;Location “/project1″&gt;</span><br><span class="line"></span><br><span class="line">WSGIProcessGroup site1</span><br><span class="line"></span><br><span class="line">&lt;/Location&gt;</span><br><span class="line"></span><br><span class="line">WSGIScriptAlias /project1 “/home/website/project1.wsgi”</span><br><span class="line"></span><br><span class="line">&lt;Location “/project1″&gt;</span><br><span class="line"></span><br><span class="line">WSGIProcessGroup site2</span><br><span class="line"></span><br><span class="line">&lt;/Location&gt;</span><br><span class="line"></span><br><span class="line">WSGIScriptAlias /project2 “/home/website/project2.wsgi”</span><br></pre></td></tr></table></figure>
+<p>对于django 1.0以下的版本，由于官方认定不是线程安全的，所以建议使用多进程单线程模式</p>
+<p>processes=n threads=1</p>
+<p>对于django 1.0以后，就可以放心的使用多进程多线程模式：</p>
+<p>processes=2 threads=64</p>
+<p>这样子性能会更好。</p>
+<p>ps：</p>
+<p>这里介绍了关于mod_wsgi运行模式的用法：<a href="https://code.google.com/archive/p/modwsgi/wikis/ProcessesAndThreading.wiki" target="_blank" rel="external">modwsgi-ProcessesAndThreading.wiki</a></p>
+<p>大概总结下，运行模式分为三类：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br></pre></td><td class="code"><pre><span class="line">1. prefork：</span><br><span class="line">  该MPM是最常用的。它是Apache 1.3中唯一可用的操作模式，并且在更高版本的Apache中仍然是UNIX系统上的默认模式。在此配置中，主Apache进程将在启动时创建多个子进程。当父进程接收到一个请求时，它将由哪个子进程准备就绪进行处理。</span><br><span class="line"></span><br><span class="line">  每个子进程一次只能处理一个请求。如果另一个请求同时到达，它将由下一个可用的子进程处理。当检测到可用进程数已用完时，将根据需要创建其他子进程。如果为可以创建的子进程数指定了限制，并且达到了该限制，并且有足够的请求到达以填充侦听器套接字队列，则客户端可能会收到由于无法建立而导致的错误与Web服务器的连接。</span><br><span class="line"></span><br><span class="line">  在由于到达的当前请求数量达到峰值而必须创建其他子进程的情况下，并且随后请求数量减少的情况下，多余的子进程可能会被关闭并被杀死。子进程在处理了一定数量的请求后也可能被关闭并被杀死。</span><br><span class="line"></span><br><span class="line">  尽管不使用线程来满足各个请求，但这并不妨碍应用程序创建单独的线程来执行某些特定任务。</span><br><span class="line"></span><br><span class="line">  对于使用多个进程的典型“ prefork”配置，指示如何使用进程和线程的WSGI环境键/值对如下所示。</span><br><span class="line"></span><br><span class="line">  | wsgi.multithread | False | |：------------------- |：---- | | wsgi.multiprocess |真|</span><br><span class="line"></span><br><span class="line">  由于正在使用多个进程，因此将无法使用WSGI中间件组件（如所述的基于交互式浏览器的调试器）。如果在开发和测试WSGI应用程序期间需要使用这样的调试器，那么唯一存在的选择是限制所使用的进程数。这可以使用Apache配置来实现：</span><br><span class="line"></span><br><span class="line">  StartServers 1 ServerLimit 1</span><br><span class="line"></span><br><span class="line">  使用此配置，将仅启动一个进程，而不会创建其他进程。指示如何使用进程和线程的WSGI环境键/值对将用于此配置，如下所示。</span><br><span class="line"></span><br><span class="line">  | wsgi.multithread | False | |：------------------- |：---- | | wsgi.multiprocess | False |</span><br><span class="line"></span><br><span class="line">  实际上，此配置的结果是通过单个过程序列化所有请求。这将允许使用基于浏览器的交互式调试器，但可能会使使用AJAX技术的更复杂的WSGI应用程序无法正常工作。在网页启动一系列AJAX请求并期望后续请求能够完成而初始请求的响应仍未决的情况下，可能会发生这种情况。换句话说，在请求重叠的地方可能会出现问题，因为在初始请求完成之前，后续请求将无法执行。</span><br><span class="line">  </span><br><span class="line">2. worker：</span><br><span class="line">  &apos;worker&apos;MPM与&apos;prefork&apos;模式相似，除了在每个子进程中将存在许多worker线程。代替只能由下一个可用的空闲子进程处理请求，并且仅由子进程执行该请求的处理，该请求可以由子进程中的工作线程处理，该线程已经具有其他工作线程同时处理其他请求。</span><br><span class="line"></span><br><span class="line">  一个子进程中的多个工作线程可以同时执行WSGI应用程序。这意味着多个工作线程可能希望同时访问公共共享数据。因此，必须以一种允许以线程安全的方式进行访问和修改的方式来保护此类公共共享数据。通常，这将需要使用某种形式的同步机制，以确保一次仅一个线程访问和/或修改公共共享数据。</span><br><span class="line"></span><br><span class="line">  如果新请求到达时子进程中的所有工作线程都忙，则该请求将由另一个子进程中的空闲工作线程处理。如果需要，Apache仍可以根据需要创建新的子进程。Apache可能仍会关闭并杀死多余的子进程或已处理了多个请求数量的子进程。</span><br><span class="line"></span><br><span class="line">  总体而言，使用“工作者” MPM将导致需要创建的子流程更少，但是单个子流程的资源使用量将会更大。在现代计算机系统上，通常使用“工作者” MPM作为首选的MPM，并且如果可能的话，应该优先使用“工作者” MPM。</span><br><span class="line"></span><br><span class="line">  尽管对Python中的全局解释器锁（GIL）的争用会导致纯Python程序出现问题，但是在Apache中使用Python时，这通常不是一个大问题。这是因为所有用于接受请求并将URL映射到WSGI应用程序的基础结构以及对静态文件的请求处理都是由Apache用C代码执行的。在执行此代码时，线程将不会保留Python GIL，因此在系统具有多个CPU或具有多个核心的CPU的情况下，可以实现更高水平的重叠执行。</span><br><span class="line"></span><br><span class="line">  Apache使用多个进程来处理请求，而不仅仅是一个进程，这一事实进一步增强了即使在使用多线程时也可以充分利用处理器以外的功能的能力。因此，即使在特定进程中存在GIL争用时，它也不会阻止其他进程运行，因为GIL仅在进程本地，并且不会跨进程扩展。</span><br><span class="line"></span><br><span class="line">  对于使用多个进程和多个线程的典型“工作者”配置，指示如何使用进程和线程的WSGI环境键/值对如下所示。</span><br><span class="line"></span><br><span class="line">  | wsgi.multithread | True | |：--------------- ||：--- | | wsgi.multiprocess |真|</span><br><span class="line"></span><br><span class="line">  与“ prefork” MPM相似，如果需要，可以使用以下配置将进程数限制为一个：</span><br><span class="line"></span><br><span class="line">  StartServers 1 ServerLimit 1</span><br><span class="line"></span><br><span class="line">  使用此配置，将仅启动一个进程，而不会再创建任何其他进程，但是该进程仍将使用多个线程。</span><br><span class="line"></span><br><span class="line">  指示如何使用进程和线程的WSGI环境键/值对将用于此配置，如下所示。</span><br><span class="line"></span><br><span class="line">  | wsgi.multithread | True | |：--------------- ||：--- | | wsgi.multiprocess | False |</span><br><span class="line"></span><br><span class="line">  因为使用了多个线程，所以基于AJAX的网页生成的重叠请求不会有问题。</span><br><span class="line"></span><br><span class="line">3. winnt：</span><br><span class="line">  在Windows平台上，“ winnt” MPM是唯一可用的选项。使用此MPM，子进程中的多个工作线程可用于处理所有请求。“ winnt” MPM与“ worker”模式不同，但是只有一个子进程。除了要停止或重新启动整个Apache之外，绝不会创建其他子进程，也不会立即关闭该子进程。因为只有一个子进程，所以使用的最大线程数要大得多。</span><br><span class="line"></span><br><span class="line">  指示如何使用进程和线程的WSGI环境键/值对将用于此配置，如下所示。</span><br><span class="line"></span><br><span class="line">  | wsgi.multithread | True | |：--------------- ||：--- | | wsgi.multiprocess | False |</span><br><span class="line">  </span><br><span class="line">4. The mod_wsgi Daemon Processes</span><br><span class="line">  当使用mod_wsgi的“守护程序”模式时，可以单独配置每个进程组，使其以类似于Apache的“ prefork”，“ worker”或“ winnt” MPM的方式运行。这是通过使用WSGIDaemonProcess指令的“进程”和“线程”选项控制每个进程中的进程和线程数来实现的。</span><br><span class="line"></span><br><span class="line">  为了模拟与“ winnt” MPM相同的进程/线程模型，即具有多个线程的单个进程，将使用以下配置：</span><br><span class="line"></span><br><span class="line">  WSGIDaemonProcess example threads=25</span><br><span class="line"></span><br><span class="line">  指示如何使用进程和线程的WSGI环境键/值对将用于此配置，如下所示。</span><br><span class="line"></span><br><span class="line">  | wsgi.multithread | True | |：--------------- ||：--- | | wsgi.multiprocess | False |</span><br><span class="line"></span><br><span class="line">  请注意，通过不指定&apos;processes&apos;选项，只能在流程组中创建一个流程。尽管提供“ processes = 1”作为选项也将导致创建单个进程，但这具有稍微不同的含义，因此您仅应在必要时这样做。</span><br><span class="line"></span><br><span class="line">  未指定&apos;processes&apos;选项和定义&apos;processes = 1&apos;之间的区别是，在定义&apos;processes&apos;选项时，名为&apos;wsgi.multiprocess&apos;的WSGI环境属性将设置为True，而在以下位置不提供该选项：全部将导致该属性设置为False。这种区别是为了允许使用某种形式的映射机制在多个进程组之间分配请求，因此实际上它仍然是一个多进程应用程序。</span><br><span class="line"></span><br><span class="line">  换句话说，如果您使用配置：</span><br><span class="line"></span><br><span class="line">  WSGIDaemonProcess example processes=1 threads=25</span><br><span class="line"></span><br><span class="line">  指示如何使用进程和线程的WSGI环境键/值对将改为：</span><br><span class="line"></span><br><span class="line">  | wsgi.multithread | True | |：--------------- ||：--- | | wsgi.multiprocess |真|</span><br><span class="line"></span><br><span class="line">  如果您需要确保&apos;wsgi.multiprocess&apos;为False，以使交互式调试器不会抱怨配置不兼容，只需不指定&apos;processes&apos;选项，并允许应用单个守护进程的默认行为即可。</span><br><span class="line"></span><br><span class="line">  为了模拟与“工人” MPM相同的进程/线程模型，即具有多个线程的多个进程，将使用以下配置：</span><br><span class="line"></span><br><span class="line">  WSGIDaemonProcess example processes=2 threads=25</span><br><span class="line"></span><br><span class="line">  指示如何使用进程和线程的WSGI环境键/值对将用于此配置，如下所示。</span><br><span class="line"></span><br><span class="line">  | wsgi.multithread | True | |：--------------- ||：--- | | wsgi.multiprocess |真|</span><br><span class="line"></span><br><span class="line">  为了模拟与“ prefork” MPM相同的进程/线程模型，即，多个进程中每个进程仅运行一个线程，将使用以下配置：</span><br><span class="line"></span><br><span class="line">  WSGIDaemonProcess example processes=5 threads=1</span><br><span class="line"></span><br><span class="line">  指示如何使用进程和线程的WSGI环境键/值对将用于此配置，如下所示。</span><br><span class="line"></span><br><span class="line">  | wsgi.multithread | False | |：------------------- |：---- | | wsgi.multiprocess |真|</span><br><span class="line"></span><br><span class="line">  请注意，在使用mod_wsgi守护进程时，这些进程仅用于执行基于Python的WSGI应用程序。这些过程绝不用于提供静态文件或托管以其他语言实现的应用程序。</span><br><span class="line"></span><br><span class="line">  与使用mod_wsgi的“嵌入式”模式的普通Apache子进程不同，进程组中守护进程数量的配置是固定的。也就是说，当服务器承受额外的负载时，创建的守护进程不会超过定义的进程。因此，您应该始终提前计划，并确保定义的进程和线程数足以应付预期的负载</span><br></pre></td></tr></table></figure>
+<p><strong>apache-wsgi-python如何工作</strong></p>
+<p>客户端也就是浏览器端，当用户在浏览器的地址栏输入一个网站并且回车的时候，就会产生一个http的request请求到对应的服务器，服务器端的web服务器程序-这里就是我们的apache接受到,请求后，就查看所请求的这个url对应的虚拟机的对应的目录或者文件。这样说，可能有点晕，给个实际的例子吧：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&lt;VirtualHost 192.168.77.122:80&gt;  </span><br><span class="line">   ServerAdmin admin@system  </span><br><span class="line">   DocumentRoot "C:/Program Files/Apache Software Foundation/Apache2.2/htdocs/test"  </span><br><span class="line">   ServerName myserver </span><br><span class="line">   WSGIScriptAlias / "C:/Program Files/Apache Software Foundation/Apache2.2/htdocs/test/mytest.py" </span><br><span class="line">   AddType text/html .py  </span><br><span class="line">   ErrorLog logs/dummy-host.example.com-error_log  </span><br><span class="line">   CustomLog logs/dummy-host.example.com-access_log common</span><br><span class="line">   &lt;Directory /&gt;</span><br><span class="line">     Options FollowSymLinks ExecCGI</span><br><span class="line">     AllowOverride None</span><br><span class="line">     Order deny,allow</span><br><span class="line">     Allow from all</span><br><span class="line">   &lt;/Directory&gt;</span><br><span class="line">&lt;/VirtualHost&gt;</span><br></pre></td></tr></table></figure>
+<p>apache接受到这个请求后，发现请求对应的是目录<strong>C:/Program Files/Apache Software Foundation/Apache2.2/htdocs/test</strong>，虚拟机是myserver，这个虚拟机中有个很重要的配置是就是<strong>WSGIScriptAlias</strong></p>
+<p>这个东西非常关键，因为如果没有这个那么apache就不知道如何解析这个请求了。这个关键字告诉apache，该虚拟对应的目录下面的程序有wsgi对应的模块去执行，那么apache又怎么知道什么是wsgi模块，这个模块又在什么地方呢？这个需要在httpd.conf中来告诉apache，上面已经介绍过，加载mod_wsgi.go</p>
+<p>即<strong>LoadModule wsgi_module modules/mod_wsgi.so</strong>，在httpd.conf中加入这个配置后，apache就知道wsgi是哪个模块，在什么位置了。注意<strong>LoadModule</strong>和<strong>wsgi_module</strong>是apache自己的关键字，它自己知道wsgi_module就是wsgi对应模块定义关键字。</p>
+<p>你可以自己写一个动态库so，然后通过上面的方式-LoadModule加载进apache，但是对不起，apache并不认识你的模块，不能让你的这个so工作起来。好了我们言归正传吧，回到我们的主题。</p>
+<p>所以当apache收到这个请求后，就知道使用mod_wsgi.so这个动态库的函数去处理请求，上面因为有这句：</p>
+<p><strong>WSGIScriptAlias / “C:/Program Files/Apache Software Foundation/Apache2.2/htdocs/test/mytest.py”</strong></p>
+<p>这样apache就知道当收到访问当前服务器的根目录时，就使用mytest.py来处理请求。谁来处理mytest.py，就是python解释器，所以mod_wsgi.so中就要创建进程-python解释器进程来解释执行mytest.py。</p>
+<p>执行mytest.py就是为了生成这个请求的应答的内容，接着返回mod_wsgi，从而通知apache，处理完成并把结果-比如是一个html的流，apache再把这个结果发送给我们的客户端-浏览器，浏览器最后显示它。整个过程结束。</p>
+<p>这里加一句题外话，上面是指定只要访问服务器就使用mytest.py来处理请求，这样的话，你请求别的页面，比如<a href="http://192.168.77.122/test.py那么服务器还是会使用mytest.py来处理请求，这不是我们希望的，我们希望用户访问不同的页面会有不同结果。怎么办呢?我们只要一个小小的改变就可以，就是将上面的有wsgiscriptAlias那就修改为下面的这句：" target="_blank" rel="external">http://192.168.77.122/test.py那么服务器还是会使用mytest.py来处理请求，这不是我们希望的，我们希望用户访问不同的页面会有不同结果。怎么办呢?我们只要一个小小的改变就可以，就是将上面的有wsgiscriptAlias那就修改为下面的这句：</a></p>
+<p><strong>WSGIScriptAlias / “C:/Program Files/Apache Software Foundation/Apache2.2/htdocs/test”</strong></p>
+<p>这样就达到我们的效果了。</p>
+<h4 id="nginx-mod-wsgi"><a href="#nginx-mod-wsgi" class="headerlink" title="nginx mod_wsgi"></a>nginx mod_wsgi</h4><p>其实nginx也可以使用mod_wsgi的模块，但是由于nginx在底层是一个事件驱动系统，因此它具有不利于阻塞应用程序的行为特征，例如基于WSGI的应用程序。更糟糕的情况是，使用多进程nginx配置，您可以看到用户请求被阻止，即使某些nginx工作进程可能处于空闲状态。Apache/mod_wsgi没有这个问题，因为Apache进程只有在有资源实际处理请求时才会接受请求。因此，Apache/mod_wsgi将提供更可预测和可靠的行为。</p>
+<h2 id="Nginx、WSGI、-uWSGI、-uwsgi-简介"><a href="#Nginx、WSGI、-uWSGI、-uwsgi-简介" class="headerlink" title="Nginx、WSGI、 uWSGI、 uwsgi 简介"></a>Nginx、WSGI、 uWSGI、 uwsgi 简介</h2><p>当我们部署完一个应用程序，浏览网页时具体的过程是怎样的呢？首先我们得有一个 Web 服务器来处理 HTTP 协议的内容，Web 服务器获得客户端的请求，交给应用程序，应用程序处理完，返回给 Web 服务器，这时 Web 服务器再返回给客户端。Web 服务器与应用程序之间显然要进行交互，这时就出现了很多 Web 服务器与应用程序之间交互的规范，最早出现的是 CGI，后来又出现了改进 CGI 性能的FasgCGI，Java 专用的 Servlet 规范，Python 专用的 WSGI 规范等等。有了统一标准，程序的可移植性就大大提高了。这里我们只介绍 WSGI。</p>
+<p>WSGI 全称是 Web Server Gateway Interface，也就是 Web 服务器网关接口，它是 Python 语言定义出来的 Web 服务器和 Web 应用程序之间的简单而通用的接口，基于现存的 CGI 标准设计，后来在很多其他语言中也出现了类似的接口。 总的来说，WSGI 可以分为服务器和应用程序两个部分，实际上可以将 WSGI 理解为服务器与应用程序之间的一座桥，桥的一边是服务器，另一边是应用程序。</p>
+<p>按照 web 组件分类，WSGI 内部可以分为三类，web 应用程序，web 服务器，web 中间件。应用程序端的部分通过Python 语言的各种 Web 框架实现，比如 Flask，Django这些，有了框架，开发者就不需要处理 WSGI，框架会帮忙解决这些，开发者只需处理 HTTP 请求和响应，web 服务器的部分就要复杂一点，可以通过 uWSGI 实现，也可以用最常见的 Web 服务器，比如 Apache、Nginx，但这些 Web 服务器没有内置 WSGI 的实现，是通过扩展完成的。如 Apache，通过扩展模块 mod_wsgi 来支持WSGI，Nginx可以通过代理的方式，将请求封装好，交给应用服务器，比如 uWSGI。uWSGI 可以完成 WSGI 的服务端，进程管理以及对应用的调用。WSGI 中间件的部分可以这样理解：我们把 WSGI 看做桥，这个桥有两个桥墩，一个是应用程序端，另一个是服务器端，那么桥面就是 WSGI 中间件，中间件同时具备服务器、应用程序端两个角色，当然也需要同时遵守 WSGI 服务器和 WSGI 应用程序两边的限制和需要。更详细的内容可以看<a href="https://www.python.org/dev/peps/pep-3333/#middleware-components-that-play-both-sides" target="_blank" rel="external">PEP-333 中间件的描述</a></p>
+<p>Flask 依赖的 Werkzeug 就是一个 WSGI 工具包，官方文档的定义是 Werkzeug 是为 Python 设计的 HTTP和 WSGI 实用程序库。我们需要注意的是，Flask 自带的 Werkzeug 是用来开发的，并不能用于生产环境，Flask 是 Web 框架，而 Werkzeug 不是 Web框架，不是 Web 服务器，它只是一个 WSGI 工具包，它在 Flask 的作用是作为 Web 框架的底层库，它方便了我们的开发。</p>
+<p>我们将 uwsgi 和 uWSGI 放在一起讲解。uWSGI 是一个 Web 服务器程序，WSGI，上面已经谈到，是一种协议，uwsgi 也是一种协议，uWSGI 实现了 uwsgi、WSGI、http 等协议。 uwsgi 的介绍可以看<a href="http://uwsgi-docs.readthedocs.io/en/latest/Protocol.html" target="_blank" rel="external">这里</a>，uwsgi 是 uWSGI 使用的一个自有的协议，它用4个字节来定义传输数据类型描述。尽管都是协议，uwsgi 和 WSGI 并没有联系，我们需要区分这两个词。</p>
+<h3 id="Nginx-简介"><a href="#Nginx-简介" class="headerlink" title="Nginx 简介"></a>Nginx 简介</h3><p>Nginx 是高效的 Web 服务器和反向代理服务器，可以用作负载均衡（当有 n 个用户访问服务器时，可以实现分流，分担服务器的压力），与 Apache 相比，Nginx 支持高并发，可以支持百万级的 TCP 连接，十万级别的并发连接，部署简单，内存消耗少，成本低，但 Nginx 的模块没有 Apache 丰富。Nginx 支持 uWSGI 的 uwsgi 协议，因此我们可以将 Nginx 与 uWSGI 结合起来，Nginx 通过 <code>uwsgi_pass</code> 将动态内容交给 uWSGI 处理。</p>
+<h3 id="Nginx-和-uWSGI-的关系"><a href="#Nginx-和-uWSGI-的关系" class="headerlink" title="Nginx 和 uWSGI 的关系"></a>Nginx 和 uWSGI 的关系</h3><p>从上面的讲解中，我们知道，uWSGI 可以起到 Web 服务器的作用，那么为什么有了 uWSGI 还需要 Nginx 呢？</p>
+<p>最普遍的说法是 Nginx 对于处理静态文件更有优势，性能更好。其实如果是小网站，没有静态文件需要处理，只用 uWSGI 也是可以的，但加上 Nginx 这一层，优势可以很具体：</p>
+<ol>
+<li>对于运维来说比较方便，如果服务器被某个 IP 攻击，在 Nginx 配置文件黑名单中添加这个 IP 即可，如果只用 uWSGI，那么就需要在代码中修改了。另一方面，Nginx 是身经百战的 Web 服务器了，在表现上 uWSGI 显得更专业，比如说 uWSGI 在早期版本里是不支持 https 的，可以说 Nginx 更安全。</li>
+<li>Nginx 的特点是能够做负载均衡和 HTTP 缓存，如果不止一台服务器，Nginx 基本就是必选项了，通过 Nginx，将资源可以分配给不同的服务器节点，只有一台服务器，也能很好地提高性能，因为 Nginx 可以通过 headers 的Expires or E-Tag，gzip 压缩等方式很好地处理静态资源，毕竟是 C 语言写的，调用的是 native 的函数，针对 I/O做了优化，对于动态资源来说，Nginx 还可以实现缓存的功能，配合 CDN 优化（这是 uWSGI 做不到的）。Nginx 支持epoll/kqueue 等高效网络库，能够很好地处理高并发短连接请求，性能比 uWSGI 不知道高到哪里去了。</li>
+<li>如果服务器主机上运行了PHP，Python 等语言写的多个应用，都需要监听80端口，这时候 Nginx 就是必选项了。因为我们需要一个转发的服务。</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">WSGI：全称是Web Server Gateway Interface，WSGI不是服务器，python模块，框架，API或者任何软件，只是一种规范，描述web server如何与web application通信的规范。要实现WSGI协议，必须同时实现web server和web application，当前运行在WSGI协议之上的web框架有Bottle, Flask, Django。</span><br><span class="line">uwsgi：与WSGI一样是一种通信协议，是uWSGI服务器的独占协议，用于定义传输信息的类型(type of information)</span><br><span class="line">uWSGI：是一个web服务器，实现了WSGI协议、uwsgi协议、http协议等。</span><br><span class="line">WSGI协议主要包括server和application两部分：</span><br><span class="line">WSGI server负责从客户端接收请求，将request转发给application，将application返回的response返回给客户端；</span><br><span class="line">WSGI application接收由server转发的request，处理请求，并将处理结果返回给server。application中可以包括多个栈式的中间件(middlewares)，这些中间件需要同时实现server与application，因此可以在WSGI服务器与WSGI应用之间起调节作用：对服务器来说，中间件扮演应用程序，对应用程序来说，中间件扮演服务器。</span><br><span class="line">WSGI协议其实是定义了一种server与application解耦的规范，即可以有多个实现WSGI server的服务器，也可以有多个实现WSGI application的框架，那么就可以选择任意的server和application组合实现自己的web应用。例如uWSGI和Gunicorn都是实现了WSGI server协议的服务器，Django，Flask是实现了WSGI application协议的web框架，可以根据项目实际情况搭配使用</span><br></pre></td></tr></table></figure>
+<h3 id="Nginx-与-Apache-的异同"><a href="#Nginx-与-Apache-的异同" class="headerlink" title="Nginx 与 Apache 的异同"></a>Nginx 与 Apache 的异同</h3><p>Nginx和Apache一样，都是一个HTTP服务器软件，功能实现上都采用模块化结构设计，都支持通用的语言接口，如PHP、Perl、Python等，同时还支持正、反向代理，虚拟主机，URL重写，压缩传输，SSL加密传输等。它们之间最大的差别是Apache处理速度很慢，且占用很多内存资源，而Nginx却恰恰相反；在功能实现上，Apache的所有模块都支持动、静态编译，而Nginx模块都是静态编译的，同时，Apache对Fcgi支持不好，而Nginx对Fcgi的支持非常的好；最重要的是，在处理连接方式上，Nginx支持epoll，而Apache却不支持；在大小上，Nginx安装包仅仅有几百K，和Nginx比起来Apache绝对是庞然大物。在了解了Nginx和Apache之间的异同点后基本知道了Nginx作为HTTP服务器的优势所在。</p>
+<h3 id="Nginx的优势"><a href="#Nginx的优势" class="headerlink" title="Nginx的优势"></a>Nginx的优势</h3><p>通过上面的简单介绍，Nginx作为HTTP服务器的优势是显而易见的，它有很多其它Web服务器无法比拟的性能和优势：<br>作为Web服务器，nginx处理静态文件、索引文件以及自动索引效率非常高。<br>作为代理服务器，Nginx可以实现无缓存的反向代理加速，提高网站运行速度。<br>作为负载均衡服务器，Nginx既可以在内部直接支持Rails和PHP，也可以支持HTTP代理服务器，对外进行服务。同时支持简单的容错和利用算法进行负载均衡。<br>在性能方面，Nginx是专门为性能优化而开发的，在实现上非常注重效率。它采用内核Poll模型，可以支持更多的并发连接，最大可以支持对50 000个并发连接数的响应，而且占用很低的内存资源。<br>在稳定性方面，Nginx采取了分阶段资源分配技术，使得对CPU与内存的占用率非常低。Nginx官方表示Nginx保持10 000个没有活动的连接，这些连接只占2.5M内存，因此，类似DOS这样的攻击对Nginx来说基本上是没有任何作用的。<br>在高可用性方面，Nginx支持热部署，启动速度特别迅速，因此可以在不间断服务的情况下，对软件版本或者配置进行升级，即使运行数月也无需重新启动，几乎可以做到7×24小时的不间断运行。</p>
+<h3 id="Nginx的模块与工作原理"><a href="#Nginx的模块与工作原理" class="headerlink" title="Nginx的模块与工作原理"></a>Nginx的模块与工作原理</h3><p>Nginx由内核和模块组成，其中，内核的设计非常微小和简洁，完成的工作也非常简单，仅仅通过查找配置文件将客户端请求映射到一个location block（location是Nginx配置中的一个指令，用于URL匹配），而在这个location中所配置的每个指令将会启动不同的模块去完成相应的工作。<br>Nginx的模块从结构上分为核心模块、基础模块和第三方模块， HTTP模块、EVENT模块和MAIL模块等属于核心模块，HTTP Access模块、HTTP FastCGI模块、HTTP Proxy模块和HTTP Rewrite模块属于基本模块，而HTTP Upstream Request Hash模块、Notice模块和HTTP Access Key模块属于第三方模块，用户根据自己的需要开发的模块都属于第三方模块。正是有了这么多模块的支撑，Nginx的功能才会如此强大。<br>Nginx的模块从功能上分为三类，分别是：<br>(1) Handlers（处理器模块）。此类模块直接处理请求，并进行输出内容和修改headers信息等操作。handlers处理器模块一般只能有一个。<br>(2) Filters （过滤器模块）。此类模块主要对其他处理器模块输出的内容进行修改操作，最后由Nginx输出。<br>(3) Proxies （代理类模块）。就是Nginx的HTTP Upstream之类的模块，这些模块主要与后端一些服务比如fastcgi等操作交互，实现服务代理和负载均衡等功能。<br>下图展示了Nginx的模块下一次常规的HTTP请求和响应的过程。</p>
+<p><img src="/images/python-apache-1.png" alt="image-20200809171115243"></p>
+<p>在工作方式上，Nginx分为单工作进程和多工作进程两种模式。在单工作进程模式下，除主进程外，还有一个工作进程，工作进程是单线程的；在多工作进程模式下，每个工作进程包含多个线程。Nginx默认为单工作进程模式。<br>Nginx的模块直接被编译进Nginx，因此属于静态编译方式。启动Nginx后，Nginx的模块被自动加载，不像在Apache一样，首先将模块编译为一个so文件，然后在配置文件中指定是否进行加载。在解析配置文件时，Nginx的每个模块都有可能去处理某个请求，但是同一个处理请求只能由一个模块来完成。</p>
+<h3 id="Nginx-配置文件结构"><a href="#Nginx-配置文件结构" class="headerlink" title="Nginx 配置文件结构"></a>Nginx 配置文件结构</h3><p>Nginx的配置文件是一个纯文本文件，它一般位于Nginx安装目录的conf目录下，整个配置文件是以block的形式组织的。每个block一般以一个大括号“{}”来表示，block可以分为几个层次，整个配置文件中Main指令位于最高层，在Main层下面可以有Events、HTTP等层级，而在HTTP层中又包含有Server层，即server block，server block中又可分为location层，并且一个server block中可以包含多个location block。<br>一个完整的配置文件结构如下图所示。</p>
+<p><img src="/images/python-apache-2.png" alt="image-20200809171313596"></p>
+<h3 id="Nginx-配置文件详解"><a href="#Nginx-配置文件详解" class="headerlink" title="Nginx 配置文件详解"></a>Nginx 配置文件详解</h3><p>Nginx安装完毕后，会产生相应的安装目录，一般为/etc/nginx/conf，其中nginx.conf为Nginx的主配置文件。这里重点介绍下nginx.conf这个配置文件。</p>
+<p>Nginx配置文件主要分成四部分：main（全局设置）、server（主机设置）、upstream（负载均衡服务器设置）和 location（URL匹配特定位置的设置）。main部分设置的指令将影响其他所有设置；server部分的指令主要用于指定主机和端口；upstream指令主要用于负载均衡，设置一系列的后端服务器；location部分用于匹配网页位置。这四者之间的关系式：server继承main，location继承server，upstream既不会继承其他设置也不会被继承。<br>在这四个部分当中，每个部分都包含若干指令，这些指令主要包含Nginx的主模块指令、事件模块指令、HTTP核心模块指令，同时每个部分还可以使用其他HTTP模块指令，例如Http SSL模块、HttpGzip Static模块和Http Addition模块等。<br>下面通过一个Nginx配置实例，详细介绍下nginx.conf每个指令的含义。为了能更清楚地了解Nginx的结构和每个配置选项的含义，这里按照功能点将Nginx配置文件分为7个部分逐次讲解，下面就围绕这7个部分进行介绍。</p>
+<h4 id="Nginx的全局配置"><a href="#Nginx的全局配置" class="headerlink" title="Nginx的全局配置"></a>Nginx的全局配置</h4><p>下面这段内容是对Nginx的全局属性配置，代码如下：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">user</span>  nobody nobody;</span><br><span class="line"><span class="attribute">worker_processes</span>  <span class="number">4</span>;</span><br><span class="line"><span class="attribute">error_log</span>  logs/error.log  <span class="literal">notice</span>;</span><br><span class="line"><span class="attribute">pid</span>        logs/nginx.pid;</span><br><span class="line"><span class="attribute">worker_rlimit_nofile</span> <span class="number">65535</span>;</span><br><span class="line">events&#123;</span><br><span class="line"> <span class="attribute">use</span> <span class="literal">epoll</span>;</span><br><span class="line"> <span class="attribute">worker_connections</span>      <span class="number">65536</span>;</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+<p>对上面这段代码中每个配置选项的含义解释如下：</p>
+<p>对上面这段代码中每个配置选项的含义解释如下：</p>
+<ul>
+<li><p>user是个主模块指令，指定Nginx Worker进程运行用户以及用户组，默认由nobody账号运行。</p>
+</li>
+<li><p>worker_processes是个主模块指令，指定了Nginx要开启的进程数。每个Nginx进程平均耗费10M~12M内存。根据经验，一般指定一个进程足够了，如果是多核CPU，建议指定和CPU的数量一样的进程数即可。</p>
+</li>
+<li><p>error_log是个主模块指令，用来定义全局错误日志文件。日志输出级别有debug、info、notice、warn、error、crit可供选择，其中，debug输出日志最为最详细，而crit输出日志最少。</p>
+</li>
+<li><p>pid是个主模块指令，用来指定进程id的存储文件位置。</p>
+</li>
+<li><p>worker_rlimit_nofile用于指定一个nginx进程可以打开的最多文件描述符数目，这里是65535，需要使用命令“ulimit -n 65535”来设置。</p>
+</li>
+<li><p>events指令是设定Nginx的工作模式及连接数上限。</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">events&#123;</span><br><span class="line"><span class="attribute">use</span> <span class="literal">epoll</span>;</span><br><span class="line"><span class="attribute">worker_connections</span>      <span class="number">65536</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>use是个事件模块指令，用来指定Nginx的工作模式。Nginx支持的工作模式有select、poll、kqueue、epoll、rtsig和/dev/poll。其中select和poll都是标准的工作模式，kqueue和epoll是高效的工作模式，不同的是epoll用在Linux平台上，而kqueue用在BSD系统中。对于Linux系统，epoll工作模式是首选。<br>worker_connections也是个事件模块指令，用于定义Nginx每个进程的最大连接数，默认是1024.最大客户端连接数由worker_processes和worker_connections决定，即Max_client=worker_processes<em>worker_connections，在作为反向代理时，max_clients变为：max_clients = worker_processes </em> worker_connections/4。<br>进程的最大连接数受Linux系统进程的最大打开文件数限制，在执行操作系统命令“ulimit -n 65536”后worker_connections的设置才能生效。</p>
+</li>
+</ul>
+<h4 id="HTTP服务器配置"><a href="#HTTP服务器配置" class="headerlink" title="HTTP服务器配置"></a>HTTP服务器配置</h4><p>接下来开始进行HTTP服务器设置。<br>下面这段内容是Nginx对HTTP服务器相关属性的配置，代码如下：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">http&#123;</span><br><span class="line"><span class="attribute">include</span>      conf/mime.types;</span><br><span class="line"><span class="attribute">default_type</span>  application/octet-stream;</span><br><span class="line"><span class="attribute">log_format</span> main <span class="string">'<span class="variable">$remote_addr</span> - <span class="variable">$remote_user</span> [<span class="variable">$time_local</span>] '</span></span><br><span class="line"> <span class="string">'"<span class="variable">$request</span>" <span class="variable">$status</span> <span class="variable">$bytes_sent</span> '</span></span><br><span class="line"> <span class="string">'"<span class="variable">$http_referer</span>" "<span class="variable">$http_user_agent</span>" '</span></span><br><span class="line"> <span class="string">'"<span class="variable">$gzip_ratio</span>"'</span>;</span><br><span class="line"> <span class="attribute">log_format</span> download <span class="string">'<span class="variable">$remote_addr</span> - <span class="variable">$remote_user</span> [<span class="variable">$time_local</span>] '</span></span><br><span class="line"> <span class="string">'"<span class="variable">$request</span>" <span class="variable">$status</span> <span class="variable">$bytes_sent</span> '</span></span><br><span class="line"> <span class="string">'"<span class="variable">$http_referer</span>" "<span class="variable">$http_user_agent</span>" '</span></span><br><span class="line"> <span class="string">'"<span class="variable">$http_range</span>" "<span class="variable">$sent_http_content_range</span>"'</span>;</span><br><span class="line"><span class="attribute">client_max_body_size</span>  <span class="number">20m</span>;</span><br><span class="line"><span class="attribute">client_header_buffer_size</span>    <span class="number">32K</span>;</span><br><span class="line"><span class="attribute">large_client_header_buffers</span>  <span class="number">4</span> <span class="number">32k</span>;</span><br><span class="line"><span class="attribute">Sendfile</span>  <span class="literal">on</span>;</span><br><span class="line"><span class="attribute">tcp_nopush</span>     <span class="literal">on</span>;</span><br><span class="line"><span class="attribute">tcp_nodelay</span>    <span class="literal">on</span>;</span><br><span class="line"><span class="attribute">keepalive_timeout</span> <span class="number">60</span>;</span><br><span class="line"><span class="attribute">client_header_timeout</span>  <span class="number">10</span>;</span><br><span class="line"><span class="attribute">client_body_timeout</span>    <span class="number">10</span>;</span><br><span class="line"><span class="attribute">send_timeout</span>          <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+<p>下面详细介绍下这段代码中每个配置选项的含义:</p>
+<ul>
+<li>include是个主模块指令，实现对配置文件所包含的文件的设定，可以减少主配置文件的复杂度。类似于Apache中的include方法。</li>
+<li>default_type属于HTTP核心模块指令，这里设定默认类型为二进制流，也就是当文件类型未定义时使用这种方式，例如在没有配置PHP环境时，Nginx是不予解析的，此时，用浏览器访问PHP文件就会出现下载窗口。<br>下面的代码实现对日志格式的设定。<br>log_format main ‘$remote_addr - $remote_user [$time_local] ‘<br>‘“$request” $status $bytes_sent ‘<br>‘“$http_referer” “$http_user_agent” ‘<br>‘“$gzip_ratio”‘;<br>log_format download ‘$remote_addr - $remote_user [$time_local] ‘<br>‘“$request” $status $bytes_sent ‘<br>‘“$http_referer” “$http_user_agent” ‘<br>‘“$http_range” “$sent_http_content_range”‘;</li>
+<li>log_format是Nginx的HttpLog模块指令，用于指定Nginx日志的输出格式。main为此日志输出格式的名称，可以在下面的access_log指令中引用。</li>
+<li>client_max_body_size用来设置允许客户端请求的最大的单个文件字节数。</li>
+<li>client_header_buffer_size用于指定来自客户端请求头的headerbuffer大小。对于大多数请求，1K的缓冲区大小已经足够，如果自定义了消息头或有更大的Cookie，可以增加缓冲区大小。这里设置为32K。</li>
+<li>large_client_header_buffers用来指定客户端请求中较大的消息头的缓存最大数量和大小， “4”为个数，“128K”为大小，最大缓存量为4个128K。</li>
+<li>sendfile参数用于开启高效文件传输模式。将tcp_nopush和tcp_nodelay两个指令设置为on用于防止网络阻塞。</li>
+<li>keepalive_timeout设置客户端连接保持活动的超时时间。在超过这个时间之后，服务器会关闭该连接。</li>
+<li>client_header_timeout设置客户端请求头读取超时时间。如果超过这个时间，客户端还没有发送任何数据，Nginx将返回“Request time out（408）”错误。</li>
+<li>client_body_timeout设置客户端请求主体读取超时时间。如果超过这个时间，客户端还没有发送任何数据，Nginx将返回“Request time out（408）”错误，默认值是60。</li>
+<li>send_timeout指定响应客户端的超时时间。这个超时仅限于两个连接活动之间的时间，如果超过这个时间，客户端没有任何活动，Nginx将会关闭连接。</li>
+</ul>
+<h4 id="HttpGzip模块配置"><a href="#HttpGzip模块配置" class="headerlink" title="HttpGzip模块配置"></a>HttpGzip模块配置</h4><p>下面配置Nginx的HttpGzip模块。这个模块支持在线实时压缩输出数据流。要查看是否安装了此模块，需要使用下面的命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost conf]# /etc/nginx/sbin/nginx  -V</span><br><span class="line">nginx version: nginx/0.7.65</span><br><span class="line"></span><br><span class="line">configure arguments: --with-http_stub_status_module --with-http_gzip_static_module --prefix=/etc/nginx</span><br><span class="line">通过/etc/nginx/sbin/nginx  -V命令可以查看安装Nginx时的编译选项，由输出可知，我们已经安装了HttpGzip模块。</span><br></pre></td></tr></table></figure>
+<p>下面是HttpGzip模块在Nginx配置中的相关属性设置：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">gzip</span>  <span class="literal">on</span>;</span><br><span class="line"><span class="attribute">gzip_min_length</span>  <span class="number">1k</span>;</span><br><span class="line"><span class="attribute">gzip_buffers</span>     <span class="number">4</span>  <span class="number">16k</span>;</span><br><span class="line"><span class="attribute">gzip_http_version</span>  <span class="number">1</span>.<span class="number">1</span>;</span><br><span class="line"><span class="attribute">gzip_comp_level</span>  <span class="number">2</span>;</span><br><span class="line"><span class="attribute">gzip_types</span>  text/plain application/x-javascript text/css application/xml;</span><br><span class="line"><span class="attribute">gzip_vary</span>  <span class="literal">on</span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>gzip用于设置开启或者关闭gzip模块，“gzip on”表示开启GZIP压缩，实时压缩输出数据流。</li>
+<li>gzip_min_length设置允许压缩的页面最小字节数，页面字节数从header头的Content-Length中获取。默认值是0，不管页面多大都进行压缩。建议设置成大于1K的字节数，小于1K可能会越压越大。</li>
+<li>gzip_buffers表示申请4个单位为16K的内存作为压缩结果流缓存，默认值是申请与原始数据大小相同的内存空间来存储gzip压缩结果。</li>
+<li>gzip_http_version用于设置识别HTTP协议版本，默认是1.1，目前大部分浏览器已经支持GZIP解压，使用默认即可。</li>
+<li>gzip_comp_level用来指定GZIP压缩比，1 压缩比最小，处理速度最快；9 压缩比最大，传输速度快，但处理最慢，也比较消耗cpu资源。</li>
+<li>gzip_types用来指定压缩的类型，无论是否指定，“text/html”类型总是会被压缩的。</li>
+<li>gzip_vary选项可以让前端的缓存服务器缓存经过GZIP压缩的页面，例如用Squid缓存经过Nginx压缩的数据</li>
+</ul>
+<h4 id="负载均衡配置"><a href="#负载均衡配置" class="headerlink" title="负载均衡配置"></a>负载均衡配置</h4><p>下面设定负载均衡的服务器列表:</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">upstream</span> ixdba.net&#123;</span><br><span class="line">ip_hash;</span><br><span class="line"><span class="attribute">server</span> <span class="number">192.168.12.133:80</span>;</span><br><span class="line"><span class="attribute">server</span> <span class="number">192.168.12.134:80</span>  down;</span><br><span class="line"><span class="attribute">server</span> <span class="number">192.168.12.135:8009</span>  max_fails=<span class="number">3</span>  fail_timeout=<span class="number">20s</span>;</span><br><span class="line"><span class="attribute">server</span> <span class="number">192.168.12.136:8080</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>upstream是Nginx的HTTP Upstream模块，这个模块通过一个简单的调度算法来实现客户端IP到后端服务器的负载均衡。在上面的设定中，通过upstream指令指定了一个负载均衡器的名称ixdba.net。这个名称可以任意指定，在后面需要的地方直接调用即可。</p>
+<ul>
+<li>在HTTP Upstream模块中，可以通过server指令指定后端服务器的IP地址和端口，同时还可以设定每个后端服务器在负载均衡调度中的状态。常用的状态有：<br>down，表示当前的server暂时不参与负载均衡。</li>
+<li>backup，预留的备份机器。当其他所有的非backup机器出现故障或者忙的时候，才会请求backup机器，因此这台机器的压力最轻。</li>
+<li>max_fails，允许请求失败的次数，默认为1。当超过最大次数时，返回proxy_next_upstream 模块定义的错误。</li>
+<li>fail_timeout，在经历了max_fails次失败后，暂停服务的时间。max_fails可以和fail_timeout一起使用。</li>
+<li>注意 当负载调度算法为ip_hash时，后端服务器在负载均衡调度中的状态不能是weight和backup。</li>
+</ul>
+<h4 id="server虚拟主机配置"><a href="#server虚拟主机配置" class="headerlink" title="server虚拟主机配置"></a>server虚拟主机配置</h4><p>下面介绍对虚拟主机的配置。建议将对虚拟主机进行配置的内容写进另外一个文件，然后通过include指令包含进来，这样更便于维护和管理:</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">server&#123;</span><br><span class="line"><span class="attribute">listen</span>          <span class="number">80</span>;</span><br><span class="line"><span class="attribute">server_name</span>    <span class="number">192.168.12.188</span>  www.ixdba.net;</span><br><span class="line"><span class="attribute">index</span> index.html index.htm index.jsp;</span><br><span class="line"><span class="attribute">root</span>  /web/wwwroot/www.ixdba.net</span><br><span class="line">charset gb2312;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>server标志定义虚拟主机开始，listen用于指定虚拟主机的服务端口，server_name用来指定IP地址或者域名，多个域名之间用空格分开。Index用于设定访问的默认首页地址，root指令用于指定虚拟主机的网页根目录，这个目录可以是相对路径，也可以是绝对路径。Charset用于设置网页的默认编码格式。</li>
+<li>access_log logs/www.ixdba.net.access.log main;</li>
+<li>access_log用来指定此虚拟主机的访问日志存放路径，最后的main用于指定访问日志的输出格式。</li>
+</ul>
+<h4 id="URL匹配配置"><a href="#URL匹配配置" class="headerlink" title="URL匹配配置"></a>URL匹配配置</h4><p>URL地址匹配是进行Nginx配置中最灵活的部分。 location支持正则表达式匹配，也支持条件判断匹配，用户可以通过location指令实现Nginx对动、静态网页进行过滤处理。<br>以下这段设置是通过location指令来对网页URL进行分析处理，所有扩展名以.gif、.jpg、.jpeg、.png、.bmp、.swf结尾的静态文件都交给nginx处理，而expires用来指定静态文件的过期时间，这里是30天</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">location</span> <span class="regexp">~ .*\.(gif|jpg|jpeg|png|bmp|swf)$</span>  &#123;</span><br><span class="line">                <span class="attribute">root</span>    /web/wwwroot/www.ixdba.net;</span><br><span class="line">               <span class="attribute">expires</span> <span class="number">30d</span>;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<p>以下这段设置是将upload和html下的所有文件都交给nginx来处理，当然，upload和html目录包含在/web/wwwroot/www.ixdba.net目录中。</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">location</span> <span class="regexp">~ ^/(upload|html)/</span>  &#123;</span><br><span class="line">        <span class="attribute">root</span>    /web/wwwroot/www.ixdba.net;</span><br><span class="line">        <span class="attribute">expires</span> <span class="number">30d</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在最后这段设置中，location是对此虚拟主机下动态网页的过滤处理，也就是将所有以.jsp为后缀的文件都交给本机的8080端口处理</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">location</span> <span class="regexp">~ .*.jsp$</span> &#123;</span><br><span class="line">    <span class="attribute">index</span> index.jsp;      </span><br><span class="line">    <span class="attribute">proxy_pass</span> http://localhost:8080;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="StubStatus模块配置"><a href="#StubStatus模块配置" class="headerlink" title="StubStatus模块配置"></a>StubStatus模块配置</h4><p>StubStatus模块能够获取Nginx自上次启动以来的工作状态，此模块非核心模块，需要在Nginx编译安装时手工指定才能使用此功能。<br>以下指令实指定启用获取Nginx工作状态的功能</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">        <span class="attribute">location</span> /NginxStatus &#123;</span><br><span class="line">                        <span class="attribute">stub_status</span>      <span class="literal">on</span>;</span><br><span class="line"><span class="attribute">access_log</span>              logs/NginxStatus.log;</span><br><span class="line">                        <span class="attribute">auth_basic</span>              <span class="string">"NginxStatus"</span>;</span><br><span class="line">      <span class="attribute">auth_basic_user_file</span>    ../htpasswd;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<p>stub_status设置为“on”表示启用StubStatus的工作状态统计功能。access_log 用来指定StubStatus模块的访问日志文件。auth_basic是Nginx的一种认证机制。auth_basic_user_file用来指定认证的密码文件，由于Nginx的auth_basic认证采用的是与Apache兼容的密码文件，因此需要用Apache的htpasswd命令来生成密码文件，例如要添加一个webadmin用户，可以使用下面方式生成密码文件：<br>/usr/local/apache/bin/htpasswd -c /opt/nginx/conf/htpasswd webadmin<br>会得到以下提示信息：<br>New password:<br>输入密码之后，系统会要求再次输入密码。确认之后添加用户成功。</p>
+<p>要查看Nginx的运行状态，可以输入<a href="http://ip/" target="_blank" rel="external">http://ip/</a> NginxStatus，然后输入刚刚创建的用户名和密码就可以看到如下信息：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Active connections: 1</span><br><span class="line">server accepts handled requests</span><br><span class="line"> 393411 393411 393799</span><br><span class="line">Reading: 0 Writing: 1 Waiting: 0</span><br></pre></td></tr></table></figure>
+<p>Active connections表示当前活跃的连接数，第三行的三个数字表示 Nginx当前总共处理了393411个连接， 成功创建393411次握手， 总共处理了393799个请求。最后一行的Reading表示Nginx读取到客户端Header信息数， Writing表示Nginx返回给客户端的Header信息数，“Waiting”表示Nginx已经处理完，正在等候下一次请求指令时的驻留连接数。</p>
+<p>在最后这段设置中，设置了虚拟主机的错误信息返回页面，通过error_page指令可以定制各种错误信息的返回页面。在默认情况下，Nginx会在主目录的html目录中查找指定的返回页面，特别需要注意的是，这些错误信息的返回页面大小一定要超过512K，否者会被ie浏览器替换为ie默认的错误页面。</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">    <span class="attribute">error_page</span> <span class="number">404</span>       /<span class="number">404</span>.html;</span><br><span class="line">    <span class="attribute">error_page</span>  <span class="number">500</span> <span class="number">502</span> <span class="number">503</span> <span class="number">504</span> /50x.html;</span><br><span class="line">    <span class="attribute">location</span> = /50x.html &#123;</span><br><span class="line">      <span class="attribute">root</span>  html;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Nginx-代理"><a href="#Nginx-代理" class="headerlink" title="Nginx 代理"></a>Nginx 代理</h3><p>Nginx是一款自由的、开源的、高性能的HTTP服务器和反向代理服务器；同时也是一个IMAP、POP3、SMTP代理服务器；Nginx可以作为一个HTTP服务器进行网站的发布处理，另外Nginx可以作为反向代理进行负载均衡的实现。</p>
+<h4 id="关于代理"><a href="#关于代理" class="headerlink" title="关于代理"></a>关于代理</h4><p>说到代理，首先我们要明确一个概念，所谓代理就是一个代表、一个渠道；</p>
+<p>此时就涉及到两个角色，一个是被代理角色，一个是目标角色，被代理角色通过这个代理访问目标角色完成一些任务的过程称为代理操作过程；如同生活中的专卖店~客人到adidas专卖店买了一双鞋，这个专卖店就是代理，被代理角色就是adidas厂家，目标角色就是用户。</p>
+<h4 id="正向代理"><a href="#正向代理" class="headerlink" title="正向代理"></a>正向代理</h4><p>说反向代理之前，我们先看看正向代理，正向代理也是大家最常接触的到的代理模式，我们会从两个方面来说关于正向代理的处理模式，分别从软件方面和生活方面来解释一下什么叫正向代理。</p>
+<p>在如今的网络环境下，我们如果由于技术需要要去访问国外的某些网站，此时你会发现位于国外的某网站我们通过浏览器是没有办法访问的，此时大家可能都会用一个代理进行访问，代理的方式主要是找到一个可以访问国外网站的代理服务器，我们将请求发送给代理服务器，代理服务器去访问国外的网站，然后将访问到的数据传递给我们！</p>
+<p>上述这样的代理模式称为正向代理，正向代理最大的特点是客户端非常明确要访问的服务器地址；服务器只清楚请求来自哪个代理服务器，而不清楚来自哪个具体的客户端；正向代理模式屏蔽或者隐藏了真实客户端信息。</p>
+<p>总结来说：正向代理，”它代理的是客户端”，是一个位于客户端和原始服务器(origin server)之间的服务器，为了从原始服务器取得内容，客户端向代理发送一个请求并指定目标(原始服务器)，然后代理向原始服务器转交请求并将获得的内容返回给客户端。客户端必须要进行一些特别的设置才能使用正向代理。</p>
+<p>正向代理的用途：<br>（1）访问原来无法访问的资源，如Google<br>（2） 可以做缓存，加速访问资源<br>（3）对客户端访问授权，上网进行认证<br>（4）代理可以记录用户访问记录（上网行为管理），对外隐藏用户信息</p>
+<h4 id="反向代理"><a href="#反向代理" class="headerlink" title="反向代理"></a>反向代理</h4><p>明白了什么是正向代理，我们继续看关于反向代理的处理方式，举例如我大天朝的某宝网站，每天同时连接到网站的访问人数已经爆表，单个服务器远远不能满足人民日益增长的购买欲望了，此时就出现了一个大家耳熟能详的名词：分布式部署；也就是通过部署多台服务器来解决访问人数限制的问题；某宝网站中大部分功能也是直接使用Nginx进行反向代理实现的，并且通过封装Nginx和其他的组件之后起了个高大上的名字：Tengine，有兴趣的童鞋可以访问Tengine的官网查看具体的信息：<a href="http://tengine.taobao.org/。" target="_blank" rel="external">http://tengine.taobao.org/。</a></p>
+<p>多个客户端给服务器发送的请求，Nginx服务器接收到之后，按照一定的规则分发给了后端的业务处理服务器进行处理了。此时~请求的来源也就是客户端是明确的，但是请求具体由哪台服务器处理的并不明确了，Nginx扮演的就是一个反向代理角色。</p>
+<p>客户端是无感知代理的存在的，反向代理对外都是透明的，访问者并不知道自己访问的是一个代理。因为客户端不需要任何配置就可以访问。</p>
+<p>反向代理，”它代理的是服务端”，主要用于服务器集群分布式部署的情况下，反向代理隐藏了服务器的信息。</p>
+<p>反向代理的作用：<br>（1）保证内网的安全，通常将反向代理作为公网访问地址，Web服务器是内网<br>（2）负载均衡，通过反向代理服务器来优化网站的负载</p>
+<h4 id="项目场景"><a href="#项目场景" class="headerlink" title="项目场景"></a>项目场景</h4><p>一般在项目中正向代理和反向代理都是同时出现的，正向代理代理客户端的请求去访问目标服务器，目标服务器是一个反向代理服务器，反向代理了多台真实的业务处理服务器：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">多个客户端请求		-----&gt;		正向代理		-----&gt;		反向代理		-----&gt;		多个服务器</span><br></pre></td></tr></table></figure>
+<p>在正向代理中，Proxy和Client同属于一个LAN（图中方框内），隐藏了客户端信息；</p>
+<p>在反向代理中，Proxy和Server同属于一个LAN（图中方框内），隐藏了服务端信息；</p>
+<p>实际上，Proxy在两种代理中做的事情都是替服务器代为收发请求和响应，不过从结构上看正好左右互换了一下，所以把后出现的那种代理方式称为反向代理了。</p>
+<h3 id="Nginx-负载均衡"><a href="#Nginx-负载均衡" class="headerlink" title="Nginx 负载均衡"></a>Nginx 负载均衡</h3><h4 id="负载均衡"><a href="#负载均衡" class="headerlink" title="负载均衡"></a>负载均衡</h4><p>我们已经明确了所谓代理服务器的概念，那么接下来，Nginx扮演了反向代理服务器的角色，它是以依据什么样的规则进行请求分发的呢？不同的项目应用场景，分发的规则是否可以控制呢？</p>
+<p>这里提到的客户端发送的、Nginx反向代理服务器接收到的请求数量，就是我们说的负载量。</p>
+<p>请求数量按照一定的规则进行分发到不同的服务器处理的规则，就是一种均衡规则。</p>
+<p>所以~将服务器接收到的请求按照规则分发的过程，称为负载均衡。</p>
+<p>负载均衡在实际项目操作过程中，有硬件负载均衡和软件负载均衡两种，硬件负载均衡也称为硬负载，如F5负载均衡，相对造价昂贵成本较高，但是数据的稳定性安全性等等有非常好的保障，如中国移动中国联通这样的公司才会选择硬负载进行操作；更多的公司考虑到成本原因，会选择使用软件负载均衡，软件负载均衡是利用现有的技术结合主机硬件实现的一种消息队列分发机制。</p>
+<p>Nginx支持的负载均衡调度算法方式如下：</p>
+<ol>
+<li>weight轮询(默认)：接收到的请求按照顺序逐一分配到不同的后端服务器，即使在使用过程中，某一台后端服务器宕机，Nginx会自动将该服务器剔除出队列，请求受理情况不会受到任何影响。 这种方式下，可以给不同的后端服务器设置一个权重值(weight)，用于调整不同的服务器上请求的分配率；权重数据越大，被分配到请求的几率越大；该权重值，主要是针对实际工作环境中不同的后端服务器硬件配置进行调整的。</li>
+<li>ip_hash：每个请求按照发起客户端的ip的hash结果进行匹配，这样的算法下一个固定ip地址的客户端总会访问到同一个后端服务器，这也在一定程度上解决了集群部署环境下session共享的问题。</li>
+<li>fair：智能调整调度算法，动态的根据后端服务器的请求处理到响应的时间进行均衡分配，响应时间短处理效率高的服务器分配到请求的概率高，响应时间长处理效率低的服务器分配到的请求少；结合了前两者的优点的一种调度算法。但是需要注意的是Nginx默认不支持fair算法，如果要使用这种调度算法，请安装upstream_fair模块。</li>
+<li>url_hash：按照访问的url的hash结果分配请求，每个请求的url会指向后端固定的某个服务器，可以在Nginx作为静态服务器的情况下提高缓存效率。同样要注意Nginx默认不支持这种调度算法，要使用的话需要安装Nginx的hash软件包。</li>
+</ol>
+<h2 id="附录小知识"><a href="#附录小知识" class="headerlink" title="附录小知识"></a>附录小知识</h2><h3 id="如何查看某个进程的线程数"><a href="#如何查看某个进程的线程数" class="headerlink" title="如何查看某个进程的线程数"></a><strong>如何查看某个进程的线程数</strong></h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">有些时候需要确定进程内部当前运行了多少线程，查询方法如下：</span><br><span class="line">  </span><br><span class="line">1）通过pstree命令（根据pid）进行查询：</span><br><span class="line">[root@xqsj_web2 ~]# ps -ef|grep java     //查找进程pid（比如这里查找java（tomcat）进程的pid）</span><br><span class="line">[root@xqsj_web2 ~]# pstree -p 19135</span><br><span class="line">java(19135)─┬─&#123;java&#125;(19136)</span><br><span class="line">            ├─&#123;java&#125;(19137)</span><br><span class="line">             .......</span><br><span class="line">            └─&#123;java&#125;(13578)</span><br><span class="line">[root@xqsj_web2 ~]# pstree -p 19135|wc -l</span><br><span class="line">46     //由于第一行包括了2个线程，所以该进程下一共有47个线程！</span><br><span class="line">  </span><br><span class="line">或者使用top命令查看（可以查看到线程情况）</span><br><span class="line">[root@xqsj_web2 ~]# top -Hp 19135       //下面结果中的Tasks 对应的47即是线程的个数</span><br><span class="line">  </span><br><span class="line">top - 14:05:55 up 391 days, 20:59,  1 user,  load average: 0.00, 0.00, 0.00</span><br><span class="line">Tasks:  47 total,   0 running,  47 sleeping,   0 stopped,   0 zombie</span><br><span class="line">Cpu(s):  0.2%us,  0.1%sy,  0.0%ni, 99.7%id,  0.0%wa,  0.0%hi,  0.0%si,  0.0%st</span><br><span class="line">Mem:   8058056k total,  7718656k used,   339400k free,   354216k buffers</span><br><span class="line">Swap:        0k total,        0k used,        0k free,  4678160k cached</span><br><span class="line">  </span><br><span class="line">  PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND                                                                      </span><br><span class="line">19135 root      20   0 5339m 632m 5476 S  0.0  8.0   0:00.00 java                                                                          </span><br><span class="line">19136 root      20   0 5339m 632m 5476 S  0.0  8.0   0:00.84 java                                                                          </span><br><span class="line">......</span><br><span class="line">  </span><br><span class="line">2）根据ps命令直接查询：</span><br><span class="line">[root@xqsj_web2 ~]# ps hH p 19135| wc -l</span><br><span class="line">47</span><br><span class="line">  </span><br><span class="line">3）通过查看/proc/pid/status</span><br><span class="line">proc伪文件系统，它驻留在/proc目录，这是最简单的方法来查看任何活动进程的线程数。/proc目录以可读文本文件形式输出，提供现有进程和系统硬件</span><br><span class="line">相关的信息如CPU、中断、内存、磁盘等等。</span><br><span class="line">  </span><br><span class="line">[root@xqsj_web2 ~]# cat /proc/19135/status</span><br><span class="line">Name:   java</span><br><span class="line">State:  S (sleeping)</span><br><span class="line">Tgid:   19135</span><br><span class="line">Pid:    19135</span><br><span class="line">PPid:   1</span><br><span class="line">TracerPid:  0</span><br><span class="line">........</span><br><span class="line">Threads:    47                    //这里显示的是进程创建的总线程数。输出表明该进程有47个线程。</span><br><span class="line">SigQ:   1/62793</span><br><span class="line">SigPnd: 0000000000000000</span><br><span class="line">ShdPnd: 0000000000000000</span><br><span class="line">.......</span><br><span class="line">voluntary_ctxt_switches:    1</span><br><span class="line">nonvoluntary_ctxt_switches: 1</span><br><span class="line">  </span><br><span class="line">或者，也可以在/proc//task中简单的统计子目录的数量，如下所示：</span><br><span class="line">[root@xqsj_web2 ~]# ll /proc/19135/task</span><br><span class="line">总用量 0</span><br><span class="line">dr-xr-xr-x 6 root root 0 6月  14 17:57 11553</span><br><span class="line">......</span><br><span class="line">[root@xqsj_web2 ~]# ll /proc/19135/task|wc -l</span><br><span class="line">48</span><br><span class="line">  </span><br><span class="line">这是因为，对于一个进程中创建的每个线程，在/proc/&lt;pid&gt;/task中会创建一个相应的目录，命名为其线程ID。由此在/proc/&lt;pid&gt;/task中目录的总数表示在进程中线程的数目。</span><br><span class="line"></span><br><span class="line">参考：https://www.cnblogs.com/kevingrace/p/5252919.html</span><br></pre></td></tr></table></figure>
+<h3 id="httpd-process-和-wsgi-process"><a href="#httpd-process-和-wsgi-process" class="headerlink" title="httpd process 和 wsgi process"></a>httpd process 和 wsgi process</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">()[root@gnocchi-api-797d4748bd-9ljfw /]# ps -ef</span><br><span class="line">UID        PID  PPID  C STIME TTY          TIME CMD</span><br><span class="line">root         1     0  0 Aug03 ?        00:00:00 /usr/local/bin/dumb-init /bin/bash /tmp/gnocchi-api.sh start</span><br><span class="line">root         7     1  0 Aug03 ?        00:00:28 httpd -DFOREGROUND</span><br><span class="line">gnocchi      8     7  0 Aug03 ?        00:04:09 (wsgi -DFOREGROUND</span><br></pre></td></tr></table></figure>
+<p>为什么在apache中使用了mod_wsgi之后，却会有两个不同名字进程</p>
+<p>根据：<a href="https://serverfault.com/questions/293595/why-are-there-double-apache-processes-for-mod-wsgi" target="_blank" rel="external">https://serverfault.com/questions/293595/why-are-there-double-apache-processes-for-mod-wsgi</a></p>
+<p>When you use daemon mode and your Django application is therefore running in a separate process to main Apache processes, you still need the Apache parent process and at least one Apache child process. The later is what accepts requests and proxies them through to the mod_wsgi daemon processes. Read:</p>
+<p><a href="http://code.google.com/p/modwsgi/wiki/ProcessesAndThreading" target="_blank" rel="external">http://code.google.com/p/modwsgi/wiki/ProcessesAndThreading</a></p>
+<p>即httpd是转发请求给wsgi进程，由wsgi进程处理具体请求</p>
+<h3 id="DFOREGROUND-含义"><a href="#DFOREGROUND-含义" class="headerlink" title="DFOREGROUND 含义"></a>DFOREGROUND 含义</h3><p>在k8s中运行的httpd和wsgi进程中总会有 DFOREGROUND</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">()[root@gnocchi-api-797d4748bd-9ljfw /]# ps -ef</span><br><span class="line">UID        PID  PPID  C STIME TTY          TIME CMD</span><br><span class="line">root         1     0  0 Aug03 ?        00:00:00 /usr/local/bin/dumb-init /bin/bash /tmp/gnocchi-api.sh start</span><br><span class="line">root         7     1  0 Aug03 ?        00:00:28 httpd -DFOREGROUND</span><br><span class="line">gnocchi      8     7  0 Aug03 ?        00:04:09 (wsgi -DFOREGROUND</span><br></pre></td></tr></table></figure>
+<p>通俗的说就是它使得 apache 的进程一直在 console 界面的“前端”运行，而不是作为一个守护进程挂起，想象一下你用 tail -f 跟踪某个 log 文件时的窗口，就是那个效果。其目的就是让 docker “认为” apache 一直在跑着，否则 docker 就会认为自己的任务结束了，从而 exit；那是我们不希望看到的。据此，也让我对 docker 的运行机制多了一点了解。</p>
+<h3 id="查看apache当前并发访问数和进程数-ApacheLinux"><a href="#查看apache当前并发访问数和进程数-ApacheLinux" class="headerlink" title="查看apache当前并发访问数和进程数 ApacheLinux"></a>查看apache当前并发访问数和进程数 ApacheLinux</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">1、查看apache当前并发访问数：</span><br><span class="line">　netstat -an | grep ESTABLISHED | wc -l</span><br><span class="line"></span><br><span class="line">对比httpd.conf中MaxClients的数字差距多少。</span><br><span class="line"></span><br><span class="line">2、查看有多少个进程数：</span><br><span class="line">ps aux|grep httpd|wc -l</span><br><span class="line"></span><br><span class="line">3、可以使用如下参数查看数据</span><br><span class="line">server-status?auto</span><br><span class="line"></span><br><span class="line">#ps -ef|grep httpd|wc -l</span><br><span class="line">1388</span><br><span class="line">统计httpd进程数，连个请求会启动一个进程，使用于Apache服务器。</span><br><span class="line">表示Apache能够处理1388个并发请求，这个值Apache可根据负载情况自动调整。</span><br><span class="line"></span><br><span class="line">#netstat -nat|grep -i &quot;80&quot;|wc -l</span><br><span class="line">4341</span><br><span class="line">netstat -an会打印系统当前网络链接状态，而grep -i &quot;80&quot;是用来提取与80端口有关的连接的，wc -l进行连接数统计。</span><br><span class="line">最终返回的数字就是当前所有80端口的请求总数。</span><br><span class="line"></span><br><span class="line">#netstat -na|grep ESTABLISHED|wc -l</span><br><span class="line">376</span><br><span class="line">netstat -an会打印系统当前网络链接状态，而grep ESTABLISHED 提取出已建立连接的信息。 然后wc -l统计。</span><br><span class="line">最终返回的数字就是当前所有80端口的已建立连接的总数。</span><br><span class="line"></span><br><span class="line">netstat -nat||grep ESTABLISHED|wc - 可查看所有建立连接的详细记录</span><br><span class="line"></span><br><span class="line">查看Apache的并发请求数及其TCP连接状态：</span><br><span class="line">　　Linux命令：</span><br><span class="line">netstat -n | awk &apos;/^tcp/ &#123;++S[$NF]&#125; END &#123;for(a in S) print a, S[a]&#125;&apos;</span><br><span class="line"></span><br><span class="line">（这条语句是从 新浪互动社区事业部 新浪互动社区事业部技术总监王老大那儿获得的，非常不错）返回结果示例：</span><br><span class="line">　　LAST_ACK 5</span><br><span class="line">　　SYN_RECV 30</span><br><span class="line">　　ESTABLISHED 1597</span><br><span class="line">　　FIN_WAIT1 51</span><br><span class="line">　　FIN_WAIT2 504</span><br><span class="line">　　TIME_WAIT 1057</span><br><span class="line">　　其中的</span><br><span class="line">SYN_RECV表示正在等待处理的请求数；</span><br><span class="line">ESTABLISHED表示正常数据传输状态；</span><br><span class="line">TIME_WAIT表示处理完毕，等待超时结束的请求数</span><br></pre></td></tr></table></figure>
+<h3 id="常用web服务器对比"><a href="#常用web服务器对比" class="headerlink" title="常用web服务器对比"></a>常用web服务器对比</h3><table>
+<thead>
+<tr>
+<th><strong>对比项</strong></th>
+<th><strong>Apache</strong></th>
+<th><strong>Nginx</strong></th>
+<th><strong>Lighttpd</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Proxy代理</td>
+<td>非常好</td>
+<td>非常好</td>
+<td>一般</td>
+</tr>
+<tr>
+<td>Rewriter</td>
+<td>好</td>
+<td>非常好</td>
+<td>一般</td>
+</tr>
+<tr>
+<td>Fcgi</td>
+<td>不好</td>
+<td>好</td>
+<td>非常好</td>
+</tr>
+<tr>
+<td>热部署</td>
+<td>不支持</td>
+<td>支持</td>
+<td>不支持</td>
+</tr>
+<tr>
+<td>系统压力</td>
+<td>很大</td>
+<td>很小</td>
+<td>比较小</td>
+</tr>
+<tr>
+<td>稳定性</td>
+<td>好</td>
+<td>非常好</td>
+<td>不好</td>
+</tr>
+<tr>
+<td>安全性</td>
+<td>好</td>
+<td>一般</td>
+<td>一般</td>
+</tr>
+<tr>
+<td>静态文件处理</td>
+<td>一般</td>
+<td>非常好</td>
+<td>好</td>
+</tr>
+<tr>
+<td>反向代理</td>
+<td>一般</td>
+<td>非常好</td>
+<td>一般</td>
+</tr>
+</tbody>
+</table>
+<p><br><br><br><br><br></p>
+<p>参考：</p>
+<p><a href="http://blog.360converter.com/archives/1005" target="_blank" rel="external">http://blog.360converter.com/archives/1005</a><br><a href="https://www.cnblogs.com/fengchong/p/10230266.html" target="_blank" rel="external">https://www.cnblogs.com/fengchong/p/10230266.html</a><br><a href="https://blog.csdn.net/a3192048/article/details/89737337" target="_blank" rel="external">https://blog.csdn.net/a3192048/article/details/89737337</a><br><a href="https://blog.51cto.com/ixdba/790611" target="_blank" rel="external">https://blog.51cto.com/ixdba/790611</a><br><a href="https://blog.51cto.com/ixdba/778469" target="_blank" rel="external">https://blog.51cto.com/ixdba/778469</a><br><a href="https://blog.51cto.com/ixdba/778462" target="_blank" rel="external">https://blog.51cto.com/ixdba/778462</a><br><a href="https://blog.51cto.com/ixdba/793571" target="_blank" rel="external">https://blog.51cto.com/ixdba/793571</a><br><a href="https://blog.51cto.com/ixdba/798913" target="_blank" rel="external">https://blog.51cto.com/ixdba/798913</a><br><a href="https://blog.51cto.com/ixdba/803475" target="_blank" rel="external">https://blog.51cto.com/ixdba/803475</a><br><a href="https://blog.csdn.net/weixin_34117211/article/details/85928265?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-4.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-4.channel_param" target="_blank" rel="external">https://blog.csdn.net/weixin_34117211/article/details/85928265?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-4.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-4.channel_param</a><br><a href="https://blog.csdn.net/weixin_33779515/article/details/92821188?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param" target="_blank" rel="external">https://blog.csdn.net/weixin_33779515/article/details/92821188?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param</a><br><a href="https://blog.csdn.net/weixin_33994444/article/details/92981756?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param&amp;depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param" target="_blank" rel="external">https://blog.csdn.net/weixin_33994444/article/details/92981756?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param&amp;depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param</a><br><a href="https://blog.csdn.net/weixin_33842304/article/details/86420744?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.channel_param" target="_blank" rel="external">https://blog.csdn.net/weixin_33842304/article/details/86420744?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.channel_param</a><br><a href="https://blog.csdn.net/willierStrong/article/details/7226938?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.channel_param" target="_blank" rel="external">https://blog.csdn.net/willierStrong/article/details/7226938?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.channel_param</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+<blockquote class="blockquote-center" style="color: #ccc;">
+    -------------本文结束 <i class="fa fa-apple"></i> 感谢您的阅读-------------
+</blockquote>
+
+  <span id="inline-green" style="border-radius:3px;">作者</span>：<a class="link-blue" href="https://github.com/magiceses" target="_blank">Magiceses</a><br/>有问题请 <a class="link-blue" href="https://magiceses.github.io/guestbook" target="_blank">留言</a> 或者私信我的 <a class="link-blue" href="https://weibo.com/u/3069595351" target="_blank">微博</a>。
+
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>满分是10分的话，这篇文章你给几分</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/reward/reward_wechat.png" alt="magiceses WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/reward/reward_alipay.png" alt="magiceses Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"><i class="fa fa-tag"></i> Python</a>
+          
+            <a href="/tags/PythonWeb/" rel="tag"><i class="fa fa-tag"></i> PythonWeb</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/09/03/hexo-next-one/" rel="next" title="Hexo-NexT搭建个人博客（一）">
+                <i class="fa fa-chevron-left"></i> Hexo-NexT搭建个人博客（一）
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/09/30/hexo-next-two/" rel="prev" title="Hexo-NexT搭建个人博客（二）">
+                Hexo-NexT搭建个人博客（二） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar/avatar.png"
+               alt="magiceses" />
+          <p class="site-author-name" itemprop="name">magiceses</p>
+          <p class="site-description motion-element" itemprop="description">Stay Hungry,Stay Foolish</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">36</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/magiceses" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://blog.csdn.net/weixin_43700106" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-chrome"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/weblog" title="建站日志" target="_blank">建站日志</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/reward" title="打赏" target="_blank">打赏</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Apache-httpd-mod-wsgi-Nginx-uWSGI学习笔记"><span class="nav-number">1.</span> <span class="nav-text">Apache httpd mod_wsgi Nginx uWSGI学习笔记</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Apache-httpd-简介"><span class="nav-number">1.1.</span> <span class="nav-text">Apache httpd 简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#apache和httpd区别"><span class="nav-number">1.1.1.</span> <span class="nav-text">apache和httpd区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#httpd配置相关目录"><span class="nav-number">1.1.2.</span> <span class="nav-text">httpd配置相关目录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#httpd配置文件"><span class="nav-number">1.1.3.</span> <span class="nav-text">httpd配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#https运行模式–MPM"><span class="nav-number">1.1.4.</span> <span class="nav-text">https运行模式–MPM</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#prefork"><span class="nav-number">1.1.4.1.</span> <span class="nav-text">prefork</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#worker"><span class="nav-number">1.1.4.2.</span> <span class="nav-text">worker</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#event"><span class="nav-number">1.1.4.3.</span> <span class="nav-text">event</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#httpd虚拟主机的配置"><span class="nav-number">1.1.5.</span> <span class="nav-text">httpd虚拟主机的配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#httpd命令使用"><span class="nav-number">1.1.6.</span> <span class="nav-text">httpd命令使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mod-wsgi介绍"><span class="nav-number">1.1.7.</span> <span class="nav-text">mod_wsgi介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#apache-mod-wsgi"><span class="nav-number">1.1.7.1.</span> <span class="nav-text">apache mod_wsgi</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#nginx-mod-wsgi"><span class="nav-number">1.1.7.2.</span> <span class="nav-text">nginx mod_wsgi</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Nginx、WSGI、-uWSGI、-uwsgi-简介"><span class="nav-number">1.2.</span> <span class="nav-text">Nginx、WSGI、 uWSGI、 uwsgi 简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Nginx-简介"><span class="nav-number">1.2.1.</span> <span class="nav-text">Nginx 简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Nginx-和-uWSGI-的关系"><span class="nav-number">1.2.2.</span> <span class="nav-text">Nginx 和 uWSGI 的关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Nginx-与-Apache-的异同"><span class="nav-number">1.2.3.</span> <span class="nav-text">Nginx 与 Apache 的异同</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Nginx的优势"><span class="nav-number">1.2.4.</span> <span class="nav-text">Nginx的优势</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Nginx的模块与工作原理"><span class="nav-number">1.2.5.</span> <span class="nav-text">Nginx的模块与工作原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Nginx-配置文件结构"><span class="nav-number">1.2.6.</span> <span class="nav-text">Nginx 配置文件结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Nginx-配置文件详解"><span class="nav-number">1.2.7.</span> <span class="nav-text">Nginx 配置文件详解</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Nginx的全局配置"><span class="nav-number">1.2.7.1.</span> <span class="nav-text">Nginx的全局配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP服务器配置"><span class="nav-number">1.2.7.2.</span> <span class="nav-text">HTTP服务器配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HttpGzip模块配置"><span class="nav-number">1.2.7.3.</span> <span class="nav-text">HttpGzip模块配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#负载均衡配置"><span class="nav-number">1.2.7.4.</span> <span class="nav-text">负载均衡配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#server虚拟主机配置"><span class="nav-number">1.2.7.5.</span> <span class="nav-text">server虚拟主机配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#URL匹配配置"><span class="nav-number">1.2.7.6.</span> <span class="nav-text">URL匹配配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#StubStatus模块配置"><span class="nav-number">1.2.7.7.</span> <span class="nav-text">StubStatus模块配置</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Nginx-代理"><span class="nav-number">1.2.8.</span> <span class="nav-text">Nginx 代理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#关于代理"><span class="nav-number">1.2.8.1.</span> <span class="nav-text">关于代理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#正向代理"><span class="nav-number">1.2.8.2.</span> <span class="nav-text">正向代理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#反向代理"><span class="nav-number">1.2.8.3.</span> <span class="nav-text">反向代理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#项目场景"><span class="nav-number">1.2.8.4.</span> <span class="nav-text">项目场景</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Nginx-负载均衡"><span class="nav-number">1.2.9.</span> <span class="nav-text">Nginx 负载均衡</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#负载均衡"><span class="nav-number">1.2.9.1.</span> <span class="nav-text">负载均衡</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#附录小知识"><span class="nav-number">1.3.</span> <span class="nav-text">附录小知识</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#如何查看某个进程的线程数"><span class="nav-number">1.3.1.</span> <span class="nav-text">如何查看某个进程的线程数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#httpd-process-和-wsgi-process"><span class="nav-number">1.3.2.</span> <span class="nav-text">httpd process 和 wsgi process</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DFOREGROUND-含义"><span class="nav-number">1.3.3.</span> <span class="nav-text">DFOREGROUND 含义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看apache当前并发访问数和进程数-ApacheLinux"><span class="nav-number">1.3.4.</span> <span class="nav-text">查看apache当前并发访问数和进程数 ApacheLinux</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#常用web服务器对比"><span class="nav-number">1.3.5.</span> <span class="nav-text">常用web服务器对比</span></a></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+      
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="busuanzi-count">
+
+  <!-- <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script> -->
+  <!-- 上面这个是之前的，不知道为什么失效了，改成下面这个 -->
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">您是第<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>个小伙伴</span>
+  
+
+  
+    <span class="site-pv">本站总浏览<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">magiceses</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Pisces
+  </a>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count" style="color: #e90f92;">全站共 685k 字</span>
+</div>
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+  <!-- 按需加载背景 -->
+  <!-- 背景动画 -->
+<script type="text/javascript">
+  // 按需加载背景
+  // 如果是all，就直接加载了
+  if("pc" == "all") {
+    $.getScript("/js/src/particle.js?v=5.0.1");
+  }
+  // 识别手机或电脑的js开始
+  (function(){
+    var res = GetRequest();
+    var par = res['index'];
+    if(par!='gfan'){
+      var ua=navigator.userAgent.toLowerCase();
+      var contains=function (a, b){
+          if(a.indexOf(b)!=-1){return true;}
+      };
+      if((contains(ua,"android") && contains(ua,"mobile"))||(contains(ua,"android") && contains(ua,"mozilla"))||(contains(ua,"android") && contains(ua,"opera"))||contains(ua,"ucweb7")||contains(ua,"iphone")){
+        return false;
+      } else {
+        $.getScript("/js/src/particle.js?v=5.0.1");
+      }
+    }
+  })();
+  function GetRequest() {
+    var url = location.search;
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+      var str = url.substr(1);
+      strs = str.split("&");
+      for(var i = 0; i < strs.length; i ++) {
+        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+      }
+    }
+    return theRequest;
+  }
+</script>
+<!-- 识别手机或电脑的js结束 -->  
+
+  <!-- 页面点击小红心 -->
+  <!-- 页面点击小红心 -->
+
+  <script type="text/javascript" src="/js/src/love.js?v=5.0.1"></script>
+
+
+  <!-- 鼠标移动，效果 -->
+  <!-- 鼠标移动特效 -->
+
+  <script type="text/javascript" src="/js/src/jquery-stars.js?v=5.0.1"></script>
+  <script type="text/javascript">
+  jQuery('body').jstars({
+  	image_path: '/images',
+  	image: 'candy-cane-stars.png',
+  	style: 'white',
+  	width: 34,
+  	height: 34,
+  	delay: 700,
+  	frequency: 5
+  });
+  </script>
+
+
+  <!-- 页面 title 进入/离开 效果 -->
+
+  <script type="text/javascript">var OriginTitile=document.title,st;document.addEventListener("visibilitychange",function(){document.hidden?(document.title="Waiting for you back！",clearTimeout(st)):(document.title="Thanks for visit~ "+OriginTitile,st=setTimeout(function(){document.title=OriginTitile},4e3))})</script>
+
+
+</body>
+</html>

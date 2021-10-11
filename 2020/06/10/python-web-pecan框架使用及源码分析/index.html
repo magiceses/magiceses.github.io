@@ -1,0 +1,1391 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Courier New:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Python,PythonWeb," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="天青色等烟雨" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="别人怎样去看待你的价值并不重要，重要是你自己怎样看待自身的价值。即便你是一块货真价实的金子，多说己长也便是短，自知己短便是长。一个人的真正伟大之处，就在于能认识到自己的渺小。
+
+Pecan框架的目标是实现一个采用对象分发方式进行URL路由的轻量级Web框架。它非常专注于自己的目标，它的大部分功能都和URL路
+由以及请求和响应的处理相关，而不去实现模板、安全以及数据库层，这些东西都可以通过其他的库来">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Pecan 框架使用及源码分析">
+<meta property="og:url" content="https://magiceses.github.io/2020/06/10/python-web-pecan框架使用及源码分析/index.html">
+<meta property="og:site_name" content="天青色等烟雨">
+<meta property="og:description" content="别人怎样去看待你的价值并不重要，重要是你自己怎样看待自身的价值。即便你是一块货真价实的金子，多说己长也便是短，自知己短便是长。一个人的真正伟大之处，就在于能认识到自己的渺小。
+
+Pecan框架的目标是实现一个采用对象分发方式进行URL路由的轻量级Web框架。它非常专注于自己的目标，它的大部分功能都和URL路
+由以及请求和响应的处理相关，而不去实现模板、安全以及数据库层，这些东西都可以通过其他的库来">
+<meta property="og:image" content="https://magiceses.github.io/images/python-web-pecan-1.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-web-pecan-2.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-web-pecan-3.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-web-pecan-4.png">
+<meta property="og:image" content="https://magiceses.github.io/images/python-web-pecan-5.png">
+<meta property="og:updated_time" content="2021-10-01T01:23:08.194Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Pecan 框架使用及源码分析">
+<meta name="twitter:description" content="别人怎样去看待你的价值并不重要，重要是你自己怎样看待自身的价值。即便你是一块货真价实的金子，多说己长也便是短，自知己短便是长。一个人的真正伟大之处，就在于能认识到自己的渺小。
+
+Pecan框架的目标是实现一个采用对象分发方式进行URL路由的轻量级Web框架。它非常专注于自己的目标，它的大部分功能都和URL路
+由以及请求和响应的处理相关，而不去实现模板、安全以及数据库层，这些东西都可以通过其他的库来">
+<meta name="twitter:image" content="https://magiceses.github.io/images/python-web-pecan-1.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://magiceses.github.io/2020/06/10/python-web-pecan框架使用及源码分析/"/>
+
+
+<!-- 网页加载条 -->
+<script src="/js/src/pace.min.js"></script>
+  <title> Pecan 框架使用及源码分析 | 天青色等烟雨 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">天青色等烟雨</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">而我在等你</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-guestbook">
+          <a href="/guestbook" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-commenting"></i> <br />
+            
+            留言
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+      
+      
+        <li class="menu-item"> <a title="把这个链接拖到你的工具栏中,任何网页都可以High" href='javascript:(
+/*
+ * Copyright (C) 2016 Never_yu (Neveryu.github.io) <React.dong.yu@gmail.com>
+ * Sina Weibo (http://weibo.com/Neveryu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function go() {
+
+var songs = [
+  "http://dl.stream.qqmusic.qq.com/C400001Qu4I30eVFYb.m4a?vkey=2127178E4405E7B8B268F20F05232485735CCF4FF8C1432F0360D2626D0B6C9564B5627C7AB481BBC685FEDB0946A50E97C66F0D1B008226&guid=7175649092&uin=0&fromtag=66",
+  "",
+  "",
+  ""
+];
+
+function c() {
+  var e = document.createElement("link");
+  e.setAttribute("type", "text/css");
+  e.setAttribute("rel", "stylesheet");
+  e.setAttribute("href", f);
+  e.setAttribute("class", l);
+  document.body.appendChild(e)
+}
+
+function h() {
+  var e = document.getElementsByClassName(l);
+  for (var t = 0; t < e.length; t++) {
+    document.body.removeChild(e[t])
+  }
+}
+
+function p() {
+  var e = document.createElement("div");
+  e.setAttribute("class", a);
+  document.body.appendChild(e);
+  setTimeout(function() {
+    document.body.removeChild(e)
+  }, 100)
+}
+
+function d(e) {
+  return {
+    height : e.offsetHeight,
+    width : e.offsetWidth
+  }
+}
+
+function v(i) {
+  var s = d(i);
+  return s.height > e && s.height < n && s.width > t && s.width < r
+}
+
+function m(e) {
+  var t = e;
+  var n = 0;
+  while (!!t) {
+    n += t.offsetTop;
+    t = t.offsetParent
+  }
+  return n
+}
+
+function g() {
+  var e = document.documentElement;
+  if (!!window.innerWidth) {
+    return window.innerHeight
+  } else if (e && !isNaN(e.clientHeight)) {
+    return e.clientHeight
+  }
+  return 0
+}
+
+function y() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  }
+  return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+}
+
+function E(e) {
+  var t = m(e);
+  return t >= w && t <= b + w
+}
+
+function S() {
+  var e = document.getElementById("audio_element_id");
+  if(e != null){
+    var index = parseInt(e.getAttribute("curSongIndex"));
+    if(index > songs.length - 2) {
+      index = 0;
+    } else {
+      index++;
+    }
+    e.setAttribute("curSongIndex", index);
+    N();
+  }
+
+  e.src = i;
+  e.play()
+}
+
+function x(e) {
+  e.className += " " + s + " " + o
+}
+
+function T(e) {
+  e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+}
+
+function N() {
+  var e = document.getElementsByClassName(s);
+  var t = new RegExp("\\b" + s + "\\b");
+  for (var n = 0; n < e.length; ) {
+    e[n].className = e[n].className.replace(t, "")
+  }
+}
+
+function initAudioEle() {
+  var e = document.getElementById("audio_element_id");
+  if(e === null){
+    e = document.createElement("audio");
+    e.setAttribute("class", l);
+    e.setAttribute("curSongIndex", 0);
+    e.id = "audio_element_id";
+    e.loop = false;
+    e.bgcolor = 0;
+    e.addEventListener("canplay", function() {
+      setTimeout(function() {
+        x(k)
+      }, 500);
+      setTimeout(function() {
+        N();
+        p();
+        for (var e = 0; e < O.length; e++) {
+          T(O[e])
+        }
+      }, 15500)
+    }, true);
+    e.addEventListener("ended", function() {
+      N();
+      h();
+      go();
+    }, true);
+    e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+    document.body.appendChild(e);
+  }
+}
+
+initAudioEle();
+var e = 30;
+var t = 30;
+var n = 350;
+var r = 350;
+
+var curSongIndex = parseInt(document.getElementById("audio_element_id").getAttribute("curSongIndex"));
+var i = songs[curSongIndex];
+
+var s = "mw-harlem_shake_me";
+var o = "im_first";
+var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+var a = "mw-strobe_light";
+
+/* harlem-shake-style.css，替换成你的位置，也可以直接使用：//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css */
+var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+
+var l = "mw_added_css";
+var b = g();
+var w = y();
+var C = document.getElementsByTagName("*");
+var k = null;
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    if (E(A)) {
+      k = A;
+      break
+    }
+  }
+}
+if (A === null) {
+  console.warn("Could not find a node of the right size. Please try a different page.");
+  return
+}
+c();
+S();
+var O = [];
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    O.push(A)
+  }
+}
+})()'><i class="menu-item-icon fa fa-music fa-fw"></i> High一下</a></li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search fa-lg"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Pecan 框架使用及源码分析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2020-06-10T05:25:24+08:00" content="2020-06-10">
+              2020-06-10
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv">热度
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p id="div-border-top-green">别人怎样去看待你的价值并不重要，重要是你自己怎样看待自身的价值。即便你是一块货真价实的金子，多说己长也便是短，自知己短便是长。一个人的真正伟大之处，就在于能认识到自己的渺小。<br></p>
+
+<p><code>Pecan</code>框架的目标是实现一个采用对象分发方式进行<code>URL</code>路由的轻量级<code>Web</code>框架。它非常专注于自己的目标，它的大部分功能都和<code>URL</code>路</p>
+<p>由以及请求和响应的处理相关，而不去实现模板、安全以及数据库层，这些东西都可以通过其他的库来实现。关于<code>Pecan</code>的更多信息，可</p>
+<p>以 <a href="https://pecan.readthedocs.org/en/latest/index.html" target="_blank" rel="external">查看文档</a></p>
+<a id="more"></a>
+<h1 id="pecan-工程创建"><a href="#pecan-工程创建" class="headerlink" title="pecan 工程创建"></a>pecan 工程创建</h1><h2 id="pecan源码目录"><a href="#pecan源码目录" class="headerlink" title="pecan源码目录"></a>pecan源码目录</h2><p><img src="/images/python-web-pecan-1.png" alt="在这里插入图片描述"></p>
+<h2 id="创建-pecan-工程"><a href="#创建-pecan-工程" class="headerlink" title="创建 pecan 工程"></a>创建 pecan 工程</h2><h3 id="一般工程"><a href="#一般工程" class="headerlink" title="一般工程"></a>一般工程</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pecan create <span class="built_in">test</span></span><br></pre></td></tr></table></figure>
+<p>创建pecan工程用到了bin下的pecan脚本</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// bin/pecan</span><br><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    <span class="keyword">from</span> pecan.commands <span class="keyword">import</span> CommandRunner</span><br><span class="line">    CommandRunner.handle_command_line()</span><br></pre></td></tr></table></figure>
+<p>调用了pecan/commands/base.py下的CommandRunner类中的handle_command_line()方法</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 具体处理命令</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(self, args)</span>:</span></span><br><span class="line">    ns = self.parser.parse_args(args) <span class="comment"># 解析参数</span></span><br><span class="line">    self.commands[ns.command_name]().run(ns) <span class="comment"># 执行命令，相当于执行commands下相应模块中的run方法</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@classmethod</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">handle_command_line</span><span class="params">(cls)</span>:</span></span><br><span class="line">    runner = CommandRunner() <span class="comment"># 实例化该对象时，加载commands文件夹下定义的名命令</span></span><br><span class="line">    runner.run(sys.argv[<span class="number">1</span>:])</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pecan/commands/base.py</span></span><br><span class="line"><span class="comment"># 加载command的方法，entry point在setup.py里面注册了</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">load_commands</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="keyword">for</span> ep <span class="keyword">in</span> pkg_resources.iter_entry_points(<span class="string">'pecan.command'</span>):</span><br><span class="line">        log.debug(<span class="string">'%s loading plugin %s'</span>, self.__class__.__name__, ep)</span><br><span class="line">        <span class="keyword">if</span> ep.name <span class="keyword">in</span> self.commands:</span><br><span class="line">            warn(</span><br><span class="line">                <span class="string">"Duplicate entry points found on `%s` - ignoring %s"</span> % (</span><br><span class="line">                    ep.name,</span><br><span class="line">                    ep</span><br><span class="line">                ),</span><br><span class="line">                RuntimeWarning</span><br><span class="line">            )</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">        	  <span class="comment"># 该方法是去加载模块中含有run方法的类</span></span><br><span class="line">            cmd = ep.load()</span><br><span class="line">            cmd.run  <span class="comment"># 确保加载的类有run方法</span></span><br><span class="line">        <span class="keyword">except</span> Exception <span class="keyword">as</span> e:  <span class="comment"># pragma: nocover</span></span><br><span class="line">            warn(<span class="string">"Unable to load plugin %s: %s"</span> % (ep, e), RuntimeWarning)</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        self.add(&#123;ep.name: cmd&#125;) <span class="comment"># 添加到self.commands字典里面，上面的run运行时，从字典中取出类，实例化，然后调用run方法</span></span><br></pre></td></tr></table></figure>
+<p>可以看到，pecan创建工程的过程和django类似（其实基本所有的python web框架都是一样的）</p>
+<p>下面来看看创建工程具体做了什么工作</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#  pecan/commands/create.py</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ScaffoldManager</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        self.scaffolds = &#123;&#125;</span><br><span class="line">        self.load_scaffolds()</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">load_scaffolds</span><span class="params">(self)</span>:</span></span><br><span class="line">    	  <span class="comment"># 加载在setup.py文件中注册了的类</span></span><br><span class="line">        <span class="keyword">for</span> ep <span class="keyword">in</span> pkg_resources.iter_entry_points(<span class="string">'pecan.scaffold'</span>):</span><br><span class="line">            log.debug(<span class="string">'%s loading scaffold %s'</span>, self.__class__.__name__, ep)</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                cmd = ep.load()</span><br><span class="line">                cmd.copy_to	<span class="comment"># 确保有copy_to方法</span></span><br><span class="line">            <span class="keyword">except</span> Exception <span class="keyword">as</span> e:  <span class="comment"># pragma: nocover</span></span><br><span class="line">                warn(</span><br><span class="line">                    <span class="string">"Unable to load scaffold %s: %s"</span> % (ep, e), RuntimeWarning</span><br><span class="line">                )</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            self.add(&#123;ep.name: cmd&#125;)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">add</span><span class="params">(self, cmd)</span>:</span></span><br><span class="line">        self.scaffolds.update(cmd)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CreateCommand</span><span class="params">(BaseCommand)</span>:</span></span><br><span class="line">	  <span class="comment"># 通过实例化该对象，加载pecan/scaffolds下的BaseScaffold和RestAPIScaffold类，加载方法和加载command方法一样</span></span><br><span class="line">    manager = ScaffoldManager()</span><br><span class="line">    arguments = (&#123;</span><br><span class="line">        <span class="string">'name'</span>: <span class="string">'project_name'</span>,</span><br><span class="line">        <span class="string">'help'</span>: <span class="string">'the (package) name of the new project'</span></span><br><span class="line">    &#125;, &#123;</span><br><span class="line">        <span class="string">'name'</span>: <span class="string">'template_name'</span>,</span><br><span class="line">        <span class="string">'metavar'</span>: <span class="string">'template_name'</span>,</span><br><span class="line">        <span class="string">'help'</span>: <span class="string">'a registered Pecan template'</span>,</span><br><span class="line">        <span class="string">'nargs'</span>: <span class="string">'?'</span>,</span><br><span class="line">        <span class="string">'default'</span>: DEFAULT_SCAFFOLD, <span class="comment"># 值为base，会调用BaseScaffold的实例</span></span><br><span class="line">        <span class="string">'choices'</span>: manager.scaffolds.keys()</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="comment"># 该方法会首先执行</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(self, args)</span>:</span></span><br><span class="line">        super(CreateCommand, self).run(args)</span><br><span class="line">        <span class="comment">#  self.manager.scaffolds为&#123;'rest-api': &lt;class 'pecan.scaffolds.RestAPIScaffold'&gt;, 'base': &lt;class 'pecan.scaffolds.BaseScaffold'&gt;&#125;</span></span><br><span class="line">        <span class="comment"># 具体由RestAPIScaffold和BaseScaffold去创建工程</span></span><br><span class="line">        self.manager.scaffolds[args.template_name]().copy_to(</span><br><span class="line">            args.project_name	<span class="comment"># 项目名：test</span></span><br><span class="line">        )</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注：通过上面的代码可以知道，默认创建工程时使用的是BaseScaffold类，创建的是一般的pecan工程，而要创建restful的pecan工程，则需要使用下面的方式创建</p>
+</blockquote>
+<h3 id="Restful工程"><a href="#Restful工程" class="headerlink" title="Restful工程"></a>Restful工程</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pecan create <span class="built_in">test</span> rest-api</span><br></pre></td></tr></table></figure>
+<p>BaseScaffold和RestAPIScaffold调用copy_to(project_name)方法去创建工程，主要工作就是根据传入的项目名创建目录，拷贝文件等，pecan/scaffolds模块中放置了相关的模板文件</p>
+<p><img src="/images/python-web-pecan-2.png" alt="在这里插入图片描述"></p>
+<p>至此，一个pecan工程就创建完毕。</p>
+<h2 id="运行-pecan-工程"><a href="#运行-pecan-工程" class="headerlink" title="运行 pecan 工程"></a>运行 pecan 工程</h2><p>运行方式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pecan serve config.py</span><br></pre></td></tr></table></figure>
+<p>和创建工程一样，运行时调用了pecan/commands/create.py模块的方法。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(self, args)</span>:</span></span><br><span class="line">    super(ServeCommand, self).run(args)</span><br><span class="line">    app = self.load_app() <span class="comment"># 创建一个app</span></span><br><span class="line">    self.serve(app, app.config) <span class="comment"># 部署app</span></span><br></pre></td></tr></table></figure>
+<p>众所周知，要运行一个python的web服务，需要两个条件：</p>
+<ul>
+<li>application</li>
+<li>wsgi server</li>
+</ul>
+<p>上面的load_app()方法创建了一个application（会调用到core.py里面的load_app()方法）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pecan/core.py</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">load_app</span><span class="params">(config, **kwargs)</span>:</span></span><br><span class="line">    <span class="keyword">from</span> .configuration <span class="keyword">import</span> _runtime_conf, set_config</span><br><span class="line">    <span class="comment"># 根据配置文件初始化配置</span></span><br><span class="line">    set_config(config, overwrite=<span class="keyword">True</span>)</span><br><span class="line">    <span class="keyword">for</span> package_name <span class="keyword">in</span> getattr(_runtime_conf.app, <span class="string">'modules'</span>, []):</span><br><span class="line">        module = __import__(package_name, fromlist=[<span class="string">'app'</span>])</span><br><span class="line">        <span class="comment"># 项目工程创建好后，有个test/test/app.py文件，里面的setup_app(config)具体来创建app</span></span><br><span class="line">        <span class="keyword">if</span> hasattr(module, <span class="string">'app'</span>) <span class="keyword">and</span> hasattr(module.app, <span class="string">'setup_app'</span>):</span><br><span class="line">        	  <span class="comment"># 这里开始创建一个app</span></span><br><span class="line">            app = module.app.setup_app(_runtime_conf, **kwargs)</span><br><span class="line">            app.config = _runtime_conf</span><br><span class="line">            <span class="keyword">return</span> app</span><br><span class="line">    <span class="keyword">raise</span> RuntimeError(</span><br><span class="line">        <span class="string">'No app.setup_app found in any of the configured app.modules'</span></span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line"><span class="comment"># test/test/app.py</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">setup_app</span><span class="params">(config)</span>:</span></span><br><span class="line">    model.init_model()	<span class="comment"># 创建app时，初始化model，一般在这实现orm映射</span></span><br><span class="line">    app_conf = dict(config.app)</span><br><span class="line">    <span class="comment"># test/conifg.py文件中有app配置项，定义了app的重要内容</span></span><br><span class="line">    <span class="keyword">return</span> make_app(</span><br><span class="line">        app_conf.pop(<span class="string">'root'</span>),</span><br><span class="line">        logging=getattr(config, <span class="string">'logging'</span>, &#123;&#125;),</span><br><span class="line">        **app_conf</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line"><span class="comment"># pecan/__init__.py</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">make_app</span><span class="params">(root, **kw)</span>:</span></span><br><span class="line">  	...</span><br><span class="line">  	<span class="comment"># root是test/config.py中app项里面配置的，作为路由的入口</span></span><br><span class="line">    app = Pecan(root, **kw)</span><br><span class="line">	...</span><br><span class="line">    <span class="keyword">return</span> app</span><br></pre></td></tr></table></figure>
+<p>app其实就是一个Pecan实例。</p>
+<p>对于wsgi server，下面的代码可以看出，pecan使用了python内置的simple_server</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pecan/commands/serve.py</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">serve</span><span class="params">(self, app, conf)</span>:</span></span><br><span class="line">      <span class="keyword">if</span> self.args.reload:</span><br><span class="line">          <span class="keyword">try</span>:</span><br><span class="line">          		<span class="comment"># 使用了watchdog，用于修改文件后自动部署（暂不做讲解）</span></span><br><span class="line">              self.watch_and_spawn(conf)</span><br><span class="line">          <span class="keyword">except</span> ImportError:</span><br><span class="line">              print(<span class="string">'The `--reload` option requires `watchdog` to be '</span></span><br><span class="line">                    <span class="string">'installed.'</span>)</span><br><span class="line">              print(<span class="string">'   $ pip install watchdog'</span>)</span><br><span class="line">      <span class="keyword">else</span>:</span><br><span class="line">      		<span class="comment"># 这里就是具体部署app的方法</span></span><br><span class="line">          self._serve(app, conf)</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_serve</span><span class="params">(self, app, conf)</span>:</span></span><br><span class="line">	<span class="comment"># 引入python内置simple_server </span></span><br><span class="line">   <span class="keyword">from</span> wsgiref.simple_server <span class="keyword">import</span> make_server</span><br><span class="line">   host, port = conf.server.host, int(conf.server.port)</span><br><span class="line">   srv = make_server(</span><br><span class="line">       host,</span><br><span class="line">       port,</span><br><span class="line">       app, <span class="comment"># 创建的app</span></span><br><span class="line">       handler_class=PecanWSGIRequestHandler, <span class="comment"># 处理器</span></span><br><span class="line">   )</span><br><span class="line">   print(<span class="string">'Starting server in PID %s'</span> % os.getpid())</span><br><span class="line">   <span class="keyword">if</span> host == <span class="string">'0.0.0.0'</span>:</span><br><span class="line">       print(</span><br><span class="line">           <span class="string">'serving on 0.0.0.0:%s, view at http://127.0.0.1:%s'</span> %</span><br><span class="line">           (port, port)</span><br><span class="line">       )</span><br><span class="line">   <span class="keyword">else</span>:</span><br><span class="line">       print(<span class="string">"serving on http://%s:%s"</span> % (host, port))</span><br><span class="line">   <span class="keyword">try</span>:</span><br><span class="line">   		 <span class="comment"># 运行web服务</span></span><br><span class="line">       srv.serve_forever()</span><br><span class="line">   <span class="keyword">except</span> KeyboardInterrupt:</span><br><span class="line">       <span class="comment"># allow CTRL+C to shutdown</span></span><br><span class="line">       <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+<p>至此，一个python web服务就运行起来了。</p>
+<h1 id="pecan-源码解析"><a href="#pecan-源码解析" class="headerlink" title="pecan 源码解析"></a>pecan 源码解析</h1><p>新建pecan工程的默认config.py文件（上面讲过，该文件是从scaffolds中的模板copy的）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Server Specific Configurations</span></span><br><span class="line"><span class="comment"># 启动的默认的host和port</span></span><br><span class="line">server = &#123;</span><br><span class="line">    <span class="string">'port'</span>: <span class="string">'8080'</span>,</span><br><span class="line">    <span class="string">'host'</span>: <span class="string">'0.0.0.0'</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># Pecan Application Configurations</span></span><br><span class="line"><span class="comment"># app的配置</span></span><br><span class="line">app = &#123;</span><br><span class="line">    <span class="string">'root'</span>: <span class="string">'$&#123;package&#125;.controllers.root.RootController'</span>, <span class="comment"># root项很重要，指定开始路由的处理器</span></span><br><span class="line">    <span class="string">'modules'</span>: [<span class="string">'$&#123;package&#125;'</span>],</span><br><span class="line">    <span class="string">'debug'</span>: <span class="keyword">True</span></span><br><span class="line">  	<span class="comment"># 还可以配置 static_root、template_path、errors 等。</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># python格式的日志配置</span></span><br><span class="line">logging = &#123;</span><br><span class="line">    <span class="string">'root'</span>: &#123;<span class="string">'level'</span>: <span class="string">'INFO'</span>, <span class="string">'handlers'</span>: [<span class="string">'console'</span>]&#125;,</span><br><span class="line">    <span class="string">'loggers'</span>: &#123;</span><br><span class="line">        <span class="string">'$&#123;package&#125;'</span>: &#123;<span class="string">'level'</span>: <span class="string">'DEBUG'</span>, <span class="string">'handlers'</span>: [<span class="string">'console'</span>], <span class="string">'propagate'</span>: <span class="keyword">False</span>&#125;,</span><br><span class="line">        <span class="string">'pecan'</span>: &#123;<span class="string">'level'</span>: <span class="string">'DEBUG'</span>, <span class="string">'handlers'</span>: [<span class="string">'console'</span>], <span class="string">'propagate'</span>: <span class="keyword">False</span>&#125;,</span><br><span class="line">        <span class="string">'py.warnings'</span>: &#123;<span class="string">'handlers'</span>: [<span class="string">'console'</span>]&#125;,</span><br><span class="line">        <span class="string">'__force_dict__'</span>: <span class="keyword">True</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">'handlers'</span>: &#123;</span><br><span class="line">        <span class="string">'console'</span>: &#123;</span><br><span class="line">            <span class="string">'level'</span>: <span class="string">'DEBUG'</span>,</span><br><span class="line">            <span class="string">'class'</span>: <span class="string">'logging.StreamHandler'</span>,</span><br><span class="line">            <span class="string">'formatter'</span>: <span class="string">'color'</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">'formatters'</span>: &#123;</span><br><span class="line">        <span class="string">'simple'</span>: &#123;</span><br><span class="line">            <span class="string">'format'</span>: (<span class="string">'%(asctime)s %(levelname)-5.5s [%(name)s]'</span></span><br><span class="line">                       <span class="string">'[%(threadName)s] %(message)s'</span>)</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">'color'</span>: &#123;</span><br><span class="line">            <span class="string">'()'</span>: <span class="string">'pecan.log.ColorFormatter'</span>,</span><br><span class="line">            <span class="string">'format'</span>: (<span class="string">'%(asctime)s [%(padded_color_levelname)s] [%(name)s]'</span></span><br><span class="line">                       <span class="string">'[%(threadName)s] %(message)s'</span>),</span><br><span class="line">        <span class="string">'__force_dict__'</span>: <span class="keyword">True</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># Custom Configurations must be in Python dictionary format::</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># foo = &#123;'bar':'baz'&#125;</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># All configurations are accessible at::</span></span><br><span class="line"><span class="comment"># pecan.conf</span></span><br></pre></td></tr></table></figure>
+<h2 id="路由分析"><a href="#路由分析" class="headerlink" title="路由分析"></a>路由分析</h2><p>app是一个Pecan实例，先来看看初始化Pecan实例时做了哪些工作</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># core.py文件</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Pecan</span><span class="params">(PecanBase)</span>:</span></span><br><span class="line">	<span class="function"><span class="keyword">def</span> <span class="title">__new__</span><span class="params">(cls, *args, **kw)</span>:</span></span><br><span class="line">	     <span class="keyword">if</span> kw.get(<span class="string">'use_context_locals'</span>) <span class="keyword">is</span> <span class="keyword">False</span>:</span><br><span class="line">	         self = super(Pecan, cls).__new__(ExplicitPecan, *args, **kw)</span><br><span class="line">	         self.__init__(*args, **kw)</span><br><span class="line">	         <span class="keyword">return</span> self</span><br><span class="line">	     <span class="keyword">return</span> super(Pecan, cls).__new__(cls)</span><br><span class="line">	</span><br><span class="line">	 <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, *args, **kw)</span>:</span></span><br><span class="line">	     self.init_context_local(kw.get(<span class="string">'context_local_factory'</span>))</span><br><span class="line">	     <span class="comment"># 调用了PecanBase的初始化方法</span></span><br><span class="line">	     super(Pecan, self).__init__(*args, **kw)</span><br><span class="line">	 </span><br><span class="line">	 ......</span><br><span class="line">	 ......</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PecanBase</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, root, default_renderer=<span class="string">'mako'</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">                 template_path=<span class="string">'templates'</span>, hooks=lambda: [],</span></span></span><br><span class="line"><span class="function"><span class="params">                 custom_renderers=&#123;&#125;, extra_template_vars=&#123;&#125;,</span></span></span><br><span class="line"><span class="function"><span class="params">                 force_canonical=True, guess_content_type_from_ext=True,</span></span></span><br><span class="line"><span class="function"><span class="params">                 context_local_factory=None, request_cls=Request,</span></span></span><br><span class="line"><span class="function"><span class="params">                 response_cls=Response, **kw)</span>:</span></span><br><span class="line">        <span class="comment"># 这里将配置文件中的root配置项导入为一个python对象</span></span><br><span class="line">        <span class="keyword">if</span> isinstance(root, six.string_types):</span><br><span class="line">            root = self.__translate_root__(root)</span><br><span class="line">        self.root = root <span class="comment"># url中的路径，比如：/v1/books</span></span><br><span class="line">        self.request_cls = request_cls <span class="comment"># webob的Request类，所以pecan以来WebOb</span></span><br><span class="line">        self.response_cls = response_cls <span class="comment"># webob的Response类</span></span><br><span class="line">        self.renderers = RendererFactory(custom_renderers, extra_template_vars) <span class="comment"># 渲染器</span></span><br><span class="line">        self.default_renderer = default_renderer</span><br><span class="line">        <span class="comment"># 初始化钩子程序</span></span><br><span class="line">        <span class="keyword">if</span> six.callable(hooks):</span><br><span class="line">            hooks = hooks()</span><br><span class="line">        self.hooks = list(sorted(</span><br><span class="line">            hooks,</span><br><span class="line">            key=operator.attrgetter(<span class="string">'priority'</span>)</span><br><span class="line">        ))</span><br><span class="line">        self.template_path = template_path</span><br><span class="line">        self.force_canonical = force_canonical</span><br><span class="line">        self.guess_content_type_from_ext = guess_content_type_from_ext</span><br></pre></td></tr></table></figure>
+<p>在core.py中定义了一个全局变量state，它的生命周期和整个请求的生命周期一致，保存了请求过程中各种参数状态值</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">state = <span class="keyword">None</span></span><br></pre></td></tr></table></figure>
+<p>当一个请求从wsgiserver转发过来，首先处理的是Pecan中的<strong>call</strong>方法</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># core.py文件</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Pecan</span><span class="params">(PecanBase)</span>:</span></span><br><span class="line">   <span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self, environ, start_response)</span>:</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            state.hooks = []</span><br><span class="line">            state.app = self</span><br><span class="line">            state.controller = <span class="keyword">None</span></span><br><span class="line">            state.arguments = <span class="keyword">None</span></span><br><span class="line">            <span class="comment"># 调用了PecanBase的__call__方法</span></span><br><span class="line">            <span class="keyword">return</span> super(Pecan, self).__call__(environ, start_response)</span><br><span class="line">        <span class="keyword">finally</span>:</span><br><span class="line">            <span class="keyword">del</span> state.hooks 			<span class="comment"># 存储钩子程序的list</span></span><br><span class="line">            <span class="keyword">del</span> state.request 		<span class="comment"># 请求对象</span></span><br><span class="line">            <span class="keyword">del</span> state.response 		<span class="comment"># 响应对象</span></span><br><span class="line">            <span class="keyword">del</span> state.controller 	<span class="comment"># 处理器（程序中被expose装饰的方法）</span></span><br><span class="line">            <span class="keyword">del</span> state.arguments 	<span class="comment"># 参数</span></span><br><span class="line">            <span class="keyword">del</span> state.app 				<span class="comment"># Peacn对象</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PecanBase</span><span class="params">(object)</span>:</span></span><br><span class="line">	 <span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self, environ, start_response)</span>:</span></span><br><span class="line">	 				<span class="comment"># WebOb的Request和Response</span></span><br><span class="line">	        req = self.request_cls(environ)</span><br><span class="line">	        resp = self.response_cls()</span><br><span class="line">	        </span><br><span class="line">	        state = RoutingState(req, resp, self)</span><br><span class="line">	        environ[<span class="string">'pecan.locals'</span>] = &#123;</span><br><span class="line">	            <span class="string">'request'</span>: req,</span><br><span class="line">	            <span class="string">'response'</span>: resp</span><br><span class="line">	        &#125;</span><br><span class="line">	        controller = <span class="keyword">None</span></span><br><span class="line">	        internal_redirect = <span class="keyword">False</span></span><br><span class="line">	        <span class="keyword">try</span>:</span><br><span class="line">	            req.context = environ.get(<span class="string">'pecan.recursive.context'</span>, &#123;&#125;)</span><br><span class="line">	            req.pecan = dict(content_type=<span class="keyword">None</span>)</span><br><span class="line">							<span class="comment"># 路由方法，对象分发路由机制，传入state，记录整个过程中的状态</span></span><br><span class="line">	            controller, args, kwargs = self.find_controller(state)</span><br><span class="line">	            <span class="comment"># 调用处理方法</span></span><br><span class="line">	            self.invoke_controller(controller, args, kwargs, state)</span><br><span class="line">	        <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">	            ......</span><br><span class="line">	            ......</span><br><span class="line">	</span><br><span class="line">	        self._handle_empty_response_body(state)</span><br><span class="line">					<span class="comment"># 返回结果</span></span><br><span class="line">	        <span class="keyword">return</span> state.response(environ, start_response)</span><br></pre></td></tr></table></figure>
+<p><strong>主要调用了find_controller和invoke_controller方法。find_controller根据对象分发机制找到url的处理方法，如果没找到，则抛出异常，由后面的except代码块处理，找到了就调用invoke_controller执行该处理方法，将处理结果保存到state中。</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PecanBase</span><span class="params">(object)</span>:</span></span><br><span class="line">   <span class="function"><span class="keyword">def</span> <span class="title">find_controller</span><span class="params">(self, state)</span>:</span></span><br><span class="line">        req = state.request</span><br><span class="line">        pecan_state = req.pecan</span><br><span class="line">        pecan_state[<span class="string">'routing_path'</span>] = path = req.path_info</span><br><span class="line">        <span class="comment"># 处理钩子程序</span></span><br><span class="line">        self.handle_hooks(self.hooks, <span class="string">'on_route'</span>, state)</span><br><span class="line">        ......</span><br><span class="line">        ......</span><br><span class="line">		    <span class="comment"># 具体路由方法</span></span><br><span class="line">        controller, remainder = self.route(req, self.root, path)</span><br><span class="line">        ......</span><br><span class="line">        ......</span><br><span class="line">        <span class="comment"># 根据路由结果处理参数，如果没有路由到，则该方法会抛出异常</span></span><br><span class="line">        args, varargs, kwargs = self.get_args(</span><br><span class="line">            state,</span><br><span class="line">            params.mixed(),</span><br><span class="line">            remainder,</span><br><span class="line">            cfg[<span class="string">'argspec'</span>],</span><br><span class="line">            im_self</span><br><span class="line">        )</span><br><span class="line">        state.arguments = Arguments(args, varargs, kwargs)</span><br><span class="line">        <span class="comment"># 处理钩子程序</span></span><br><span class="line">        self.handle_hooks(self.determine_hooks(controller), <span class="string">'before'</span>, state)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> controller, args + varargs, kwargs</span><br></pre></td></tr></table></figure>
+<p><strong>钩子程序分为4种，路由前（on_route），路由后处理前（before），处理后（after），发生错误（on_error）,钩子程序可在app.py中自定义，需要继承PecanHook类（在hooks.py中定义）</strong></p>
+<p>route(req, self.root, path)：</p>
+<blockquote>
+<p>req：WebOb的Request对象，存储了请求的信息<br>self.root：是第一个处理对象（config.py中定义的root<strong>对象</strong>）<br>path：路径信息，如：/v1/books</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">route</span><span class="params">(self, req, node, path)</span>:</span></span><br><span class="line">    path = path.split(<span class="string">'/'</span>)[<span class="number">1</span>:]</span><br><span class="line">    <span class="comment"># 转化后的路径 path:['v1','boos']</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">    	  <span class="comment"># 调用了routing.py文件中的lookup_controller方法</span></span><br><span class="line">        node, remainder = lookup_controller(node, path, req)</span><br><span class="line">        <span class="keyword">return</span> node, remainder</span><br><span class="line">    <span class="keyword">except</span> NonCanonicalPath <span class="keyword">as</span> e:</span><br><span class="line">        <span class="keyword">if</span> self.force_canonical <span class="keyword">and</span> \</span><br><span class="line">                <span class="keyword">not</span> _cfg(e.controller).get(<span class="string">'accept_noncanonical'</span>, <span class="keyword">False</span>):</span><br><span class="line">            <span class="keyword">if</span> req.method == <span class="string">'POST'</span>:</span><br><span class="line">                <span class="keyword">raise</span> RuntimeError(</span><br><span class="line">                    <span class="string">"You have POSTed to a URL '%s' which "</span></span><br><span class="line">                    <span class="string">"requires a slash. Most browsers will not maintain "</span></span><br><span class="line">                    <span class="string">"POST data when redirected. Please update your code "</span></span><br><span class="line">                    <span class="string">"to POST to '%s/' or set force_canonical to False"</span> %</span><br><span class="line">                    (req.pecan[<span class="string">'routing_path'</span>],</span><br><span class="line">                        req.pecan[<span class="string">'routing_path'</span>])</span><br><span class="line">                )</span><br><span class="line">            redirect(code=<span class="number">302</span>, add_slash=<span class="keyword">True</span>, request=req)</span><br><span class="line">        <span class="keyword">return</span> e.controller, e.remainder</span><br><span class="line"></span><br><span class="line"><span class="comment"># routing.py文件</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">lookup_controller</span><span class="params">(obj, remainder, request=None)</span>:</span></span><br><span class="line">	......</span><br><span class="line">	......</span><br><span class="line">	  <span class="comment"># 存储在obj中未找到处理方法时的_default，_lookup</span></span><br><span class="line">    notfound_handlers = []</span><br><span class="line">    <span class="keyword">while</span> <span class="keyword">True</span>:</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            obj, remainder = find_object(obj, remainder, notfound_handlers,</span><br><span class="line">                                         request)</span><br><span class="line">            handle_security(obj)</span><br><span class="line">            <span class="keyword">return</span> obj, remainder</span><br><span class="line">        <span class="keyword">except</span> (exc.HTTPNotFound, exc.HTTPMethodNotAllowed,</span><br><span class="line">                PecanNotFound) <span class="keyword">as</span> e:</span><br><span class="line">            <span class="keyword">if</span> isinstance(e, PecanNotFound):</span><br><span class="line">                e = exc.HTTPNotFound()</span><br><span class="line">            <span class="keyword">while</span> notfound_handlers:</span><br><span class="line">                name, obj, remainder = notfound_handlers.pop()</span><br><span class="line">                <span class="keyword">if</span> name == <span class="string">'_default'</span>:</span><br><span class="line">                    <span class="keyword">return</span> obj, remainder</span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    result = handle_lookup_traversal(obj, remainder)</span><br><span class="line">                    <span class="keyword">if</span> result:</span><br><span class="line">                        <span class="keyword">if</span> (</span><br><span class="line">                            remainder == [<span class="string">''</span>] <span class="keyword">and</span></span><br><span class="line">                            len(obj._pecan[<span class="string">'argspec'</span>].args) &gt; <span class="number">1</span></span><br><span class="line">                        ):</span><br><span class="line">                            <span class="keyword">raise</span> e</span><br><span class="line">                        obj_, remainder_ = result</span><br><span class="line">                        <span class="keyword">return</span> lookup_controller(obj_, remainder_, request)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">raise</span> e</span><br></pre></td></tr></table></figure>
+<p><strong>lookup_controller针对每一个controller对象，在其中查找对应的处理方法，如果没找到，则会继续找_default，如果没定义_default，则找_lookup，然后继续循环调用lookup_controller，直到找到对应的方法，或notfound_handlers 为空抛出异常</strong></p>
+<p>obj, remainder = find_object(obj, remainder, notfound_handlers, request)</p>
+<blockquote>
+<p>obj：当前的controller对象<br>remainder：路由信息，如[‘v1’, ‘books’]<br>notfound_handlers：该controller中没找到时，存储<code>_default</code>或者<code>_lookup</code><br>request：请求信息</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">find_object</span><span class="params">(obj, remainder, notfound_handlers, request)</span>:</span></span><br><span class="line">    prev_obj = <span class="keyword">None</span></span><br><span class="line">    <span class="keyword">while</span> <span class="keyword">True</span>:</span><br><span class="line">        <span class="keyword">if</span> obj <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">            <span class="keyword">raise</span> PecanNotFound</span><br><span class="line">        <span class="comment"># 如果传入的obj直接是一个处理方法（被expsoe装饰），直接返回</span></span><br><span class="line">        <span class="keyword">if</span> iscontroller(obj):</span><br><span class="line">            <span class="keyword">if</span> getattr(obj, <span class="string">'custom_route'</span>, <span class="keyword">None</span>) <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">                <span class="keyword">return</span> obj, remainder</span><br><span class="line">		    <span class="comment"># 处理自定义路由信息</span></span><br><span class="line">        _detect_custom_path_segments(obj)</span><br><span class="line">		</span><br><span class="line">				<span class="comment"># 根据自定义路由名找到处理方法</span></span><br><span class="line">        <span class="keyword">if</span> remainder:</span><br><span class="line">            custom_route = __custom_routes__.get((obj.__class__, remainder[<span class="number">0</span>]))</span><br><span class="line">            <span class="keyword">if</span> custom_route:</span><br><span class="line">                <span class="keyword">return</span> getattr(obj, custom_route), remainder[<span class="number">1</span>:]</span><br><span class="line">        cross_boundary(prev_obj, obj)</span><br><span class="line">        <span class="comment"># 如果根据默认和自定义路由都没找到，则找该controller中的index方法</span></span><br><span class="line">        <span class="comment"># 如果有路由：/v1/books//best（不标准的路径）,那么就只能路由到/v1/books,后面的就没法路由</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            next_obj, rest = remainder[<span class="number">0</span>], remainder[<span class="number">1</span>:]</span><br><span class="line">            <span class="keyword">if</span> next_obj == <span class="string">''</span>:</span><br><span class="line">                index = getattr(obj, <span class="string">'index'</span>, <span class="keyword">None</span>)</span><br><span class="line">                <span class="keyword">if</span> iscontroller(index):</span><br><span class="line">                    <span class="keyword">return</span> index, rest</span><br><span class="line">        <span class="keyword">except</span> IndexError:</span><br><span class="line">            index = getattr(obj, <span class="string">'index'</span>, <span class="keyword">None</span>)</span><br><span class="line">            <span class="keyword">if</span> iscontroller(index):</span><br><span class="line">                <span class="keyword">raise</span> NonCanonicalPath(index, [])</span><br><span class="line">				<span class="comment"># 存储_default方法到notfound_handlers</span></span><br><span class="line">        default = getattr(obj, <span class="string">'_default'</span>, <span class="keyword">None</span>)</span><br><span class="line">        <span class="keyword">if</span> iscontroller(default):</span><br><span class="line">            notfound_handlers.append((<span class="string">'_default'</span>, default, remainder))</span><br><span class="line">				<span class="comment"># 则存储_lookup方法到notfound_handlers</span></span><br><span class="line">        lookup = getattr(obj, <span class="string">'_lookup'</span>, <span class="keyword">None</span>)</span><br><span class="line">        <span class="keyword">if</span> iscontroller(lookup):</span><br><span class="line">            notfound_handlers.append((<span class="string">'_lookup'</span>, lookup, remainder))</span><br><span class="line">				<span class="comment"># 根据自定义的_route方法来处理路由（pecan允许开发者在controller中自定义_route方法，让开发者完全掌控路由方式）</span></span><br><span class="line">        route = getattr(obj, <span class="string">'_route'</span>, <span class="keyword">None</span>)</span><br><span class="line">        <span class="keyword">if</span> iscontroller(route):</span><br><span class="line">            <span class="keyword">if</span> len(getargspec(route).args) == <span class="number">2</span>:</span><br><span class="line">                warnings.warn(</span><br><span class="line">                    (</span><br><span class="line">                        <span class="string">"The function signature for %s.%s._route is changing "</span></span><br><span class="line">                        <span class="string">"in the next version of pecan.\nPlease update to: "</span></span><br><span class="line">                        <span class="string">"`def _route(self, args, request)`."</span> % (</span><br><span class="line">                            obj.__class__.__module__,</span><br><span class="line">                            obj.__class__.__name__</span><br><span class="line">                        )</span><br><span class="line">                    ),</span><br><span class="line">                    DeprecationWarning</span><br><span class="line">                )</span><br><span class="line">                next_obj, next_remainder = route(remainder)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                next_obj, next_remainder = route(remainder, request)</span><br><span class="line">            cross_boundary(route, next_obj)</span><br><span class="line">            <span class="keyword">return</span> next_obj, next_remainder</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> remainder:</span><br><span class="line">            <span class="keyword">raise</span> PecanNotFound</span><br><span class="line"></span><br><span class="line">        prev_remainder = remainder</span><br><span class="line">        prev_obj = obj</span><br><span class="line">        remainder = rest</span><br><span class="line">        <span class="comment"># 根据方法名（或者属性名）（默认的路由方式）找到处理方法</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            obj = getattr(obj, next_obj, <span class="keyword">None</span>)</span><br><span class="line">        <span class="keyword">except</span> UnicodeEncodeError:</span><br><span class="line">            obj = <span class="keyword">None</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> obj <span class="keyword">and</span> <span class="keyword">not</span> notfound_handlers <span class="keyword">and</span> hasattr(prev_obj, <span class="string">'index'</span>):</span><br><span class="line">            <span class="keyword">if</span> request.method <span class="keyword">in</span> _cfg(prev_obj.index).get(<span class="string">'generic_handlers'</span>,</span><br><span class="line">                                                          &#123;&#125;):</span><br><span class="line">                <span class="keyword">return</span> prev_obj.index, prev_remainder</span><br></pre></td></tr></table></figure>
+<p>find_object 首先会处理自定义的路由信息，然后存储<code>_default</code>和<code>_lookup</code>，最后处理默认路由（个人觉得可以先处理默认路由信息，然后根据是否配置route装饰进行取舍，这样可能处理更高效）</p>
+<p>routing.py中的lookup_controller 和 find_object是核心路由方式的实现，从代码中可以看出，最终找到处理方法的方式是根据路径（/v1/books）中每一个segment来查找对应的对象，然后根据当前对象再查找下一个对象，所以pecan的路由机制叫做<strong>对象分发</strong></p>
+<h2 id="装饰器"><a href="#装饰器" class="headerlink" title="装饰器"></a>装饰器</h2><p>装饰器定义在decorators.py中，其中最重要的就是expose，它标识了这个被装饰的方法可以被路由找到</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">when_for</span><span class="params">(controller)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">when</span><span class="params">(method, **kw)</span>:</span></span><br><span class="line">        <span class="function"><span class="keyword">def</span> <span class="title">decorate</span><span class="params">(f)</span>:</span></span><br><span class="line">            _cfg(f)[<span class="string">'generic_handler'</span>] = <span class="keyword">True</span></span><br><span class="line">            controller._pecan[<span class="string">'generic_handlers'</span>][method.upper()] = f</span><br><span class="line">            controller._pecan[<span class="string">'allowed_methods'</span>].append(method.upper())</span><br><span class="line">            expose(**kw)(f)</span><br><span class="line">            <span class="keyword">return</span> f</span><br><span class="line">        <span class="keyword">return</span> decorate</span><br><span class="line">    <span class="keyword">return</span> when</span><br><span class="line"></span><br><span class="line"><span class="comment"># template：标识了渲染模板，默认moko，</span></span><br><span class="line"><span class="comment"># generic：默认的方法处理所有类型的请求（GET,POST,PUT,DELETE）,如果为true,则各种类型的请求分开处理</span></span><br><span class="line"><span class="comment"># route：自定义路由</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">expose</span><span class="params">(template=None,</span></span></span><br><span class="line"><span class="function"><span class="params">           generic=False,</span></span></span><br><span class="line"><span class="function"><span class="params">           route=None,</span></span></span><br><span class="line"><span class="function"><span class="params">           **kw)</span>:</span></span><br><span class="line">    content_type = kw.get(<span class="string">'content_type'</span>, <span class="string">'text/html'</span>)</span><br><span class="line">    <span class="keyword">if</span> template == <span class="string">'json'</span>:</span><br><span class="line">        content_type = <span class="string">'application/json'</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">decorate</span><span class="params">(f)</span>:</span></span><br><span class="line">        <span class="comment"># flag the method as exposed</span></span><br><span class="line">        f.exposed = <span class="keyword">True</span></span><br><span class="line"></span><br><span class="line">        cfg = _cfg(f)</span><br><span class="line">        cfg[<span class="string">'explicit_content_type'</span>] = <span class="string">'content_type'</span> <span class="keyword">in</span> kw</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> route:</span><br><span class="line">            <span class="comment"># This import is here to avoid a circular import issue</span></span><br><span class="line">            <span class="keyword">from</span> pecan <span class="keyword">import</span> routing</span><br><span class="line">            <span class="keyword">if</span> cfg.get(<span class="string">'generic_handler'</span>):</span><br><span class="line">                <span class="keyword">raise</span> ValueError(</span><br><span class="line">                    <span class="string">'Path segments cannot be overridden for generic '</span></span><br><span class="line">                    <span class="string">'controllers.'</span></span><br><span class="line">                )</span><br><span class="line">            routing.route(route, f)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># set a "pecan" attribute, where we will store details</span></span><br><span class="line">        cfg[<span class="string">'content_type'</span>] = content_type</span><br><span class="line">        cfg.setdefault(<span class="string">'template'</span>, []).append(template)</span><br><span class="line">        cfg.setdefault(<span class="string">'content_types'</span>, &#123;&#125;)[content_type] = template</span><br><span class="line"></span><br><span class="line">        <span class="comment"># handle generic controllers</span></span><br><span class="line">        <span class="keyword">if</span> generic:</span><br><span class="line">            <span class="keyword">if</span> f.__name__ <span class="keyword">in</span> (<span class="string">'_default'</span>, <span class="string">'_lookup'</span>, <span class="string">'_route'</span>):</span><br><span class="line">                <span class="keyword">raise</span> ValueError(</span><br><span class="line">                    <span class="string">'The special method %s cannot be used as a generic '</span></span><br><span class="line">                    <span class="string">'controller'</span> % f.__name__</span><br><span class="line">                )</span><br><span class="line">            cfg[<span class="string">'generic'</span>] = <span class="keyword">True</span></span><br><span class="line">            cfg[<span class="string">'generic_handlers'</span>] = dict(DEFAULT=f)</span><br><span class="line">            cfg[<span class="string">'allowed_methods'</span>] = []</span><br><span class="line">            <span class="comment"># 方法可以被类似@index.when()装饰</span></span><br><span class="line">            f.when = when_for(f)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># store the arguments for this controller method</span></span><br><span class="line">        <span class="comment"># 参数</span></span><br><span class="line">        cfg[<span class="string">'argspec'</span>] = getargspec(f)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> f</span><br><span class="line">    <span class="keyword">return</span> decorate</span><br></pre></td></tr></table></figure>
+<ol>
+<li><p><code>cfg = _cfg(f)</code>代码为方法指定了参数<code>_pecan，dict</code>对象，其中存储了该方法很多重要信息</p>
+</li>
+<li><p><code>cfg[‘generic_handlers’] = dict(DEFAULT=f)</code>当<code>generic</code>为<code>true</code>时，其中存储了具体的处理方法，<code>{‘generic_handlers’：{‘DEFAULT’:function,‘POST’:function,‘PUT’:function}}</code>，当请求时<code>POST,PUT,DELETE</code>等方式时，就是从其中获取处理方法</p>
+</li>
+<li><p>f.when = when_for(f)</p>
+</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 看似是对index_post方法进行装饰，但是主要还是对index方法进行处理</span></span><br><span class="line"><span class="comment"># 这里把index_post方法添加到index方法的_pecan['generic_handlers']中</span></span><br><span class="line"><span class="comment"># 这个写法很有意思，大家可以借鉴</span></span><br><span class="line"><span class="meta">@index.when(method='POST')</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">index_post</span><span class="params">(self)</span>:</span></span><br><span class="line">	<span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+<h2 id="根据POST-PUT-DELETE路由"><a href="#根据POST-PUT-DELETE路由" class="headerlink" title="根据POST,PUT,DELETE路由"></a>根据POST,PUT,DELETE路由</h2><p>在<code>routing.py</code>中<code>find_object</code>方法会返回找到的<code>subcontroller</code>,它是有@expose装饰的一个方法</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">find_object</span><span class="params">(obj, remainder, notfound_handlers, request)</span>:</span></span><br><span class="line">   ...</span><br><span class="line">   ...</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Last-ditch effort: if there's not a matching subcontroller, no</span></span><br><span class="line">        <span class="comment"># `_default`, no `_lookup`, and no `_route`, look to see if there's</span></span><br><span class="line">        <span class="comment"># an `index` that has a generic method defined for the current request</span></span><br><span class="line">        <span class="comment"># method.</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> obj <span class="keyword">and</span> <span class="keyword">not</span> notfound_handlers <span class="keyword">and</span> hasattr(prev_obj, <span class="string">'index'</span>):</span><br><span class="line">            <span class="keyword">if</span> request.method <span class="keyword">in</span> _cfg(prev_obj.index).get(<span class="string">'generic_handlers'</span>,</span><br><span class="line">                                                          &#123;&#125;):</span><br><span class="line">                <span class="keyword">return</span> prev_obj.index, prev_remainder</span><br></pre></td></tr></table></figure>
+<p>在core.py中根据POST具体找到相应的方法</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">find_controller</span><span class="params">(self, state)</span>:</span></span><br><span class="line">   ...</span><br><span class="line">   ...</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> cfg.get(<span class="string">'generic'</span>):</span><br><span class="line">            im_self = six.get_method_self(controller)</span><br><span class="line">            handlers = cfg[<span class="string">'generic_handlers'</span>]</span><br><span class="line">            <span class="comment"># 根据POST找到处理方法</span></span><br><span class="line">            controller = handlers.get(req.method, handlers[<span class="string">'DEFAULT'</span>])</span><br><span class="line">            handle_security(controller, im_self)</span><br><span class="line">            cfg = _cfg(controller)</span><br></pre></td></tr></table></figure>
+<p>所以最终找到处理方法是在core.py中，其实这里我认为处理的不好，还是应该在routing.py中处理</p>
+<p>这里有几个写的不好的地方：</p>
+<ol>
+<li>当请求为/v1//books这种不标准的形式的时候，pecan的路由机制是没法处理的</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    next_obj, rest = remainder[<span class="number">0</span>], remainder[<span class="number">1</span>:]</span><br><span class="line">    <span class="comment"># 可以将这里改成 if next_obj == '' and not rest  解决该问题</span></span><br><span class="line">    <span class="keyword">if</span> next_obj == <span class="string">''</span>:</span><br><span class="line">        index = getattr(obj, <span class="string">'index'</span>, <span class="keyword">None</span>)</span><br><span class="line">        <span class="keyword">if</span> iscontroller(index):</span><br><span class="line">            <span class="keyword">return</span> index, rest</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">route</span><span class="params">(self, req, node, path)</span>:</span></span><br><span class="line">	  <span class="comment"># 可以将list中最后的空字符串删除，这个需和第一点配合</span></span><br><span class="line">    path = path.split(<span class="string">'/'</span>)[<span class="number">1</span>:]</span><br></pre></td></tr></table></figure>
+<ol>
+<li>对于 POST /v1/books/safgrgfwsfrsg （最后的一个segment没有定义，并且没有定义_lookup和_default），这是依然能够找到路由方法，但是会在参数处理的时候报错，这个地方不合理</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">find_object</span><span class="params">(obj, remainder, notfound_handlers, request)</span>:</span></span><br><span class="line">		...</span><br><span class="line">		...</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            obj = getattr(obj, next_obj, <span class="keyword">None</span>)</span><br><span class="line">        <span class="keyword">except</span> UnicodeEncodeError:</span><br><span class="line">            obj = <span class="keyword">None</span></span><br><span class="line">            </span><br><span class="line">		<span class="comment"># 添加这段代码规避该问题</span></span><br><span class="line">		<span class="comment">###########</span></span><br><span class="line">		<span class="keyword">if</span> <span class="keyword">not</span> obj <span class="keyword">and</span> <span class="keyword">not</span> notfound_handlers <span class="keyword">and</span> remainder:</span><br><span class="line">			abort(<span class="number">404</span>)</span><br><span class="line">		<span class="comment">##########</span></span><br><span class="line">		</span><br><span class="line">        <span class="comment"># Last-ditch effort: if there's not a matching subcontroller, no</span></span><br><span class="line">        <span class="comment"># `_default`, no `_lookup`, and no `_route`, look to see if there's</span></span><br><span class="line">        <span class="comment"># an `index` that has a generic method defined for the current request</span></span><br><span class="line">        <span class="comment"># method.</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> obj <span class="keyword">and</span> <span class="keyword">not</span> notfound_handlers <span class="keyword">and</span> hasattr(prev_obj, <span class="string">'index'</span>):</span><br><span class="line">            <span class="keyword">if</span> request.method <span class="keyword">in</span> _cfg(prev_obj.index).get(<span class="string">'generic_handlers'</span>,</span><br><span class="line">                                                          &#123;&#125;):</span><br><span class="line">                <span class="keyword">return</span> prev_obj.index, prev_remainder</span><br></pre></td></tr></table></figure>
+<p>上面3点对源码的改动可以完成我们自定义的一些需求，并且是pecan的代码结构更加合理。</p>
+<h1 id="pecan-控制器和路由系统"><a href="#pecan-控制器和路由系统" class="headerlink" title="pecan 控制器和路由系统"></a>pecan 控制器和路由系统</h1><p>对于 pecan 的路由分发机制还是有必要再分析一下</p>
+<p>Pecan路由采用的是对象分发机制，将HTTP请求分发到控制器，然后到控制器里定义的方法。</p>
+<p>对象分发机制将请求路径进行切割，根据请求路径从root控制器开始，按次序寻找路径对应的控制器及方法。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pecan <span class="keyword">import</span> expose</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BooksController</span><span class="params">(object)</span>:</span></span><br><span class="line"><span class="meta">    @expose()</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">index</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Welcome to book section."</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @expose()</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">bestsellers</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"We have 5 books in the top 10."</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CatalogController</span><span class="params">(object)</span>:</span></span><br><span class="line"><span class="meta">    @expose()</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">index</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Welcome to the catalog."</span></span><br><span class="line"></span><br><span class="line">    books = BooksController()</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RootController</span><span class="params">(object)</span>:</span></span><br><span class="line"><span class="meta">    @expose()</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">index</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Welcome to store.example.com!"</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @expose()</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">hours</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Open 24/7 on the web."</span></span><br><span class="line"></span><br><span class="line">    catalog = CatalogController()</span><br></pre></td></tr></table></figure>
+<p>对于上述代码，如果此时有这样一个请求：/catalog/books/bestsellers，则pecan首先将这个请求分割成：catalog, books, bestsellers。接下来，pecan将会从root控制器中寻找catalog，找到catalog对象后，pecan会继续在catalog控制器中寻找books，以此类推一直找到bestsellers。如果URL以’/‘结束，那么pecan将会查找最后一个控制器的index方法。</p>
+<p>进一步讲，下面的这些请求路径：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">└── /</span><br><span class="line">    ├── /hours</span><br><span class="line">    └── /catalog</span><br><span class="line">         └── /catalog/books</span><br><span class="line">            └── /catalog/books/bestsellers</span><br></pre></td></tr></table></figure>
+<p>将会路由给这些控制器方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">└── RootController.index</span><br><span class="line">    ├── RootController.hours</span><br><span class="line">    └── CatalogController.index</span><br><span class="line">         └── BooksController.index</span><br><span class="line">            └── BooksController.bestsellers</span><br></pre></td></tr></table></figure>
+<h2 id="路由算法"><a href="#路由算法" class="headerlink" title="路由算法"></a>路由算法</h2><p>有时，标准的对象分发路由方式不足以将某个URL路由到一个控制器上。pecan提供了几种方法去使对象分发方式的路由发生短路，以便用更多的控制来处理URL，以下这些特殊的方法用来实现这个目标：<code>_lookup()，_default()，_route()</code>。在你的控制器上定义这些方法可以让你更加灵活的处理一个URL的全部内容或部分内容。</p>
+<h3 id="Controller-增加方法处理路由"><a href="#Controller-增加方法处理路由" class="headerlink" title="Controller 增加方法处理路由"></a>Controller 增加方法处理路由</h3><p>我们需要不同的路由返回不同的内容。这里我们介绍一种Pecan注册路由的方法。RootController加一个方法叫做diff。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># /usr/bin/env python</span></span><br><span class="line"><span class="comment"># coding=utf-8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> utils <span class="keyword">import</span> happy_expose</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RootController</span><span class="params">(object)</span>:</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @happy_expose</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">index</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Hello World"</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @happy_expose</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_default</span><span class="params">(self, *remainder)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">'Hello World from root default'</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @happy_expose</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">diff</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">'You find different worlds'</span></span><br></pre></td></tr></table></figure>
+<p>增加了diff方法，装饰器不要忘了，怎么访问这个不同的路径呢，很简单：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">http://127.0.0.1:5000/diff</span><br><span class="line"></span><br><span class="line">页面显示 You find different worlds</span><br></pre></td></tr></table></figure>
+<p>我们可以通过添加不同的方法名，来处理不同的路由，返回不同的结果。Pecan会根据路由查看，你这个控制器有没有对应的属性，有的话就交给这个属性方法处理。</p>
+<h3 id="Controller-增加属性处理路由"><a href="#Controller-增加属性处理路由" class="headerlink" title="Controller 增加属性处理路由"></a>Controller 增加属性处理路由</h3><p>我们已经知道了一种注册路由的方法了，现在介绍第二种。</p>
+<p>更改代码，这次我们原有的文件结构不变，给root.py增加点东西，增加后变成下面这样</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># /usr/bin/env python</span></span><br><span class="line"><span class="comment"># coding=utf-8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> utils <span class="keyword">import</span> happy_expose</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BookController</span><span class="params">(object)</span>:</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @happy_expose</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">index</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Welcome to the Sea of Books"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RootController</span><span class="params">(object)</span>:</span></span><br><span class="line"></span><br><span class="line">    book = BookController()</span><br><span class="line"></span><br><span class="line"><span class="meta">    @happy_expose</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">index</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Hello World"</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @happy_expose</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_default</span><span class="params">(self, *remainder)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">'Hello World from root default'</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @happy_expose</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">diff</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">'You find different worlds'</span></span><br></pre></td></tr></table></figure>
+<p>两点改变：</p>
+<ul>
+<li>增加BookController这个类的定义</li>
+<li>RootController增加一个属性 book = BookController()</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">浏览器输入http://127.0.0.1:5000/book/</span><br><span class="line"></span><br><span class="line">页面显示 Welcome to the Sea of Books</span><br><span class="line"></span><br><span class="line">我们如愿看到，“Welcome to the Sea of Books”</span><br></pre></td></tr></table></figure>
+<p>这次的原理，其实是个上一个添加路由的方法是一样的，Pecan会根据路由查看，你这个控制器有没有对应的属性，有的话就交给这个属性方法处理。上一个是添加了一个成员方法，这次是一个成员属性而已。</p>
+<p>如果我们访问：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">http://127.0.0.1:5000/book/sea 会是什么样呢？</span><br><span class="line"></span><br><span class="line">页面显示 Hello World from root default</span><br><span class="line"></span><br><span class="line">咦，怎么进了RootController的_default了呢？！</span><br></pre></td></tr></table></figure>
+<p>其实原理是这么回事的：</p>
+<p>Pecan会把路由分成[“book”, “sea”]</p>
+<ol>
+<li><p>从RootController去发现有没有能处理book的Controller。发现RooController有一个book属性值为BookController的对象。</p>
+</li>
+<li><p>Pecan从BookController的对象去发现有没有能处理sea的Controller。找了一圈发现没有，这就尴尬了处理不了！但是为啥没有报404呢？</p>
+</li>
+</ol>
+<p>因为在第一步的时候，Pecan不仅会去发现有没有能处理book的Controller，同时还会去检查RootController有没有一些应对没找到Controller时处理的方法。这些方法可以是<code>_defalut</code>（这个我们已经用过了），<code>_lookup</code>（这个后面在讲）。发现有<code>_default</code>，会将<code>_default</code>放入一个列表，待用。第二步以后发现，没有能处理的Controller，所以调用了RootController对象的<code>_default</code>的方法，我们就看到了“Hello World from root default”</p>
+<p>如果在 BookController 放个 _default 呢？</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BookController</span><span class="params">(object)</span>:</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @happy_expose</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">index</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Welcome to the Sea of Books"</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @happy_expose</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_default</span><span class="params">(self, *remainder)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"This is Book default"</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">再访问http://127.0.0.1:5000/book/sea 会是什么样呢？</span><br><span class="line"></span><br><span class="line">页面显示 This is Book default</span><br></pre></td></tr></table></figure>
+<p>为啥是这个结果呢？</p>
+<ol>
+<li><p>第一步的时候，会把<code>RooController()._default</code>，放入一个待用队列，源码里叫做<code>notfound_handlers=[RooController()._default]</code></p>
+</li>
+<li><p>第二步的时候，虽然没有发现能处理sea的控制器，也会去查找一个有没有<code>_default，_look_up</code>。发现有<code>_default</code>，也会放入队列。变成<code>notfound_handlers=[RooController()._default, BookController()._default]</code>。</p>
+</li>
+</ol>
+<p>当最终没有能处理[‘book’, ‘sea’]时，开始<code>notfound_handlers</code>上场。他会倒着拿里面的值，就是<code>notfound_handlers.pop()</code>。所以会<code>BookController()._default</code>处理。</p>
+<h3 id="lookup"><a href="#lookup" class="headerlink" title="_lookup()"></a>_lookup()</h3><p><code>_lookup()</code>提供一种方式处理一个URL的部分内容，并返回一个新的控制器用于处理URL的剩余部分。一个<code>_lookup()</code>方法可以提供一个或多个参数，以及URL的分片。同时_lookup()方法应该用可变的位置表示URL的剩余部分，并且在它的返回值里包含未处理的剩余URL部分。在下面的例子中，对象分发路由算法将会把remainder列表传递给该方法返回的控制器。</p>
+<p><code>_lookup()</code>除了被用来动态创建控制器以外，当没有其他任何控制器方法能够匹配一个URL且没有定义<code>_default()</code>方法时，<code>_lookup()</code>方法作为最后一个方法被调用。</p>
+<p>此方法返回一个新的控制器用于控制url的剩余部分，如下代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_student_by_primary_key</span><span class="params">(num)</span>:</span></span><br><span class="line">    a = [<span class="string">"xiao_ming"</span>, <span class="string">"xiao_li"</span>]</span><br><span class="line">    num = int(num) <span class="keyword">if</span> type(num) == int <span class="keyword">and</span> len(a) &gt; int(num) <span class="keyword">else</span> <span class="number">0</span></span><br><span class="line">    <span class="keyword">return</span> a[num]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Addr</span><span class="params">(object)</span>:</span></span><br><span class="line"><span class="meta">    @expose()</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">index</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"addr"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">StudentController</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, student)</span>:</span></span><br><span class="line">        self.student = student</span><br><span class="line"></span><br><span class="line"><span class="meta">    @expose()</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">name</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self.student</span><br><span class="line"></span><br><span class="line">    addr = Addr()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RootController</span><span class="params">(object)</span>:</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @expose()</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_lookup</span><span class="params">(self, primary_key, *remainder)</span>:</span></span><br><span class="line">        student = get_student_by_primary_key(primary_key)</span><br><span class="line">        <span class="keyword">if</span> student:</span><br><span class="line">            <span class="keyword">return</span> StudentController(student), remainder</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="string">"404"</span></span><br></pre></td></tr></table></figure>
+<p>例如”/1/name”路径，将走_lookup()方法，返回 StudentController(student), remainder；</p>
+<p>此时，StudentController(student) 是一个新的控制器，而remainder是url的剩余部分，即 name；</p>
+<p>StudentController() 控制器将找到def name(self) 进而响应请求。</p>
+<p>同理，对于”/100/addr”，也走_lookup()方法，返回 StudentController(student), remainder；</p>
+<p>此时，StudentController(student) 是一个新的控制器，而remainder是url的剩余部分，即 addr；</p>
+<p>找到addr = Addr()，进而得到响应。</p>
+<h3 id="default"><a href="#default" class="headerlink" title="_default()"></a>_default()</h3><p>对于标准的对象路由分发机制，当没有任何控制器可以处理url是，_default将要作为最后一个方法被调度。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> functools <span class="keyword">import</span> wraps</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">happy_expose</span><span class="params">(f=None, **kw)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> f <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">        <span class="function"><span class="keyword">def</span> <span class="title">inner_expose</span><span class="params">(func)</span>:</span></span><br><span class="line">            <span class="keyword">return</span> happy_expose(func, **kw)</span><br><span class="line">        <span class="keyword">return</span> inner_expose</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line"><span class="meta">        @wraps(f)</span></span><br><span class="line"><span class="meta">        @expose(**kw)</span></span><br><span class="line">        <span class="function"><span class="keyword">def</span> <span class="title">_expose</span><span class="params">(*args, **kwargs)</span>:</span></span><br><span class="line">            <span class="keyword">return</span> f(*args, **kwargs)</span><br><span class="line">        <span class="keyword">return</span> _expose</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RootController</span><span class="params">(object)</span>:</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @expose()</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">hours</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Open 24/7 on the web."</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @happy_expose</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_default</span><span class="params">(self, *remainder)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">'Hello World from root default'</span></span><br></pre></td></tr></table></figure>
+<p>_default方法是最后被调用的。</p>
+<h3 id="route-方法"><a href="#route-方法" class="headerlink" title="_route()方法"></a>_route()方法</h3><p><code>_route()</code>方法允许一个控制器完全覆盖pecan的路由机制。pecan它本身也使用<code>_route()</code>方法去实现它的RestController。如果你想在pecan之上定义一套替代的路由机制，那么定义一个包含<code>_route()</code>方法的基控制器将会使你完全掌控请求的路由。</p>
+<h2 id="expose-暴露控制器方法"><a href="#expose-暴露控制器方法" class="headerlink" title="expose 暴露控制器方法"></a>expose 暴露控制器方法</h2><p>expose告诉Pecan类中的哪些方法是公开可见的 。如果一个方法没有用修饰expose()，Pecan永远不会将请求路由到它。</p>
+<p>pecan默认采用expose进行路由绑定，需要路由控制器类的方法都要经过expose装饰器的装饰，pecan就可以使HTTP请求找到对应的方法。</p>
+<p>不同的使用方法会有不同的效果，如下：</p>
+<h3 id="expose"><a href="#expose" class="headerlink" title="@expose()"></a>@expose()</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pecan <span class="keyword">import</span> expose</span><br><span class="line"> </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RootController</span><span class="params">(object)</span>:</span></span><br><span class="line"><span class="meta">    @expose()</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">hello</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">'Hello World’</span></span><br></pre></td></tr></table></figure>
+<p>被装饰的方法需要返回一个字符串，表示HTML响应的body。</p>
+<h3 id="expose-html-template-name"><a href="#expose-html-template-name" class="headerlink" title="@expose(html_template_name)"></a>@expose(html_template_name)</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pecan <span class="keyword">import</span> expose</span><br><span class="line"> </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RootController</span><span class="params">(object)</span>:</span></span><br><span class="line"><span class="meta">    @expose('html_template.mako')</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">hello</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> &#123;<span class="string">'msg'</span>: <span class="string">'Hello!’&#125;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- html_template.mako --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">body</span>&gt;</span>$&#123;msg&#125;<span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>被装饰的方法返回一个字典，字典的key可以在html模板中使用<code>${key}</code>的方式引用。</p>
+<h3 id="expose-route-’some-path’"><a href="#expose-route-’some-path’" class="headerlink" title="@expose(route=’some-path’)"></a>@expose(route=’some-path’)</h3><p>例如有这样一个请求：/some-path，由于python语法限制，pecan并不能将该请求的处理方法声明为some-path。使用@expose(route=’some-path’)，被装饰方法将响应<code>/some-path</code>请求。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RootController</span><span class="params">(object)</span>:</span></span><br><span class="line"> </span><br><span class="line"><span class="meta">    @expose(route='some-path')</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">some_path</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> dict()</span><br></pre></td></tr></table></figure>
+<p>注意：尽量不使用dict()，使用不当，HTTP状态码将是204，及服务器没有返回任何内容错误。</p>
+<p>另一种方式：pecan.route()</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RootController</span><span class="params">(object)</span>:</span></span><br><span class="line"> </span><br><span class="line"><span class="meta">    @expose()</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">some_path</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> dict()</span><br><span class="line"> </span><br><span class="line">pecan.route(<span class="string">'some-path'</span>, RootController.some_path)</span><br></pre></td></tr></table></figure>
+<p>延伸：利用route()方法来将请求路由给下一级控制器</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ChildController</span><span class="params">(object)</span>:</span></span><br><span class="line"> </span><br><span class="line"><span class="meta">    @expose()</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">child</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> dict()</span><br><span class="line"> </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RootController</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"> </span><br><span class="line">pecan.route(RootController, <span class="string">'child-path'</span>, ChildController())</span><br></pre></td></tr></table></figure>
+<p>在这个例子中，pecan应用将会给请求/child-path/child/返回HTTP 200响应。</p>
+<h3 id="expose-generic-True"><a href="#expose-generic-True" class="headerlink" title="@expose(generic=True)"></a>@expose(generic=True)</h3><p>expose()方法中的generic参数可以根据请求方法对URL进行重载，即一个url路径可以被两个不同的方法处理。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RootController</span><span class="params">(object)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># HTTP GET /</span></span><br><span class="line"><span class="meta">    @expose(generic=True, template='json')</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">index</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> dict()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># HTTP POST /</span></span><br><span class="line"><span class="meta">    @index.when(method='POST', template='json')</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">index_POST</span><span class="params">(self, **kw)</span>:</span></span><br><span class="line">        uuid = create_something()</span><br><span class="line">        <span class="keyword">return</span> dict(uuid=uuid)</span><br></pre></td></tr></table></figure>
+<p>对于”/“的GET请求，由index()方法处理；对于”/“的POST请求，由index_POST方法处理。</p>
+<p><strong>根据请求方法来路由，其实还有一种方式，继承<code>pecan.rest.RestController</code>来实现</strong></p>
+<p>但是这里有个坑，就是不能实现<code>index</code>方法，不然会被覆盖，具体用法看下：</p>
+<p><img src="/images/python-web-pecan-3.png" alt="With RestController"></p>
+<p><img src="/images/python-web-pecan-4.png" alt="default method with RestController"></p>
+<p><a href="https://xinzhe.blog.csdn.net/article/details/114086638" target="_blank" rel="external">Pecan学习：官方文档解读</a></p>
+<p><a href="https://pecan.readthedocs.io/en/latest/rest.html#rest" target="_blank" rel="external">Writing RESTful Web Services with Generic Controllers</a></p>
+<h3 id="expose-叠加用法"><a href="#expose-叠加用法" class="headerlink" title="@expose()叠加用法"></a>@expose()叠加用法</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RootController</span><span class="params">(object)</span>:</span></span><br><span class="line"><span class="meta">    @expose('json')</span></span><br><span class="line"><span class="meta">    @expose('text_template.mako', content_type='text/plain')</span></span><br><span class="line"><span class="meta">    @expose('html_template.mako')</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">hello</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> &#123;<span class="string">'msg'</span>: <span class="string">'Hello!'</span>&#125;</span><br></pre></td></tr></table></figure>
+<p>叠加使用后一个<code>hello</code>方法可以响应三种格式的请求(application/json, text/plain, text/html)。</p>
+<ul>
+<li>当客户端请求/hello.json或者http header中包含“Accept: application/json”时，将hello()方法响应的名字空间渲染进json文本，及@expose(‘json’)用法；</li>
+<li>当客户端请求/hello.txt或者http header中包含“Accept: text/plain”时，使用text_template.mako模板文件响应，即@expose(‘text_template.mako’, content_type=’text/plain’)用法；</li>
+<li>当客户端请求/hello.html时，使用html_template.mako模板文件。如果客户端请求/hello，并且没有显式指明内容格式，则pecan默认使用text/html的内容格式进行响应，假设客户端想要HTML。</li>
+</ul>
+<h1 id="pecan-使用示例"><a href="#pecan-使用示例" class="headerlink" title="pecan 使用示例"></a>pecan 使用示例</h1><p>配置文件test.ini</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[composite:hello]</span></span><br><span class="line"><span class="attr">use</span> = egg:Paste#urlmap</span><br><span class="line">/ = hello</span><br><span class="line"></span><br><span class="line"><span class="section">[pipeline:hello]</span></span><br><span class="line"><span class="attr">pipeline</span> = main</span><br><span class="line"></span><br><span class="line"><span class="section">[app:main]</span></span><br><span class="line">paste.app_factory = main:app_factory</span><br><span class="line"><span class="attr">root</span> = main.Controller</span><br></pre></td></tr></table></figure>
+<p>main.py简单文件</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> wsgiref.simple_server <span class="keyword">as</span> wss</span><br><span class="line"><span class="keyword">from</span> paste <span class="keyword">import</span> deploy</span><br><span class="line"><span class="keyword">from</span> pecan <span class="keyword">import</span> expose, Response</span><br><span class="line"><span class="keyword">import</span> pecan</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Controller</span><span class="params">(object)</span>:</span></span><br><span class="line"><span class="meta">    @expose()</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">hello</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> Response(<span class="string">'Hello, World!'</span>, <span class="number">202</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">build_wsgi_app</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">import</span> os</span><br><span class="line">    abspath = os.path.dirname(os.path.abspath(__file__))</span><br><span class="line">    conf_path = os.path.join(abspath, <span class="string">"hello.ini"</span>)</span><br><span class="line">    app = deploy.loadapp(<span class="string">"config:&#123;0&#125;"</span>.format(conf_path), name=<span class="string">"main"</span>)</span><br><span class="line">    <span class="keyword">return</span> app</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">app_factory</span><span class="params">(global_config, **local_conf)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> pecan.make_app(root=local_conf.get(<span class="string">'root'</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    server = wss.make_server(<span class="string">''</span>, <span class="number">8000</span>, build_wsgi_app())</span><br><span class="line">    server.serve_forever()</span><br></pre></td></tr></table></figure>
+<p>配置文件中，构建一个叫hello的composite，使用一个叫hello的pipeline。pipeline使用Controller作为控制器。</p>
+<p>build_wsgi_app 加载配置文件。</p>
+<p>运行server</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python main.py</span><br></pre></td></tr></table></figure>
+<p><img src="/images/python-web-pecan-5.png" alt="img"></p>
+<p><br><br>参考：</p>
+<p><a href="https://blog.csdn.net/choumin/article/details/89405135?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-14.baidujs&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-14.baidujs" target="_blank" rel="external">pecan的路由机制</a></p>
+<p><a href="https://blog.csdn.net/qq527631128/article/details/90245555" target="_blank" rel="external">pecan源码阅读</a></p>
+<p><a href="https://www.cnblogs.com/aaronthon/p/14832494.html" target="_blank" rel="external">Pecan控制器和路由系统</a></p>
+<p><a href="https://blog.csdn.net/weixin_43700106/article/details/107734216" target="_blank" rel="external">python 学习记录：pecan 框架原理分析和示例</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+<blockquote class="blockquote-center" style="color: #ccc;">
+    -------------本文结束 <i class="fa fa-apple"></i> 感谢您的阅读-------------
+</blockquote>
+
+  <span id="inline-green" style="border-radius:3px;">作者</span>：<a class="link-blue" href="https://github.com/magiceses" target="_blank">Magiceses</a><br/>有问题请 <a class="link-blue" href="https://magiceses.github.io/guestbook" target="_blank">留言</a> 或者私信我的 <a class="link-blue" href="https://weibo.com/u/3069595351" target="_blank">微博</a>。
+
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>满分是10分的话，这篇文章你给几分</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/reward/reward_wechat.png" alt="magiceses WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/reward/reward_alipay.png" alt="magiceses Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"><i class="fa fa-tag"></i> Python</a>
+          
+            <a href="/tags/PythonWeb/" rel="tag"><i class="fa fa-tag"></i> PythonWeb</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/03/31/prometheus-alertmanager-使用原理和源码分析/" rel="next" title="Alertmanager 使用原理和源码分析">
+                <i class="fa fa-chevron-left"></i> Alertmanager 使用原理和源码分析
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/10/01/prometheus-prometheus-0-简单使用/" rel="prev" title="Prometheus 简单使用">
+                Prometheus 简单使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar/avatar.png"
+               alt="magiceses" />
+          <p class="site-author-name" itemprop="name">magiceses</p>
+          <p class="site-description motion-element" itemprop="description">Stay Hungry,Stay Foolish</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">36</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/magiceses" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://blog.csdn.net/weixin_43700106" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-chrome"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/weblog" title="建站日志" target="_blank">建站日志</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/reward" title="打赏" target="_blank">打赏</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#pecan-工程创建"><span class="nav-number">1.</span> <span class="nav-text">pecan 工程创建</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#pecan源码目录"><span class="nav-number">1.1.</span> <span class="nav-text">pecan源码目录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建-pecan-工程"><span class="nav-number">1.2.</span> <span class="nav-text">创建 pecan 工程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#一般工程"><span class="nav-number">1.2.1.</span> <span class="nav-text">一般工程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Restful工程"><span class="nav-number">1.2.2.</span> <span class="nav-text">Restful工程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#运行-pecan-工程"><span class="nav-number">1.3.</span> <span class="nav-text">运行 pecan 工程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#pecan-源码解析"><span class="nav-number">2.</span> <span class="nav-text">pecan 源码解析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#路由分析"><span class="nav-number">2.1.</span> <span class="nav-text">路由分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#装饰器"><span class="nav-number">2.2.</span> <span class="nav-text">装饰器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#根据POST-PUT-DELETE路由"><span class="nav-number">2.3.</span> <span class="nav-text">根据POST,PUT,DELETE路由</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#pecan-控制器和路由系统"><span class="nav-number">3.</span> <span class="nav-text">pecan 控制器和路由系统</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#路由算法"><span class="nav-number">3.1.</span> <span class="nav-text">路由算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Controller-增加方法处理路由"><span class="nav-number">3.1.1.</span> <span class="nav-text">Controller 增加方法处理路由</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Controller-增加属性处理路由"><span class="nav-number">3.1.2.</span> <span class="nav-text">Controller 增加属性处理路由</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#lookup"><span class="nav-number">3.1.3.</span> <span class="nav-text">_lookup()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#default"><span class="nav-number">3.1.4.</span> <span class="nav-text">_default()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#route-方法"><span class="nav-number">3.1.5.</span> <span class="nav-text">_route()方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#expose-暴露控制器方法"><span class="nav-number">3.2.</span> <span class="nav-text">expose 暴露控制器方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#expose"><span class="nav-number">3.2.1.</span> <span class="nav-text">@expose()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#expose-html-template-name"><span class="nav-number">3.2.2.</span> <span class="nav-text">@expose(html_template_name)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#expose-route-’some-path’"><span class="nav-number">3.2.3.</span> <span class="nav-text">@expose(route=’some-path’)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#expose-generic-True"><span class="nav-number">3.2.4.</span> <span class="nav-text">@expose(generic=True)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#expose-叠加用法"><span class="nav-number">3.2.5.</span> <span class="nav-text">@expose()叠加用法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#pecan-使用示例"><span class="nav-number">4.</span> <span class="nav-text">pecan 使用示例</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+      
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="busuanzi-count">
+
+  <!-- <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script> -->
+  <!-- 上面这个是之前的，不知道为什么失效了，改成下面这个 -->
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">您是第<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>个小伙伴</span>
+  
+
+  
+    <span class="site-pv">本站总浏览<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">magiceses</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Pisces
+  </a>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count" style="color: #e90f92;">全站共 685k 字</span>
+</div>
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+  <!-- 按需加载背景 -->
+  <!-- 背景动画 -->
+<script type="text/javascript">
+  // 按需加载背景
+  // 如果是all，就直接加载了
+  if("pc" == "all") {
+    $.getScript("/js/src/particle.js?v=5.0.1");
+  }
+  // 识别手机或电脑的js开始
+  (function(){
+    var res = GetRequest();
+    var par = res['index'];
+    if(par!='gfan'){
+      var ua=navigator.userAgent.toLowerCase();
+      var contains=function (a, b){
+          if(a.indexOf(b)!=-1){return true;}
+      };
+      if((contains(ua,"android") && contains(ua,"mobile"))||(contains(ua,"android") && contains(ua,"mozilla"))||(contains(ua,"android") && contains(ua,"opera"))||contains(ua,"ucweb7")||contains(ua,"iphone")){
+        return false;
+      } else {
+        $.getScript("/js/src/particle.js?v=5.0.1");
+      }
+    }
+  })();
+  function GetRequest() {
+    var url = location.search;
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+      var str = url.substr(1);
+      strs = str.split("&");
+      for(var i = 0; i < strs.length; i ++) {
+        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+      }
+    }
+    return theRequest;
+  }
+</script>
+<!-- 识别手机或电脑的js结束 -->  
+
+  <!-- 页面点击小红心 -->
+  <!-- 页面点击小红心 -->
+
+  <script type="text/javascript" src="/js/src/love.js?v=5.0.1"></script>
+
+
+  <!-- 鼠标移动，效果 -->
+  <!-- 鼠标移动特效 -->
+
+  <script type="text/javascript" src="/js/src/jquery-stars.js?v=5.0.1"></script>
+  <script type="text/javascript">
+  jQuery('body').jstars({
+  	image_path: '/images',
+  	image: 'candy-cane-stars.png',
+  	style: 'white',
+  	width: 34,
+  	height: 34,
+  	delay: 700,
+  	frequency: 5
+  });
+  </script>
+
+
+  <!-- 页面 title 进入/离开 效果 -->
+
+  <script type="text/javascript">var OriginTitile=document.title,st;document.addEventListener("visibilitychange",function(){document.hidden?(document.title="Waiting for you back！",clearTimeout(st)):(document.title="Thanks for visit~ "+OriginTitile,st=setTimeout(function(){document.title=OriginTitile},4e3))})</script>
+
+
+</body>
+</html>
