@@ -1,0 +1,1312 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Courier New:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Openstack,Telemetry,Ceilometer," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="天青色等烟雨" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="在强者的眼中，没有最好，只有更好。
+
+以社区 N 版代码为例
+一、启动命令1exec ceilometer-agent-notification --config-file /etc/ceilometer/ceilometer.conf">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ceilometer-notification源码分析">
+<meta property="og:url" content="https://magiceses.github.io/2017/10/04/openstack-telemetry-ceilometer-notification源码分析/index.html">
+<meta property="og:site_name" content="天青色等烟雨">
+<meta property="og:description" content="在强者的眼中，没有最好，只有更好。
+
+以社区 N 版代码为例
+一、启动命令1exec ceilometer-agent-notification --config-file /etc/ceilometer/ceilometer.conf">
+<meta property="og:updated_time" content="2021-10-13T12:36:59.580Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ceilometer-notification源码分析">
+<meta name="twitter:description" content="在强者的眼中，没有最好，只有更好。
+
+以社区 N 版代码为例
+一、启动命令1exec ceilometer-agent-notification --config-file /etc/ceilometer/ceilometer.conf">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://magiceses.github.io/2017/10/04/openstack-telemetry-ceilometer-notification源码分析/"/>
+
+
+<!-- 网页加载条 -->
+<script src="/js/src/pace.min.js"></script>
+  <title> ceilometer-notification源码分析 | 天青色等烟雨 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">天青色等烟雨</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">而我在等你</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-guestbook">
+          <a href="/guestbook" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-commenting"></i> <br />
+            
+            留言
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+      
+      
+        <li class="menu-item"> <a title="把这个链接拖到你的工具栏中,任何网页都可以High" href='javascript:(
+/*
+ * Copyright (C) 2016 Never_yu (Neveryu.github.io) <React.dong.yu@gmail.com>
+ * Sina Weibo (http://weibo.com/Neveryu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function go() {
+
+var songs = [
+  "http://dl.stream.qqmusic.qq.com/C400001Qu4I30eVFYb.m4a?vkey=2127178E4405E7B8B268F20F05232485735CCF4FF8C1432F0360D2626D0B6C9564B5627C7AB481BBC685FEDB0946A50E97C66F0D1B008226&guid=7175649092&uin=0&fromtag=66",
+  "",
+  "",
+  ""
+];
+
+function c() {
+  var e = document.createElement("link");
+  e.setAttribute("type", "text/css");
+  e.setAttribute("rel", "stylesheet");
+  e.setAttribute("href", f);
+  e.setAttribute("class", l);
+  document.body.appendChild(e)
+}
+
+function h() {
+  var e = document.getElementsByClassName(l);
+  for (var t = 0; t < e.length; t++) {
+    document.body.removeChild(e[t])
+  }
+}
+
+function p() {
+  var e = document.createElement("div");
+  e.setAttribute("class", a);
+  document.body.appendChild(e);
+  setTimeout(function() {
+    document.body.removeChild(e)
+  }, 100)
+}
+
+function d(e) {
+  return {
+    height : e.offsetHeight,
+    width : e.offsetWidth
+  }
+}
+
+function v(i) {
+  var s = d(i);
+  return s.height > e && s.height < n && s.width > t && s.width < r
+}
+
+function m(e) {
+  var t = e;
+  var n = 0;
+  while (!!t) {
+    n += t.offsetTop;
+    t = t.offsetParent
+  }
+  return n
+}
+
+function g() {
+  var e = document.documentElement;
+  if (!!window.innerWidth) {
+    return window.innerHeight
+  } else if (e && !isNaN(e.clientHeight)) {
+    return e.clientHeight
+  }
+  return 0
+}
+
+function y() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  }
+  return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+}
+
+function E(e) {
+  var t = m(e);
+  return t >= w && t <= b + w
+}
+
+function S() {
+  var e = document.getElementById("audio_element_id");
+  if(e != null){
+    var index = parseInt(e.getAttribute("curSongIndex"));
+    if(index > songs.length - 2) {
+      index = 0;
+    } else {
+      index++;
+    }
+    e.setAttribute("curSongIndex", index);
+    N();
+  }
+
+  e.src = i;
+  e.play()
+}
+
+function x(e) {
+  e.className += " " + s + " " + o
+}
+
+function T(e) {
+  e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+}
+
+function N() {
+  var e = document.getElementsByClassName(s);
+  var t = new RegExp("\\b" + s + "\\b");
+  for (var n = 0; n < e.length; ) {
+    e[n].className = e[n].className.replace(t, "")
+  }
+}
+
+function initAudioEle() {
+  var e = document.getElementById("audio_element_id");
+  if(e === null){
+    e = document.createElement("audio");
+    e.setAttribute("class", l);
+    e.setAttribute("curSongIndex", 0);
+    e.id = "audio_element_id";
+    e.loop = false;
+    e.bgcolor = 0;
+    e.addEventListener("canplay", function() {
+      setTimeout(function() {
+        x(k)
+      }, 500);
+      setTimeout(function() {
+        N();
+        p();
+        for (var e = 0; e < O.length; e++) {
+          T(O[e])
+        }
+      }, 15500)
+    }, true);
+    e.addEventListener("ended", function() {
+      N();
+      h();
+      go();
+    }, true);
+    e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+    document.body.appendChild(e);
+  }
+}
+
+initAudioEle();
+var e = 30;
+var t = 30;
+var n = 350;
+var r = 350;
+
+var curSongIndex = parseInt(document.getElementById("audio_element_id").getAttribute("curSongIndex"));
+var i = songs[curSongIndex];
+
+var s = "mw-harlem_shake_me";
+var o = "im_first";
+var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+var a = "mw-strobe_light";
+
+/* harlem-shake-style.css，替换成你的位置，也可以直接使用：//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css */
+var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+
+var l = "mw_added_css";
+var b = g();
+var w = y();
+var C = document.getElementsByTagName("*");
+var k = null;
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    if (E(A)) {
+      k = A;
+      break
+    }
+  }
+}
+if (A === null) {
+  console.warn("Could not find a node of the right size. Please try a different page.");
+  return
+}
+c();
+S();
+var O = [];
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    O.push(A)
+  }
+}
+})()'><i class="menu-item-icon fa fa-music fa-fw"></i> High一下</a></li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search fa-lg"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                ceilometer-notification源码分析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-10-04T23:25:24+08:00" content="2017-10-04">
+              2017-10-04
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Openstack/" itemprop="url" rel="index">
+                    <span itemprop="name">Openstack</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv">热度
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p id="div-border-top-green">在强者的眼中，没有最好，只有更好。<br></p>
+
+<p>以社区 N 版代码为例</p>
+<h2 id="一、启动命令"><a href="#一、启动命令" class="headerlink" title="一、启动命令"></a>一、启动命令</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">exec ceilometer-agent-notification --config-file /etc/ceilometer/ceilometer.conf</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<h2 id="二、代码入口"><a href="#二、代码入口" class="headerlink" title="二、代码入口"></a>二、代码入口</h2><p>ceilometer代码使用setuptools的pbr管理，该部分知识请见:</p>
+<p><a href="https://blog.csdn.net/weixin_43700106/article/details/107144392" target="_blank" rel="external">Python打包之setuptools</a></p>
+<p><a href="https://blog.csdn.net/weixin_43700106/article/details/107070025" target="_blank" rel="external">Openstack中setuptools和pbr软件打包管理</a></p>
+<p>入口在：/ceilometer/cmd/agent_notification.py的main函数</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></span><br><span class="line">    service.prepare_service()</span><br><span class="line"></span><br><span class="line">    sm = cotyledon.ServiceManager()</span><br><span class="line">    sm.add(notification.NotificationService,</span><br><span class="line">           workers=CONF.notification.workers)</span><br><span class="line">    sm.run()</span><br></pre></td></tr></table></figure>
+<p>该部分使用cotyledon的多进程框架实现</p>
+<p>直接看NotificationService类的 run 方法</p>
+<h2 id="三、服务启动"><a href="#三、服务启动" class="headerlink" title="三、服务启动"></a>三、服务启动</h2><p>服务启动在：NotificationService.run</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(self)</span>:</span></span><br><span class="line">    super(NotificationService, self).run()</span><br><span class="line">    self.shutdown = <span class="keyword">False</span></span><br><span class="line">    self.periodic = <span class="keyword">None</span></span><br><span class="line">    self.partition_coordinator = <span class="keyword">None</span></span><br><span class="line">    self.coord_lock = threading.Lock()</span><br><span class="line"></span><br><span class="line">    self.listeners = []</span><br><span class="line"></span><br><span class="line">    <span class="comment"># NOTE(kbespalov): for the pipeline queues used a single amqp host</span></span><br><span class="line">    <span class="comment"># hence only one listener is required</span></span><br><span class="line">    self.pipeline_listener = <span class="keyword">None</span></span><br><span class="line"></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    (Pdb) self.pipeline_manager.__dict__</span></span><br><span class="line"><span class="string">    &#123;</span></span><br><span class="line"><span class="string">        'cfg_mtime': 1592551325.2732353,</span></span><br><span class="line"><span class="string">        'cfg_hash': 'ba1311798d634022e4b684b72bf7b42a',</span></span><br><span class="line"><span class="string">        'cfg_loc': '/etc/ceilometer/pipeline.yaml',</span></span><br><span class="line"><span class="string">        'pipelines': [ &lt; ceilometer.pipeline.SamplePipeline object at 0x7fa1741e3ad0 &gt; , &lt; ceilometer.pipeline.SamplePipeline object at 0x7fa1741e3290 &gt; , &lt; ceilometer.pipeline.SamplePipeline object at 0x7fa1741e3b90 &gt; , &lt; ceilometer.pipeline.SamplePipeline object at 0x7fa1741e39d0 &gt; , &lt; ceilometer.pipeline.SamplePipeline object at 0x7fa1741e3950 &gt; , &lt; ceilometer.pipeline.SamplePipeline object at 0x7fa1741e3a10 &gt; , &lt; ceilometer.pipeline.SamplePipeline object at 0x7fa1741e37d0 &gt; ]</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    (Pdb) self.pipeline_manager.pipelines[0].__dict__</span></span><br><span class="line"><span class="string">    &#123;</span></span><br><span class="line"><span class="string">        'source': &lt; ceilometer.pipeline.SampleSource object at 0x7fa17405e050 &gt; ,</span></span><br><span class="line"><span class="string">        'sink': &lt; ceilometer.pipeline.SampleSink object at 0x7fa17405e350 &gt; ,</span></span><br><span class="line"><span class="string">        'name': 'notification_source:notification_sink'</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    (Pdb) self.pipeline_manager.pipelines[0].source.__dict__</span></span><br><span class="line"><span class="string">    &#123;</span></span><br><span class="line"><span class="string">        'name': 'notification_source',</span></span><br><span class="line"><span class="string">        'cfg': &#123;</span></span><br><span class="line"><span class="string">            'interval': 3600,</span></span><br><span class="line"><span class="string">            'meters': ['instance', 'volume', 'image', 'snapshot', 'backup', 'ip.floating', 'router', 'network', 'subnet', 'account'],</span></span><br><span class="line"><span class="string">            'name': 'notification_source',</span></span><br><span class="line"><span class="string">            'sinks': ['notification_sink']</span></span><br><span class="line"><span class="string">        &#125;,</span></span><br><span class="line"><span class="string">        'interval': 3600,</span></span><br><span class="line"><span class="string">        'meters': ['instance', 'volume', 'image', 'snapshot', 'backup', 'ip.floating', 'router', 'network', 'subnet', 'account'],</span></span><br><span class="line"><span class="string">        'discovery': [],</span></span><br><span class="line"><span class="string">        'resources': [],</span></span><br><span class="line"><span class="string">        'sinks': ['notification_sink']</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    (Pdb) self.pipeline_manager.pipelines[0].sink.__dict__</span></span><br><span class="line"><span class="string">    &#123;</span></span><br><span class="line"><span class="string">        'publishers': [ &lt; ceilometer.publisher.messaging.SampleNotifierPublisher object at 0x7fa17405e410 &gt; ],</span></span><br><span class="line"><span class="string">        'transformers': [],</span></span><br><span class="line"><span class="string">        'name': 'notification_sink',</span></span><br><span class="line"><span class="string">        'cfg': &#123;</span></span><br><span class="line"><span class="string">            'publishers': ['notifier://'],</span></span><br><span class="line"><span class="string">            'transformers': None,</span></span><br><span class="line"><span class="string">            'name': 'notification_sink'</span></span><br><span class="line"><span class="string">        &#125;,</span></span><br><span class="line"><span class="string">        'multi_publish': False,</span></span><br><span class="line"><span class="string">        'transformer_cfg': []</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    self.pipeline_manager = pipeline.setup_pipeline()</span><br><span class="line">    self.event_pipeline_manager = pipeline.setup_event_pipeline()</span><br><span class="line"></span><br><span class="line">    self.transport = messaging.get_transport()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> cfg.CONF.notification.workload_partitioning:</span><br><span class="line">        self.group_id = self.NOTIFICATION_NAMESPACE</span><br><span class="line">        self.partition_coordinator = coordination.PartitionCoordinator()</span><br><span class="line">        self.partition_coordinator.start()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="comment"># FIXME(sileht): endpoint uses the notification_topics option</span></span><br><span class="line">        <span class="comment"># and it should not because this is an oslo_messaging option</span></span><br><span class="line">        <span class="comment"># not a ceilometer. Until we have something to get the</span></span><br><span class="line">        <span class="comment"># notification_topics in another way, we must create a transport</span></span><br><span class="line">        <span class="comment"># to ensure the option has been registered by oslo_messaging.</span></span><br><span class="line">        messaging.get_notifier(self.transport, <span class="string">''</span>)</span><br><span class="line">        self.group_id = <span class="keyword">None</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 该函数里判断了是否支持工作负载，如果是则返回SamplePipelineTransportManager类实例替换掉</span></span><br><span class="line">		<span class="comment"># PipelineManager类实例，否则还是PipelineManager类实例</span></span><br><span class="line">	  <span class="comment"># 这两者的区别在于publisher函数实现是不一样的</span></span><br><span class="line">	  <span class="comment"># SamplePipelineTransportManager的在调用publisher函数时会再发到消息队列中去保存，之后会再取出来处理再发到gnocchi-api上</span></span><br><span class="line">		<span class="comment"># PipelineManager的则直接去发到gnocchi-api服务上去了</span></span><br><span class="line">    self.pipe_manager = self._get_pipe_manager(self.transport,</span><br><span class="line">                                               self.pipeline_manager)</span><br><span class="line">    self.event_pipe_manager = self._get_event_pipeline_manager(</span><br><span class="line">        self.transport)</span><br><span class="line"></span><br><span class="line">    self._configure_main_queue_listeners(self.pipe_manager,</span><br><span class="line">                                         self.event_pipe_manager)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> cfg.CONF.notification.workload_partitioning:</span><br><span class="line">		......</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> cfg.CONF.notification.disable_non_metric_meters:</span><br><span class="line">        LOG.warning(_LW(<span class="string">'Non-metric meters may be collected. It is highly '</span></span><br><span class="line">                        <span class="string">'advisable to disable these meters using '</span></span><br><span class="line">                        <span class="string">'ceilometer.conf or the pipeline.yaml'</span>))</span><br><span class="line"></span><br><span class="line">    self.init_pipeline_refresh()</span><br></pre></td></tr></table></figure>
+<p>以上的代码中的一些参数我都用pdb打印出来了，可以更加直观的感受，我们来逐行分析一下服务启动的过程：</p>
+<ol>
+<li><p>前 12 主要是一些参数的定义和初始化的工作</p>
+</li>
+<li><p>看下第 61 行和 62 行两部分，实现的逻辑是一样的，我们来分析一下 61 行：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">setup_pipeline</span><span class="params">(transformer_manager=None)</span>:</span></span><br><span class="line">    <span class="string">"""Setup pipeline manager according to yaml config file."""</span></span><br><span class="line"></span><br><span class="line">    default = extension.ExtensionManager(<span class="string">'ceilometer.transformer'</span>)</span><br><span class="line">    cfg_file = cfg.CONF.pipeline_cfg_file</span><br><span class="line">    <span class="keyword">return</span> PipelineManager(cfg_file, transformer_manager <span class="keyword">or</span> default,</span><br><span class="line">                           SAMPLE_TYPE)</span><br></pre></td></tr></table></figure>
+<ol>
+<li><p>第4行加载了 ceilometer.transformer 命名空间中的插件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ceilometer.transformer =</span><br><span class="line">    accumulator = ceilometer.transformer.accumulator:TransformerAccumulator</span><br><span class="line">    delta = ceilometer.transformer.conversions:DeltaTransformer</span><br><span class="line">    unit_conversion = ceilometer.transformer.conversions:ScalingTransformer</span><br><span class="line">    rate_of_change = ceilometer.transformer.conversions:RateOfChangeTransformer</span><br><span class="line">    aggregator = ceilometer.transformer.conversions:AggregatorTransformer</span><br><span class="line">    arithmetic = ceilometer.transformer.arithmetic:ArithmeticTransformer</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>第 5 行的文件是 pipeline.yaml ，然后使用 PipelineManager 类进行初始化</p>
+<p>我们来看下 PipelineManager 类初始化的内容，同样的我也加了 pdb 调试出来，更加直观：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PipelineManager</span><span class="params">(ConfigManagerBase)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, cfg_info, transformer_manager, p_type=SAMPLE_TYPE)</span>:</span></span><br><span class="line">        super(PipelineManager, self).__init__()</span><br><span class="line">        cfg = self.load_config(cfg_info)</span><br><span class="line"></span><br><span class="line">        self.pipelines = []</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> (<span class="string">'sources'</span> <span class="keyword">in</span> cfg <span class="keyword">and</span> <span class="string">'sinks'</span> <span class="keyword">in</span> cfg):</span><br><span class="line">            <span class="keyword">raise</span> PipelineException(<span class="string">"Both sources &amp; sinks are required"</span>,</span><br><span class="line">                                    cfg)</span><br><span class="line">        LOG.info(_LI(<span class="string">'detected decoupled pipeline config format'</span>))</span><br><span class="line"></span><br><span class="line">        unique_names = set()</span><br><span class="line">        sources = []</span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        pipeline.yaml</span></span><br><span class="line"><span class="string">            (Pdb) cfg.get('sources')</span></span><br><span class="line"><span class="string">            [&#123;</span></span><br><span class="line"><span class="string">                'interval': 3600,</span></span><br><span class="line"><span class="string">                'meters': ['instance', 'volume', 'image', 'snapshot', 'backup', 'ip.floating', 'router', 'network', 'subnet', 'account'],</span></span><br><span class="line"><span class="string">                'name': 'notification_source',</span></span><br><span class="line"><span class="string">                'sinks': ['notification_sink']</span></span><br><span class="line"><span class="string">            &#125;, &#123;</span></span><br><span class="line"><span class="string">                'interval': 300,</span></span><br><span class="line"><span class="string">                'meters': ['poll.*', 'memory.usage', 'memory.util'],</span></span><br><span class="line"><span class="string">                'name': 'meter_source',</span></span><br><span class="line"><span class="string">                'sinks': ['meter_sink']</span></span><br><span class="line"><span class="string">            &#125;]</span></span><br><span class="line"><span class="string">        event_pipeline.yaml</span></span><br><span class="line"><span class="string">            (Pdb) cfg.get('sources')</span></span><br><span class="line"><span class="string">            [&#123;</span></span><br><span class="line"><span class="string">                'sinks': ['event_sink'],</span></span><br><span class="line"><span class="string">                'name': 'event_source',</span></span><br><span class="line"><span class="string">                'events': ['*', '!magnum.bay.metrics.update', '!compute.instance.exists', '!volume.exists', '!snapshot.exists']</span></span><br><span class="line"><span class="string">            &#125;]</span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="keyword">for</span> s <span class="keyword">in</span> cfg.get(<span class="string">'sources'</span>):</span><br><span class="line">            name = s.get(<span class="string">'name'</span>)</span><br><span class="line">            <span class="keyword">if</span> name <span class="keyword">in</span> unique_names:</span><br><span class="line">                <span class="keyword">raise</span> PipelineException(<span class="string">"Duplicated source names: %s"</span> %</span><br><span class="line">                                        name, self)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                unique_names.add(name)</span><br><span class="line">                <span class="string">"""</span></span><br><span class="line"><span class="string">                pipeline.yaml</span></span><br><span class="line"><span class="string">                    (Pdb) sources</span></span><br><span class="line"><span class="string">                    [&lt;ceilometer.pipeline.SampleSource object at 0x7fa17405e050&gt;, &lt;ceilometer.pipeline.SampleSource object at 0x7fa17405e110&gt;, &lt;ceilometer.pipeline.SampleSource object at 0x7fa17405e090&gt;, &lt;ceilometer.pipeline.SampleSource object at 0x7fa17405e190&gt;, &lt;ceilometer.pipeline.SampleSource object at 0x7fa17405e250&gt;, &lt;ceilometer.pipeline.SampleSource object at 0x7fa17405e210&gt;, &lt;ceilometer.pipeline.SampleSource object at 0x7fa17405e310&gt;]</span></span><br><span class="line"><span class="string">                    (Pdb) sources[0].__dict__</span></span><br><span class="line"><span class="string">                    &#123;</span></span><br><span class="line"><span class="string">                        'name': 'notification_source',</span></span><br><span class="line"><span class="string">                        'cfg': &#123;</span></span><br><span class="line"><span class="string">                            'interval': 3600,</span></span><br><span class="line"><span class="string">                            'meters': ['instance', 'volume', 'image', 'snapshot', 'backup', 'ip.floating', 'router', 'network', 'subnet', 'account'],</span></span><br><span class="line"><span class="string">                            'name': 'notification_source',</span></span><br><span class="line"><span class="string">                            'sinks': ['notification_sink']</span></span><br><span class="line"><span class="string">                        &#125;,</span></span><br><span class="line"><span class="string">                        'interval': 3600,</span></span><br><span class="line"><span class="string">                        'meters': ['instance', 'volume', 'image', 'snapshot', 'backup', 'ip.floating', 'router', 'network', 'subnet', 'account'],</span></span><br><span class="line"><span class="string">                        'discovery': [],</span></span><br><span class="line"><span class="string">                        'resources': [],</span></span><br><span class="line"><span class="string">                        'sinks': ['notification_sink']</span></span><br><span class="line"><span class="string">                    &#125;</span></span><br><span class="line"><span class="string">                    (Pdb) sources[1].__dict__</span></span><br><span class="line"><span class="string">                    &#123;'name': 'meter_source', 'cfg': &#123;'interval': 300, 'meters': ['poll.*', 'memory.usage', 'memory.util'], 'name': 'meter_source', 'sinks': ['meter_sink']&#125;, 'interval': 300, 'meters': ['poll.*', 'memory.usage', 'memory.util'], 'discovery': [], 'resources': [], 'sinks': ['meter_sink']&#125;</span></span><br><span class="line"><span class="string">               </span></span><br><span class="line"><span class="string">                event_pipeline.yaml</span></span><br><span class="line"><span class="string">                    &#123;</span></span><br><span class="line"><span class="string">                        'cfg': &#123;</span></span><br><span class="line"><span class="string">                            'sinks': ['event_sink'],</span></span><br><span class="line"><span class="string">                            'name': 'event_source',</span></span><br><span class="line"><span class="string">                            'events': ['*', '!magnum.bay.metrics.update', '!compute.instance.exists', '!volume.exists', '!snapshot.exists']</span></span><br><span class="line"><span class="string">                        &#125;,</span></span><br><span class="line"><span class="string">                        'events': ['*', '!magnum.bay.metrics.update', '!compute.instance.exists', '!volume.exists', '!snapshot.exists'],</span></span><br><span class="line"><span class="string">                        'name': 'event_source',</span></span><br><span class="line"><span class="string">                        'sinks': ['event_sink']</span></span><br><span class="line"><span class="string">                    &#125;</span></span><br><span class="line"><span class="string">                """</span></span><br><span class="line">                sources.append(p_type[<span class="string">'source'</span>](s))</span><br><span class="line">        unique_names.clear()</span><br><span class="line"></span><br><span class="line">        sinks = &#123;&#125;</span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        pipeline.yaml</span></span><br><span class="line"><span class="string">            (Pdb) cfg.get('sinks')</span></span><br><span class="line"><span class="string">            [&#123;</span></span><br><span class="line"><span class="string">                'publishers': ['notifier://'],</span></span><br><span class="line"><span class="string">                'transformers': None,</span></span><br><span class="line"><span class="string">                'name': 'notification_sink'</span></span><br><span class="line"><span class="string">            &#125;, &#123;</span></span><br><span class="line"><span class="string">                'publishers': ['notifier://'],</span></span><br><span class="line"><span class="string">                'transformers': None,</span></span><br><span class="line"><span class="string">                'name': 'meter_sink'</span></span><br><span class="line"><span class="string">            &#125;]</span></span><br><span class="line"><span class="string">        event_pipeline.yaml</span></span><br><span class="line"><span class="string">            (Pdb) cfg.get('sinks')</span></span><br><span class="line"><span class="string">            [&#123;'publishers': ['notifier://'], 'transformers': None, 'name': 'event_sink'&#125;]</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="keyword">for</span> s <span class="keyword">in</span> cfg.get(<span class="string">'sinks'</span>):</span><br><span class="line">            name = s.get(<span class="string">'name'</span>)</span><br><span class="line">            <span class="keyword">if</span> name <span class="keyword">in</span> unique_names:</span><br><span class="line">                <span class="keyword">raise</span> PipelineException(<span class="string">"Duplicated sink names: %s"</span> %</span><br><span class="line">                                        name, self)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                unique_names.add(name)</span><br><span class="line">                <span class="string">"""</span></span><br><span class="line"><span class="string">                (Pdb) sinks</span></span><br><span class="line"><span class="string">                &#123;'network_sink': &lt;ceilometer.pipeline.SampleSink object at 0x7fa1741e3350&gt;, 'volume_sink': &lt;ceilometer.pipeline.SampleSink object at 0x7fa1741dbfd0&gt;, 'disk_sink': &lt;ceilometer.pipeline.SampleSink object at 0x7fa1741dbc50&gt;, 'cpu_delta_sink': &lt;ceilometer.pipeline.SampleSink object at 0x7fa17405e290&gt;, 'cpu_sink': &lt;ceilometer.pipeline.SampleSink object at 0x7fa17405e390&gt;, 'meter_sink': &lt;ceilometer.pipeline.SampleSink object at 0x7fa17405e3d0&gt;, 'notification_sink': &lt;ceilometer.pipeline.SampleSink object at 0x7fa17405e350&gt;&#125;</span></span><br><span class="line"><span class="string">                (Pdb) sinks.get('network_sink').__dict__</span></span><br><span class="line"><span class="string">                &#123;</span></span><br><span class="line"><span class="string">                    'publishers': [ &lt; ceilometer.publisher.messaging.SampleNotifierPublisher object at 0x7fa1741e3890 &gt; ],</span></span><br><span class="line"><span class="string">                    'transformers': [ &lt; ceilometer.transformer.conversions.RateOfChangeTransformer object at 0x7fa1741e3710 &gt; ],</span></span><br><span class="line"><span class="string">                    'name': 'network_sink',</span></span><br><span class="line"><span class="string">                    'cfg': &#123;</span></span><br><span class="line"><span class="string">                        'publishers': ['notifier://'],</span></span><br><span class="line"><span class="string">                        'transformers': [&#123;</span></span><br><span class="line"><span class="string">                            'name': 'rate_of_change',</span></span><br><span class="line"><span class="string">                            'parameters': &#123;</span></span><br><span class="line"><span class="string">                                'source': &#123;</span></span><br><span class="line"><span class="string">                                    'map_from': &#123;</span></span><br><span class="line"><span class="string">                                        'name': 'network\\.(incoming|outgoing)\\.(bytes|packets)',</span></span><br><span class="line"><span class="string">                                        'unit': '(B|packet)'</span></span><br><span class="line"><span class="string">                                    &#125;</span></span><br><span class="line"><span class="string">                                &#125;,</span></span><br><span class="line"><span class="string">                                'target': &#123;</span></span><br><span class="line"><span class="string">                                    'map_to': &#123;</span></span><br><span class="line"><span class="string">                                        'name': 'network.\\1.\\2.rate',</span></span><br><span class="line"><span class="string">                                        'unit': '\\1/s'</span></span><br><span class="line"><span class="string">                                    &#125;,</span></span><br><span class="line"><span class="string">                                    'type': 'gauge'</span></span><br><span class="line"><span class="string">                                &#125;</span></span><br><span class="line"><span class="string">                            &#125;</span></span><br><span class="line"><span class="string">                        &#125;],</span></span><br><span class="line"><span class="string">                        'name': 'network_sink'</span></span><br><span class="line"><span class="string">                    &#125;,</span></span><br><span class="line"><span class="string">                    'multi_publish': False,</span></span><br><span class="line"><span class="string">                    'transformer_cfg': [&#123;</span></span><br><span class="line"><span class="string">                        'name': 'rate_of_change',</span></span><br><span class="line"><span class="string">                        'parameters': &#123;</span></span><br><span class="line"><span class="string">                            'source': &#123;</span></span><br><span class="line"><span class="string">                                'map_from': &#123;</span></span><br><span class="line"><span class="string">                                    'name': 'network\\.(incoming|outgoing)\\.(bytes|packets)',</span></span><br><span class="line"><span class="string">                                    'unit': '(B|packet)'</span></span><br><span class="line"><span class="string">                                &#125;</span></span><br><span class="line"><span class="string">                            &#125;,</span></span><br><span class="line"><span class="string">                            'target': &#123;</span></span><br><span class="line"><span class="string">                                'map_to': &#123;</span></span><br><span class="line"><span class="string">                                    'name': 'network.\\1.\\2.rate',</span></span><br><span class="line"><span class="string">                                    'unit': '\\1/s'</span></span><br><span class="line"><span class="string">                                &#125;,</span></span><br><span class="line"><span class="string">                                'type': 'gauge'</span></span><br><span class="line"><span class="string">                            &#125;</span></span><br><span class="line"><span class="string">                        &#125;</span></span><br><span class="line"><span class="string">                    &#125;]</span></span><br><span class="line"><span class="string">                &#125;</span></span><br><span class="line"><span class="string">                </span></span><br><span class="line"><span class="string">                """</span></span><br><span class="line">                sinks[s[<span class="string">'name'</span>]] = p_type[<span class="string">'sink'</span>](s, transformer_manager)</span><br><span class="line">        unique_names.clear()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> source <span class="keyword">in</span> sources:</span><br><span class="line">            source.check_sinks(sinks)</span><br><span class="line">            <span class="keyword">for</span> target <span class="keyword">in</span> source.sinks:</span><br><span class="line">                pipe = p_type[<span class="string">'pipeline'</span>](source, sinks[target])</span><br><span class="line">                <span class="keyword">if</span> pipe.name <span class="keyword">in</span> unique_names:</span><br><span class="line">                    <span class="keyword">raise</span> PipelineException(</span><br><span class="line">                        <span class="string">"Duplicate pipeline name: %s. Ensure pipeline"</span></span><br><span class="line">                        <span class="string">" names are unique. (name is the source and sink"</span></span><br><span class="line">                        <span class="string">" names combined)"</span> % pipe.name, cfg)</span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    unique_names.add(pipe.name)</span><br><span class="line">                    self.pipelines.append(pipe)</span><br><span class="line">        unique_names.clear()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">publisher</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">"""Build a new Publisher for these manager pipelines.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :param context: The context.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="keyword">return</span> PublishContext(self.pipelines)</span><br></pre></td></tr></table></figure>
+<ol>
+<li><p>第 37-79 行是取出 pipeline.yaml 文件中的 sources然后经过p_type[‘source’]类的初始化，再放进 sources 对象里，那么p_type[‘source’]类是什么呢，如下所示，代表SampleSource类，这个类里面就是解析下配置文件中每个资源的采集周期interval和采集插件 meters</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">SAMPLE_TYPE = &#123;&apos;pipeline&apos;: SamplePipeline,</span><br><span class="line">               &apos;source&apos;: SampleSource,</span><br><span class="line">               &apos;sink&apos;: SampleSink&#125;</span><br><span class="line">EVENT_TYPE = &#123;&apos;pipeline&apos;: EventPipeline,</span><br><span class="line">              &apos;source&apos;: EventSource,</span><br><span class="line">              &apos;sink&apos;: EventSink&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>同样的，第 98-158 行是为了取出配置文件中的 sinks 对象，使用SampleSink类进行初始化，这个类本身没有 init 函数，所以使用此类的基类进行初始化，即 Sink 类</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Sink</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, cfg, transformer_manager)</span>:</span></span><br><span class="line">        self.cfg = cfg</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            self.name = cfg[<span class="string">'name'</span>]</span><br><span class="line">            <span class="comment"># It's legal to have no transformer specified</span></span><br><span class="line">            self.transformer_cfg = cfg.get(<span class="string">'transformers'</span>) <span class="keyword">or</span> []</span><br><span class="line">        <span class="keyword">except</span> KeyError <span class="keyword">as</span> err:</span><br><span class="line">            <span class="keyword">raise</span> PipelineException(</span><br><span class="line">                <span class="string">"Required field %s not specified"</span> % err.args[<span class="number">0</span>], cfg)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> cfg.get(<span class="string">'publishers'</span>):</span><br><span class="line">            <span class="keyword">raise</span> PipelineException(<span class="string">"No publisher specified"</span>, cfg)</span><br><span class="line"></span><br><span class="line">        self.publishers = []</span><br><span class="line">        <span class="keyword">for</span> p <span class="keyword">in</span> cfg[<span class="string">'publishers'</span>]:</span><br><span class="line">            <span class="keyword">if</span> <span class="string">'://'</span> <span class="keyword">not</span> <span class="keyword">in</span> p:</span><br><span class="line">                <span class="comment"># Support old format without URL</span></span><br><span class="line">                p = p + <span class="string">"://"</span></span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                self.publishers.append(publisher.get_publisher(p,</span><br><span class="line">                                                               self.NAMESPACE))</span><br><span class="line">            <span class="keyword">except</span> Exception:</span><br><span class="line">                LOG.exception(_(<span class="string">"Unable to load publisher %s"</span>), p)</span><br><span class="line"></span><br><span class="line">        self.multi_publish = <span class="keyword">True</span> <span class="keyword">if</span> len(self.publishers) &gt; <span class="number">1</span> <span class="keyword">else</span> <span class="keyword">False</span></span><br><span class="line">        self.transformers = self._setup_transformers(cfg, transformer_manager)</span><br></pre></td></tr></table></figure>
+<p>这里面主要看下第 22 行和第 28 行，分析：</p>
+<ol>
+<li>第 22 行调用了get_publisher方法，这个里面主要是加载ceilometer.publisher命名空间中的notifier插件</li>
+<li>第 28 行调用了_setup_transformers 方法，其中transformer_manager参数是ceilometer-transformer 中的所有插件，方法里面主要实现的是，遍历配置文件中的 sinks ，然后根据transformer 中的 name 来生成插件对象，比如name 是rate_of_change的话，即代表生成在ceilometer-transformer中的rate_of_change插件，然后放到transformers列表里</li>
+</ol>
+</li>
+<li><p>我们接着来分析PipelineManager，然后第 160-185 行，就是遍历在以上分析配置文件之后存储的值 sources 和 sinks，拿出 sources 中每个 source，然后再拿出 source 中的每个 sink，使用SamplePipeline类初始化之后，放进self.pipelines列表，该类没有 init 方法，所以调用基类Pipeline</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@six.add_metaclass(abc.ABCMeta)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Pipeline</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="string">"""Represents a coupling between a sink and a corresponding source."""</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, source, sink)</span>:</span></span><br><span class="line">        self.source = source</span><br><span class="line">        self.sink = sink</span><br><span class="line">        self.name = str(self)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>最终在对象存储的数据是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">pipeline.yaml</span><br><span class="line">    (Pdb) self.pipelines</span><br><span class="line">    [&lt;ceilometer.pipeline.SamplePipeline object at 0x7fa1741e3ad0&gt;, &lt;ceilometer.pipeline.SamplePipeline object at 0x7fa1741e3290&gt;, &lt;ceilometer.pipeline.SamplePipeline object at 0x7fa1741e3b90&gt;, &lt;ceilometer.pipeline.SamplePipeline object at 0x7fa1741e39d0&gt;]</span><br><span class="line">    (Pdb) self.pipelines[0].__dict__</span><br><span class="line">    &#123;&apos;source&apos;: &lt;ceilometer.pipeline.SampleSource object at 0x7fc20c082650&gt;, &apos;sink&apos;: &lt;ceilometer.pipeline.SampleSink object at 0x7fc20c082050&gt;, &apos;name&apos;: &apos;notification_source:notification_sink&apos;&#125;</span><br><span class="line">event_pipeline.yaml</span><br><span class="line">    (Pdb) self.pipelines</span><br><span class="line">    [&lt;ceilometer.pipeline.EventPipeline object at 0x7fa1741e3d10&gt;]</span><br><span class="line">    (Pdb) self.pipelines[0].__dict__</span><br><span class="line">    &#123;&apos;source&apos;: &lt;ceilometer.pipeline.EventSource object at 0x7fa1741e3dd0&gt;, &apos;sink&apos;: &lt;ceilometer.pipeline.EventSink object at 0x7fa1741e3ed0&gt;, &apos;name&apos;: &apos;event:event_source:event_sink&apos;&#125;</span><br><span class="line">&quot;&quot;&quot;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+</li>
+<li><p>再继续 NotificationService.run 方法，61 行已经分析完毕，62 行和 61 行逻辑一致</p>
+</li>
+<li><p>第 79-82 行的分析见代码中</p>
+</li>
+<li><p>最终的是第 89 行的代码，调用了 _configure_main_queue_listeners 方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_configure_main_queue_listeners</span><span class="params">(self, pipe_manager,</span></span></span><br><span class="line"><span class="function"><span class="params">                                    event_pipe_manager)</span>:</span></span><br><span class="line">    <span class="string">""""""</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    (Pdb) notification_manager.extensions[0].__dict__</span></span><br><span class="line"><span class="string">    &#123;</span></span><br><span class="line"><span class="string">        'obj': &lt; ceilometer.network.notifications.Firewall object at 0x7fa1741e3d50 &gt; ,</span></span><br><span class="line"><span class="string">        'entry_point': EntryPoint.parse('network.services.firewall = ceilometer.network.notifications:Firewall'),</span></span><br><span class="line"><span class="string">        'name': 'network.services.firewall',</span></span><br><span class="line"><span class="string">        'plugin': &lt; class 'ceilometer.network.notifications.Firewall' &gt;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    notification_manager = self._get_notifications_manager(pipe_manager)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> list(notification_manager):</span><br><span class="line">        LOG.warning(_(<span class="string">'Failed to load any notification handlers for %s'</span>),</span><br><span class="line">                    self.NOTIFICATION_NAMESPACE)</span><br><span class="line">       </span><br><span class="line">    ack_on_error = cfg.CONF.notification.ack_on_event_error</span><br><span class="line">       </span><br><span class="line">    endpoints = []</span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    (Pdb) endpoints</span></span><br><span class="line"><span class="string">    [&lt;ceilometer.event.endpoint.EventsNotificationEndpoint object at 0x2f5f610&gt;]</span></span><br><span class="line"><span class="string">    (Pdb) endpoints[0].__dict__</span></span><br><span class="line"><span class="string">    &#123;</span></span><br><span class="line"><span class="string">        'event_converter': &lt; ceilometer.event.converter.NotificationEventsConverter object at 0x7fa17467c050 &gt; ,</span></span><br><span class="line"><span class="string">        'manager': &lt; ceilometer.pipeline.PipelineManager object at 0x2f6d550 &gt;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">    (Pdb) endpoints[0].manager.__dict__</span></span><br><span class="line"><span class="string">    &#123;</span></span><br><span class="line"><span class="string">        'cfg_mtime': 1592551325.2732353,</span></span><br><span class="line"><span class="string">        'cfg_hash': 'c01e8ee1c40b66314628536afcd48a39',</span></span><br><span class="line"><span class="string">        'cfg_loc': '/etc/ceilometer/event_pipeline.yaml',</span></span><br><span class="line"><span class="string">        'pipelines': [ &lt; ceilometer.pipeline.EventPipeline object at 0x7fa1741e3d10 &gt; ]</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    endpoints.append(</span><br><span class="line">        event_endpoint.EventsNotificationEndpoint(event_pipe_manager))</span><br><span class="line">       </span><br><span class="line">    targets = []</span><br><span class="line">    <span class="keyword">for</span> ext <span class="keyword">in</span> notification_manager:</span><br><span class="line">        handler = ext.obj</span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        (Pdb) cfg.CONF.oslo_messaging_notifications.topics</span></span><br><span class="line"><span class="string">        ['notifications']</span></span><br><span class="line"><span class="string">        (Pdb) cfg.CONF.notification.disable_non_metric_meters</span></span><br><span class="line"><span class="string">        True</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">       </span><br><span class="line">        <span class="keyword">if</span> (cfg.CONF.notification.disable_non_metric_meters <span class="keyword">and</span></span><br><span class="line">                isinstance(handler, base.NonMetricNotificationBase)):</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        LOG.debug(<span class="string">'Event types from %(name)s: %(type)s'</span></span><br><span class="line">                  <span class="string">' (ack_on_error=%(error)s)'</span>,</span><br><span class="line">                  &#123;<span class="string">'name'</span>: ext.name,</span><br><span class="line">                   <span class="string">'type'</span>: <span class="string">', '</span>.join(handler.event_types),</span><br><span class="line">                   <span class="string">'error'</span>: ack_on_error&#125;)</span><br><span class="line">        <span class="comment"># NOTE(gordc): this could be a set check but oslo_messaging issue</span></span><br><span class="line">        <span class="comment"># https://bugs.launchpad.net/oslo.messaging/+bug/1398511</span></span><br><span class="line">        <span class="comment"># This ensures we don't create multiple duplicate consumers.</span></span><br><span class="line">        <span class="keyword">for</span> new_tar <span class="keyword">in</span> handler.get_targets(cfg.CONF):</span><br><span class="line">            <span class="keyword">if</span> new_tar <span class="keyword">not</span> <span class="keyword">in</span> targets:</span><br><span class="line">                targets.append(new_tar)</span><br><span class="line">        endpoints.append(handler)</span><br><span class="line">       </span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    (Pdb) endpoints</span></span><br><span class="line"><span class="string">    [&lt;ceilometer.event.endpoint.EventsNotificationEndpoint object at 0x2f5f610&gt;,</span></span><br><span class="line"><span class="string">     &lt;ceilometer.ipmi.notifications.ironic.TemperatureSensorNotification object at 0x7fa1741f6810&gt;,</span></span><br><span class="line"><span class="string">      &lt;ceilometer.telemetry.notifications.TelemetryIpc object at 0x7fa17424d410&gt;,</span></span><br><span class="line"><span class="string">       &lt;ceilometer.ipmi.notifications.ironic.FanSensorNotification object at 0x7fa17424d8d0&gt;,</span></span><br><span class="line"><span class="string">        &lt;ceilometer.ipmi.notifications.ironic.VoltageSensorNotification object at 0x7fa1742461d0&gt;,</span></span><br><span class="line"><span class="string">         &lt;ceilometer.meter.notifications.ProcessMeterNotifications object at 0x7fa17424dc90&gt;,</span></span><br><span class="line"><span class="string">          &lt;ceilometer.ipmi.notifications.ironic.CurrentSensorNotification object at 0x7fa17467ddd0&gt;]</span></span><br><span class="line"><span class="string">    (Pdb) cfg.CONF.notification.messaging_urls</span></span><br><span class="line"><span class="string">    ['rabbit://rabbitmq:I5dZs2KN@rabbitmq.openstack.svc.cluster.local:5672/']</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    urls = cfg.CONF.notification.messaging_urls <span class="keyword">or</span> [<span class="keyword">None</span>]</span><br><span class="line">    <span class="keyword">for</span> url <span class="keyword">in</span> urls:</span><br><span class="line">        transport = messaging.get_transport(url)</span><br><span class="line">        <span class="comment"># NOTE(gordc): ignore batching as we want pull</span></span><br><span class="line">        <span class="comment"># to maintain sequencing as much as possible.</span></span><br><span class="line">        listener = messaging.get_batch_notification_listener(</span><br><span class="line">            transport, targets, endpoints)</span><br><span class="line">        listener.start()</span><br><span class="line">        self.listeners.append(listener)</span><br></pre></td></tr></table></figure>
+<ol>
+<li><p>第 13 行，里面主要是加载了ceilometer.notification命名空间的插件，并将pipe_manager作为自动加载extension时传入的参数</p>
+</li>
+<li><p>第 37 行，定义了当其余组件触发事件的时候的 endpoints，此处我们稍后分析</p>
+</li>
+<li><p>第 40-64 行，遍历刚在 13 行加载的插件，里面大概的逻辑是，先判断该插件的对象是不是 NonMetricNotificationBase 类的子类，如果是的话，直接跳过，如果不是的话，调用插件的 get-target 方法，生成oslo_messaging.Target实例，topic 是 notifications，然后将插件也放进 endpoints 中</p>
+</li>
+<li><p>第 78 行到最后就是开启服务的最后了，首先我们看下这个 urls 是什么：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(Pdb) cfg.CONF.notification.messaging_urls</span><br><span class="line">[&apos;rabbit://rabbitmq:I5dZs2KN@rabbitmq.openstack.svc.cluster.local:5672/&apos;]</span><br></pre></td></tr></table></figure>
+<p>使用 rabbitmq 通信，然后在 83 行调用了get_batch_notification_listener方法，方法中定义接收消息的 target 类型，已经消息过来之后的 endpoints ，这个 endpoints 我们知道里面有两中类型的数据，一种是采集的数据的收集，还有一种是 event 事件的收集，我们看下这个里面发生了什么</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_batch_notification_listener</span><span class="params">(transport, targets, endpoints,</span></span></span><br><span class="line"><span class="function"><span class="params">                                    allow_requeue=False,</span></span></span><br><span class="line"><span class="function"><span class="params">                                    batch_size=<span class="number">1</span>, batch_timeout=None)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">        (Pdb) a</span></span><br><span class="line"><span class="string">        transport = &lt;oslo_messaging.transport.Transport object at 0x7fab5c6a9190&gt;</span></span><br><span class="line"><span class="string">        targets = [&lt;Target exchange=ironic, topic=notifications&gt;, &lt;Target exchange=ceilometer, topic=notifications&gt;, &lt;Target exchange=nova, topic=notifications&gt;, &lt;Target exchange=cinder, topic=notifications&gt;, &lt;Target exchange=glance, topic=notifications&gt;, &lt;Target exchange=neutron, topic=notifications&gt;, &lt;Target exchange=heat, topic=notifications&gt;, &lt;Target exchange=keystone, topic=notifications&gt;, &lt;Target exchange=sahara, topic=notifications&gt;, &lt;Target exchange=trove, topic=notifications&gt;, &lt;Target exchange=zaqar, topic=notifications&gt;, &lt;Target exchange=swift, topic=notifications&gt;, &lt;Target exchange=magnum, topic=notifications&gt;, &lt;Target exchange=central, topic=notifications&gt;]</span></span><br><span class="line"><span class="string">        endpoints = [&lt;ceilometer.event.endpoint.EventsNotificationEndpoint object at 0x7fab5c258c90&gt;, &lt;ceilometer.ipmi.notifications.ironic.TemperatureSensorNotification object at 0x7fab5c2a9610&gt;, &lt;ceilometer.telemetry.notifications.TelemetryIpc object at 0x7fab5c2b8110&gt;, &lt;ceilometer.ipmi.notifications.ironic.FanSensorNotification object at 0x7fab5c2b8510&gt;, &lt;ceilometer.ipmi.notifications.ironic.VoltageSensorNotification object at 0x7fab5c2b8810&gt;, &lt;ceilometer.meter.notifications.ProcessMeterNotifications object at 0x7fab5c2b8a90&gt;, &lt;ceilometer.ipmi.notifications.ironic.CurrentSensorNotification object at 0x7fab5c6be210&gt;]</span></span><br><span class="line"><span class="string">        allow_requeue = False</span></span><br><span class="line"><span class="string">        batch_size = 1</span></span><br><span class="line"><span class="string">        batch_timeout = None</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="keyword">return</span> oslo_messaging.get_batch_notification_listener(</span><br><span class="line">        transport, targets, endpoints, executor=<span class="string">'threading'</span>,</span><br><span class="line">        allow_requeue=allow_requeue,</span><br><span class="line">        batch_size=batch_size, batch_timeout=batch_timeout)</span><br></pre></td></tr></table></figure>
+<p>实际上调用还是oslo_messaging.get_batch_notification_listener 我们继续往里分析</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_batch_notification_listener</span><span class="params">(transport, targets, endpoints,</span></span></span><br><span class="line"><span class="function"><span class="params">                                    executor=<span class="string">'blocking'</span>, serializer=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                                    allow_requeue=False, pool=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                                    batch_size=None, batch_timeout=None)</span>:</span></span><br><span class="line">    dispatcher = notify_dispatcher.BatchNotificationDispatcher(</span><br><span class="line">        endpoints, serializer)</span><br><span class="line">    <span class="keyword">return</span> BatchNotificationServer(</span><br><span class="line">        transport, targets, dispatcher, executor, allow_requeue, pool,</span><br><span class="line">        batch_size, batch_timeout</span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
+<p>看下BatchNotificationDispatcher的实现，没有 init 方法，调用基类NotificationDispatcher的 init 方法，即：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">PRIORITIES = [<span class="string">'audit'</span>, <span class="string">'debug'</span>, <span class="string">'info'</span>, <span class="string">'warn'</span>, <span class="string">'error'</span>, <span class="string">'critical'</span>, <span class="string">'sample'</span>]</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NotificationDispatcher</span><span class="params">(dispatcher.DispatcherBase)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, endpoints, serializer)</span>:</span></span><br><span class="line"></span><br><span class="line">        self.endpoints = endpoints</span><br><span class="line">        self.serializer = serializer <span class="keyword">or</span> msg_serializer.NoOpSerializer()</span><br><span class="line"></span><br><span class="line">        self._callbacks_by_priority = &#123;&#125;</span><br><span class="line">        <span class="keyword">for</span> endpoint, prio <span class="keyword">in</span> itertools.product(endpoints, PRIORITIES):</span><br><span class="line">            <span class="keyword">if</span> hasattr(endpoint, prio):</span><br><span class="line">                method = getattr(endpoint, prio)</span><br><span class="line">                screen = getattr(endpoint, <span class="string">'filter_rule'</span>, <span class="keyword">None</span>)</span><br><span class="line">                self._callbacks_by_priority.setdefault(prio, []).append(</span><br><span class="line">                    (screen, method))</span><br></pre></td></tr></table></figure>
+<p>这里用到了itertools.product（A，B），这个方法返回A、B中的元素的笛卡尔积的元组，以此遍历，如果某个 endpoint 中实现了此 prio 的属性，如果存在的话，即存进_callbacks_by_priority，大概格式是：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">'sample'</span>: [</span><br><span class="line">                        ( &lt; oslo_messaging.notify.filter.NotificationFilter object at <span class="number">0x7ff14c254590</span> &gt; , &lt; bound method TemperatureSensorNotification.sample of &lt; ceilometer.ipmi.notifications.ironic.TemperatureSensorNotification object at <span class="number">0x7ff14c254550</span> &gt;&gt; ), </span><br><span class="line">                        ( &lt; oslo_messaging.notify.filter.NotificationFilter object at <span class="number">0x7ff14c260590</span> &gt; , &lt; bound method TelemetryIpc.sample of &lt; ceilometer.telemetry.notifications.TelemetryIpc object at <span class="number">0x7ff14c260150</span> &gt;&gt; )]</span><br></pre></td></tr></table></figure>
+<p>列表中元祖格式（screen,method），其中 screen 是插件类的filter_rule属性，以TelemetryIpc为例，NotificationBase是其基类：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@six.add_metaclass(abc.ABCMeta)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NotificationBase</span><span class="params">(PluginBase)</span>:</span></span><br><span class="line">    <span class="string">"""Base class for plugins that support the notification API."""</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, manager)</span>:</span></span><br><span class="line">        super(NotificationBase, self).__init__()</span><br><span class="line">        <span class="comment"># NOTE(gordc): this is filter rule used by oslo.messaging to dispatch</span></span><br><span class="line">        <span class="comment"># messages to an endpoint.</span></span><br><span class="line">        <span class="keyword">if</span> self.event_types:</span><br><span class="line">            self.filter_rule = oslo_messaging.NotificationFilter(</span><br><span class="line">                event_type=<span class="string">'|'</span>.join(self.event_types))</span><br><span class="line">        self.manager = manager</span><br></pre></td></tr></table></figure>
+<p>NotificationFilter是用来筛选 notification 服务接收到的消息的，可以根据 context,publisher_id, event_type, metadata and payload来筛选</p>
+<p>我们再回到get_batch_notification_listener，dispatcher分析完了之后，下面就是BatchNotificationServer类的实例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">继承关系</span><br><span class="line">BatchNotificationServer---&gt;NotificationServerBase---&gt;MessageHandlingServer</span><br></pre></td></tr></table></figure>
+<p>这里面的初始化就是简单的定义一些参数，返回 listen 对象</p>
+<p>然后_configure_main_queue_listeners方法的第 83 行调用了 listen.start，这里就是调用MessageHandlingServer的 start 方法</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@ordered(reset_after='stop')</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">start</span><span class="params">(self, override_pool_size=None)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> self._started:</span><br><span class="line">        LOG.warning(<span class="string">'The server has already been started. Ignoring '</span></span><br><span class="line">                    <span class="string">'the redundant call to start().'</span>)</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">           </span><br><span class="line">    self._started = <span class="keyword">True</span></span><br><span class="line">           </span><br><span class="line">    executor_opts = &#123;&#125;</span><br><span class="line">           </span><br><span class="line">    <span class="keyword">if</span> self.executor_type <span class="keyword">in</span> (<span class="string">"threading"</span>, <span class="string">"eventlet"</span>):</span><br><span class="line">        executor_opts[<span class="string">"max_workers"</span>] = (</span><br><span class="line">            override_pool_size <span class="keyword">or</span> self.conf.executor_thread_pool_size</span><br><span class="line">        )</span><br><span class="line">    self._work_executor = self._executor_cls(**executor_opts)</span><br><span class="line">           </span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        self.listener = self._create_listener()</span><br><span class="line">    <span class="keyword">except</span> driver_base.TransportDriverError <span class="keyword">as</span> ex:</span><br><span class="line">        <span class="keyword">raise</span> ServerListenError(self.target, ex)</span><br><span class="line">           </span><br><span class="line">    self.listener.start(self._on_incoming)</span><br></pre></td></tr></table></figure>
+<p>这里主要看下 19 行和 23 行，第 19 行调用了_create_listener，实际上调用的是NotificationServerBase的方法</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_create_listener</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> self.transport._listen_for_notifications(</span><br><span class="line">        self._targets_priorities, self._pool, self._batch_size,</span><br><span class="line">        self._batch_timeout</span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
+<p>我们看到这里又调用了_listen_for_notifications</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_listen_for_notifications</span><span class="params">(self, targets_and_priorities, pool,</span></span></span><br><span class="line"><span class="function"><span class="params">                              batch_size, batch_timeout)</span>:</span></span><br><span class="line">    <span class="keyword">for</span> target, priority <span class="keyword">in</span> targets_and_priorities:</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> target.topic:</span><br><span class="line">            <span class="keyword">raise</span> exceptions.InvalidTarget(<span class="string">'A target must have '</span></span><br><span class="line">                                           <span class="string">'topic specified'</span>,</span><br><span class="line">                                           target)</span><br><span class="line">    <span class="keyword">return</span> self._driver.listen_for_notifications(</span><br><span class="line">        targets_and_priorities, pool, batch_size, batch_timeout</span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
+<p>继续往里分析</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">listen_for_notifications</span><span class="params">(self, targets_and_priorities, pool,</span></span></span><br><span class="line"><span class="function"><span class="params">                             batch_size, batch_timeout)</span>:</span></span><br><span class="line">    conn = self._get_connection(rpc_common.PURPOSE_LISTEN)</span><br><span class="line">           </span><br><span class="line">    listener = NotificationAMQPListener(self, conn)</span><br><span class="line">    <span class="keyword">for</span> target, priority <span class="keyword">in</span> targets_and_priorities:</span><br><span class="line">        conn.declare_topic_consumer(</span><br><span class="line">            exchange_name=self._get_exchange(target),</span><br><span class="line">            topic=<span class="string">'%s.%s'</span> % (target.topic, priority),</span><br><span class="line">            callback=listener, queue_name=pool)</span><br><span class="line">    <span class="keyword">return</span> base.PollStyleListenerAdapter(listener, batch_size,</span><br><span class="line">                                         batch_timeout)</span><br></pre></td></tr></table></figure>
+<p>这段代码主要是为了在要监听的队列上创建消费者进行监听，并初始化PollStyleListenerAdapter类实例并返回</p>
+<p>PollStyleListenerAdapter类对象初始化时会生成一个线程对象：</p>
+<p>File：oslo_messaging/_drivers/base.py:PollStyleListenerAdapter.<strong><strong>init</strong></strong></p>
+<p>self._listen_thread = threading.Thread(target=self.____runner)</p>
+<p>然后调用start后就会生成一个线程运行___runner函数，该函数主要功能是不断的去获取消息，并通过调用_process_incoming函数来处理消息</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PollStyleListenerAdapter</span><span class="params">(Listener)</span>:</span></span><br><span class="line">    <span class="string">"""A Listener that uses a PollStyleListener for message transfer. A</span></span><br><span class="line"><span class="string">    dedicated thread is created to do message polling.</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, poll_style_listener, batch_size, batch_timeout)</span>:</span></span><br><span class="line">        super(PollStyleListenerAdapter, self).__init__(</span><br><span class="line">            batch_size, batch_timeout, poll_style_listener.prefetch_size</span><br><span class="line">        )</span><br><span class="line">        self._poll_style_listener = poll_style_listener</span><br><span class="line">        self._listen_thread = threading.Thread(target=self._runner)</span><br><span class="line">        self._listen_thread.daemon = <span class="keyword">True</span></span><br><span class="line">        self._started = <span class="keyword">False</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">start</span><span class="params">(self, on_incoming_callback)</span>:</span></span><br><span class="line">        super(PollStyleListenerAdapter, self).start(on_incoming_callback)</span><br><span class="line">        self._started = <span class="keyword">True</span></span><br><span class="line">        self._listen_thread.start()</span><br><span class="line"></span><br><span class="line"><span class="meta">    @excutils.forever_retry_uncaught_exceptions</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_runner</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">while</span> self._started:</span><br><span class="line">            incoming = self._poll_style_listener.poll(</span><br><span class="line">                batch_size=self.batch_size, batch_timeout=self.batch_timeout)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> incoming:</span><br><span class="line">                self.on_incoming_callback(incoming)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># listener is stopped but we need to process all already consumed</span></span><br><span class="line">        <span class="comment"># messages</span></span><br><span class="line">        <span class="keyword">while</span> <span class="keyword">True</span>:</span><br><span class="line">            incoming = self._poll_style_listener.poll(</span><br><span class="line">                batch_size=self.batch_size, batch_timeout=self.batch_timeout)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> incoming:</span><br><span class="line">                <span class="keyword">return</span></span><br><span class="line">            self.on_incoming_callback(incoming)</span><br></pre></td></tr></table></figure>
+<p>我们看到在MessageHandlingServer的 start 方法中的最后一行是 self.listener.start(self._on_incoming) 这里调用的就是上述代码中的 start，启动之后调用 runner，然后通过poll 不断从队列中取出数据，取出之后用self.on_incoming_callback(incoming)处理，即MessageHandlingServer中的self.__on_incoming处理</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_on_incoming</span><span class="params">(self, incoming)</span>:</span></span><br><span class="line">    <span class="string">"""Handles on_incoming event</span></span><br><span class="line"><span class="string">           </span></span><br><span class="line"><span class="string">    :param incoming: incoming request.</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    self._work_executor.submit(self._process_incoming, incoming)</span><br></pre></td></tr></table></figure>
+<p>我们看到这边实际使用的是self._process_incoming来处理，即采用BatchNotificationServer类中的self.__process_incoming处理</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BatchNotificationServer</span><span class="params">(NotificationServerBase)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_process_incoming</span><span class="params">(self, incoming)</span>:</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            not_processed_messages = self.dispatcher.dispatch(incoming)</span><br><span class="line">        <span class="keyword">except</span> Exception:</span><br><span class="line">                        ......</span><br></pre></td></tr></table></figure>
+<p>可以看到该处理函数会调用dispatcher对象来分派消息，这里的self.dispatcher，就是之前使用NotificationDispatcher初始化后传过来的参数，即调用</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BatchNotificationDispatcher</span><span class="params">(NotificationDispatcher)</span>:</span></span><br><span class="line">    <span class="string">"""A message dispatcher which understands Notification messages.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    A MessageHandlingServer is constructed by passing a callable dispatcher</span></span><br><span class="line"><span class="string">    which is invoked with a list of message dictionaries each time 'batch_size'</span></span><br><span class="line"><span class="string">    messages are received or 'batch_timeout' seconds is reached.</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">dispatch</span><span class="params">(self, incoming)</span>:</span></span><br><span class="line">        <span class="string">"""Dispatch notification messages to the appropriate endpoint method.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line"></span><br><span class="line">        messages_grouped = itertools.groupby(sorted(</span><br><span class="line">            (self._extract_user_message(m) <span class="keyword">for</span> m <span class="keyword">in</span> incoming),</span><br><span class="line">            key=operator.itemgetter(<span class="number">0</span>)), operator.itemgetter(<span class="number">0</span>))</span><br><span class="line"></span><br><span class="line">        requeues = set()</span><br><span class="line">        <span class="keyword">for</span> priority, messages <span class="keyword">in</span> messages_grouped:</span><br><span class="line">            __, raw_messages, messages = six.moves.zip(*messages)</span><br><span class="line">            <span class="keyword">if</span> priority <span class="keyword">not</span> <span class="keyword">in</span> PRIORITIES:</span><br><span class="line">                LOG.warning(<span class="string">'Unknown priority "%s"'</span>, priority)</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            <span class="keyword">for</span> screen, callback <span class="keyword">in</span> self._callbacks_by_priority.get(priority,</span><br><span class="line">                                                                    []):</span><br><span class="line">                <span class="keyword">if</span> screen:</span><br><span class="line">                    filtered_messages = [message <span class="keyword">for</span> message <span class="keyword">in</span> messages</span><br><span class="line">                                         <span class="keyword">if</span> screen.match(</span><br><span class="line">                                             message[<span class="string">"ctxt"</span>],</span><br><span class="line">                                             message[<span class="string">"publisher_id"</span>],</span><br><span class="line">                                             message[<span class="string">"event_type"</span>],</span><br><span class="line">                                             message[<span class="string">"metadata"</span>],</span><br><span class="line">                                             message[<span class="string">"payload"</span>])]</span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    filtered_messages = list(messages)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> <span class="keyword">not</span> filtered_messages:</span><br><span class="line">                    <span class="keyword">continue</span></span><br><span class="line"></span><br><span class="line">                ret = self._exec_callback(callback, filtered_messages)</span><br><span class="line">                <span class="keyword">if</span> ret == NotificationResult.REQUEUE:</span><br><span class="line">                    requeues.update(raw_messages)</span><br><span class="line">                    <span class="keyword">break</span></span><br><span class="line">        <span class="keyword">return</span> requeues</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_exec_callback</span><span class="params">(self, callback, messages)</span>:</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="keyword">return</span> callback(messages)</span><br><span class="line">        <span class="keyword">except</span> Exception:</span><br><span class="line">            LOG.exception(<span class="string">"Callback raised an exception."</span>)</span><br><span class="line">            <span class="keyword">return</span> NotificationResult.REQUEUE</span><br></pre></td></tr></table></figure>
+<p>这里重点看通过消息的priority字段查找self._callbacks_by_priority字典里匹配的插件的对应方法，也即是获取到callback函数，然后进行调用。比如notifications.sample上的消息会匹配到TelemetryIpc类的sample方法去处理</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">_sample = ceilometer.telemetry.notifications:TelemetryIpc</span><br></pre></td></tr></table></figure>
+<p>但该类实例是调用了它父类的sample方法：ceilometer/agent/plugin_base.py:NotificationBase.sample</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">sample</span><span class="params">(self, notifications)</span>:</span></span><br><span class="line">    self._process_notifications(<span class="string">'sample'</span>, notifications)</span><br><span class="line">  </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_process_notifications</span><span class="params">(self, priority, notifications)</span>:</span></span><br><span class="line">    <span class="keyword">for</span> notification <span class="keyword">in</span> notifications:</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            notification = messaging.convert_to_old_notification_format(</span><br><span class="line">                priority, notification)</span><br><span class="line">            self.to_samples_and_publish(notification)</span><br><span class="line">        <span class="keyword">except</span> Exception:</span><br><span class="line">            LOG.error(_LE(<span class="string">'Fail to process notification'</span>), exc_info=<span class="keyword">True</span>)</span><br><span class="line">           </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">to_samples_and_publish</span><span class="params">(self, notification)</span>:</span></span><br><span class="line">    <span class="keyword">with</span> self.manager.publisher() <span class="keyword">as</span> p:</span><br><span class="line">        p(list(self.process_notification(notification)))</span><br></pre></td></tr></table></figure>
+<p>可以看到这边以次往下调用_process_notifications–&gt;to_samples_and_publish，这边比较重要的是第 14 行和第 15 行，第14 行调用了self.manager.publisher()，此处的 manager 是在插件初始化的时候传进来的，是PipelineManager类的实例，所以看下PipelineManager.publisher</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">publisher</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> PublishContext(self.pipelines)</span><br></pre></td></tr></table></figure>
+<p>参数self.pipelines是在init的时候生成的，看下PublishContext</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PublishContext</span><span class="params">(object)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, pipelines=None)</span>:</span></span><br><span class="line">        pipelines = pipelines <span class="keyword">or</span> []</span><br><span class="line">        self.pipelines = set(pipelines)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">add_pipelines</span><span class="params">(self, pipelines)</span>:</span></span><br><span class="line">        self.pipelines.update(pipelines)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__enter__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="function"><span class="keyword">def</span> <span class="title">p</span><span class="params">(data)</span>:</span></span><br><span class="line">            <span class="keyword">for</span> p <span class="keyword">in</span> self.pipelines:</span><br><span class="line">                p.publish_data(data)</span><br><span class="line">        <span class="keyword">return</span> p</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__exit__</span><span class="params">(self, exc_type, exc_value, traceback)</span>:</span></span><br><span class="line">        <span class="keyword">for</span> p <span class="keyword">in</span> self.pipelines:</span><br><span class="line">            p.flush()</span><br></pre></td></tr></table></figure>
+<p>因为这边使用 with 实现，所以看下 enter 方法，enter 返回的值与 as 后面的值绑定，data 参数就是list(self.process_notification(notification))，这里的 p 有两种类型，SamplePipeline和EventPipeline</p>
+<p>以SamplePipeline为例</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">publish_data</span><span class="params">(self, samples)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> isinstance(samples, list):</span><br><span class="line">        samples = [samples]</span><br><span class="line">    supported = [s <span class="keyword">for</span> s <span class="keyword">in</span> samples <span class="keyword">if</span> self.source.support_meter(s.name)</span><br><span class="line">                 <span class="keyword">and</span> self._validate_volume(s)]</span><br><span class="line">    self.sink.publish_samples(supported)</span><br></pre></td></tr></table></figure>
+<p>调用SampleSink的publish_samples方法</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_transform_sample</span><span class="params">(self, start, sample)</span>:</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">for</span> transformer <span class="keyword">in</span> self.transformers[start:]:</span><br><span class="line">                <span class="comment"># 这里就是调用了RateOfChangeTransformer的handle_sample方法进行处理</span></span><br><span class="line">            sample = transformer.handle_sample(sample)</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> sample:</span><br><span class="line">                LOG.debug(</span><br><span class="line">                    <span class="string">"Pipeline %(pipeline)s: Sample dropped by "</span></span><br><span class="line">                    <span class="string">"transformer %(trans)s"</span>, &#123;<span class="string">'pipeline'</span>: self,</span><br><span class="line">                                              <span class="string">'trans'</span>: transformer&#125;)</span><br><span class="line">                <span class="keyword">return</span></span><br><span class="line">        <span class="keyword">return</span> sample</span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> err:</span><br><span class="line">        <span class="comment"># TODO(gordc): only use one log level.</span></span><br><span class="line">        LOG.warning(_(<span class="string">"Pipeline %(pipeline)s: "</span></span><br><span class="line">                      <span class="string">"Exit after error from transformer "</span></span><br><span class="line">                      <span class="string">"%(trans)s for %(smp)s"</span>) % (&#123;<span class="string">'pipeline'</span>: self,</span><br><span class="line">                                                   <span class="string">'trans'</span>: transformer,</span><br><span class="line">                                                   <span class="string">'smp'</span>: sample&#125;))</span><br><span class="line">        LOG.exception(err)</span><br><span class="line">           </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_publish_samples</span><span class="params">(self, start, samples)</span>:</span></span><br><span class="line">    <span class="string">"""Push samples into pipeline for publishing.</span></span><br><span class="line"><span class="string">           </span></span><br><span class="line"><span class="string">    :param start: The first transformer that the sample will be injected.</span></span><br><span class="line"><span class="string">                  This is mainly for flush() invocation that transformer</span></span><br><span class="line"><span class="string">                  may emit samples.</span></span><br><span class="line"><span class="string">    :param samples: Sample list.</span></span><br><span class="line"><span class="string">           </span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">           </span><br><span class="line">    transformed_samples = []</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> self.transformers:</span><br><span class="line">        transformed_samples = samples</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">for</span> sample <span class="keyword">in</span> samples:</span><br><span class="line">            LOG.debug(</span><br><span class="line">       <span class="string">"Pipeline %(pipeline)s: Transform sample "</span></span><br><span class="line">                <span class="string">"%(smp)s from %(trans)s transformer"</span>, &#123;<span class="string">'pipeline'</span>: self,</span><br><span class="line">                                              <span class="string">'smp'</span>: sample,</span><br><span class="line">                                                       <span class="string">'trans'</span>: start&#125;)</span><br><span class="line">            sample = self._transform_sample(start, sample)</span><br><span class="line">            <span class="keyword">if</span> sample:</span><br><span class="line">                transformed_samples.append(sample)</span><br><span class="line">           </span><br><span class="line">    <span class="keyword">if</span> transformed_samples:</span><br><span class="line">        <span class="keyword">for</span> p <span class="keyword">in</span> self.publishers:</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                p.publish_samples(transformed_samples)</span><br><span class="line">            <span class="keyword">except</span> Exception:</span><br><span class="line">                LOG.exception(_(</span><br><span class="line">                    <span class="string">"Pipeline %(pipeline)s: Continue after error "</span></span><br><span class="line">                    <span class="string">"from publisher %(pub)s"</span>) % (&#123;<span class="string">'pipeline'</span>: self,</span><br><span class="line">                                                  <span class="string">'pub'</span>: p&#125;))</span><br><span class="line">           </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">publish_samples</span><span class="params">(self, samples)</span>:</span></span><br><span class="line">    self._publish_samples(<span class="number">0</span>, samples)</span><br></pre></td></tr></table></figure>
+<p>可以看到self._publish_samples方法被调用，在该方法中组装了transformed_samples之后，遍历self.publishers的publish_samples方法来处理数据，之前我们看到 publisher 里面放的是 notifier 插件，那么即调用SampleNotifierPublisher类，此类继承NotifierPublisher–&gt;MessagingPublisher，即调用到MessagingPublisher的publish_samples方法</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">def</span> <span class="title">publish_samples</span><span class="params">(self, samples)</span>:</span></span><br><span class="line">     <span class="string">"""Publish samples on RPC.</span></span><br><span class="line"><span class="string">           </span></span><br><span class="line"><span class="string">     :param samples: Samples from pipeline after transformation.</span></span><br><span class="line"><span class="string">           </span></span><br><span class="line"><span class="string">     """</span></span><br><span class="line">           </span><br><span class="line">     meters = [</span><br><span class="line">utils.meter_message_from_counter(</span><br><span class="line">             sample, cfg.CONF.publisher.telemetry_secret)</span><br><span class="line">         <span class="keyword">for</span> sample <span class="keyword">in</span> samples</span><br><span class="line">     ]</span><br><span class="line">     topic = cfg.CONF.publisher_notifier.metering_topic</span><br><span class="line">     self.local_queue.append((topic, meters))</span><br><span class="line">           </span><br><span class="line">     <span class="keyword">if</span> self.per_meter_topic:</span><br><span class="line">         <span class="keyword">for</span> meter_name, meter_list <span class="keyword">in</span> itertools.groupby(</span><br><span class="line">        sorted(meters, key=operator.itemgetter(<span class="string">'counter_name'</span>)),</span><br><span class="line">                 operator.itemgetter(<span class="string">'counter_name'</span>)):</span><br><span class="line">    meter_list = list(meter_list)</span><br><span class="line">             topic_name = topic + <span class="string">'.'</span> + meter_name</span><br><span class="line">             LOG.debug(<span class="string">'Publishing %(m)d samples on %(n)s'</span>,</span><br><span class="line">                       &#123;<span class="string">'m'</span>: len(meter_list), <span class="string">'n'</span>: topic_name&#125;)</span><br><span class="line">             self.local_queue.append((topic_name, meter_list))</span><br><span class="line">           </span><br><span class="line">     self.flush()</span><br></pre></td></tr></table></figure>
+<p>第 13 行的 topic 是 metering，最后执行了 flush，然后执行了_process_queue，其中有个send方法，将数据发出去</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_send</span><span class="params">(self, event_type, data)</span>:</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        self.notifier.sample(&#123;&#125;, event_type=event_type,</span><br><span class="line">                             payload=data)</span><br><span class="line">    <span class="keyword">except</span> oslo_messaging.MessageDeliveryFailure <span class="keyword">as</span> e:</span><br><span class="line">        raise_delivery_failure(e)</span><br></pre></td></tr></table></figure>
+<p>发到了 metering.sample 队列，之后的消息发送流程便和polling-compute 服务一样了，具体请见：<a href="https://blog.csdn.net/weixin_43700106/article/details/107006653" target="_blank" rel="external">polling-compute</a></p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<p>参考：<br><a href="https://www.cnblogs.com/luohaixian/p/11145939.html" target="_blank" rel="external">https://www.cnblogs.com/luohaixian/p/11145939.html</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+<blockquote class="blockquote-center" style="color: #ccc;">
+    -------------本文结束 <i class="fa fa-apple"></i> 感谢您的阅读-------------
+</blockquote>
+
+  <span id="inline-green" style="border-radius:3px;">作者</span>：<a class="link-blue" href="https://github.com/magiceses" target="_blank">Magiceses</a><br/>有问题请 <a class="link-blue" href="https://magiceses.github.io/guestbook" target="_blank">留言</a> 或者私信我的 <a class="link-blue" href="https://weibo.com/u/3069595351" target="_blank">微博</a>。
+
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>满分是10分的话，这篇文章你给几分</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/reward/reward_wechat.png" alt="magiceses WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/reward/reward_alipay.png" alt="magiceses Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Openstack/" rel="tag"><i class="fa fa-tag"></i> Openstack</a>
+          
+            <a href="/tags/Telemetry/" rel="tag"><i class="fa fa-tag"></i> Telemetry</a>
+          
+            <a href="/tags/Ceilometer/" rel="tag"><i class="fa fa-tag"></i> Ceilometer</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/04/openstack-telemetry-ceilometer-polling源码分析/" rel="next" title="ceilometer-polling源码分析">
+                <i class="fa fa-chevron-left"></i> ceilometer-polling源码分析
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/10/04/openstack-telemetry-ceilometerclient分析/" rel="prev" title="CeilometerClient源码学习记录">
+                CeilometerClient源码学习记录 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar/avatar.png"
+               alt="magiceses" />
+          <p class="site-author-name" itemprop="name">magiceses</p>
+          <p class="site-description motion-element" itemprop="description">Stay Hungry,Stay Foolish</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">61</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/magiceses" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://blog.csdn.net/weixin_43700106" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-chrome"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/weblog" title="建站日志" target="_blank">建站日志</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/reward" title="打赏" target="_blank">打赏</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、启动命令"><span class="nav-number">1.</span> <span class="nav-text">一、启动命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、代码入口"><span class="nav-number">2.</span> <span class="nav-text">二、代码入口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、服务启动"><span class="nav-number">3.</span> <span class="nav-text">三、服务启动</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+      
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="busuanzi-count">
+
+  <!-- <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script> -->
+  <!-- 上面这个是之前的，不知道为什么失效了，改成下面这个 -->
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">您是第<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>个小伙伴</span>
+  
+
+  
+    <span class="site-pv">本站总浏览<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">magiceses</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Pisces
+  </a>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count" style="color: #e90f92;">全站共 1m 字</span>
+</div>
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+  <!-- 按需加载背景 -->
+  <!-- 背景动画 -->
+<script type="text/javascript">
+  // 按需加载背景
+  // 如果是all，就直接加载了
+  if("pc" == "all") {
+    $.getScript("/js/src/particle.js?v=5.0.1");
+  }
+  // 识别手机或电脑的js开始
+  (function(){
+    var res = GetRequest();
+    var par = res['index'];
+    if(par!='gfan'){
+      var ua=navigator.userAgent.toLowerCase();
+      var contains=function (a, b){
+          if(a.indexOf(b)!=-1){return true;}
+      };
+      if((contains(ua,"android") && contains(ua,"mobile"))||(contains(ua,"android") && contains(ua,"mozilla"))||(contains(ua,"android") && contains(ua,"opera"))||contains(ua,"ucweb7")||contains(ua,"iphone")){
+        return false;
+      } else {
+        $.getScript("/js/src/particle.js?v=5.0.1");
+      }
+    }
+  })();
+  function GetRequest() {
+    var url = location.search;
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+      var str = url.substr(1);
+      strs = str.split("&");
+      for(var i = 0; i < strs.length; i ++) {
+        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+      }
+    }
+    return theRequest;
+  }
+</script>
+<!-- 识别手机或电脑的js结束 -->  
+
+  <!-- 页面点击小红心 -->
+  <!-- 页面点击小红心 -->
+
+  <script type="text/javascript" src="/js/src/love.js?v=5.0.1"></script>
+
+
+  <!-- 鼠标移动，效果 -->
+  <!-- 鼠标移动特效 -->
+
+  <script type="text/javascript" src="/js/src/jquery-stars.js?v=5.0.1"></script>
+  <script type="text/javascript">
+  jQuery('body').jstars({
+  	image_path: '/images',
+  	image: 'candy-cane-stars.png',
+  	style: 'white',
+  	width: 34,
+  	height: 34,
+  	delay: 700,
+  	frequency: 5
+  });
+  </script>
+
+
+  <!-- 页面 title 进入/离开 效果 -->
+
+  <script type="text/javascript">var OriginTitile=document.title,st;document.addEventListener("visibilitychange",function(){document.hidden?(document.title="Waiting for you back！",clearTimeout(st)):(document.title="Thanks for visit~ "+OriginTitile,st=setTimeout(function(){document.title=OriginTitile},4e3))})</script>
+
+
+</body>
+</html>

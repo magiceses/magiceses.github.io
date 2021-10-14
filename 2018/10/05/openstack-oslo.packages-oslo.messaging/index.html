@@ -1,0 +1,1567 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Courier New:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Openstack,Oslo," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="天青色等烟雨" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="生命的道路上永远没有捷径可言，只有脚踏实地走下去。
+
+今天介绍一下 openstack 中关于 RabbitMq 和 oslo_messaging 库之间的前生今世
+一定要弄清楚的一个问题就是：直接使用rabbitmq和使用oslo_messaging这个库间接的使用有什么区别。
+olso_messaging实际上是在rabbitmq的基础上通过一些列的调用，最终暴露给用户一个简单的使用接口，用户">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Oslo系列之oslo.messaging">
+<meta property="og:url" content="https://magiceses.github.io/2018/10/05/openstack-oslo.packages-oslo.messaging/index.html">
+<meta property="og:site_name" content="天青色等烟雨">
+<meta property="og:description" content="生命的道路上永远没有捷径可言，只有脚踏实地走下去。
+
+今天介绍一下 openstack 中关于 RabbitMq 和 oslo_messaging 库之间的前生今世
+一定要弄清楚的一个问题就是：直接使用rabbitmq和使用oslo_messaging这个库间接的使用有什么区别。
+olso_messaging实际上是在rabbitmq的基础上通过一些列的调用，最终暴露给用户一个简单的使用接口，用户">
+<meta property="og:updated_time" content="2021-10-14T01:59:41.645Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Oslo系列之oslo.messaging">
+<meta name="twitter:description" content="生命的道路上永远没有捷径可言，只有脚踏实地走下去。
+
+今天介绍一下 openstack 中关于 RabbitMq 和 oslo_messaging 库之间的前生今世
+一定要弄清楚的一个问题就是：直接使用rabbitmq和使用oslo_messaging这个库间接的使用有什么区别。
+olso_messaging实际上是在rabbitmq的基础上通过一些列的调用，最终暴露给用户一个简单的使用接口，用户">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://magiceses.github.io/2018/10/05/openstack-oslo.packages-oslo.messaging/"/>
+
+
+<!-- 网页加载条 -->
+<script src="/js/src/pace.min.js"></script>
+  <title> Oslo系列之oslo.messaging | 天青色等烟雨 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">天青色等烟雨</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">而我在等你</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-guestbook">
+          <a href="/guestbook" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-commenting"></i> <br />
+            
+            留言
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+      
+      
+        <li class="menu-item"> <a title="把这个链接拖到你的工具栏中,任何网页都可以High" href='javascript:(
+/*
+ * Copyright (C) 2016 Never_yu (Neveryu.github.io) <React.dong.yu@gmail.com>
+ * Sina Weibo (http://weibo.com/Neveryu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function go() {
+
+var songs = [
+  "http://dl.stream.qqmusic.qq.com/C400001Qu4I30eVFYb.m4a?vkey=2127178E4405E7B8B268F20F05232485735CCF4FF8C1432F0360D2626D0B6C9564B5627C7AB481BBC685FEDB0946A50E97C66F0D1B008226&guid=7175649092&uin=0&fromtag=66",
+  "",
+  "",
+  ""
+];
+
+function c() {
+  var e = document.createElement("link");
+  e.setAttribute("type", "text/css");
+  e.setAttribute("rel", "stylesheet");
+  e.setAttribute("href", f);
+  e.setAttribute("class", l);
+  document.body.appendChild(e)
+}
+
+function h() {
+  var e = document.getElementsByClassName(l);
+  for (var t = 0; t < e.length; t++) {
+    document.body.removeChild(e[t])
+  }
+}
+
+function p() {
+  var e = document.createElement("div");
+  e.setAttribute("class", a);
+  document.body.appendChild(e);
+  setTimeout(function() {
+    document.body.removeChild(e)
+  }, 100)
+}
+
+function d(e) {
+  return {
+    height : e.offsetHeight,
+    width : e.offsetWidth
+  }
+}
+
+function v(i) {
+  var s = d(i);
+  return s.height > e && s.height < n && s.width > t && s.width < r
+}
+
+function m(e) {
+  var t = e;
+  var n = 0;
+  while (!!t) {
+    n += t.offsetTop;
+    t = t.offsetParent
+  }
+  return n
+}
+
+function g() {
+  var e = document.documentElement;
+  if (!!window.innerWidth) {
+    return window.innerHeight
+  } else if (e && !isNaN(e.clientHeight)) {
+    return e.clientHeight
+  }
+  return 0
+}
+
+function y() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  }
+  return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+}
+
+function E(e) {
+  var t = m(e);
+  return t >= w && t <= b + w
+}
+
+function S() {
+  var e = document.getElementById("audio_element_id");
+  if(e != null){
+    var index = parseInt(e.getAttribute("curSongIndex"));
+    if(index > songs.length - 2) {
+      index = 0;
+    } else {
+      index++;
+    }
+    e.setAttribute("curSongIndex", index);
+    N();
+  }
+
+  e.src = i;
+  e.play()
+}
+
+function x(e) {
+  e.className += " " + s + " " + o
+}
+
+function T(e) {
+  e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+}
+
+function N() {
+  var e = document.getElementsByClassName(s);
+  var t = new RegExp("\\b" + s + "\\b");
+  for (var n = 0; n < e.length; ) {
+    e[n].className = e[n].className.replace(t, "")
+  }
+}
+
+function initAudioEle() {
+  var e = document.getElementById("audio_element_id");
+  if(e === null){
+    e = document.createElement("audio");
+    e.setAttribute("class", l);
+    e.setAttribute("curSongIndex", 0);
+    e.id = "audio_element_id";
+    e.loop = false;
+    e.bgcolor = 0;
+    e.addEventListener("canplay", function() {
+      setTimeout(function() {
+        x(k)
+      }, 500);
+      setTimeout(function() {
+        N();
+        p();
+        for (var e = 0; e < O.length; e++) {
+          T(O[e])
+        }
+      }, 15500)
+    }, true);
+    e.addEventListener("ended", function() {
+      N();
+      h();
+      go();
+    }, true);
+    e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+    document.body.appendChild(e);
+  }
+}
+
+initAudioEle();
+var e = 30;
+var t = 30;
+var n = 350;
+var r = 350;
+
+var curSongIndex = parseInt(document.getElementById("audio_element_id").getAttribute("curSongIndex"));
+var i = songs[curSongIndex];
+
+var s = "mw-harlem_shake_me";
+var o = "im_first";
+var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+var a = "mw-strobe_light";
+
+/* harlem-shake-style.css，替换成你的位置，也可以直接使用：//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css */
+var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+
+var l = "mw_added_css";
+var b = g();
+var w = y();
+var C = document.getElementsByTagName("*");
+var k = null;
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    if (E(A)) {
+      k = A;
+      break
+    }
+  }
+}
+if (A === null) {
+  console.warn("Could not find a node of the right size. Please try a different page.");
+  return
+}
+c();
+S();
+var O = [];
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    O.push(A)
+  }
+}
+})()'><i class="menu-item-icon fa fa-music fa-fw"></i> High一下</a></li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search fa-lg"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Oslo系列之oslo.messaging
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2018-10-05T23:25:24+08:00" content="2018-10-05">
+              2018-10-05
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Openstack/" itemprop="url" rel="index">
+                    <span itemprop="name">Openstack</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv">热度
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p id="div-border-top-green">生命的道路上永远没有捷径可言，只有脚踏实地走下去。<br></p>
+
+<p>今天介绍一下 openstack 中关于 <a href="https://blog.csdn.net/weixin_43700106/article/details/107763282" target="_blank" rel="external">RabbitMq</a> 和 oslo_messaging 库之间的前生今世</p>
+<p>一定要弄清楚的一个问题就是：直接使用rabbitmq和使用oslo_messaging这个库间接的使用有什么区别。</p>
+<p>olso_messaging实际上是在rabbitmq的基础上通过一些列的调用，最终暴露给用户一个简单的使用接口，用户不必关心内部的实现，只用配置好配置文件，进行简单的函数调用即可。<br>并且由于这个库是openstack的标准库，里面的一些函数命名和默认参数都是针对于openstack的概念来讲的。</p>
+<a id="more"></a>
+<p>基本结构就是：</p>
+<p>openstack -&gt; oslo_messaging -&gt; kombu -&gt; AMQP -&gt; socket</p>
+<p>首先看下 oslo_messaging 中对象封装：</p>
+<h2 id="概念简介"><a href="#概念简介" class="headerlink" title="概念简介"></a>概念简介</h2><h3 id="Transport"><a href="#Transport" class="headerlink" title="Transport"></a>Transport</h3><p>Transport(传输层)主要实现RPC底层的通信(比如socket)以及事件循环,多线程等其他功能.可以通过URL来获得不同transport的句柄.URL的格式为:</p>
+<p>transport://user:password@host:port[,hostN:portN]/virtual_host</p>
+<p>目前支持的Transport有rabbit,qpid与zmq,分别对应不同的后端消息总线.用户可以使用oslo.messaging.get_transport函数来获得transport对象实例的句柄.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> oslo_messaging</span><br><span class="line">transport = oslo_messaging.get_transport(cfg, url=<span class="keyword">None</span>, **kwargs)</span><br></pre></td></tr></table></figure>
+<h3 id="Target"><a href="#Target" class="headerlink" title="Target"></a>Target</h3><p>Target封装了指定某一个消息最终目的地的所有信息,下表所示为其所具有的属性:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">参数=默认值</th>
+<th style="text-align:left">说  明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">exchange = None</td>
+<td style="text-align:left">(字符串类型)topic所属的范围,不指定的话默认使用配置文件中的control_exchange选项</td>
+</tr>
+<tr>
+<td style="text-align:left">topic = None</td>
+<td style="text-align:left">(字符串类型)一个topic可以用来标识服务器所暴露的一组接口(一个接口包含多个可被远程调用的方法).允许多个服务器暴露同一组接口,消息会以轮循的方式发送给多个服务器中的某一个</td>
+</tr>
+<tr>
+<td style="text-align:left">namespace = None</td>
+<td style="text-align:left">(字符串类型)用来标识服务器所暴露的某个特定接口(多个可被远程调用的方法)</td>
+</tr>
+<tr>
+<td style="text-align:left">version = None</td>
+<td style="text-align:left">(字符串类型)服务器所暴露的接口支持M.N类型的版本号.次版本号(N)的增加表示新的接口向前兼容,主版本号(M)的增加表示新接口和旧接口不兼容.RPC服务器可以实现多个不同的主版本号接口.</td>
+</tr>
+<tr>
+<td style="text-align:left">server = None</td>
+<td style="text-align:left">(字符串类型)客户端可以指定此参数来要求消息的目的地是某个特定的服务器,而不是一组同属某个topic的服务器中的任意一台.</td>
+</tr>
+<tr>
+<td style="text-align:left">fanout = None</td>
+<td style="text-align:left">(布尔型)当设置为真时,消息会被发送到同属某个topic的所有服务器上,而不是其中的一台.</td>
+</tr>
+</tbody>
+</table>
+<p>在不同的应用场景下,构造Target对象需要不同的参数:创建一个RPC服务器时,需要topic和server参数,exchange参数可选;指定一个endpoint时,namespace和version是可选的;客户端发送消息时,需要topic参数,其他可选.</p>
+<h3 id="Server"><a href="#Server" class="headerlink" title="Server"></a>Server</h3><p>一个RPC服务器可以暴露多个endpoint,每个endpoint包含一组方法,这组方法是可以被客户端通过某种Transport对象远程调用的.创建Server对象时,需要指定Transport,Target和一组endpoint.</p>
+<h3 id="RPC-Client"><a href="#RPC-Client" class="headerlink" title="RPC Client"></a>RPC Client</h3><p>通过RPC Client,可以远程调用RPC Sever上的方法.远程调用时,需要提供一个字典对象来指明调用的上下文,调用方法的名字和传递给调用方法的参数(用字典表示).</p>
+<p>有cast和call两种远程调用方式.通过cast方式远程调用,请求发送后就直接返回了;通过call方式调用,需要等响应从服务器返回.</p>
+<h3 id="Notifier"><a href="#Notifier" class="headerlink" title="Notifier"></a>Notifier</h3><p>Notifier用来通过某种transport发送通知消息.通知消息遵循如下的格式:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> six</span><br><span class="line"><span class="keyword">import</span> uuid</span><br><span class="line"><span class="keyword">from</span> oslo_utils <span class="keyword">import</span> timeutils</span><br><span class="line"> </span><br><span class="line">&#123;<span class="string">'message_id'</span>: six.text_type(uuid.uuid4()), <span class="comment">#消息id号</span></span><br><span class="line"> <span class="string">'publisher_id'</span>: <span class="string">'compute.hos1'</span>,    <span class="comment">#发送者id</span></span><br><span class="line"> <span class="string">'timestamp'</span>: timeutils.utcnow(),   <span class="comment">#时间戳</span></span><br><span class="line"> <span class="string">'priority'</span>: <span class="string">'WARN'</span>,                <span class="comment">#通知优先级</span></span><br><span class="line"> <span class="string">'event_type'</span>: <span class="string">'compute.create_instance'</span>,   <span class="comment">#通知类型</span></span><br><span class="line"> <span class="string">'payload'</span>: &#123;<span class="string">'instance_id'</span>: <span class="number">12</span>, ...&#125;&#125;       <span class="comment">#通知内容</span></span><br></pre></td></tr></table></figure>
+<p>可以在不同的优先级别上发送通知,这些优先级包括sample,critical,error,warn,info,debug,audit等.</p>
+<h3 id="Notification-Listener"><a href="#Notification-Listener" class="headerlink" title="Notification Listener"></a>Notification Listener</h3><p>Notification Listener和Server类似,一个Notification Listener对象可以暴露多个endpoint,每个endpoint包含一组方法.但是与Server对象中的endpoint不同的是,这里的endpoint中的方法对应通知消息的不同优先级.比如：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> oslo_messaging</span><br><span class="line"> </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ErrorEndpoint</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">error</span><span class="params">(self, ctxt, publisher_id, event_type, payload, metadata)</span>:</span></span><br><span class="line">        do_something(payload)</span><br><span class="line">        <span class="keyword">return</span> oslo_messaging.NotificationResult.HANDLED</span><br></pre></td></tr></table></figure>
+<p>endpoint中的方法如果返回messaging.NotificationResult.HANDLED或者None,表示这个通知消息已经确认被处理;如果返回messaging.NotificationResult.REQUEUE,表示这个通知消息要重新进入消息队列.</p>
+<p>下面是一个利用oslo_messaging来实现远程过程调用的示例.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> oslo_config <span class="keyword">import</span> cfg</span><br><span class="line"><span class="keyword">import</span> oslo_messaging <span class="keyword">as</span> messaging</span><br><span class="line"> </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ServerControlEndpoint</span><span class="params">(object)</span>:</span></span><br><span class="line">    target = messaging.Target(namespace=<span class="string">'controle'</span>,</span><br><span class="line">                              version=<span class="string">'2.0'</span>)</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, server)</span>:</span></span><br><span class="line">        self.server = server</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">stop</span><span class="params">(self, ctx)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> self.server:</span><br><span class="line">            self.server.stop()</span><br><span class="line"> </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestEndpoint</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">test</span><span class="params">(self, ctx, arg)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> arg</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">transport = messaging.get_transport(cfg.CONF)</span><br><span class="line">target = messaging.Target(topic=<span class="string">'test'</span>,</span><br><span class="line">                          server=<span class="string">'server1'</span>)</span><br><span class="line">endpoints = [</span><br><span class="line">    ServerControlEndpoint(<span class="keyword">None</span>),</span><br><span class="line">    TestEndpoint(),</span><br><span class="line">]</span><br><span class="line"> </span><br><span class="line">server = messaging.get_rpc_server(transport, target, endpoints,</span><br><span class="line">                                  executor=<span class="string">'blocking'</span>)</span><br><span class="line">server.start()</span><br><span class="line">server.wait()</span><br></pre></td></tr></table></figure>
+<p>这个例子里,定义了两个不同的endpoint:ServerControlEndpoint与TestEndpoint.这两个endpoint中的方法stop和test都可以被客户端远程调用.</p>
+<p>创建rpc server对象之前,需要先创建transport和target对象,这里使用get_transport()函数来获得transport对象的句柄,get_transport()的参数如下表所示:</p>
+<table>
+<thead>
+<tr>
+<th>参数=默认值</th>
+<th>说  明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>conf</td>
+<td>(oslo.config.cfg.ConfigOpts类型)oslo.config配置项对象</td>
+</tr>
+<tr>
+<td>url = None</td>
+<td>(字符串或者oslo.messaging.Transport类型)transport URL.如果为空,采用conf配置中的transport_url项所指定的值</td>
+</tr>
+<tr>
+<td>namespace = None</td>
+<td>(字符串类型)用来标识服务器所暴露的某个特定接口(多个可被远程调用的方法)</td>
+</tr>
+<tr>
+<td>allowed_remote_exmods = None</td>
+<td>(列表类型)Python模块的列表.客户端可用列表里的模块来deserialize异常</td>
+</tr>
+<tr>
+<td>aliases = None</td>
+<td>(字典类型)transport别名和transport名称之间的对应关系</td>
+</tr>
+</tbody>
+</table>
+<p>conf对象里,除了包含transport_url项外,还可以包含control_exchange项.control_exchange用来指明topic所属的默认范围,默认为”openstack”.可以使用oslo.messaging.set_transport_defaults()函数来修改默认值.</p>
+<p>此处构建的Target对象是用来建立RPC Server的,所以需指明topic和server参数.用户定义的endpoint对象也可以包含一个target属性,用来指明这个endpoint所支持的特定的namespace和version.</p>
+<p>这里使用get_rpc_server()函数创建server对象,然后调用server对象的start方法开始接收远程调用.get_rpc_server()函数的参数如下表所求:</p>
+<table>
+<thead>
+<tr>
+<th>参数=默认值</th>
+<th>说  明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>transport</td>
+<td>(Transpor类型)transport对象</td>
+</tr>
+<tr>
+<td>target</td>
+<td>(Target类型)target对象,用来指明监听的exchange,topic和server</td>
+</tr>
+<tr>
+<td>endpoints</td>
+<td>(列表类型)包含了endpoints对象实例的列表</td>
+</tr>
+<tr>
+<td>executor=’blocking’</td>
+<td>(字符串类型)用来指明消息接收和发收的方式:目前支持两种方式: blocking:在这种方式中,用户调用start函数后,在start函数中开始请求处理循环:用户线程阻塞,处理下一个请求.直到用户调用了stop函数后,这个处理循环才会退出.消息的接收和分发处理都在调用start函数的线程中完成. eventlet:在这种方式中,会有一个协程GreenThread来处理消息的接收,然后有其他不同的GreenThread来处理不同消息的分发处理.调用start的用户线程不会被阻塞</td>
+</tr>
+<tr>
+<td>serializer = None</td>
+<td>(Serializer类型)用来序列化/反序列化消息</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#client.py 客户端</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">from</span> oslo_config <span class="keyword">import</span> cfg</span><br><span class="line"><span class="keyword">import</span> oslo_messaging <span class="keyword">as</span> messaging</span><br><span class="line"> </span><br><span class="line">transport = messaging.get_transport(cfg.CONF)</span><br><span class="line">target = messaging.Target(topic=<span class="string">'test'</span>)</span><br><span class="line">client = messaging.RPCClient(transport, target)</span><br><span class="line">ret = client.call(ctxt=&#123;&#125;,</span><br><span class="line">                  method=<span class="string">'test'</span>,</span><br><span class="line">                  arg=<span class="string">'myarg'</span>)</span><br><span class="line"> </span><br><span class="line">cctx = client.prepare(namespace=<span class="string">'control'</span>, version=<span class="string">'2.0'</span>)</span><br><span class="line">cctx.cast(&#123;&#125;, <span class="string">'stop'</span>)</span><br></pre></td></tr></table></figure>
+<p>这里target对象构造时,必须要有的参数只有topic,创建RPCClient对象时,可以接受的参数如下表所示:</p>
+<table>
+<thead>
+<tr>
+<th>参数=默认值</th>
+<th>说  明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>transport</td>
+<td>(Transport类型)transport对象</td>
+</tr>
+<tr>
+<td>target</td>
+<td>(Taget类型)该client对象的默认target对象</td>
+</tr>
+<tr>
+<td>timeout = None</td>
+<td>(整数或者浮点数类型)客户端调用call方法时超时时间(秒)</td>
+</tr>
+<tr>
+<td>version_cap = None</td>
+<td>(字符串类型)最大所支持的版本号.当版本号超过时,会扔出RPCVersionCapError异常</td>
+</tr>
+<tr>
+<td>serializer = None</td>
+<td>（Serializer类型)用来序列化/反序列化消息</td>
+</tr>
+<tr>
+<td>retry = None</td>
+<td>(整数类型)连接重试次数:None或者-1:一直重试0:不重试&gt;0:重试次数</td>
+</tr>
+</tbody>
+</table>
+<p>远程调用时,需要传入调用上下文,调用方法的名字和传给调用方法的参数.</p>
+<p>Target对象的属性在RPCClient对象构造以后,还可以通过prepare()方法修改.可以修改的属性包括exchange,topic,namespace,version,server,fanout,timeout,version_cap和retry.</p>
+<p>修改后的target属性只在这个prepare()方法返回的对象中有效.</p>
+<p>下面我们再来看一个利用oslo_messaing实现通知消息处理的例子:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#notification_listener.py 消息通知处理</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">from</span> oslo_config <span class="keyword">import</span> cfg</span><br><span class="line"><span class="keyword">import</span> oslo_messaging <span class="keyword">as</span> messaging</span><br><span class="line"> </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NotificationEndPoint</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">warn</span><span class="params">(self, ctxt, publisher_id, event_type, payload, metadata)</span>:</span></span><br><span class="line">        do_something(payload)</span><br><span class="line"> </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ErrorEndpoint</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">error</span><span class="params">(self, ctxt, publisher_id, event_type, payload, metadata)</span>:</span></span><br><span class="line">        do_something(payload)</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">transport = messaging.get_transport(cfg.CONF)</span><br><span class="line">targets = [</span><br><span class="line">    messaging.Target(topic=<span class="string">'notifications'</span>),</span><br><span class="line">    messaging.Target(topic=<span class="string">'notifications_bis'</span>)</span><br><span class="line">]</span><br><span class="line">endpoints = [</span><br><span class="line">    NotificationEndPoint(),</span><br><span class="line">    ErrorEndpoint(),</span><br><span class="line">]</span><br><span class="line">listener = messaging.get_notification_listener(transport,</span><br><span class="line">                                               targets,</span><br><span class="line">                                               endpoints)</span><br><span class="line"> </span><br><span class="line">listener.start()</span><br><span class="line">listener.wait()</span><br></pre></td></tr></table></figure>
+<p>通知消息处理的endpoint对象和远程过程调用的endpoint对象不同,对象定义的方法要和通知消息的优先级一一对应.我们可以为每个endpoint指定所对应的target对象.</p>
+<p>最后调用get_notificaton_listener()函数构造notification listener对象,get_notification_listener()函数的参数如下表所示:</p>
+<table>
+<thead>
+<tr>
+<th>参数=默认值</th>
+<th>说  明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>transport</td>
+<td>(Transport类型)transport对象</td>
+</tr>
+<tr>
+<td>target</td>
+<td>(列表类型)target对象的列表,用来指明endpoints列表中的每一个endpoint所侦听处理的exchange和topic</td>
+</tr>
+<tr>
+<td>endpoints</td>
+<td>(列表类型)包含了endpoints对象实例的列表</td>
+</tr>
+<tr>
+<td>executor=’blocking’</td>
+<td>(字符串类型)用来指明消息接收和发收的方式:目前支持两种方式: blocking:在这种方式中,用户调用start函数后,在start函数中开始请求处理循环:用户线程阻塞,处理下一个请求.直到用户调用了stop函数后,这个处理循环才会退出.消息的接收和分发处理都在调用start函数的线程中完成. eventlet:在这种方式中,会有一个协程GreenThread来处理消息的接收,然后有其他不同的GreenThread来处理不同消息的分发处理.调用start的用户线程不会被阻塞</td>
+</tr>
+<tr>
+<td>serializer=None</td>
+<td>（Serializer类型）用来序列化/反序列化消息</td>
+</tr>
+<tr>
+<td>allow_requeue=False</td>
+<td>(布尔类型)如果为真,表示支持NotificationResult.REQUEUE</td>
+</tr>
+</tbody>
+</table>
+<p>相对应的发送消息通知的代码如下:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#notifier_send.py</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">from</span> oslo_config <span class="keyword">import</span> cfg</span><br><span class="line"><span class="keyword">import</span> oslo_messaging <span class="keyword">as</span> messaging</span><br><span class="line"> </span><br><span class="line">transport = messaging.get_transport(cfg.CONF)</span><br><span class="line">notifier = messaging.Notifier(transport,</span><br><span class="line">                              driver=<span class="string">'messaging'</span>,</span><br><span class="line">                              topic=<span class="string">'notifications'</span>)</span><br><span class="line"> </span><br><span class="line">notifier2 = notifier.prepare(publisher_id=<span class="string">'compute'</span>)</span><br><span class="line">notifier2.error(ctxt=&#123;&#125;,</span><br><span class="line">                event_type=<span class="string">'my_type'</span>,</span><br><span class="line">                payload=&#123;<span class="string">'content'</span>: <span class="string">'error occurred'</span>&#125;)</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">发送通知消息时,首先要构造Notifier对象,此时可能需要指定的参数如下表所示:</span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>参数=默认值</th>
+<th>说  明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>transport</td>
+<td>（Transport类型)transport对象</td>
+</tr>
+<tr>
+<td>target</td>
+<td>(列表类型)target对象的列表,用来指明endpoints列表中的每一个endpoint所侦听处理的exchange和topic</td>
+</tr>
+<tr>
+<td>publish_id = None</td>
+<td>(字符串类型)发送者id</td>
+</tr>
+<tr>
+<td>driver = None</td>
+<td>(字符串类型)后台驱动.一般采用”messaging”.如果没有指定,会使用配置文件中的notificaton_driver的值</td>
+</tr>
+<tr>
+<td>topic = None</td>
+<td>(字符串类型)发送消息的topic.如果没有指定,会使用配置文件中的notification_topics的值</td>
+</tr>
+<tr>
+<td>serializer = None</td>
+<td>（Serializer类型）用来序列化/反序列化消息</td>
+</tr>
+</tbody>
+</table>
+<p>初始化Notifier对象的操作比较复杂,所以可以用prepare()方法修改已创建的Notifier对象,prepare()方法返回的是新的Notifier对象的实例.它的参数如下表所示:</p>
+<table>
+<thead>
+<tr>
+<th>参数 = 默认值</th>
+<th>说  明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>publish_id = None</td>
+<td>(字符串类型)发送者id</td>
+</tr>
+<tr>
+<td>retry = None</td>
+<td>(整数类型)连接重试次数:None或者-1:一直重试0:不重试&gt;0:重试次数</td>
+</tr>
+</tbody>
+</table>
+<p>最后可以调用Notifier对象的不同方法(error, critical, warn, 等等)发送不同优先级的消息通知.</p>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>根据上个章节，我们可以看到其实这个库最终暴漏给用户的是两个概念：1.rpc，2.notification</p>
+<p>下面我们来根据基本源码分析一下这两个概念</p>
+<h3 id="rpc"><a href="#rpc" class="headerlink" title="rpc"></a>rpc</h3><p>rpc(即远程调用)的概念被划分为调用方和被调用方<br>调用方称为client：rpc_client<br>被调用方称为server：rpc_server<br>使用时，被调用方server.start,等待调用方client.cast 或 clinet.call即可发起阻塞或非阻塞的远程调用。</p>
+<p>当rpc client执行一次远程调用时实际发生了什么呢 ？<br>（代码在oslo_messaging/rpc/client.py文件里）</p>
+<h4 id="rpc-client"><a href="#rpc-client" class="headerlink" title="rpc client"></a>rpc client</h4><p>首先构建 rpc client ，实例化 RPCClient</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">self.rpc_client = messaging.get_rpc_client(</span><br><span class="line">    messaging.get_transport(),</span><br><span class="line">    version=<span class="string">'1.0'</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_rpc_client</span><span class="params">(transport, retry=None, **kwargs)</span>:</span></span><br><span class="line">    <span class="string">"""Return a configured oslo_messaging RPCClient."""</span></span><br><span class="line">    target = oslo_messaging.Target(**kwargs)</span><br><span class="line">    serializer = oslo_serializer.RequestContextSerializer(</span><br><span class="line">        oslo_serializer.JsonPayloadSerializer())</span><br><span class="line">    <span class="keyword">return</span> oslo_messaging.RPCClient(transport, target,</span><br><span class="line">                                    serializer=serializer,</span><br><span class="line">                                    retry=retry)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RPCClient</span><span class="params">(_BaseCallContext)</span>:</span></span><br><span class="line">      _marker = _BaseCallContext._marker</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, transport, target,</span></span></span><br><span class="line"><span class="function"><span class="params">                 timeout=None, version_cap=None, serializer=None, retry=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                 call_monitor_timeout=None, transport_options=None)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> serializer <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">            serializer = msg_serializer.NoOpSerializer()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> isinstance(transport, msg_transport.RPCTransport):</span><br><span class="line">            LOG.warning(<span class="string">"Using notification transport for RPC. Please use "</span></span><br><span class="line">                        <span class="string">"get_rpc_transport to obtain an RPC transport "</span></span><br><span class="line">                        <span class="string">"instance."</span>)</span><br><span class="line"></span><br><span class="line">        super(RPCClient, self).__init__(</span><br><span class="line">            transport, target, serializer, timeout, version_cap, retry,</span><br><span class="line">            call_monitor_timeout, transport_options</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        self.conf.register_opts(_client_opts)</span><br></pre></td></tr></table></figure>
+<p>然后通过 call 或者 cast 调用</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">self.rpc_client.prepare(topic=topic).call(cxt, method, **args)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@six.add_metaclass(abc.ABCMeta)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">_BaseCallContext</span><span class="params">(object)</span>:</span></span><br><span class="line"></span><br><span class="line">    _marker = object()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, transport, target, serializer,</span></span></span><br><span class="line"><span class="function"><span class="params">                 timeout=None, version_cap=None, retry=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                 call_monitor_timeout=None, transport_options=None)</span>:</span></span><br><span class="line">        self.conf = transport.conf</span><br><span class="line"></span><br><span class="line">        self.transport = transport</span><br><span class="line">        self.target = target</span><br><span class="line">        self.serializer = serializer</span><br><span class="line">        self.timeout = timeout</span><br><span class="line">        self.call_monitor_timeout = call_monitor_timeout</span><br><span class="line">        self.retry = retry</span><br><span class="line">        self.version_cap = version_cap</span><br><span class="line">        self.transport_options = transport_options</span><br><span class="line"></span><br><span class="line">        super(_BaseCallContext, self).__init__()</span><br><span class="line">		<span class="function"><span class="keyword">def</span> <span class="title">cast</span><span class="params">(self, ctxt, method, **kwargs)</span>:</span></span><br><span class="line">        <span class="string">"""Invoke a method and return immediately. See RPCClient.cast()."""</span></span><br><span class="line">        msg = self._make_message(ctxt, method, kwargs)</span><br><span class="line">        msg_ctxt = self.serializer.serialize_context(ctxt)</span><br><span class="line"></span><br><span class="line">        self._check_version_cap(msg.get(<span class="string">'version'</span>))</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            self.transport._send(self.target, msg_ctxt, msg,</span><br><span class="line">                                 retry=self.retry,</span><br><span class="line">                                 transport_options=self.transport_options)</span><br><span class="line">        <span class="keyword">except</span> driver_base.TransportDriverError <span class="keyword">as</span> ex:</span><br><span class="line">            <span class="keyword">raise</span> ClientSendError(self.target, ex)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">call</span><span class="params">(self, ctxt, method, **kwargs)</span>:</span></span><br><span class="line">        <span class="string">"""Invoke a method and wait for a reply. See RPCClient.call()."""</span></span><br><span class="line">        <span class="keyword">if</span> self.target.fanout:</span><br><span class="line">            <span class="keyword">raise</span> exceptions.InvalidTarget(<span class="string">'A call cannot be used with fanout'</span>,</span><br><span class="line">                                           self.target)</span><br><span class="line"></span><br><span class="line">        msg = self._make_message(ctxt, method, kwargs)</span><br><span class="line">        msg_ctxt = self.serializer.serialize_context(ctxt)</span><br><span class="line"></span><br><span class="line">        timeout = self.timeout</span><br><span class="line">        <span class="keyword">if</span> self.timeout <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">            timeout = self.conf.rpc_response_timeout</span><br><span class="line"></span><br><span class="line">        cm_timeout = self.call_monitor_timeout</span><br><span class="line"></span><br><span class="line">        self._check_version_cap(msg.get(<span class="string">'version'</span>))</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            result = \</span><br><span class="line">                self.transport._send(self.target, msg_ctxt, msg,</span><br><span class="line">                                     wait_for_reply=<span class="keyword">True</span>, timeout=timeout,</span><br><span class="line">                                     call_monitor_timeout=cm_timeout,</span><br><span class="line">                                     retry=self.retry,</span><br><span class="line">                                     transport_options=self.transport_options)</span><br><span class="line">        <span class="keyword">except</span> driver_base.TransportDriverError <span class="keyword">as</span> ex:</span><br><span class="line">            <span class="keyword">raise</span> ClientSendError(self.target, ex)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> self.serializer.deserialize_entity(ctxt, result)</span><br></pre></td></tr></table></figure>
+<p>可以看到在 29 行和 54 行，两个方法都是执行了 transport._send</p>
+<p>只有参数不同，这里最大的区别其实是wait_for_reply这个参数，顾名思义wait or no wait也就是我们说的阻塞/非阻塞。<br>那_send这个方法，最重要的两关键一个是transport本身，一个是target参数，这两个东西是rpc client <strong>init</strong>的时候必须要传的参数，</p>
+<p><strong>transport</strong> 参数是由（osllo_messaging/transport.py文件）_get_transport方法而来:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_get_transport</span><span class="params">(conf, url=None, allowed_remote_exmods=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                   transport_cls=RPCTransport)</span>:</span></span><br><span class="line">    allowed_remote_exmods = allowed_remote_exmods <span class="keyword">or</span> []</span><br><span class="line">    conf.register_opts(_transport_opts)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> isinstance(url, TransportURL):</span><br><span class="line">        url = TransportURL.parse(conf, url)</span><br><span class="line"></span><br><span class="line">    kwargs = dict(default_exchange=conf.control_exchange,</span><br><span class="line">                  allowed_remote_exmods=allowed_remote_exmods)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        mgr = driver.DriverManager(<span class="string">'oslo.messaging.drivers'</span>,</span><br><span class="line">                                   url.transport.split(<span class="string">'+'</span>)[<span class="number">0</span>],</span><br><span class="line">                                   invoke_on_load=<span class="keyword">True</span>,</span><br><span class="line">                                   invoke_args=[conf, url],</span><br><span class="line">                                   invoke_kwds=kwargs)</span><br><span class="line">    <span class="keyword">except</span> RuntimeError <span class="keyword">as</span> ex:</span><br><span class="line">        <span class="keyword">raise</span> DriverLoadFailure(url.transport, ex)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> transport_cls(mgr.driver)</span><br></pre></td></tr></table></figure>
+<p>这里url是配置文件里配的，这里以rabbitmq为例<br>entry_point到oslo_messaging._drivers.impl_rabbit:RabbitDriver，最终获得到的是RabbitDriver的实例。</p>
+<p><strong>target</strong>  直接实例化即可，这里注意到两个参数exchange和topic，和rabbitmq里的exchange和routing_key的概念一致</p>
+<p>那我们接着来看 transport._send方法，前面也说到了transport此时是RabbitDriver</p>
+<p>RabbitDriver 继承自 AMQPDriverBase 继承自 BaseDriver</p>
+<p>_send 方法在AMQPDriverBase中：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AMQPDriverBase</span><span class="params">(base.BaseDriver)</span>:</span></span><br><span class="line">    missing_destination_retry_timeout = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, conf, url, connection_pool,</span></span></span><br><span class="line"><span class="function"><span class="params">                 default_exchange=None, allowed_remote_exmods=None)</span>:</span></span><br><span class="line">        super(AMQPDriverBase, self).__init__(conf, url, default_exchange,</span><br><span class="line">                                             allowed_remote_exmods)</span><br><span class="line"></span><br><span class="line">        self._default_exchange = default_exchange</span><br><span class="line"></span><br><span class="line">        self._connection_pool = connection_pool</span><br><span class="line"></span><br><span class="line">        self._reply_q_lock = threading.Lock()</span><br><span class="line">        self._reply_q = <span class="keyword">None</span></span><br><span class="line">        self._reply_q_conn = <span class="keyword">None</span></span><br><span class="line">        self._waiter = <span class="keyword">None</span>    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_send</span><span class="params">(self, target, ctxt, message,</span></span></span><br><span class="line"><span class="function"><span class="params">              wait_for_reply=None, timeout=None, call_monitor_timeout=None,</span></span></span><br><span class="line"><span class="function"><span class="params">              envelope=True, notify=False, retry=None, transport_options=None)</span>:</span></span><br><span class="line"></span><br><span class="line">        msg = message</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> wait_for_reply:</span><br><span class="line">            msg_id = uuid.uuid4().hex</span><br><span class="line">            msg.update(&#123;<span class="string">'_msg_id'</span>: msg_id&#125;)</span><br><span class="line">            msg.update(&#123;<span class="string">'_reply_q'</span>: self._get_reply_q()&#125;)</span><br><span class="line">            msg.update(&#123;<span class="string">'_timeout'</span>: call_monitor_timeout&#125;)</span><br><span class="line"></span><br><span class="line">        rpc_amqp._add_unique_id(msg)</span><br><span class="line">        unique_id = msg[rpc_amqp.UNIQUE_ID]</span><br><span class="line"></span><br><span class="line">        rpc_amqp.pack_context(msg, ctxt)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> envelope:</span><br><span class="line">            msg = rpc_common.serialize_msg(msg)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> wait_for_reply:</span><br><span class="line">            self._waiter.listen(msg_id)</span><br><span class="line">            log_msg = <span class="string">"CALL msg_id: %s "</span> % msg_id</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            log_msg = <span class="string">"CAST unique_id: %s "</span> % unique_id</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="keyword">with</span> self._get_connection(rpc_common.PURPOSE_SEND) <span class="keyword">as</span> conn:</span><br><span class="line">                <span class="keyword">if</span> notify:</span><br><span class="line">                    exchange = self._get_exchange(target)</span><br><span class="line">                    LOG.debug(log_msg + <span class="string">"NOTIFY exchange '%(exchange)s'"</span></span><br><span class="line">                              <span class="string">" topic '%(topic)s'"</span>, &#123;<span class="string">'exchange'</span>: exchange,</span><br><span class="line">                                                     <span class="string">'topic'</span>: target.topic&#125;)</span><br><span class="line">                    conn.notify_send(exchange, target.topic, msg, retry=retry)</span><br><span class="line">                <span class="keyword">elif</span> target.fanout:</span><br><span class="line">                    log_msg += <span class="string">"FANOUT topic '%(topic)s'"</span> % &#123;</span><br><span class="line">                        <span class="string">'topic'</span>: target.topic&#125;</span><br><span class="line">                    LOG.debug(log_msg)</span><br><span class="line">                    conn.fanout_send(target.topic, msg, retry=retry)</span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    topic = target.topic</span><br><span class="line">                    exchange = self._get_exchange(target)</span><br><span class="line">                    <span class="keyword">if</span> target.server:</span><br><span class="line">                        topic = <span class="string">'%s.%s'</span> % (target.topic, target.server)</span><br><span class="line">                    LOG.debug(log_msg + <span class="string">"exchange '%(exchange)s'"</span></span><br><span class="line">                              <span class="string">" topic '%(topic)s'"</span>, &#123;<span class="string">'exchange'</span>: exchange,</span><br><span class="line">                                                     <span class="string">'topic'</span>: topic&#125;)</span><br><span class="line">                    conn.topic_send(exchange_name=exchange, topic=topic,</span><br><span class="line">                                    msg=msg, timeout=timeout, retry=retry,</span><br><span class="line">                                    transport_options=transport_options)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> wait_for_reply:</span><br><span class="line">                result = self._waiter.wait(msg_id, timeout,</span><br><span class="line">                                           call_monitor_timeout)</span><br><span class="line">                <span class="keyword">if</span> isinstance(result, Exception):</span><br><span class="line">                    <span class="keyword">raise</span> result</span><br><span class="line">                <span class="keyword">return</span> result</span><br><span class="line">        <span class="keyword">finally</span>:</span><br><span class="line">            <span class="keyword">if</span> wait_for_reply:</span><br><span class="line">                self._waiter.unlisten(msg_id)</span><br></pre></td></tr></table></figure>
+<p>我们看下 44 行到 66 行，回顾上面的cast和call函数里调用_send的时候是没有传notify找个参数的，所以第一个条件一定不成立</p>
+<p>那看接下来的两个case，elif target.fanout/else（这里的fanout与rabbitmq本身的fanout意义是一样的）那也就是说我们在生成target或者client.prepare的时候可以通过指定fanout这个参数来决定进入哪个case，(注意第三个case里如果指定了target.server那么topic是target.topic和target.server二者相结合)那我们这里来看一下conn.fanout_send和conn.topic_send这两个方法(conn是<strong>enter</strong> <strong>exit</strong> <strong>getattr</strong>的产物，具体本文不细说了，这里只要知道最终调用到了oslo_messaging/_drivers/impl_rabbit.py里Connection这个类就可以了)：</p>
+<p><strong>conn.fanout_send</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Connection</span><span class="params">(object)</span>:</span></span><br><span class="line">		<span class="function"><span class="keyword">def</span> <span class="title">fanout_send</span><span class="params">(self, topic, msg, retry=None)</span>:</span></span><br><span class="line">        <span class="string">"""Send a 'fanout' message."""</span></span><br><span class="line">        exchange = kombu.entity.Exchange(name=<span class="string">'%s_fanout'</span> % topic,</span><br><span class="line">                                         type=<span class="string">'fanout'</span>,</span><br><span class="line">                                         durable=<span class="keyword">False</span>,</span><br><span class="line">                                         auto_delete=<span class="keyword">True</span>)</span><br><span class="line"></span><br><span class="line">        self._ensure_publishing(self._publish, exchange, msg, retry=retry)</span><br></pre></td></tr></table></figure>
+<p>其实到这里基本上就清楚了fanout_send就是往名叫target.topic + “_fanout”这个exchange里发送fanout模式的消息，所有bind到这个exchange的queue都会收到这条消息，如果这个exchange没有创建过，在self.publish方法里会被declare.</p>
+<p><strong>conn.topic_send</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Connection</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">topic_send</span><span class="params">(self, exchange_name, topic, msg, timeout=None, retry=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                   transport_options=None)</span>:</span></span><br><span class="line">        <span class="string">"""Send a 'topic' message."""</span></span><br><span class="line">        exchange = kombu.entity.Exchange(</span><br><span class="line">            name=exchange_name,</span><br><span class="line">            type=<span class="string">'topic'</span>,</span><br><span class="line">            durable=self.amqp_durable_queues,</span><br><span class="line">            auto_delete=self.amqp_auto_delete)</span><br><span class="line"></span><br><span class="line">        self._ensure_publishing(self._publish, exchange, msg,</span><br><span class="line">                                routing_key=topic, timeout=timeout,</span><br><span class="line">                                retry=retry,</span><br><span class="line">                                transport_options=transport_options)</span><br></pre></td></tr></table></figure>
+<p>topic_send就是以topic做为routing_key 以exchange_name这个参数值命名的exchange里发送topic模式的消息，这里注意区别就是exchange_name是上级调用_get_exchange方法得来的</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Connection</span><span class="params">(object)</span>:</span></span><br><span class="line">		<span class="function"><span class="keyword">def</span> <span class="title">_get_exchange</span><span class="params">(self, target)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> target.exchange <span class="keyword">or</span> self._default_exchange</span><br></pre></td></tr></table></figure>
+<p>_default_exchange如果仔细看的话前面其实前面的截图里有，就是conf.control_exchange<br>默认是openstack（这里大概知道点为啥oslo_messaging是为openstack搞得了吧😄）,关键还是取决于target,如果target里没有指定才会用配置文件的。<br>同样，如果这个exchange没有创建过，在self.publish方法里会被declare.</p>
+<h4 id="rpc-server"><a href="#rpc-server" class="headerlink" title="rpc server"></a>rpc server</h4><p>首先要获得一个rpc server的实例</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_rpc_server</span><span class="params">(transport, target, endpoints,</span></span></span><br><span class="line"><span class="function"><span class="params">                   executor=<span class="string">'blocking'</span>, serializer=None, access_policy=None)</span>:</span></span><br><span class="line">  	dispatcher = rpc_dispatcher.RPCDispatcher(endpoints, serializer,</span><br><span class="line">                                              access_policy)</span><br><span class="line">    <span class="keyword">return</span> RPCServer(transport, target, dispatcher, executor)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RPCServer</span><span class="params">(msg_server.MessageHandlingServer)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, transport, target, dispatcher, executor=<span class="string">'blocking'</span>)</span>:</span></span><br><span class="line">        super(RPCServer, self).__init__(transport, dispatcher, executor)</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> isinstance(transport, msg_transport.RPCTransport):</span><br><span class="line">            LOG.warning(<span class="string">"Using notification transport for RPC. Please use "</span></span><br><span class="line">                        <span class="string">"get_rpc_transport to obtain an RPC transport "</span></span><br><span class="line">                        <span class="string">"instance."</span>)</span><br><span class="line">        self._target = target</span><br></pre></td></tr></table></figure>
+<p>RPCServer 继承自 MessageHandlingServer 继承自 ServiceBase,_OrderedTaskRunner</p>
+<p>同样的，transport和target是必须要有的，获得 rpc sever实例后，rpc server调用start方法，最终调用到了基类的start方法</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@six.add_metaclass(abc.ABCMeta)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MessageHandlingServer</span><span class="params">(service.ServiceBase, _OrderedTaskRunner)</span>:</span></span><br><span class="line"><span class="meta">    @ordered(reset_after='stop')</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">start</span><span class="params">(self, override_pool_size=None)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> self._started:</span><br><span class="line">            LOG.warning(<span class="string">'The server has already been started. Ignoring '</span></span><br><span class="line">                        <span class="string">'the redundant call to start().'</span>)</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">        self._started = <span class="keyword">True</span></span><br><span class="line"></span><br><span class="line">        executor_opts = &#123;&#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> self.executor_type <span class="keyword">in</span> (<span class="string">"threading"</span>, <span class="string">"eventlet"</span>):</span><br><span class="line">            executor_opts[<span class="string">"max_workers"</span>] = (</span><br><span class="line">                override_pool_size <span class="keyword">or</span> self.conf.executor_thread_pool_size</span><br><span class="line">            )</span><br><span class="line">        self._work_executor = self._executor_cls(**executor_opts)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            self.listener = self._create_listener()</span><br><span class="line">        <span class="keyword">except</span> driver_base.TransportDriverError <span class="keyword">as</span> ex:</span><br><span class="line">            <span class="keyword">raise</span> ServerListenError(self.target, ex)</span><br><span class="line"></span><br><span class="line">        self.listener.start(self._on_incoming)</span><br></pre></td></tr></table></figure>
+<p>关键看下 20 行到 25 行，因为这里实例化的是 RPCServer，所以_create_listener 调用的是 RPCServer 的方法</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RPCServer</span><span class="params">(msg_server.MessageHandlingServer)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_create_listener</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self.transport._listen(self._target, <span class="number">1</span>, <span class="keyword">None</span>)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Transport</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_listen</span><span class="params">(self, target, batch_size, batch_timeout)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> (target.topic <span class="keyword">and</span> target.server):</span><br><span class="line">            <span class="keyword">raise</span> exceptions.InvalidTarget(<span class="string">'A server\'s target must have '</span></span><br><span class="line">                                           <span class="string">'topic and server names specified'</span>,</span><br><span class="line">                                           target)</span><br><span class="line">        <span class="keyword">return</span> self._driver.listen(target, batch_size,</span><br><span class="line">                                   batch_timeout)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AMQPDriverBase</span><span class="params">(base.BaseDriver)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">listen</span><span class="params">(self, target, batch_size, batch_timeout)</span>:</span></span><br><span class="line">        conn = self._get_connection(rpc_common.PURPOSE_LISTEN)</span><br><span class="line"></span><br><span class="line">        listener = RpcAMQPListener(self, conn)</span><br><span class="line"></span><br><span class="line">        conn.declare_topic_consumer(exchange_name=self._get_exchange(target),</span><br><span class="line">                                    topic=target.topic,</span><br><span class="line">                                    callback=listener)</span><br><span class="line">        conn.declare_topic_consumer(exchange_name=self._get_exchange(target),</span><br><span class="line">                                    topic=<span class="string">'%s.%s'</span> % (target.topic,</span><br><span class="line">                                                     target.server),</span><br><span class="line">                                    callback=listener)</span><br><span class="line">        conn.declare_fanout_consumer(target.topic, listener)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> base.PollStyleListenerAdapter(listener, batch_size,</span><br><span class="line">                                             batch_timeout)</span><br></pre></td></tr></table></figure>
+<p>listen方法实际上关键是执行了三个declare，以下称作：<br>declare_topic_consumer（1）<br>declare_topic_consumer (2)<br>declare_fanout_consumer</p>
+<p><strong>declare_topic_consumer（1）</strong></p>
+<p>oslo_messaging/_drivers/impl_rabbit.py</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Connection</span><span class="params">(object)</span>:</span></span><br><span class="line">		<span class="function"><span class="keyword">def</span> <span class="title">declare_topic_consumer</span><span class="params">(self, exchange_name, topic, callback=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                               queue_name=None)</span>:</span></span><br><span class="line">        <span class="string">"""Create a 'topic' consumer."""</span></span><br><span class="line">        consumer = Consumer(exchange_name=exchange_name,</span><br><span class="line">                            queue_name=queue_name <span class="keyword">or</span> topic,</span><br><span class="line">                            routing_key=topic,</span><br><span class="line">                            type=<span class="string">'topic'</span>,</span><br><span class="line">                            durable=self.amqp_durable_queues,</span><br><span class="line">                            exchange_auto_delete=self.amqp_auto_delete,</span><br><span class="line">                            queue_auto_delete=self.amqp_auto_delete,</span><br><span class="line">                            callback=callback,</span><br><span class="line">                            rabbit_ha_queues=self.rabbit_ha_queues)</span><br><span class="line"></span><br><span class="line">        self.declare_consumer(consumer)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">declare_consumer</span><span class="params">(self, consumer)</span>:</span></span><br><span class="line">    <span class="string">"""Create a Consumer using the class that was passed in and</span></span><br><span class="line"><span class="string">    add it to our list of consumers</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_connect_error</span><span class="params">(exc)</span>:</span></span><br><span class="line">        log_info = &#123;<span class="string">'topic'</span>: consumer.routing_key, <span class="string">'err_str'</span>: exc&#125;</span><br><span class="line">        LOG.error(<span class="string">"Failed to declare consumer for topic '%(topic)s': "</span></span><br><span class="line">                  <span class="string">"%(err_str)s"</span>, log_info)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_declare_consumer</span><span class="params">()</span>:</span></span><br><span class="line">        consumer.declare(self)</span><br><span class="line">        tag = self._active_tags.get(consumer.queue_name)</span><br><span class="line">        <span class="keyword">if</span> tag <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">            tag = next(self._tags)</span><br><span class="line">            self._active_tags[consumer.queue_name] = tag</span><br><span class="line">            self._new_tags.add(tag)</span><br><span class="line"></span><br><span class="line">        self._consumers[consumer] = tag</span><br><span class="line">        <span class="keyword">return</span> consumer</span><br><span class="line"></span><br><span class="line">    <span class="keyword">with</span> self._connection_lock:</span><br><span class="line">        <span class="keyword">return</span> self.ensure(_declare_consumer,</span><br><span class="line">                           error_callback=_connect_error)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">declare</span><span class="params">(self, conn)</span>:</span></span><br><span class="line">    <span class="string">"""Re-declare the queue after a rabbit (re)connect."""</span></span><br><span class="line"></span><br><span class="line">    self.queue = kombu.entity.Queue(</span><br><span class="line">        name=self.queue_name,</span><br><span class="line">        channel=conn.channel,</span><br><span class="line">        exchange=self.exchange,</span><br><span class="line">        durable=self.durable,</span><br><span class="line">        auto_delete=self.queue_auto_delete,</span><br><span class="line">        routing_key=self.routing_key,</span><br><span class="line">        queue_arguments=self.queue_arguments)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        LOG.debug(<span class="string">'[%s] Queue.declare: %s'</span>,</span><br><span class="line">                  conn.connection_id, self.queue_name)</span><br><span class="line">        self.queue.declare()</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@python_2_unicode_compatible</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Queue</span><span class="params">(MaybeChannelBound)</span>:</span></span><br><span class="line">		<span class="function"><span class="keyword">def</span> <span class="title">declare</span><span class="params">(self, nowait=False, channel=None)</span>:</span></span><br><span class="line">        <span class="string">"""Declare queue and exchange then binds queue to exchange."""</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> self.no_declare:</span><br><span class="line">            <span class="comment"># - declare main binding.</span></span><br><span class="line">            self._create_exchange(nowait=nowait, channel=channel)</span><br><span class="line">            self._create_queue(nowait=nowait, channel=channel)</span><br><span class="line">            self._create_bindings(nowait=nowait, channel=channel)</span><br><span class="line">        <span class="keyword">return</span> self.name</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_create_exchange</span><span class="params">(self, nowait=False, channel=None)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> self.exchange:</span><br><span class="line">        self.exchange.declare(nowait=nowait, channel=channel)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_create_queue</span><span class="params">(self, nowait=False, channel=None)</span>:</span></span><br><span class="line">    self.queue_declare(nowait=nowait, passive=<span class="keyword">False</span>, channel=channel)</span><br><span class="line">    <span class="keyword">if</span> self.exchange <span class="keyword">and</span> self.exchange.name:</span><br><span class="line">        self.queue_bind(nowait=nowait, channel=channel)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_create_bindings</span><span class="params">(self, nowait=False, channel=None)</span>:</span></span><br><span class="line">    <span class="keyword">for</span> B <span class="keyword">in</span> self.bindings:</span><br><span class="line">        channel = channel <span class="keyword">or</span> self.channel</span><br><span class="line">        B.declare(channel)</span><br><span class="line">        B.bind(self, nowait=nowait, channel=channel)</span><br></pre></td></tr></table></figure>
+<p>一目了然，总结来说就是使用target的exchange（默认openstack）做为exchange_name<br>使用target的topic做为默认的queue_name，然后declare这个exchange和queue，然后将二者bind。</p>
+<p><strong>declare_topic_consumer（2）</strong><br>与declare_topic_consumer(1)的唯一区别是这里使用了target.topic结合target.server做为了默认的queue_name。</p>
+<p><strong>declare_fanout_consumer</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Connection</span><span class="params">(object)</span>:</span></span><br><span class="line">		<span class="function"><span class="keyword">def</span> <span class="title">declare_fanout_consumer</span><span class="params">(self, topic, callback)</span>:</span></span><br><span class="line">        <span class="string">"""Create a 'fanout' consumer."""</span></span><br><span class="line"></span><br><span class="line">        unique = uuid.uuid4().hex</span><br><span class="line">        exchange_name = <span class="string">'%s_fanout'</span> % topic</span><br><span class="line">        queue_name = <span class="string">'%s_fanout_%s'</span> % (topic, unique)</span><br><span class="line"></span><br><span class="line">        consumer = Consumer(exchange_name=exchange_name,</span><br><span class="line">                            queue_name=queue_name,</span><br><span class="line">                            routing_key=topic,</span><br><span class="line">                            type=<span class="string">'fanout'</span>,</span><br><span class="line">                            durable=<span class="keyword">False</span>,</span><br><span class="line">                            exchange_auto_delete=<span class="keyword">True</span>,</span><br><span class="line">                            queue_auto_delete=<span class="keyword">False</span>,</span><br><span class="line">                            callback=callback,</span><br><span class="line">                            rabbit_ha_queues=self.rabbit_ha_queues,</span><br><span class="line">                            rabbit_queue_ttl=self.rabbit_transient_queues_ttl)</span><br><span class="line"></span><br><span class="line">        self.declare_consumer(consumer)</span><br></pre></td></tr></table></figure>
+<p>与上述两种的区别是，这里的queue_name变成了target.topic+”<em>fanout</em>“+uuid<br>exchange_name变成了target.topic+”_fanout”，exchange的type变成了fanout</p>
+<p>这里也指定了routing_key ，我觉得应该是没用的。</p>
+<h4 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h4><h5 id="server监听"><a href="#server监听" class="headerlink" title="server监听"></a><strong>server监听</strong></h5><p>一、<br>1.由target.exchange或配置文件（openstack为默认值）命名的exchange（type为topic模式）<br>2.以target.topic做为queue_name<br>2.以target.topic做为routing_key进行queue和exchange的绑定<br>二、<br>1.由target.exchange或配置文件（openstack为默认值）命名的exchange（type为topic模式）<br>2.以target.topic结合target.server做为queue_name<br>2.以target.topic结合target.server做为routing<em>key进行queue和exchange的绑定<br>三、<br>1.由target.topic+”fanout”命名的exchange（type为fanout模式）<br>2.以target.topic+”fanout</em>“+唯一uuid做为queue_name<br>2.将queue和exchange的绑定</p>
+<h5 id="client调用"><a href="#client调用" class="headerlink" title="client调用"></a><strong>client调用</strong></h5><p>1.非阻塞调用：client.cast<br>2.阻塞调用：client.call</p>
+<p>通过prepare来改变client的target进行fanout或者指定server的调用</p>
+<h3 id="notification"><a href="#notification" class="headerlink" title="notification"></a>notification</h3><p>notification，顾名思义，消息/通知，其概念被分为<br>通知方:notifier（官方也叫driver）, 监听方:notification_listener<br>使用时，监听方listener.start, 调用方notifier.notfiy(具体暴漏给用户使用时是sample,audit,info等不同level的方法) 即可把消息发给监听方进行处理。</p>
+<h4 id="发送方"><a href="#发送方" class="headerlink" title="发送方"></a>发送方</h4><p>以 ceilometer 为例，首先需要实例化一个 Notifier 对象</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">self.notifier = oslo_messaging.Notifier(</span><br><span class="line">    messaging.get_transport(),</span><br><span class="line">    driver=cfg.CONF.publisher_notifier.telemetry_driver,</span><br><span class="line">    publisher_id=<span class="string">"ceilometer.polling"</span>)</span><br></pre></td></tr></table></figure>
+<p>在处理完数据之后需要将数据发送出去（具体中间处理数据的部分就不讲了，见我的另一篇 <a href="https://blog.csdn.net/weixin_43700106/article/details/107006653" target="_blank" rel="external">polling 源码分析</a>）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Notifier</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">sample</span><span class="params">(self, ctxt, event_type, payload)</span>:</span></span><br><span class="line">        self._notify(ctxt, event_type, payload, <span class="string">'SAMPLE'</span>)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_notify</span><span class="params">(self, ctxt, event_type, payload, priority, publisher_id=None,</span></span></span><br><span class="line"><span class="function"><span class="params">            retry=None)</span>:</span></span><br><span class="line">    payload = self._serializer.serialize_entity(ctxt, payload)</span><br><span class="line">    ctxt = self._serializer.serialize_context(ctxt)</span><br><span class="line"></span><br><span class="line">    msg = dict(message_id=six.text_type(uuid.uuid4()),</span><br><span class="line">               publisher_id=publisher_id <span class="keyword">or</span> self.publisher_id,</span><br><span class="line">               event_type=event_type,</span><br><span class="line">               priority=priority,</span><br><span class="line">               payload=payload,</span><br><span class="line">               timestamp=six.text_type(timeutils.utcnow()))</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">do_notify</span><span class="params">(ext)</span>:</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            ext.obj.notify(ctxt, msg, priority, retry <span class="keyword">or</span> self.retry)</span><br><span class="line">        <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">            _LOG.exception(<span class="string">"Problem '%(e)s' attempting to send to "</span></span><br><span class="line">                           <span class="string">"notification system. Payload=%(payload)s"</span>,</span><br><span class="line">                           &#123;<span class="string">'e'</span>: e, <span class="string">'payload'</span>: payload&#125;)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> self._driver_mgr.extensions:</span><br><span class="line">        self._driver_mgr.map(do_notify)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExtensionManager</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">map</span><span class="params">(self, func, *args, **kwds)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> self.extensions:</span><br><span class="line">            <span class="comment"># <span class="doctag">FIXME:</span> Use a more specific exception class here.</span></span><br><span class="line">            <span class="keyword">raise</span> NoMatches(<span class="string">'No %s extensions found'</span> % self.namespace)</span><br><span class="line">        response = []</span><br><span class="line">        <span class="keyword">for</span> e <span class="keyword">in</span> self.extensions:</span><br><span class="line">            self._invoke_one_plugin(response.append, func, e, args, kwds)</span><br><span class="line">        <span class="keyword">return</span> response</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">分析def map：</span><br><span class="line">(Pdb) p func</span><br><span class="line">&lt;function do_notify at 0x7f2c3c1df758&gt;</span><br><span class="line">(Pdb) p args</span><br><span class="line">()</span><br><span class="line">(Pdb) p kwds</span><br><span class="line">&#123;&#125;</span><br><span class="line"></span><br><span class="line">2)</span><br><span class="line">(Pdb) p self.extensions</span><br><span class="line">[&lt;stevedore.extension.Extension object at 0x7f2c48771450&gt;]</span><br><span class="line">(Pdb) p e</span><br><span class="line">&lt;stevedore.extension.Extension object at 0x7f2c48771450&gt;</span><br><span class="line">(Pdb) p e.__dict__</span><br><span class="line">&#123;&apos;obj&apos;: &lt;oslo_messaging.notify.messaging.MessagingV2Driver object at 0x7f2c48771210&gt;, &apos;entry_point&apos;: EntryPoint.parse(&apos;messagingv2 = oslo_messaging.notify.messaging:MessagingV2Driver&apos;), &apos;name&apos;: &apos;messagingv2&apos;, &apos;plugin&apos;: &lt;class &apos;oslo_messaging.notify.messaging.MessagingV2Driver&apos;&gt;&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExtensionManager</span><span class="params">(object)</span>:</span></span><br><span class="line">		<span class="function"><span class="keyword">def</span> <span class="title">_invoke_one_plugin</span><span class="params">(self, response_callback, func, e, args, kwds)</span>:</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            response_callback(func(e, *args, **kwds))</span><br><span class="line">        <span class="keyword">except</span> Exception <span class="keyword">as</span> err:</span><br><span class="line">            <span class="keyword">if</span> self.propagate_map_exceptions:</span><br><span class="line">                <span class="keyword">raise</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                LOG.error(<span class="string">'error calling %r: %s'</span>, e.name, err)</span><br><span class="line">                LOG.exception(err)</span><br></pre></td></tr></table></figure>
+<p>可以看到 response_callback 传过来是一个 append 方法，这里的 func 就是 do_notify，发生调用，即</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_notify</span><span class="params">(self, ctxt, event_type, payload, priority, publisher_id=None,</span></span></span><br><span class="line"><span class="function"><span class="params">            retry=None)</span>:</span></span><br><span class="line">    payload = self._serializer.serialize_entity(ctxt, payload)</span><br><span class="line">    ctxt = self._serializer.serialize_context(ctxt)</span><br><span class="line"></span><br><span class="line">    msg = dict(message_id=six.text_type(uuid.uuid4()),</span><br><span class="line">               publisher_id=publisher_id <span class="keyword">or</span> self.publisher_id,</span><br><span class="line">               event_type=event_type,</span><br><span class="line">               priority=priority,</span><br><span class="line">               payload=payload,</span><br><span class="line">               timestamp=six.text_type(timeutils.utcnow()))</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">do_notify</span><span class="params">(ext)</span>:</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            ext.obj.notify(ctxt, msg, priority, retry <span class="keyword">or</span> self.retry)</span><br><span class="line">        <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">            _LOG.exception(<span class="string">"Problem '%(e)s' attempting to send to "</span></span><br><span class="line">                           <span class="string">"notification system. Payload=%(payload)s"</span>,</span><br><span class="line">                           &#123;<span class="string">'e'</span>: e, <span class="string">'payload'</span>: payload&#125;)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> self._driver_mgr.extensions:</span><br><span class="line">        self._driver_mgr.map(do_notify)</span><br></pre></td></tr></table></figure>
+<p>即调用 13 行方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">(Pdb) p ext</span><br><span class="line">&lt;stevedore.extension.Extension object at 0x7f2c48771450&gt;</span><br><span class="line">(Pdb) p ext.__dict__</span><br><span class="line">&#123;&apos;obj&apos;: &lt;oslo_messaging.notify.messaging.MessagingV2Driver object at 0x7f2c48771210&gt;, &apos;entry_point&apos;: EntryPoint.parse(&apos;messagingv2 = oslo_messaging.notify.messaging:MessagingV2Driver&apos;), &apos;name&apos;: &apos;messagingv2&apos;, &apos;plugin&apos;: &lt;class &apos;oslo_messaging.notify.messaging.MessagingV2Driver&apos;&gt;&#125;</span><br><span class="line"></span><br><span class="line">(Pdb) p ext.obj</span><br><span class="line">&lt;oslo_messaging.notify.messaging.MessagingV2Driver object at 0x7f2c48771210&gt;</span><br><span class="line">(Pdb) p ext.obj.__dict__</span><br><span class="line">&#123;&apos;topics&apos;: [&apos;notifications&apos;], &apos;version&apos;: 2.0, &apos;transport&apos;: &lt;oslo_messaging.transport.Transport object at 0x7f2c485df890&gt;, &apos;conf&apos;: &lt;oslo_config.cfg.ConfigOpts object at 0x16ba490&gt;&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MessagingDriver</span><span class="params">(notifier.Driver)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, conf, topics, transport, version=<span class="number">1.0</span>)</span>:</span></span><br><span class="line">        super(MessagingDriver, self).__init__(conf, topics, transport)</span><br><span class="line">        self.version = version</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">notify</span><span class="params">(self, ctxt, message, priority, retry)</span>:</span></span><br><span class="line">        priority = priority.lower()</span><br><span class="line">        <span class="keyword">for</span> topic <span class="keyword">in</span> self.topics:</span><br><span class="line">            target = oslo_messaging.Target(topic=<span class="string">'%s.%s'</span> % (topic, priority))</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                self.transport._send_notification(target, ctxt, message,</span><br><span class="line">                                                  version=self.version,</span><br><span class="line">                                                  retry=retry)</span><br><span class="line">            <span class="keyword">except</span> Exception:</span><br><span class="line">                LOG.exception(<span class="string">"Could not send notification to %(topic)s. "</span></span><br><span class="line">                              <span class="string">"Payload=%(message)s"</span>,</span><br><span class="line">                              &#123;<span class="string">'topic'</span>: topic, <span class="string">'message'</span>: message&#125;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MessagingV2Driver</span><span class="params">(MessagingDriver)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="string">"Send notifications using the 2.0 message format."</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, conf, **kwargs)</span>:</span></span><br><span class="line">        super(MessagingV2Driver, self).__init__(conf, version=<span class="number">2.0</span>, **kwargs)</span><br></pre></td></tr></table></figure>
+<p>实际调用到第 6 行，最关键的地方:<br>43  -&gt;       priority = priority.lower()<br>44        for topic in self.topics:<br>45          target = oslo_messaging.Target(topic=’%s.%s’ % (topic, priority))</p>
+<p>可以看到oslo_messaging封装得到的真正队列名称是:</p>
+<p><topic>.<priority> 这种形式，<br>样例:<br>notifications.sample<br>所以，一旦调用oslo_messaging.notifier.sample来发送消息，此时的priority就被设置为<br>sample了，并且该优先级被用于最终拼接生成oslo_messaging的Target，最后生成了对应的<br>队列notifications.sample</priority></topic></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Transport</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_send_notification</span><span class="params">(self, target, ctxt, message, version, retry=None)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> target.topic:</span><br><span class="line">            <span class="keyword">raise</span> exceptions.InvalidTarget(<span class="string">'A topic is required to send'</span>,</span><br><span class="line">                                           target)</span><br><span class="line">        self._driver.send_notification(target, ctxt, message, version,</span><br><span class="line">                                       retry=retry)</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(Pdb) p self._driver</span><br><span class="line">&lt;oslo_messaging._drivers.impl_rabbit.RabbitDriver object at 0x7f2c4876de90&gt;</span><br><span class="line">(Pdb) p self._driver.__dict__</span><br><span class="line">&#123;&apos;_waiter&apos;: None, &apos;_allowed_remote_exmods&apos;: [], &apos;_reply_q_lock&apos;: &lt;thread.lock object at 0x7f2c482efc30&gt;, &apos;conf&apos;: &lt;oslo_config.cfg.ConfigOpts object at 0x16ba490&gt;, &apos;_default_exchange&apos;: &apos;ceilometer&apos;, &apos;_connection_pool&apos;: &lt;oslo_messaging._drivers.pool.ConnectionPool object at 0x7f2c4876df90&gt;, &apos;_reply_q&apos;: None, &apos;missing_destination_retry_timeout&apos;: 60, &apos;prefetch_size&apos;: 0, &apos;_reply_q_conn&apos;: None, &apos;_url&apos;: &lt;TransportURL transport=&apos;rabbit&apos;, hosts=[&lt;TransportHost hostname=&apos;rabbitmq.openstack.svc.cluster.local&apos;, port=5672, username=&apos;rabbitmq&apos;, password=&apos;vut8mvvS&apos;&gt;]&gt;&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AMQPDriverBase</span><span class="params">(base.BaseDriver)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">send_notification</span><span class="params">(self, target, ctxt, message, version, retry=None)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self._send(target, ctxt, message,</span><br><span class="line">                          envelope=(version == <span class="number">2.0</span>), notify=<span class="keyword">True</span>, retry=retry)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_send</span><span class="params">(self, target, ctxt, message,</span></span></span><br><span class="line"><span class="function"><span class="params">          wait_for_reply=None, timeout=None, call_monitor_timeout=None,</span></span></span><br><span class="line"><span class="function"><span class="params">          envelope=True, notify=False, retry=None, transport_options=None)</span>:</span></span><br><span class="line"></span><br><span class="line">    msg = message</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> wait_for_reply:</span><br><span class="line">        msg_id = uuid.uuid4().hex</span><br><span class="line">        msg.update(&#123;<span class="string">'_msg_id'</span>: msg_id&#125;)</span><br><span class="line">        msg.update(&#123;<span class="string">'_reply_q'</span>: self._get_reply_q()&#125;)</span><br><span class="line">        msg.update(&#123;<span class="string">'_timeout'</span>: call_monitor_timeout&#125;)</span><br><span class="line"></span><br><span class="line">    rpc_amqp._add_unique_id(msg)</span><br><span class="line">    unique_id = msg[rpc_amqp.UNIQUE_ID]</span><br><span class="line"></span><br><span class="line">    rpc_amqp.pack_context(msg, ctxt)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> envelope:</span><br><span class="line">        msg = rpc_common.serialize_msg(msg)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> wait_for_reply:</span><br><span class="line">        self._waiter.listen(msg_id)</span><br><span class="line">        log_msg = <span class="string">"CALL msg_id: %s "</span> % msg_id</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        log_msg = <span class="string">"CAST unique_id: %s "</span> % unique_id</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">with</span> self._get_connection(rpc_common.PURPOSE_SEND) <span class="keyword">as</span> conn:</span><br><span class="line">            <span class="keyword">if</span> notify:</span><br><span class="line">                exchange = self._get_exchange(target)</span><br><span class="line">                LOG.debug(log_msg + <span class="string">"NOTIFY exchange '%(exchange)s'"</span></span><br><span class="line">                          <span class="string">" topic '%(topic)s'"</span>, &#123;<span class="string">'exchange'</span>: exchange,</span><br><span class="line">                                                 <span class="string">'topic'</span>: target.topic&#125;)</span><br><span class="line">                conn.notify_send(exchange, target.topic, msg, retry=retry)</span><br><span class="line">            <span class="keyword">elif</span> target.fanout:</span><br><span class="line">                log_msg += <span class="string">"FANOUT topic '%(topic)s'"</span> % &#123;</span><br><span class="line">                    <span class="string">'topic'</span>: target.topic&#125;</span><br><span class="line">                LOG.debug(log_msg)</span><br><span class="line">                conn.fanout_send(target.topic, msg, retry=retry)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                topic = target.topic</span><br><span class="line">                exchange = self._get_exchange(target)</span><br><span class="line">                <span class="keyword">if</span> target.server:</span><br><span class="line">                    topic = <span class="string">'%s.%s'</span> % (target.topic, target.server)</span><br><span class="line">                LOG.debug(log_msg + <span class="string">"exchange '%(exchange)s'"</span></span><br><span class="line">                          <span class="string">" topic '%(topic)s'"</span>, &#123;<span class="string">'exchange'</span>: exchange,</span><br><span class="line">                                                 <span class="string">'topic'</span>: topic&#125;)</span><br><span class="line">                conn.topic_send(exchange_name=exchange, topic=topic,</span><br><span class="line">                                msg=msg, timeout=timeout, retry=retry,</span><br><span class="line">                                transport_options=transport_options)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> wait_for_reply:</span><br><span class="line">            result = self._waiter.wait(msg_id, timeout,</span><br><span class="line">                                       call_monitor_timeout)</span><br><span class="line">            <span class="keyword">if</span> isinstance(result, Exception):</span><br><span class="line">                <span class="keyword">raise</span> result</span><br><span class="line">            <span class="keyword">return</span> result</span><br><span class="line">    <span class="keyword">finally</span>:</span><br><span class="line">        <span class="keyword">if</span> wait_for_reply:</span><br><span class="line">            self._waiter.unlisten(msg_id)</span><br></pre></td></tr></table></figure>
+<p>到了这里就和 rpc client 那块差不多了，区别就是这里发送的时候，传了 notify=True，后面就不啰嗦了，和前面差不多</p>
+<h4 id="接收-监听方"><a href="#接收-监听方" class="headerlink" title="接收/监听方"></a>接收/监听方</h4><p>还是以 ceilometer 为例</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">urls = cfg.CONF.notification.messaging_urls <span class="keyword">or</span> [<span class="keyword">None</span>]</span><br><span class="line"><span class="keyword">for</span> url <span class="keyword">in</span> urls:</span><br><span class="line">    transport = messaging.get_transport(url)</span><br><span class="line">    <span class="comment"># NOTE(gordc): ignore batching as we want pull</span></span><br><span class="line">    <span class="comment"># to maintain sequencing as much as possible.</span></span><br><span class="line">    listener = messaging.get_batch_notification_listener(</span><br><span class="line">        transport, targets, endpoints)</span><br><span class="line">    listener.start()</span><br><span class="line">    self.listeners.append(listener)</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">(Pdb) endpoints</span><br><span class="line">[&lt;ceilometer.event.endpoint.EventsNotificationEndpoint object at 0x2f5f610&gt;,</span><br><span class="line"> &lt;ceilometer.ipmi.notifications.ironic.TemperatureSensorNotification object at 0x7fa1741f6810&gt;,</span><br><span class="line">  &lt;ceilometer.telemetry.notifications.TelemetryIpc object at 0x7fa17424d410&gt;,</span><br><span class="line">   &lt;ceilometer.ipmi.notifications.ironic.FanSensorNotification object at 0x7fa17424d8d0&gt;,</span><br><span class="line">    &lt;ceilometer.ipmi.notifications.ironic.VoltageSensorNotification object at 0x7fa1742461d0&gt;,</span><br><span class="line">     &lt;ceilometer.meter.notifications.ProcessMeterNotifications object at 0x7fa17424dc90&gt;,</span><br><span class="line">      &lt;ceilometer.ipmi.notifications.ironic.CurrentSensorNotification object at 0x7fa17467ddd0&gt;]</span><br><span class="line">(Pdb) cfg.CONF.notification.messaging_urls</span><br><span class="line">[&apos;rabbit://rabbitmq:I5dZs2KN@rabbitmq.openstack.svc.cluster.local:5672/&apos;]</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_batch_notification_listener</span><span class="params">(transport, targets, endpoints,</span></span></span><br><span class="line"><span class="function"><span class="params">                                    allow_requeue=False,</span></span></span><br><span class="line"><span class="function"><span class="params">                                    batch_size=<span class="number">1</span>, batch_timeout=None)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> oslo_messaging.get_batch_notification_listener(</span><br><span class="line">        transport, targets, endpoints, executor=<span class="string">'threading'</span>,</span><br><span class="line">        allow_requeue=allow_requeue,</span><br><span class="line">        batch_size=batch_size, batch_timeout=batch_timeout)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_batch_notification_listener</span><span class="params">(transport, targets, endpoints,</span></span></span><br><span class="line"><span class="function"><span class="params">                                    executor=<span class="string">'blocking'</span>, serializer=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                                    allow_requeue=False, pool=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                                    batch_size=None, batch_timeout=None)</span>:</span></span><br><span class="line">    dispatcher = notify_dispatcher.BatchNotificationDispatcher(</span><br><span class="line">        endpoints, serializer)</span><br><span class="line">    <span class="keyword">return</span> BatchNotificationServer(</span><br><span class="line">        transport, targets, dispatcher, executor, allow_requeue, pool,</span><br><span class="line">        batch_size, batch_timeout</span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
+<p>其中 BatchNotificationDispatcher 实现了 dispatch 方法，BatchNotificationServer 中实现了 _process_incoming方法</p>
+<p>BatchNotificationDispatcher 继承自 NotificationDispatcher 继承自 DispatcherBase</p>
+<p>BatchNotificationServer 继承自 NotificationServerBase 继承自 MessageHandlingServer 继承自 ServiceBase，_OrderedTaskRunner</p>
+<p>因为 listen 实例化的是 BatchNotificationServer 对象，所以在调用 listener.start() 的时候，实际调用的是 MessageHandlingServer 的 start 方法</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@six.add_metaclass(abc.ABCMeta)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MessageHandlingServer</span><span class="params">(service.ServiceBase, _OrderedTaskRunner)</span>:</span></span><br><span class="line"><span class="meta">		@ordered(reset_after='stop')</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">start</span><span class="params">(self, override_pool_size=None)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> self._started:</span><br><span class="line">            LOG.warning(<span class="string">'The server has already been started. Ignoring '</span></span><br><span class="line">                        <span class="string">'the redundant call to start().'</span>)</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">        self._started = <span class="keyword">True</span></span><br><span class="line"></span><br><span class="line">        executor_opts = &#123;&#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> self.executor_type <span class="keyword">in</span> (<span class="string">"threading"</span>, <span class="string">"eventlet"</span>):</span><br><span class="line">            executor_opts[<span class="string">"max_workers"</span>] = (</span><br><span class="line">                override_pool_size <span class="keyword">or</span> self.conf.executor_thread_pool_size</span><br><span class="line">            )</span><br><span class="line">        self._work_executor = self._executor_cls(**executor_opts)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            self.listener = self._create_listener()</span><br><span class="line">        <span class="keyword">except</span> driver_base.TransportDriverError <span class="keyword">as</span> ex:</span><br><span class="line">            <span class="keyword">raise</span> ServerListenError(self.target, ex)</span><br><span class="line"></span><br><span class="line">        self.listener.start(self._on_incoming)</span><br></pre></td></tr></table></figure>
+<p>重点在 21 和 25 行，第 21 行调到了</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NotificationServerBase</span><span class="params">(msg_server.MessageHandlingServer)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, transport, targets, dispatcher, executor=<span class="string">'blocking'</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">                 allow_requeue=True, pool=None, batch_size=<span class="number">1</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">                 batch_timeout=None)</span>:</span></span><br><span class="line">        super(NotificationServerBase, self).__init__(transport, dispatcher,</span><br><span class="line">                                                     executor)</span><br><span class="line">        self._allow_requeue = allow_requeue</span><br><span class="line">        self._pool = pool</span><br><span class="line">        self.targets = targets</span><br><span class="line">        self._targets_priorities = set(</span><br><span class="line">            itertools.product(self.targets,</span><br><span class="line">                              self.dispatcher.supported_priorities)</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        self._batch_size = batch_size</span><br><span class="line">        self._batch_timeout = batch_timeout</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_create_listener</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self.transport._listen_for_notifications(</span><br><span class="line">            self._targets_priorities, self._pool, self._batch_size,</span><br><span class="line">            self._batch_timeout</span><br><span class="line">        )</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_listen_for_notifications</span><span class="params">(self, targets_and_priorities, pool,</span></span></span><br><span class="line"><span class="function"><span class="params">                              batch_size, batch_timeout)</span>:</span></span><br><span class="line">    <span class="keyword">for</span> target, priority <span class="keyword">in</span> targets_and_priorities:</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> target.topic:</span><br><span class="line">            <span class="keyword">raise</span> exceptions.InvalidTarget(<span class="string">'A target must have '</span></span><br><span class="line">                                           <span class="string">'topic specified'</span>,</span><br><span class="line">                                           target)</span><br><span class="line">    <span class="keyword">return</span> self._driver.listen_for_notifications(</span><br><span class="line">        targets_and_priorities, pool, batch_size, batch_timeout</span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AMQPDriverBase</span><span class="params">(base.BaseDriver)</span>:</span></span><br><span class="line">		<span class="function"><span class="keyword">def</span> <span class="title">listen_for_notifications</span><span class="params">(self, targets_and_priorities, pool,</span></span></span><br><span class="line"><span class="function"><span class="params">                                 batch_size, batch_timeout)</span>:</span></span><br><span class="line">        conn = self._get_connection(rpc_common.PURPOSE_LISTEN)</span><br><span class="line"></span><br><span class="line">        listener = NotificationAMQPListener(self, conn)</span><br><span class="line">        <span class="keyword">for</span> target, priority <span class="keyword">in</span> targets_and_priorities:</span><br><span class="line">            conn.declare_topic_consumer(</span><br><span class="line">                exchange_name=self._get_exchange(target),</span><br><span class="line">                topic=<span class="string">'%s.%s'</span> % (target.topic, priority),</span><br><span class="line">                callback=listener, queue_name=pool)</span><br><span class="line">        <span class="keyword">return</span> base.PollStyleListenerAdapter(listener, batch_size,</span><br><span class="line">                                             batch_timeout)</span><br></pre></td></tr></table></figure>
+<p>在listen_for_notification中建立连接后，创建topic.priority的queue。PollStyleListenerAdapter启动一个线程对获取到的数据进行处理，此处返回此类，所以_create_listener 就是返回了一个PollStyleListenerAdapter的实例</p>
+<p>然后调用 self.listener.start(self._on_incoming)</p>
+<p>PollStyleListenerAdapter 继承自 Listener</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PollStyleListenerAdapter</span><span class="params">(Listener)</span>:</span></span><br><span class="line">    <span class="string">"""A Listener that uses a PollStyleListener for message transfer. A</span></span><br><span class="line"><span class="string">    dedicated thread is created to do message polling.</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, poll_style_listener, batch_size, batch_timeout)</span>:</span></span><br><span class="line">        super(PollStyleListenerAdapter, self).__init__(</span><br><span class="line">            batch_size, batch_timeout, poll_style_listener.prefetch_size</span><br><span class="line">        )</span><br><span class="line">        self._poll_style_listener = poll_style_listener</span><br><span class="line">        self._listen_thread = threading.Thread(target=self._runner)</span><br><span class="line">        self._listen_thread.daemon = <span class="keyword">True</span></span><br><span class="line">        self._started = <span class="keyword">False</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">start</span><span class="params">(self, on_incoming_callback)</span>:</span></span><br><span class="line">        super(PollStyleListenerAdapter, self).start(on_incoming_callback)</span><br><span class="line">        self._started = <span class="keyword">True</span></span><br><span class="line">        self._listen_thread.start()</span><br><span class="line"></span><br><span class="line"><span class="meta">    @excutils.forever_retry_uncaught_exceptions</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_runner</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">while</span> self._started:</span><br><span class="line">            incoming = self._poll_style_listener.poll(</span><br><span class="line">                batch_size=self.batch_size, batch_timeout=self.batch_timeout)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> incoming:</span><br><span class="line">                self.on_incoming_callback(incoming)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># listener is stopped but we need to process all already consumed</span></span><br><span class="line">        <span class="comment"># messages</span></span><br><span class="line">        <span class="keyword">while</span> <span class="keyword">True</span>:</span><br><span class="line">            incoming = self._poll_style_listener.poll(</span><br><span class="line">                batch_size=self.batch_size, batch_timeout=self.batch_timeout)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> incoming:</span><br><span class="line">                <span class="keyword">return</span></span><br><span class="line">            self.on_incoming_callback(incoming)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">stop</span><span class="params">(self)</span>:</span></span><br><span class="line">        self._started = <span class="keyword">False</span></span><br><span class="line">        self._poll_style_listener.stop()</span><br><span class="line">        self._listen_thread.join()</span><br><span class="line">        super(PollStyleListenerAdapter, self).stop()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">cleanup</span><span class="params">(self)</span>:</span></span><br><span class="line">        self._poll_style_listener.cleanup()</span><br></pre></td></tr></table></figure>
+<p>NotificationAMQPListener 继承自 AMQPListener 继承自 PollStyleListener</p>
+<p>可以看到这里的 start 方法就是调用了 _runner方法，这里的 self.poll_style_listener 就是 NotificationAMQPListener 实例，通过 poll 不断从队列中取出数据</p>
+<p>即调用  AMQPListener.poll</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NotificationAMQPListener</span><span class="params">(AMQPListener)</span>:</span></span><br><span class="line">    message_cls = NotificationAMQPIncomingMessage</span><br><span class="line">    </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AMQPListener</span><span class="params">(base.PollStyleListener)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, driver, conn)</span>:</span></span><br><span class="line">        super(AMQPListener, self).__init__(driver.prefetch_size)</span><br><span class="line">        self.driver = driver</span><br><span class="line">        self.conn = conn</span><br><span class="line">        self.msg_id_cache = rpc_amqp._MsgIdCache()</span><br><span class="line">        self.incoming = []</span><br><span class="line">        self._shutdown = threading.Event()</span><br><span class="line">        self._shutoff = threading.Event()</span><br><span class="line">        self._obsolete_reply_queues = ObsoleteReplyQueuesCache()</span><br><span class="line">        self._message_operations_handler = MessageOperationsHandler(</span><br><span class="line">            <span class="string">"AMQPListener"</span>)</span><br><span class="line">        self._current_timeout = ACK_REQUEUE_EVERY_SECONDS_MIN</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self, message)</span>:</span></span><br><span class="line">        ctxt = rpc_amqp.unpack_context(message)</span><br><span class="line">        unique_id = self.msg_id_cache.check_duplicate_message(message)</span><br><span class="line">        <span class="keyword">if</span> ctxt.msg_id:</span><br><span class="line">            LOG.debug(<span class="string">"received message msg_id: %(msg_id)s reply to "</span></span><br><span class="line">                      <span class="string">"%(queue)s"</span>, &#123;<span class="string">'queue'</span>: ctxt.reply_q,</span><br><span class="line">                                    <span class="string">'msg_id'</span>: ctxt.msg_id&#125;)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            LOG.debug(<span class="string">"received message with unique_id: %s"</span>, unique_id)</span><br><span class="line"></span><br><span class="line">        self.incoming.append(self.message_cls(</span><br><span class="line">            self,</span><br><span class="line">            ctxt.to_dict(),</span><br><span class="line">            message,</span><br><span class="line">            unique_id,</span><br><span class="line">            ctxt.msg_id,</span><br><span class="line">            ctxt.reply_q,</span><br><span class="line">            ctxt.client_timeout,</span><br><span class="line">            self._obsolete_reply_queues,</span><br><span class="line">            self._message_operations_handler))</span><br><span class="line"></span><br><span class="line"><span class="meta">    @base.batch_poll_helper</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">poll</span><span class="params">(self, timeout=None)</span>:</span></span><br><span class="line">        stopwatch = timeutils.StopWatch(duration=timeout).start()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> <span class="keyword">not</span> self._shutdown.is_set():</span><br><span class="line">            self._message_operations_handler.process()</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> self.incoming:</span><br><span class="line">                <span class="keyword">return</span> self.incoming.pop(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">            left = stopwatch.leftover(return_none=<span class="keyword">True</span>)</span><br><span class="line">            <span class="keyword">if</span> left <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">                left = self._current_timeout</span><br><span class="line">            <span class="keyword">if</span> left &lt;= <span class="number">0</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">None</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                self.conn.consume(timeout=min(self._current_timeout, left))</span><br><span class="line">            <span class="keyword">except</span> rpc_common.Timeout:</span><br><span class="line">                self._current_timeout = max(self._current_timeout * <span class="number">2</span>,</span><br><span class="line">                                            ACK_REQUEUE_EVERY_SECONDS_MAX)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                self._current_timeout = ACK_REQUEUE_EVERY_SECONDS_MIN</span><br><span class="line"></span><br><span class="line">        <span class="comment"># NOTE(sileht): listener is stopped, just processes remaining messages</span></span><br><span class="line">        <span class="comment"># and operations</span></span><br><span class="line">        self._message_operations_handler.process()</span><br><span class="line">        <span class="keyword">if</span> self.incoming:</span><br><span class="line">            <span class="keyword">return</span> self.incoming.pop(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        self._shutoff.set()</span><br></pre></td></tr></table></figure>
+<p>在 call 方法又调用了 self.message_cls ，即 NotificationAMQPIncomingMessage</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NotificationAMQPIncomingMessage</span><span class="params">(AMQPIncomingMessage)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">acknowledge</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="function"><span class="keyword">def</span> <span class="title">_do_ack</span><span class="params">()</span>:</span></span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                self.message.acknowledge()</span><br><span class="line">            <span class="keyword">except</span> Exception <span class="keyword">as</span> exc:</span><br><span class="line">                <span class="comment"># NOTE(kgiusti): this failure is likely due to a loss of the</span></span><br><span class="line">                <span class="comment"># connection to the broker.  Not much we can do in this case,</span></span><br><span class="line">                <span class="comment"># especially considering the Notification has already been</span></span><br><span class="line">                <span class="comment"># dispatched. This *could* result in message duplication</span></span><br><span class="line">                <span class="comment"># (unacked msg is returned to the queue by the broker), but the</span></span><br><span class="line">                <span class="comment"># driver tries to catch that using the msg_id_cache.</span></span><br><span class="line">                LOG.warning(<span class="string">"Failed to acknowledge received message: %s"</span>, exc)</span><br><span class="line">        self._message_operations_handler.do(_do_ack)</span><br><span class="line">        self.listener.msg_id_cache.add(self.unique_id)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">requeue</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># NOTE(sileht): In case of the connection is lost between receiving the</span></span><br><span class="line">        <span class="comment"># message and requeing it, this requeue call fail</span></span><br><span class="line">        <span class="comment"># but because the message is not acknowledged and not added to the</span></span><br><span class="line">        <span class="comment"># msg_id_cache, the message will be reconsumed, the only difference is</span></span><br><span class="line">        <span class="comment"># the message stay at the beginning of the queue instead of moving to</span></span><br><span class="line">        <span class="comment"># the end.</span></span><br><span class="line">        <span class="function"><span class="keyword">def</span> <span class="title">_do_requeue</span><span class="params">()</span>:</span></span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                self.message.requeue()</span><br><span class="line">            <span class="keyword">except</span> Exception <span class="keyword">as</span> exc:</span><br><span class="line">                LOG.warning(<span class="string">"Failed to requeue received message: %s"</span>, exc)</span><br><span class="line">        self._message_operations_handler.do(_do_requeue)</span><br></pre></td></tr></table></figure>
+<p>NotificationAMQPIncomingMessage 继承自 AMQPIncomingMessage 继承自 RpcIncomingMessage 继承自 IncomingMessage</p>
+<p>（self.conn.consume 中有回调函数调用，call 方法，往 incoming 中塞值，poll 再从里面取值处理）括号中的部分有点疑问，理得不是很清楚，如果有清楚的大佬，欢迎指教。</p>
+<p>NotificationAMQPIncomingMessage 是一个消息对象，包含了acknowledge和requeue方法，可以用于消息确认或再次入队。</p>
+<p>取出之后用self.on_incoming_callback(incoming)处理，即MessageHandlingServer中的self.__on_incoming处理</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@six.add_metaclass(abc.ABCMeta)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MessageHandlingServer</span><span class="params">(service.ServiceBase, _OrderedTaskRunner)</span>:</span></span><br><span class="line">		<span class="function"><span class="keyword">def</span> <span class="title">_on_incoming</span><span class="params">(self, incoming)</span>:</span></span><br><span class="line">        <span class="string">"""Handles on_incoming event</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :param incoming: incoming request.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        self._work_executor.submit(self._process_incoming, incoming)</span><br></pre></td></tr></table></figure>
+<p>我们看到这边实际使用的是self._process_incoming来处理，即采用BatchNotificationServer类中的self.__process_incoming处理</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BatchNotificationServer</span><span class="params">(NotificationServerBase)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_process_incoming</span><span class="params">(self, incoming)</span>:</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            not_processed_messages = self.dispatcher.dispatch(incoming)</span><br><span class="line">        <span class="keyword">except</span> Exception:</span><br><span class="line">						......</span><br></pre></td></tr></table></figure>
+<p>可以看到该处理函数会调用dispatcher对象来分派消息，这里的self.dispatcher，就是之前使用NotificationDispatcher初始化后传过来的参数，后面就是一些数据处理的过程，详细请见我的另一篇 <a href="https://blog.csdn.net/weixin_43700106/article/details/107006677" target="_blank" rel="external">nogtification 源码分析</a></p>
+<p>参考：</p>
+<p><a href="https://www.cnblogs.com/gange111/p/9560446.html" target="_blank" rel="external">https://www.cnblogs.com/gange111/p/9560446.html</a></p>
+<p><a href="https://blog.csdn.net/MrYuanRs/article/details/105955720?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param" target="_blank" rel="external">https://blog.csdn.net/MrYuanRs/article/details/105955720?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param</a></p>
+<p><a href="https://blog.csdn.net/qingyuanluofeng/article/details/102511492?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.channel_param" target="_blank" rel="external">https://blog.csdn.net/qingyuanluofeng/article/details/102511492?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.channel_param</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+<blockquote class="blockquote-center" style="color: #ccc;">
+    -------------本文结束 <i class="fa fa-apple"></i> 感谢您的阅读-------------
+</blockquote>
+
+  <span id="inline-green" style="border-radius:3px;">作者</span>：<a class="link-blue" href="https://github.com/magiceses" target="_blank">Magiceses</a><br/>有问题请 <a class="link-blue" href="https://magiceses.github.io/guestbook" target="_blank">留言</a> 或者私信我的 <a class="link-blue" href="https://weibo.com/u/3069595351" target="_blank">微博</a>。
+
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>满分是10分的话，这篇文章你给几分</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/reward/reward_wechat.png" alt="magiceses WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/reward/reward_alipay.png" alt="magiceses Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Openstack/" rel="tag"><i class="fa fa-tag"></i> Openstack</a>
+          
+            <a href="/tags/Oslo/" rel="tag"><i class="fa fa-tag"></i> Oslo</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/10/05/openstack-oslo.packages-oslo.service/" rel="next" title="Oslo系列之oslo.service">
+                <i class="fa fa-chevron-left"></i> Oslo系列之oslo.service
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/10/05/openstack-oslo.packages-oslo.policy/" rel="prev" title="Oslo系列之oslo.policy">
+                Oslo系列之oslo.policy <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar/avatar.png"
+               alt="magiceses" />
+          <p class="site-author-name" itemprop="name">magiceses</p>
+          <p class="site-description motion-element" itemprop="description">Stay Hungry,Stay Foolish</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">61</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/magiceses" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://blog.csdn.net/weixin_43700106" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-chrome"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/weblog" title="建站日志" target="_blank">建站日志</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/reward" title="打赏" target="_blank">打赏</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概念简介"><span class="nav-number">1.</span> <span class="nav-text">概念简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Transport"><span class="nav-number">1.1.</span> <span class="nav-text">Transport</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Target"><span class="nav-number">1.2.</span> <span class="nav-text">Target</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Server"><span class="nav-number">1.3.</span> <span class="nav-text">Server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RPC-Client"><span class="nav-number">1.4.</span> <span class="nav-text">RPC Client</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Notifier"><span class="nav-number">1.5.</span> <span class="nav-text">Notifier</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Notification-Listener"><span class="nav-number">1.6.</span> <span class="nav-text">Notification Listener</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#源码分析"><span class="nav-number">2.</span> <span class="nav-text">源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#rpc"><span class="nav-number">2.1.</span> <span class="nav-text">rpc</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#rpc-client"><span class="nav-number">2.1.1.</span> <span class="nav-text">rpc client</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#rpc-server"><span class="nav-number">2.1.2.</span> <span class="nav-text">rpc server</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#小结"><span class="nav-number">2.1.3.</span> <span class="nav-text">小结</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#server监听"><span class="nav-number">2.1.3.1.</span> <span class="nav-text">server监听</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#client调用"><span class="nav-number">2.1.3.2.</span> <span class="nav-text">client调用</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#notification"><span class="nav-number">2.2.</span> <span class="nav-text">notification</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#发送方"><span class="nav-number">2.2.1.</span> <span class="nav-text">发送方</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#接收-监听方"><span class="nav-number">2.2.2.</span> <span class="nav-text">接收/监听方</span></a></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+      
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="busuanzi-count">
+
+  <!-- <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script> -->
+  <!-- 上面这个是之前的，不知道为什么失效了，改成下面这个 -->
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">您是第<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>个小伙伴</span>
+  
+
+  
+    <span class="site-pv">本站总浏览<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">magiceses</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Pisces
+  </a>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count" style="color: #e90f92;">全站共 1m 字</span>
+</div>
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+  <!-- 按需加载背景 -->
+  <!-- 背景动画 -->
+<script type="text/javascript">
+  // 按需加载背景
+  // 如果是all，就直接加载了
+  if("pc" == "all") {
+    $.getScript("/js/src/particle.js?v=5.0.1");
+  }
+  // 识别手机或电脑的js开始
+  (function(){
+    var res = GetRequest();
+    var par = res['index'];
+    if(par!='gfan'){
+      var ua=navigator.userAgent.toLowerCase();
+      var contains=function (a, b){
+          if(a.indexOf(b)!=-1){return true;}
+      };
+      if((contains(ua,"android") && contains(ua,"mobile"))||(contains(ua,"android") && contains(ua,"mozilla"))||(contains(ua,"android") && contains(ua,"opera"))||contains(ua,"ucweb7")||contains(ua,"iphone")){
+        return false;
+      } else {
+        $.getScript("/js/src/particle.js?v=5.0.1");
+      }
+    }
+  })();
+  function GetRequest() {
+    var url = location.search;
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+      var str = url.substr(1);
+      strs = str.split("&");
+      for(var i = 0; i < strs.length; i ++) {
+        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+      }
+    }
+    return theRequest;
+  }
+</script>
+<!-- 识别手机或电脑的js结束 -->  
+
+  <!-- 页面点击小红心 -->
+  <!-- 页面点击小红心 -->
+
+  <script type="text/javascript" src="/js/src/love.js?v=5.0.1"></script>
+
+
+  <!-- 鼠标移动，效果 -->
+  <!-- 鼠标移动特效 -->
+
+  <script type="text/javascript" src="/js/src/jquery-stars.js?v=5.0.1"></script>
+  <script type="text/javascript">
+  jQuery('body').jstars({
+  	image_path: '/images',
+  	image: 'candy-cane-stars.png',
+  	style: 'white',
+  	width: 34,
+  	height: 34,
+  	delay: 700,
+  	frequency: 5
+  });
+  </script>
+
+
+  <!-- 页面 title 进入/离开 效果 -->
+
+  <script type="text/javascript">var OriginTitile=document.title,st;document.addEventListener("visibilitychange",function(){document.hidden?(document.title="Waiting for you back！",clearTimeout(st)):(document.title="Thanks for visit~ "+OriginTitile,st=setTimeout(function(){document.title=OriginTitile},4e3))})</script>
+
+
+</body>
+</html>

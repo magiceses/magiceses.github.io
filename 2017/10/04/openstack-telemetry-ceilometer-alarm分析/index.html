@@ -1,0 +1,1379 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Courier New:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Openstack,Telemetry,Ceilometer," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="天青色等烟雨" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="世界上只有想不通的人，没有走不通的路。
+
+Ceilometer Alarm API 参数详解Ceilometer Alarm是H版新添加的功能，监控报警是云平台不可缺少的部分，Ceilometer已经实现了比较完善的监控体系，报警怎么能缺少呢？用过AWS CloudWatch Alarm的人应该不会对Ceilometer的Alarm感到陌生，Ceilometer实现的Alarm和CloudWatc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ceilometer-Alarm-API参数详解">
+<meta property="og:url" content="https://magiceses.github.io/2017/10/04/openstack-telemetry-ceilometer-alarm分析/index.html">
+<meta property="og:site_name" content="天青色等烟雨">
+<meta property="og:description" content="世界上只有想不通的人，没有走不通的路。
+
+Ceilometer Alarm API 参数详解Ceilometer Alarm是H版新添加的功能，监控报警是云平台不可缺少的部分，Ceilometer已经实现了比较完善的监控体系，报警怎么能缺少呢？用过AWS CloudWatch Alarm的人应该不会对Ceilometer的Alarm感到陌生，Ceilometer实现的Alarm和CloudWatc">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-telemetry-8.png">
+<meta property="og:updated_time" content="2021-10-13T12:36:59.583Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Ceilometer-Alarm-API参数详解">
+<meta name="twitter:description" content="世界上只有想不通的人，没有走不通的路。
+
+Ceilometer Alarm API 参数详解Ceilometer Alarm是H版新添加的功能，监控报警是云平台不可缺少的部分，Ceilometer已经实现了比较完善的监控体系，报警怎么能缺少呢？用过AWS CloudWatch Alarm的人应该不会对Ceilometer的Alarm感到陌生，Ceilometer实现的Alarm和CloudWatc">
+<meta name="twitter:image" content="https://magiceses.github.io/images/openstack-telemetry-8.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://magiceses.github.io/2017/10/04/openstack-telemetry-ceilometer-alarm分析/"/>
+
+
+<!-- 网页加载条 -->
+<script src="/js/src/pace.min.js"></script>
+  <title> Ceilometer-Alarm-API参数详解 | 天青色等烟雨 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">天青色等烟雨</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">而我在等你</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-guestbook">
+          <a href="/guestbook" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-commenting"></i> <br />
+            
+            留言
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+      
+      
+        <li class="menu-item"> <a title="把这个链接拖到你的工具栏中,任何网页都可以High" href='javascript:(
+/*
+ * Copyright (C) 2016 Never_yu (Neveryu.github.io) <React.dong.yu@gmail.com>
+ * Sina Weibo (http://weibo.com/Neveryu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function go() {
+
+var songs = [
+  "http://dl.stream.qqmusic.qq.com/C400001Qu4I30eVFYb.m4a?vkey=2127178E4405E7B8B268F20F05232485735CCF4FF8C1432F0360D2626D0B6C9564B5627C7AB481BBC685FEDB0946A50E97C66F0D1B008226&guid=7175649092&uin=0&fromtag=66",
+  "",
+  "",
+  ""
+];
+
+function c() {
+  var e = document.createElement("link");
+  e.setAttribute("type", "text/css");
+  e.setAttribute("rel", "stylesheet");
+  e.setAttribute("href", f);
+  e.setAttribute("class", l);
+  document.body.appendChild(e)
+}
+
+function h() {
+  var e = document.getElementsByClassName(l);
+  for (var t = 0; t < e.length; t++) {
+    document.body.removeChild(e[t])
+  }
+}
+
+function p() {
+  var e = document.createElement("div");
+  e.setAttribute("class", a);
+  document.body.appendChild(e);
+  setTimeout(function() {
+    document.body.removeChild(e)
+  }, 100)
+}
+
+function d(e) {
+  return {
+    height : e.offsetHeight,
+    width : e.offsetWidth
+  }
+}
+
+function v(i) {
+  var s = d(i);
+  return s.height > e && s.height < n && s.width > t && s.width < r
+}
+
+function m(e) {
+  var t = e;
+  var n = 0;
+  while (!!t) {
+    n += t.offsetTop;
+    t = t.offsetParent
+  }
+  return n
+}
+
+function g() {
+  var e = document.documentElement;
+  if (!!window.innerWidth) {
+    return window.innerHeight
+  } else if (e && !isNaN(e.clientHeight)) {
+    return e.clientHeight
+  }
+  return 0
+}
+
+function y() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  }
+  return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+}
+
+function E(e) {
+  var t = m(e);
+  return t >= w && t <= b + w
+}
+
+function S() {
+  var e = document.getElementById("audio_element_id");
+  if(e != null){
+    var index = parseInt(e.getAttribute("curSongIndex"));
+    if(index > songs.length - 2) {
+      index = 0;
+    } else {
+      index++;
+    }
+    e.setAttribute("curSongIndex", index);
+    N();
+  }
+
+  e.src = i;
+  e.play()
+}
+
+function x(e) {
+  e.className += " " + s + " " + o
+}
+
+function T(e) {
+  e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+}
+
+function N() {
+  var e = document.getElementsByClassName(s);
+  var t = new RegExp("\\b" + s + "\\b");
+  for (var n = 0; n < e.length; ) {
+    e[n].className = e[n].className.replace(t, "")
+  }
+}
+
+function initAudioEle() {
+  var e = document.getElementById("audio_element_id");
+  if(e === null){
+    e = document.createElement("audio");
+    e.setAttribute("class", l);
+    e.setAttribute("curSongIndex", 0);
+    e.id = "audio_element_id";
+    e.loop = false;
+    e.bgcolor = 0;
+    e.addEventListener("canplay", function() {
+      setTimeout(function() {
+        x(k)
+      }, 500);
+      setTimeout(function() {
+        N();
+        p();
+        for (var e = 0; e < O.length; e++) {
+          T(O[e])
+        }
+      }, 15500)
+    }, true);
+    e.addEventListener("ended", function() {
+      N();
+      h();
+      go();
+    }, true);
+    e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+    document.body.appendChild(e);
+  }
+}
+
+initAudioEle();
+var e = 30;
+var t = 30;
+var n = 350;
+var r = 350;
+
+var curSongIndex = parseInt(document.getElementById("audio_element_id").getAttribute("curSongIndex"));
+var i = songs[curSongIndex];
+
+var s = "mw-harlem_shake_me";
+var o = "im_first";
+var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+var a = "mw-strobe_light";
+
+/* harlem-shake-style.css，替换成你的位置，也可以直接使用：//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css */
+var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+
+var l = "mw_added_css";
+var b = g();
+var w = y();
+var C = document.getElementsByTagName("*");
+var k = null;
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    if (E(A)) {
+      k = A;
+      break
+    }
+  }
+}
+if (A === null) {
+  console.warn("Could not find a node of the right size. Please try a different page.");
+  return
+}
+c();
+S();
+var O = [];
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    O.push(A)
+  }
+}
+})()'><i class="menu-item-icon fa fa-music fa-fw"></i> High一下</a></li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search fa-lg"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Ceilometer-Alarm-API参数详解
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-10-04T23:25:24+08:00" content="2017-10-04">
+              2017-10-04
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Openstack/" itemprop="url" rel="index">
+                    <span itemprop="name">Openstack</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv">热度
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p id="div-border-top-green">世界上只有想不通的人，没有走不通的路。<br></p>
+
+<h1 id="Ceilometer-Alarm-API-参数详解"><a href="#Ceilometer-Alarm-API-参数详解" class="headerlink" title="Ceilometer Alarm API 参数详解"></a>Ceilometer Alarm API 参数详解</h1><p>Ceilometer Alarm是H版新添加的功能，监控报警是云平台不可缺少的部分，Ceilometer已经实现了比较完善的监控体系，报警怎么能缺少呢？用过AWS CloudWatch Alarm的人应该不会对Ceilometer的Alarm感到陌生，Ceilometer实现的Alarm和CloudWatch的Alarm很像，概念基本上都一样，Alarm的逻辑也基本上一样，可以说是一个开源版的CloudWatch Alarm，但是它进行了一些“微创新”，实现了一些比较有意思的小功能，而且代码写的也非常不错，是一个不错的学习素材。</p>
+<p>下面我们从功能，实现，以及它目前存在的问题三个方面介绍一下Ceilometer的Alarm。</p>
+<a id="more"></a>
+<h5 id="功能篇"><a href="#功能篇" class="headerlink" title="功能篇"></a>功能篇</h5><p>简单来说，Alarm的功能其实很简单，监控某一个或多个指标的值，若高于或者是低于阈值，那么就执行相应的动作，比如发送邮件短信报警，或者是直接调用某个接口进行autoscaling操作，像Heat就是依赖Ceilometer的Alarm实现Auto Scaling的操作。</p>
+<p>Ceilometer中，实现了2种alarm：一种是threshold，一种是combination。顾名思义，threshold就是我们熟悉的根据监控指标的阈值去判断alarm的状态，它只是针对某一个监控指标建立alarm，而combination则可以理解为alarm的alarm，它是根据多个alarm的状态来判断自己的状态的，多个alarm之间是or/and的关系，这相当于是对多个监控指标建立了一个alarm。一般情况下，我们只需要threshold类型的alarm就足够了，但是一些特殊情况，比如Heat要执行auto scaling操作，可能就要对多个监控指标进行衡量，然后再采取操作。</p>
+<p>下面，我们来分析一下Alarm的API，看它到底提供了哪些不一样的功能：</p>
+<ol>
+<li>POST /v2/alarms</li>
+</ol>
+<p>创建一个alarm，详细的参数见下表：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">参数</th>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">name</td>
+<td style="text-align:left">str</td>
+<td style="text-align:left">name是project唯一的</td>
+</tr>
+<tr>
+<td style="text-align:left">description</td>
+<td style="text-align:left">str</td>
+<td style="text-align:left">描述</td>
+</tr>
+<tr>
+<td style="text-align:left">enabled</td>
+<td style="text-align:left">bool</td>
+<td style="text-align:left">alarm的一个开关，可以停止/启动该alarm，默认是True</td>
+</tr>
+<tr>
+<td style="text-align:left">ok_actions</td>
+<td style="text-align:left">list</td>
+<td style="text-align:left">当alarm状态变为ok状态时，采取的动作，默认是[]</td>
+</tr>
+<tr>
+<td style="text-align:left">alarm_actions</td>
+<td style="text-align:left">list</td>
+<td style="text-align:left">当alarm状态变为alarm状态时，采取的动作，默认是[]</td>
+</tr>
+<tr>
+<td style="text-align:left">insufficient_data_actions</td>
+<td style="text-align:left">list</td>
+<td style="text-align:left">当alarm状态变为insufficient data状态时，采取的动作，默认是[]</td>
+</tr>
+<tr>
+<td style="text-align:left">repeat_actions</td>
+<td style="text-align:left">bool</td>
+<td style="text-align:left">当alarm被触发时，是否重复执行对应的动作，默认是False</td>
+</tr>
+<tr>
+<td style="text-align:left">type</td>
+<td style="text-align:left">str</td>
+<td style="text-align:left">alarm类型，目前有threshold和combination两种，必填</td>
+</tr>
+<tr>
+<td style="text-align:left">threshold_rule</td>
+<td style="text-align:left">AlarmThresholdRule</td>
+<td style="text-align:left">当alarm类型为threshold时，制定的threshold规则</td>
+</tr>
+<tr>
+<td style="text-align:left">combination_rule</td>
+<td style="text-align:left">AlarmCombinationRule</td>
+<td style="text-align:left">当alarm类型为combination时，制定的combination规则</td>
+</tr>
+<tr>
+<td style="text-align:left">time_constraints</td>
+<td style="text-align:left">list(AlarmTimeConstraint)</td>
+<td style="text-align:left">约束该alarm在哪些时间段执行，默认是[]</td>
+</tr>
+<tr>
+<td style="text-align:left">state</td>
+<td style="text-align:left">str</td>
+<td style="text-align:left">alarm的状态，默认是insufficient data</td>
+</tr>
+<tr>
+<td style="text-align:left">user_id</td>
+<td style="text-align:left">str</td>
+<td style="text-align:left">user id，默认是context user id</td>
+</tr>
+<tr>
+<td style="text-align:left">project_id</td>
+<td style="text-align:left">str</td>
+<td style="text-align:left">project id， 默认是context project id</td>
+</tr>
+<tr>
+<td style="text-align:left">timestamp</td>
+<td style="text-align:left">datetime</td>
+<td style="text-align:left">alarm的定义最后一次被更新的时间</td>
+</tr>
+<tr>
+<td style="text-align:left">state_timestamp</td>
+<td style="text-align:left">datetime</td>
+<td style="text-align:left">alarm的状态最后一次更改的时间</td>
+</tr>
+</tbody>
+</table>
+<p>这里主要说下面几个参数：</p>
+<ul>
+<li>name: name是project唯一的，在创建alarm的时候会检查</li>
+<li>enabled: 这个功能比较人性化，可以暂停该alarm，是微创新之一</li>
+<li>xxx_actions: 定义了在该alarm状态由其他的状态变为xxx状态时，执行的动作</li>
+<li>repeat_actions: 这个参数指定了是否要重复执行action，比如第一次检查alarm已经超过阈值，执行了相应的action了，当下一次检查时如果该alarm还是超过阈值，那么这个参数决定了是否要重复执行相应的action，这也是微创新之一</li>
+<li>threshold_rule: 当type为threshold时，定义的alarm被触发的规则，详细参数见下面AlarmThresholdRule对象属性</li>
+<li>combination_rule: 当type为combination时，定义的alarm被触发的规则，详细参数见下面AlarmCombinationRule对象属性</li>
+<li>time_constraints: 这也是一个很人性化的参数，可以指定该alarm被检查的时间的一个列表，比如说我只想让这个alarm在每天晚上的21点到23点被检查，以及每天中午的11点到13点被检查，其它时间不检查该alarm，这个参数就可以做这个限制，不过该参数设置稍微复杂一点，详细参数见下面AlarmTimeConstraint对象属性，默认是[]，即不设限制，随着alarm进程的interval time进行检查。</li>
+<li>state: alarm总共有3个状态：OK, INSUFICIENT DATA, ALARM，这三个状态分别对应到上面的xxx_actions</li>
+</ul>
+<p>AlarmThresholdRule:</p>
+<ul>
+<li>meter_name: 监控指标</li>
+<li>query: 该参数一般用于找到监控指标下的某个资源，默认是[]</li>
+<li>period: 这个参数其实有两个作用，一个是确定了获取该监控指标的监控数据的时间范围，和下面的evaluation_periods配合使用，另外一个作用就是它确定了两个点之间的时间间隔，默认是60s</li>
+<li>threshold: 阈值</li>
+<li>comparison_operator: 这个参数确定了怎么和阈值进行比较，有6个可选：lt, le, eq, ne, ge, gt，默认是eq</li>
+<li>statistic: 这个参数确定了使用什么数据去和threshold比较，有5种可选：max, min, avg, sum, count，默认是avg</li>
+<li>evaluation_periods: 和period参数相乘，可以确定获取监控数据的时间范围，默认是1</li>
+<li>exclude_outliners: 这个参数有点意思，我们都知道“标准差”是指一组数据的波动大小，平均值相同，但是标准差小的波动小，这个参数就是指对得到的一组监控数据，是否要根据标准差去除那些波动比较大的数据，以降低误判率，默认是False</li>
+</ul>
+<p>AlarmCombinationRule:</p>
+<ul>
+<li>operator: 定义alarms之间的逻辑关系，有两个选项：or 和 and，默认是and，注意这里的逻辑关系ALARM要比OK状态优先级高，比如有2个alarm，一个状态是ALARM，一个状态是OK，他们之间的逻辑关系是or，那么这个combination alarm是啥状态呢？答案是ALARM.</li>
+<li>alarms_id: alarm列表</li>
+</ul>
+<p>AlarmTimeConstraint:</p>
+<ul>
+<li>name: name</li>
+<li>description: description</li>
+<li>start: 该参数以cron的格式指定了alarm被检查的开始时间，在程序中，使用<a href="https://pypi.python.org/pypi/croniter/0.3.4" target="_blank" rel="external">croniter</a>这个库来实现cron，格式是：”min hour day month day_of_week”，比如”2 4 mon,fri”，意思是在每周一和周五的04:02开始被检查</li>
+<li>duration: 被检查持续的时间，单位是秒</li>
+<li>timezone: 可以为上面的检查时间指定时区，默认使用的是UTC时间</li>
+</ul>
+<p><strong>举两个例子：</strong></p>
+<ul>
+<li>threshold</li>
+</ul>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"name"</span>: <span class="string">"ThresholdAlarm1"</span>,</span><br><span class="line">    <span class="attr">"type"</span>: <span class="string">"threshold"</span>,</span><br><span class="line">    <span class="attr">"threshold_rule"</span>: &#123;</span><br><span class="line">        <span class="attr">"comparison_operator"</span>: <span class="string">"gt"</span>,</span><br><span class="line">        <span class="attr">"evaluation_periods"</span>: <span class="number">2</span>,</span><br><span class="line">        <span class="attr">"exclude_outliers"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="attr">"meter_name"</span>: <span class="string">"cpu_util"</span>,</span><br><span class="line">        <span class="attr">"period"</span>: <span class="number">600</span>,</span><br><span class="line">        <span class="attr">"query"</span>: [</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="attr">"field"</span>: <span class="string">"resource_id"</span>,</span><br><span class="line">                <span class="attr">"op"</span>: <span class="string">"eq"</span>,</span><br><span class="line">                <span class="attr">"type"</span>: <span class="string">"string"</span>,</span><br><span class="line">                <span class="attr">"value"</span>: <span class="string">"2a4d689b-f0b8-49c1-9eef-87cae58d80db"</span></span><br><span class="line">            &#125;</span><br><span class="line">        ],</span><br><span class="line">        <span class="attr">"statistic"</span>: <span class="string">"avg"</span>,</span><br><span class="line">        <span class="attr">"threshold"</span>: <span class="number">70.0</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">"alarm_actions"</span>: [</span><br><span class="line">        <span class="string">"http://site:8000/alarm"</span></span><br><span class="line">    ],</span><br><span class="line">    <span class="attr">"insufficient_data_actions"</span>: [</span><br><span class="line">        <span class="string">"http://site:8000/nodata"</span></span><br><span class="line">    ],</span><br><span class="line">    <span class="attr">"ok_actions"</span>: [</span><br><span class="line">        <span class="string">"http://site:8000/ok"</span></span><br><span class="line">    ],</span><br><span class="line">    <span class="attr">"repeat_actions"</span>: <span class="literal">false</span>,</span><br><span class="line">    <span class="attr">"time_constraints"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"description"</span>: <span class="string">"nightly build every night at 23h for 3 hours"</span>,</span><br><span class="line">            <span class="attr">"duration"</span>: <span class="number">10800</span>,</span><br><span class="line">            <span class="attr">"name"</span>: <span class="string">"SampleConstraint"</span>,</span><br><span class="line">            <span class="attr">"start"</span>: <span class="string">"0 23 * * *"</span>,</span><br><span class="line">            <span class="attr">"timezone"</span>: <span class="string">"Europe/Ljubljana"</span></span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>combination</li>
+</ul>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"name"</span>: <span class="string">"CombinationAlarm1"</span>,</span><br><span class="line">    <span class="attr">"type"</span>: <span class="string">"combination"</span>,</span><br><span class="line">    <span class="attr">"combination_rule"</span>: &#123;</span><br><span class="line">        <span class="attr">"alarm_ids"</span>: [</span><br><span class="line">            <span class="string">"739e99cb-c2ec-4718-b900-332502355f38"</span>,</span><br><span class="line">            <span class="string">"153462d0-a9b8-4b5b-8175-9e4b05e9b856"</span></span><br><span class="line">        ],</span><br><span class="line">        <span class="attr">"operator"</span>: <span class="string">"or"</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">"alarm_actions"</span>: [</span><br><span class="line">        <span class="string">"http://site:8000/alarm"</span></span><br><span class="line">    ],</span><br><span class="line">    <span class="attr">"insufficient_data_actions"</span>: [</span><br><span class="line">        <span class="string">"http://site:8000/nodata"</span></span><br><span class="line">    ],</span><br><span class="line">    <span class="attr">"ok_actions"</span>: [</span><br><span class="line">        <span class="string">"http://site:8000/ok"</span></span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>GET /v2/alarms/{alarm_id}/history</li>
+</ol>
+<p>这个接口用来查询某个alarm发生的历史事件，记录的事件有：alarm被创建，alarm被更新，alarm被删除，alarm的状态被更新。</p>
+<p>举个例子，比如我创建了一个alarm，然后又删除了，调用这个接口返回的结果是：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="attr">"on_behalf_of"</span>: <span class="string">"2c35166baba84f46b1c5b093f02747fa"</span>,</span><br><span class="line">        <span class="attr">"user_id"</span>: <span class="string">"778a4ae5d8904a41b00c4e0f5734bcfd"</span>,</span><br><span class="line">        <span class="attr">"event_id"</span>: <span class="string">"dc5583ac-7ac8-4f4e-b8f7-edaa04522945"</span>,</span><br><span class="line">        <span class="attr">"timestamp"</span>: <span class="string">"2014-07-26T16:50:59.387923"</span>,</span><br><span class="line">        <span class="attr">"detail"</span>: <span class="string">"xxx"</span>,</span><br><span class="line">        <span class="attr">"alarm_id"</span>: <span class="string">"697a05df-d704-46a4-a0bd-1591c6588a17"</span>,</span><br><span class="line">        <span class="attr">"project_id"</span>: <span class="string">"2c35166baba84f46b1c5b093f02747fa"</span>,</span><br><span class="line">        <span class="attr">"type"</span>: <span class="string">"deletion"</span></span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="attr">"on_behalf_of"</span>: <span class="string">"2c35166baba84f46b1c5b093f02747fa"</span>,</span><br><span class="line">        <span class="attr">"user_id"</span>: <span class="string">"778a4ae5d8904a41b00c4e0f5734bcfd"</span>,</span><br><span class="line">        <span class="attr">"event_id"</span>: <span class="string">"d09fe2c3-37a8-4b19-9729-ccb2664a1116"</span>,</span><br><span class="line">        <span class="attr">"timestamp"</span>: <span class="string">"2014-07-26T16:50:27.315824"</span>,</span><br><span class="line">        <span class="attr">"detail"</span>: <span class="string">"xxx"</span>,</span><br><span class="line">        <span class="attr">"alarm_id"</span>: <span class="string">"697a05df-d704-46a4-a0bd-1591c6588a17"</span>,</span><br><span class="line">        <span class="attr">"project_id"</span>: <span class="string">"2c35166baba84f46b1c5b093f02747fa"</span>,</span><br><span class="line">        <span class="attr">"type"</span>: <span class="string">"creation"</span></span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>Alarm还有其它一些接口，这里就不说了，更多见<a href="http://docs.openstack.org/developer/ceilometer/webapi/v2.html#alarms" target="_blank" rel="external">alarm-api</a>文档。</p>
+<h5 id="实现篇"><a href="#实现篇" class="headerlink" title="实现篇"></a>实现篇</h5><p>对于Alarm的实现，值得一说的就是Alarm的分布式实现，也就是文章的标题，Distributed Alarm。Ceilometer提供了两种方式的Alarm服务，一种是单进程的(SingletonAlarmService)，一种是分布式的(PartitionedAlarmService)，可以通过evaluation_service这个配置项进行配置。</p>
+<p>前者没啥可说的，就是在一个进程中去检查所有的alarm，这种方式主要的缺点是处理能力弱，当量稍微大的时候，就会有延时，而且也没法做高可用，当他挂掉之后，alarm整个service就挂掉了，所以不推荐在生产环境中使用这个SingletonAlarmService的方式。</p>
+<p>对于PartitionedAlarmService，它通过rpc实现了一套多个evaluator进程之间的协作协议(PartitionCoordinator)，使得可以通过水平扩展来不断增大alarm service的处理能力，这样不仅实现了一个简单的负载均衡，还实现了高可用。下面我们就重点来说一下PartitionCoordinator这个协议。</p>
+<p>PartitionCoordinator允许启动多个ceilometer-alarm-evaluator进程，这多个进程之间的关系是互相协作的关系，他们中最早启动的进程会被选为master进程，master进程主要做的事情就是给其他进程分配alarm，每个进程都在周期性的执行三个任务：</p>
+<ul>
+<li>通过rpc，向其它进程广播自己的状态，来告知其他进程，我是活着的，每个进程中都保存有其他进程的最后活跃时间。</li>
+<li>争抢master，每个进程都会不断的更新自己所维护的其它进程的状态列表，根据这个状态列表，来判断是否应该由自己来当master，判断一个进程是否是master的条件只有一个，那就是看谁启动的早。</li>
+<li>检查本进程负责的alarm，会去调用ceilometer的api，来获取该alarm的监控指标对应的监控数据，然后进行判断，发送报警等。</li>
+</ul>
+<p>进程之间的关系可参看下图：<br><img src="/images/openstack-telemetry-8.png" alt="image-20200907222228376"></p>
+<p>当一个进程被确定为master之后，如果它不挂掉，那么它的master是不会被抢走的，该进程就会一直在履行master的职责：</p>
+<ul>
+<li>当有新的alarm被创建时，master会将这些新创建的alarm平均的分配给其它worker进程，如果不能平均分配的，剩下的零头就由master自己来负责</li>
+<li>当有新的evaluator进程添加进来，或者是现有的evaluator进程被kill掉，那么master就会重新洗牌一次，把所有的alarm再平均的分配给现有的evaluator进程</li>
+<li>当master挂掉咋办呢？那么就会由第二个最早启动的进程接替master的位置，然后重新洗牌</li>
+</ul>
+<p>通过这个协议，就实现了一个简单的分布式alarm服务，其中的进程之间的相互协调，master的选举都值得去学习。</p>
+<h5 id="问题篇"><a href="#问题篇" class="headerlink" title="问题篇"></a>问题篇</h5><ol>
+<li>目前有一个比较纠结的问题就是alarm和ceilometer的关系，虽然alarm的代码写在ceilometer的代码树中，其实，他们两个并没有紧密的关系，alarm是ceilometer api的消费者，把他们两个分开也是完全可以的，之前，在邮件列表中对这个问题有过讨论，感兴趣的可以自己搜索一下。</li>
+<li>目前alarm是ceilometer api的消费者，每个alarm被检查的时间间隔是60s，当alarm数量很多的时候，会给api造成比较大的压力，所以有人提议让alarm直接访问数据库<a href="https://blueprints.launchpad.net/ceilometer/+spec/improve-alarm-evaluation" target="_blank" rel="external">[bp]</a>，但是由于上面的问题没有解决，这个问题也不好解决。</li>
+<li>目前，有的使用ceilometer作为billing服务，但是alarm和billing使用的同一个数据库，这无形中有了一些安全隐患，而且alarm和billing这两个对数据的时效性要求还不一样，alarm可能只需要最近一段时间的数据，而billing则要求数据保持较长的时间，所以这导致db-ttl也比较难做。可以参看这篇<a href="http://techs.enovance.com/5991/autoscaling-with-heat-and-ceilometer" target="_blank" rel="external">博文</a>，相关改进<a href="https://blueprints.launchpad.net/ceilometer/+spec/dedicated-alarm-database" target="_blank" rel="external">BP</a>。</li>
+<li>目前,alarm还没有quota限制，比较尴尬诶。</li>
+</ol>
+<h5 id="总结篇"><a href="#总结篇" class="headerlink" title="总结篇"></a>总结篇</h5><p>本文从三个方面大概描述了一下Ceilometer Alarm功能，功能篇主要从API入手，介绍Alarm都提供了哪些细枝末节的参数，实现篇主要描述了分布式Alarm协议的原理，很值得学习，问题篇其实没什么大问题，现在的alarm功能还是比较稳定的。</p>
+<h5 id="相关链接"><a href="#相关链接" class="headerlink" title="相关链接"></a>相关链接</h5><ul>
+<li><a href="https://review.openstack.org/#/c/89756/" target="_blank" rel="external">https://review.openstack.org/#/c/89756/</a></li>
+<li><a href="https://review.openstack.org/#/c/95418/" target="_blank" rel="external">https://review.openstack.org/#/c/95418/</a></li>
+<li><a href="https://etherpad.openstack.org/p/ceilometer-alarm-and-log-improvments" target="_blank" rel="external">https://etherpad.openstack.org/p/ceilometer-alarm-and-log-improvments</a></li>
+<li><a href="https://wiki.openstack.org/w/images/c/ca/Alarm_structure.gif" target="_blank" rel="external">https://wiki.openstack.org/w/images/c/ca/Alarm_structure.gif</a></li>
+<li><a href="https://blueprints.launchpad.net/ceilometer/+spec/dedicated-alarm-database" target="_blank" rel="external">https://blueprints.launchpad.net/ceilometer/+spec/dedicated-alarm-database</a></li>
+<li><a href="https://blueprints.launchpad.net/ceilometer/+spec/alarm-on-notification" target="_blank" rel="external">https://blueprints.launchpad.net/ceilometer/+spec/alarm-on-notification</a></li>
+<li><a href="https://blueprints.launchpad.net/ceilometer/+spec/quotas-on-alarms" target="_blank" rel="external">https://blueprints.launchpad.net/ceilometer/+spec/quotas-on-alarms</a></li>
+<li><a href="https://blueprints.launchpad.net/ceilometer/+spec/alarming-logical-combination" target="_blank" rel="external">https://blueprints.launchpad.net/ceilometer/+spec/alarming-logical-combination</a></li>
+<li><a href="http://techs.enovance.com/5991/autoscaling-with-heat-and-ceilometer" target="_blank" rel="external">http://techs.enovance.com/5991/autoscaling-with-heat-and-ceilometer</a></li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+<blockquote class="blockquote-center" style="color: #ccc;">
+    -------------本文结束 <i class="fa fa-apple"></i> 感谢您的阅读-------------
+</blockquote>
+
+  <span id="inline-green" style="border-radius:3px;">作者</span>：<a class="link-blue" href="https://github.com/magiceses" target="_blank">Magiceses</a><br/>有问题请 <a class="link-blue" href="https://magiceses.github.io/guestbook" target="_blank">留言</a> 或者私信我的 <a class="link-blue" href="https://weibo.com/u/3069595351" target="_blank">微博</a>。
+
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>满分是10分的话，这篇文章你给几分</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/reward/reward_wechat.png" alt="magiceses WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/reward/reward_alipay.png" alt="magiceses Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Openstack/" rel="tag"><i class="fa fa-tag"></i> Openstack</a>
+          
+            <a href="/tags/Telemetry/" rel="tag"><i class="fa fa-tag"></i> Telemetry</a>
+          
+            <a href="/tags/Ceilometer/" rel="tag"><i class="fa fa-tag"></i> Ceilometer</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/04/openstack-telemetry-ceilometerclient分析/" rel="next" title="CeilometerClient源码学习记录">
+                <i class="fa fa-chevron-left"></i> CeilometerClient源码学习记录
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/11/11/prometheus-operator-学习总结/" rel="prev" title="Prometheus-Operator 学习总结">
+                Prometheus-Operator 学习总结 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar/avatar.png"
+               alt="magiceses" />
+          <p class="site-author-name" itemprop="name">magiceses</p>
+          <p class="site-description motion-element" itemprop="description">Stay Hungry,Stay Foolish</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">61</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/magiceses" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://blog.csdn.net/weixin_43700106" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-chrome"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/weblog" title="建站日志" target="_blank">建站日志</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/reward" title="打赏" target="_blank">打赏</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Ceilometer-Alarm-API-参数详解"><span class="nav-number">1.</span> <span class="nav-text">Ceilometer Alarm API 参数详解</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#功能篇"><span class="nav-number">1.0.0.0.1.</span> <span class="nav-text">功能篇</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#实现篇"><span class="nav-number">1.0.0.0.2.</span> <span class="nav-text">实现篇</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#问题篇"><span class="nav-number">1.0.0.0.3.</span> <span class="nav-text">问题篇</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#总结篇"><span class="nav-number">1.0.0.0.4.</span> <span class="nav-text">总结篇</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#相关链接"><span class="nav-number">1.0.0.0.5.</span> <span class="nav-text">相关链接</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+      
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="busuanzi-count">
+
+  <!-- <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script> -->
+  <!-- 上面这个是之前的，不知道为什么失效了，改成下面这个 -->
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">您是第<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>个小伙伴</span>
+  
+
+  
+    <span class="site-pv">本站总浏览<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">magiceses</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Pisces
+  </a>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count" style="color: #e90f92;">全站共 1m 字</span>
+</div>
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+  <!-- 按需加载背景 -->
+  <!-- 背景动画 -->
+<script type="text/javascript">
+  // 按需加载背景
+  // 如果是all，就直接加载了
+  if("pc" == "all") {
+    $.getScript("/js/src/particle.js?v=5.0.1");
+  }
+  // 识别手机或电脑的js开始
+  (function(){
+    var res = GetRequest();
+    var par = res['index'];
+    if(par!='gfan'){
+      var ua=navigator.userAgent.toLowerCase();
+      var contains=function (a, b){
+          if(a.indexOf(b)!=-1){return true;}
+      };
+      if((contains(ua,"android") && contains(ua,"mobile"))||(contains(ua,"android") && contains(ua,"mozilla"))||(contains(ua,"android") && contains(ua,"opera"))||contains(ua,"ucweb7")||contains(ua,"iphone")){
+        return false;
+      } else {
+        $.getScript("/js/src/particle.js?v=5.0.1");
+      }
+    }
+  })();
+  function GetRequest() {
+    var url = location.search;
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+      var str = url.substr(1);
+      strs = str.split("&");
+      for(var i = 0; i < strs.length; i ++) {
+        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+      }
+    }
+    return theRequest;
+  }
+</script>
+<!-- 识别手机或电脑的js结束 -->  
+
+  <!-- 页面点击小红心 -->
+  <!-- 页面点击小红心 -->
+
+  <script type="text/javascript" src="/js/src/love.js?v=5.0.1"></script>
+
+
+  <!-- 鼠标移动，效果 -->
+  <!-- 鼠标移动特效 -->
+
+  <script type="text/javascript" src="/js/src/jquery-stars.js?v=5.0.1"></script>
+  <script type="text/javascript">
+  jQuery('body').jstars({
+  	image_path: '/images',
+  	image: 'candy-cane-stars.png',
+  	style: 'white',
+  	width: 34,
+  	height: 34,
+  	delay: 700,
+  	frequency: 5
+  });
+  </script>
+
+
+  <!-- 页面 title 进入/离开 效果 -->
+
+  <script type="text/javascript">var OriginTitile=document.title,st;document.addEventListener("visibilitychange",function(){document.hidden?(document.title="Waiting for you back！",clearTimeout(st)):(document.title="Thanks for visit~ "+OriginTitile,st=setTimeout(function(){document.title=OriginTitile},4e3))})</script>
+
+
+</body>
+</html>

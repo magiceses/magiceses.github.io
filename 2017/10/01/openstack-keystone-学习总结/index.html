@@ -1,0 +1,1592 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Courier New:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Openstack,Keystone," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="天青色等烟雨" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="有人在奔跑，有人在睡觉，有人在感恩，有人在报怨，有目标的睡不着，没目标的人睡不醒，努力才是人生的应有态度，睁开眼就是新的开始。
+
+在了解 keystone 之前，我们来简单介绍下用户身份校验大概有几种方式
+广义认证方式简介广义上讲，用户身份认证并不仅限于领域。广义上的身份识别技术有如下几种：静态密码、动态密码（短信密码、动态口令牌）、令牌、USB KEY、数字证书、生物识别技术。
+在以上几种认证方">
+<meta property="og:type" content="article">
+<meta property="og:title" content="openstack之keystone学习总结">
+<meta property="og:url" content="https://magiceses.github.io/2017/10/01/openstack-keystone-学习总结/index.html">
+<meta property="og:site_name" content="天青色等烟雨">
+<meta property="og:description" content="有人在奔跑，有人在睡觉，有人在感恩，有人在报怨，有目标的睡不着，没目标的人睡不醒，努力才是人生的应有态度，睁开眼就是新的开始。
+
+在了解 keystone 之前，我们来简单介绍下用户身份校验大概有几种方式
+广义认证方式简介广义上讲，用户身份认证并不仅限于领域。广义上的身份识别技术有如下几种：静态密码、动态密码（短信密码、动态口令牌）、令牌、USB KEY、数字证书、生物识别技术。
+在以上几种认证方">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-1.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-2.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-3.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-4.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-5.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-6.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-7.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-8.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-9.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-10.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-11.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-12.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-13.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-14.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-15.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-16.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-17.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-18.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-19.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-20.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-21.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-22.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-23.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-24.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-25.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-26.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-27.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-keystone-28.png">
+<meta property="og:updated_time" content="2021-10-13T12:29:44.234Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="openstack之keystone学习总结">
+<meta name="twitter:description" content="有人在奔跑，有人在睡觉，有人在感恩，有人在报怨，有目标的睡不着，没目标的人睡不醒，努力才是人生的应有态度，睁开眼就是新的开始。
+
+在了解 keystone 之前，我们来简单介绍下用户身份校验大概有几种方式
+广义认证方式简介广义上讲，用户身份认证并不仅限于领域。广义上的身份识别技术有如下几种：静态密码、动态密码（短信密码、动态口令牌）、令牌、USB KEY、数字证书、生物识别技术。
+在以上几种认证方">
+<meta name="twitter:image" content="https://magiceses.github.io/images/openstack-keystone-1.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://magiceses.github.io/2017/10/01/openstack-keystone-学习总结/"/>
+
+
+<!-- 网页加载条 -->
+<script src="/js/src/pace.min.js"></script>
+  <title> openstack之keystone学习总结 | 天青色等烟雨 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">天青色等烟雨</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">而我在等你</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-guestbook">
+          <a href="/guestbook" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-commenting"></i> <br />
+            
+            留言
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+      
+      
+        <li class="menu-item"> <a title="把这个链接拖到你的工具栏中,任何网页都可以High" href='javascript:(
+/*
+ * Copyright (C) 2016 Never_yu (Neveryu.github.io) <React.dong.yu@gmail.com>
+ * Sina Weibo (http://weibo.com/Neveryu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function go() {
+
+var songs = [
+  "http://dl.stream.qqmusic.qq.com/C400001Qu4I30eVFYb.m4a?vkey=2127178E4405E7B8B268F20F05232485735CCF4FF8C1432F0360D2626D0B6C9564B5627C7AB481BBC685FEDB0946A50E97C66F0D1B008226&guid=7175649092&uin=0&fromtag=66",
+  "",
+  "",
+  ""
+];
+
+function c() {
+  var e = document.createElement("link");
+  e.setAttribute("type", "text/css");
+  e.setAttribute("rel", "stylesheet");
+  e.setAttribute("href", f);
+  e.setAttribute("class", l);
+  document.body.appendChild(e)
+}
+
+function h() {
+  var e = document.getElementsByClassName(l);
+  for (var t = 0; t < e.length; t++) {
+    document.body.removeChild(e[t])
+  }
+}
+
+function p() {
+  var e = document.createElement("div");
+  e.setAttribute("class", a);
+  document.body.appendChild(e);
+  setTimeout(function() {
+    document.body.removeChild(e)
+  }, 100)
+}
+
+function d(e) {
+  return {
+    height : e.offsetHeight,
+    width : e.offsetWidth
+  }
+}
+
+function v(i) {
+  var s = d(i);
+  return s.height > e && s.height < n && s.width > t && s.width < r
+}
+
+function m(e) {
+  var t = e;
+  var n = 0;
+  while (!!t) {
+    n += t.offsetTop;
+    t = t.offsetParent
+  }
+  return n
+}
+
+function g() {
+  var e = document.documentElement;
+  if (!!window.innerWidth) {
+    return window.innerHeight
+  } else if (e && !isNaN(e.clientHeight)) {
+    return e.clientHeight
+  }
+  return 0
+}
+
+function y() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  }
+  return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+}
+
+function E(e) {
+  var t = m(e);
+  return t >= w && t <= b + w
+}
+
+function S() {
+  var e = document.getElementById("audio_element_id");
+  if(e != null){
+    var index = parseInt(e.getAttribute("curSongIndex"));
+    if(index > songs.length - 2) {
+      index = 0;
+    } else {
+      index++;
+    }
+    e.setAttribute("curSongIndex", index);
+    N();
+  }
+
+  e.src = i;
+  e.play()
+}
+
+function x(e) {
+  e.className += " " + s + " " + o
+}
+
+function T(e) {
+  e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+}
+
+function N() {
+  var e = document.getElementsByClassName(s);
+  var t = new RegExp("\\b" + s + "\\b");
+  for (var n = 0; n < e.length; ) {
+    e[n].className = e[n].className.replace(t, "")
+  }
+}
+
+function initAudioEle() {
+  var e = document.getElementById("audio_element_id");
+  if(e === null){
+    e = document.createElement("audio");
+    e.setAttribute("class", l);
+    e.setAttribute("curSongIndex", 0);
+    e.id = "audio_element_id";
+    e.loop = false;
+    e.bgcolor = 0;
+    e.addEventListener("canplay", function() {
+      setTimeout(function() {
+        x(k)
+      }, 500);
+      setTimeout(function() {
+        N();
+        p();
+        for (var e = 0; e < O.length; e++) {
+          T(O[e])
+        }
+      }, 15500)
+    }, true);
+    e.addEventListener("ended", function() {
+      N();
+      h();
+      go();
+    }, true);
+    e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+    document.body.appendChild(e);
+  }
+}
+
+initAudioEle();
+var e = 30;
+var t = 30;
+var n = 350;
+var r = 350;
+
+var curSongIndex = parseInt(document.getElementById("audio_element_id").getAttribute("curSongIndex"));
+var i = songs[curSongIndex];
+
+var s = "mw-harlem_shake_me";
+var o = "im_first";
+var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+var a = "mw-strobe_light";
+
+/* harlem-shake-style.css，替换成你的位置，也可以直接使用：//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css */
+var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+
+var l = "mw_added_css";
+var b = g();
+var w = y();
+var C = document.getElementsByTagName("*");
+var k = null;
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    if (E(A)) {
+      k = A;
+      break
+    }
+  }
+}
+if (A === null) {
+  console.warn("Could not find a node of the right size. Please try a different page.");
+  return
+}
+c();
+S();
+var O = [];
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    O.push(A)
+  }
+}
+})()'><i class="menu-item-icon fa fa-music fa-fw"></i> High一下</a></li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search fa-lg"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                openstack之keystone学习总结
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-10-01T23:25:24+08:00" content="2017-10-01">
+              2017-10-01
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Openstack/" itemprop="url" rel="index">
+                    <span itemprop="name">Openstack</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv">热度
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p id="div-border-top-green">有人在奔跑，有人在睡觉，有人在感恩，有人在报怨，有目标的睡不着，没目标的人睡不醒，努力才是人生的应有态度，睁开眼就是新的开始。<br></p>
+
+<p>在了解 keystone 之前，我们来简单介绍下用户身份校验大概有几种方式</p>
+<h2 id="广义认证方式简介"><a href="#广义认证方式简介" class="headerlink" title="广义认证方式简介"></a>广义认证方式简介</h2><p>广义上讲，用户身份认证并不仅限于领域。广义上的身份识别技术有如下几种：静态密码、动态密码（短信密码、动态口令牌）、令牌、USB KEY、数字证书、生物识别技术。</p>
+<p>在以上几种认证方式中，我们IT人员在数据中心通常能够遇到的是：静态密码、动态口令牌、数字证书、令牌认证（token）。</p>
+<a id="more"></a>
+<h3 id="静态密码"><a href="#静态密码" class="headerlink" title="静态密码"></a>静态密码</h3><p>在四种认证方式中，最常见的就是静态密码。如果要加强动态密码的安全性，通常是通过增加密码的复杂度，设置密码过期时间的方法。大多数linux操作系统默认也是禁止root用户的ssh或telnet权限的。</p>
+<p>如下图，在Linux中设置密码策略（/etc/login.defs）</p>
+<p><img src="/images/openstack-keystone-1.png" alt="image-20200823150021719"></p>
+<h3 id="动态口令牌"><a href="#动态口令牌" class="headerlink" title="动态口令牌"></a>动态口令牌</h3><p>动态口令牌也是一种认证方式，如最著名的RSA就是一种，通过输入个人的PIN Code，生成随机密码。</p>
+<h3 id="数字证书"><a href="#数字证书" class="headerlink" title="数字证书"></a>数字证书</h3><p>数字证书认证方式也是我们常见的。“数字证书就是互联网通讯中标志通讯各方身份信息的一串数字，提供了一种在Internet上验证通信实体身份的方式，数字证书不是数字身份证，而是身份认证机构盖在数字身份证上的一个章或印（或者说加在数字身份证上的一个签名）。它是由权威机构——CA机构，又称为证书授权（CertificateAuthority）中心发行的，人们可以在网上用它来识别对方的身份。”</p>
+<p>如果想了解证书认证，就需要了解两种加密方式：</p>
+<p>对称加密和非对称加密。对称加密是最快速、最简单的一种加密方式，加密（encryption）与解密（decryption）用的是同样的密钥（secret key）。对称加密有很多种算法，由于它效率很高，所以被广泛使用在很多加密协议的核心当中。</p>
+<p><img src="/images/openstack-keystone-2.png" alt="image-20200823150235255"></p>
+<p>非对称加密为数据的加密与解密提供了一个非常安全的方法，它使用了一对密钥，公钥（public key）和私钥（private key）。私钥只能由一方安全保管，不能外泄，而公钥则可以发给任何请求它的人。</p>
+<p><img src="/images/openstack-keystone-3.png" alt="image-20200823150252496"></p>
+<p>我们经常用到的ssh就是非对称加密。</p>
+<p>本小节提到的数字证书（又称数字签名）通常是基于对称对加密的。由此，我们引入一个新的名词，CA。</p>
+<p>数字证书认证中心（CertficateAuthority,CA）是整个网上电子交易安全的关键环节。它主要负责产生、分配并管理所有参与网上交易的实体所需的身份认证数字证书。每一份数字证书都与上一级的数字签名证书相关联，最终通过安全链追溯到一个已知的并被广泛认为是安全、权威、足以信赖的机构。CA必须是各行业各部门及公众共同信任的、认可的、权威的、不参与交易的第三方网上身份认证机构。</p>
+<p>CA服务器可以是第三方权威机构的，也可以是企业内部自行搭建的。比如：VeriSign公司，就是著名的CA权威机构。另外一个著名的证书认证机构就是—微软，通过Windows AD域实现。AD的功能十分强大，有三个功能：AD = Ldap + kerberos + CA。</p>
+<p>如果一个企业的证书，想被权威机构认证，是需要支付一定费用的。被认证的好处是，当客户通过网页访问该金融机构时，该网址是可信的。否则，在互联网应用中，如何确认彼此的身份？</p>
+<p><img src="/images/openstack-keystone-4.png" alt="image-20200823150407445"></p>
+<p>在数据中心内部，我们通常采取自签名的方式，也就是自己认证自己。</p>
+<p>数字证书的颁发原理：</p>
+<p>用户首先产生自己的密钥对，并将公共密钥及部分个人身份信息传送给认证中心。认证中心在核实身份后，将执行一些必要的步骤，以确信请求确实由用户发送而来，然后，认证中心将发给用户一个数字证书，该证书内包含用户的个人信息和他的公钥信息，同时还附有认证中心的签名信息。用户就可以使用自己的数字证书进行相关的各种活动。同时，这个被认证中心认证的公钥信息，通常被主流浏览器默认加载，这样一般客户上网访问这个网址的时候，就不会被提示为不被信任的网站。</p>
+<p>我们可以查看IE默认信任的证书：</p>
+<p><img src="/images/openstack-keystone-5.png" alt="image-20200823150454674"></p>
+<p>所以从中我们也可以看出，正是由于微软在操作系统领域中占有垄断地位，因此，在浏览器市场也处于垄断地位。与浏览器先关的互联网应用，想被认证，就必须要得到IE的认可。</p>
+<p>新装好的vcenter，我们通过webclient访问：</p>
+<p><img src="/images/openstack-keystone-6.png" alt="image-20200823150515354"></p>
+<p>如果想继续访问，我们必须要选择添加例外，然后获取证书，再确认安全例外：</p>
+<p><img src="/images/openstack-keystone-7.png" alt="image-20200823150533935"></p>
+<p>这个过程，实际上我们就把vcenter的根证书下载到本地，并装在到浏览器中，然后，就可以正常访问了：</p>
+<p><img src="/images/openstack-keystone-8.png" alt="image-20200823150552813"></p>
+<p>而在这个过程中，我们导入的就是VC的公钥。</p>
+<p>谈到这个问题，我举个很有意思的例子：大家一定有过通过12306网站买票的经历，那么下面的图片就一定不会陌生：</p>
+<p><img src="/images/openstack-keystone-9.png" alt="image-20200823150611428"></p>
+<p>首页提示“为了保障您的顺畅购票，请下载安装根证书”。</p>
+<p>然后，我们会点击安装：</p>
+<p><img src="/images/openstack-keystone-10.png" alt="image-20200823150626637"></p>
+<p>然后导入证书：</p>
+<p><img src="/images/openstack-keystone-11.png" alt="image-20200823150647555"></p>
+<p>那么大家有没有想过，为什么访问12306需要倒入其根证书，而访问ICBC的网页不会呢？</p>
+<p>原因就在于，12306的根证书没有被CA权威机构所认证，当用户通过终端访问该网站时，如果不倒入该证书，那么这个网站将会被标示成不被信任的网站。</p>
+<p>而对于金融机构的网站，如果被标示该网址不会信任，请问大家还敢访问并进行金融交易么？</p>
+<h3 id="令牌认证"><a href="#令牌认证" class="headerlink" title="令牌认证"></a>令牌认证</h3><p>令牌是一种能够控制站点占有媒体的特殊帧，以区别数据帧及其他控制帧。token其实说的更通俗点可以叫暗号，在一些数据传输之前，要先进行暗号的核对，不同的暗号被授权不同的数据操作。</p>
+<p>接下来，我看看看Openstack的内部组件的认证方式。</p>
+<p>先看一下OpenStack的架构：</p>
+<p><img src="/images/openstack-keystone-12.png" alt="image-20200823150823335"></p>
+<p>在这个架构中“keystone”就是负责用户认证的。可以说是Openstack的灵魂。手工用命令行安装过openstack组件（不是用packstack自动应答脚本）的朋友一定知道：在安装单独安装openstack所有组件的时候，都需keystone创建对应组件的用户，每个模块都必须与keystone进行通讯。</p>
+<p>例如，安装openstack中neutron的部分步骤如下：</p>
+<p><em>keystone user-create –name neutron –pass xxxx</em></p>
+<p><em>keystone user-role-add –user neutron –role admin–tenant services</em></p>
+<p><em>yum install openvswitch openstack-neutronopenstack-neutron-ml2 openstack-neutron-openvswitch</em></p>
+<p><strong>Openstack每个组件的认证，默认是通过token认证的（当然也可以通过密码）</strong>。因此，手工安装keystone的步骤中，会有这么一步：</p>
+<p><em>export SERVICE_TOKEN=$(openssl rand -hex 10)</em></p>
+<p><em>exportSERVICE_ENDPOINT=<a href="http://${HOSTNAME}:35357/v2.0" target="_blank" rel="external">http://${HOSTNAME}:35357/v2.0</a></em></p>
+<p><em>echo$SERVICE_TOKEN &gt; /root/ks_admin_token</em></p>
+<p><em># cat /root/ks_admin_token</em></p>
+<p><em>6f438ff88435dab284a9</em></p>
+<p>而“6f438ff88435dab284a9“这串数字，实际上就是token，它用于认证admin用户。我们可以把它添加到keystonerc_admin配置文件中，这样我们souce这个配置文件，就可以访问keystone的服务了：</p>
+<p><em>source /root/keystonerc_admin</em></p>
+<p>在openstack中，还有一个非常重要的概念：AMQP, AdvancedMessageQueuingProtocol,即高级消息队列协议.Openstack各个组件之间的通讯，是通过AMQP实现的。这样做的好处，可以使各个组件之间是松耦合的关系。比如说，搭建一个openstack，只搭建必要的keystone，nova等，不搭建swift，这是没问题的。</p>
+<p>而AMQP与各个组件（各个组件作为AMQP的client），之间的认证，是通过CA进行认证的，也就是自签名认证。目前AMQP使用的数据库是rabbit MQ，下面截取部分命令：</p>
+<p>产生证书数据库（AMQP Server）：</p>
+<p><em># certutil -N -d/etc/pki/tls/qpid/ -f /etc/qpid/qpid.pass</em></p>
+<p><em># certutil -S -d /etc/pki/tls/qpid/ -n $HOSTNAME -s”CN=$HOSTNAME” -t “CT,,” -x -f /etc/qpid/qpid.pass -z/usr/bin/certutil</em></p>
+<p><em>S:签发证书 -d 证书文件目录</em></p>
+<p><em>-s subject -t 设置信任证书的属性</em></p>
+<p><em>-x 自签发证书</em></p>
+<p>下面几条命令是获取CA配置文件并进行签名：</p>
+<p><em>#wget openssl.cnf ## CA configrationfile</em></p>
+<p><em>#openssl req -x509 -config openssl.cnf -newkey rsa:2048-days 365 -out cacert.pem -outform PEM -subj /CN=MyTestCA/ -nodes ## CA ‘spublic key and private key</em></p>
+<p><em>#openssl x509 -in cacert.pem -out cacert.cer -outformDER</em></p>
+<p>该证书被签发以后，就可以分发给AMQP client，用于组件之间的通讯了。</p>
+<h2 id="Keystone-简介"><a href="#Keystone-简介" class="headerlink" title="Keystone 简介"></a>Keystone 简介</h2><h3 id="Keystone-基本概念和理解"><a href="#Keystone-基本概念和理解" class="headerlink" title="Keystone 基本概念和理解"></a>Keystone 基本概念和理解</h3><p>Keystone（OpenStack Identity Service）是 OpenStack 框架中负责管理身份验证、服务访问规则和服务令牌功能的组件。用户访问资源需要验证用户的身份与权限，服务执行操作也需要进行权限检测，这些都需要通过 Keystone 来处理。Keystone 类似一个服务总线， 或者说是整个 Openstack 框架的注册表，OpenStack 服务通过 Keystone 来注册其 Endpoint（服务访问的URL），任何服务之间的相互调用，都需要先经过 Keystone 的身份验证，获得目标服务的 Endpoint ，然后再调用。</p>
+<p>Keystone 的主要功能如下：</p>
+<ul>
+<li>管理用户及其权限；</li>
+<li>维护 OpenStack 服务的 Endpoint；</li>
+<li>Authentication（认证）和 Authorization（鉴权）</li>
+</ul>
+<p>keystone的相关概念可以以一个城市的酒店服务来举例说明：</p>
+<p>​    酒店就类似于project项目，酒店提供住宿的服务service，user相当于客人，endpoint相当于客人住酒店时的询问的酒店的地址，role为角色，如客人定了个豪华套房，name他就是贵宾，定了标间，他就是普通客人，credentials相当于入住酒店时提供的身份证，酒店前台利用身份证获取身份信息并提供房间，这个过程相当于authentication，办理入住后拿到的房卡相当于token，利用token就可以刷开房间门进行住宿这项service。</p>
+<p>先看下 keystone 在 openstack 中基本位置，以创建虚拟机为例：</p>
+<p><img src="/images/openstack-keystone-13.png" alt="image-20200822232009075"></p>
+<p>Keystone 的结构如下：</p>
+<p><img src="/images/openstack-keystone-14.png" alt="image-20200822220154883"></p>
+<p>学习之前，我们先理解一下下面的几个概念：</p>
+<p><strong>1. User</strong></p>
+<p>User 指代任何使用 OpenStack 的实体，可以是真正的用户，其他系统或者服务。当 User 请求访问 OpenStack 时，Keystone 会对其进行验证。</p>
+<p>Horizon 在 “身份管理-&gt;用户” 管理 User：</p>
+<p>​    admin：openstack平台的超级管理员，负责openstack服务的管理和访问权限</p>
+<p>除了 admin 和 demo，OpenStack 也为 nova、cinder、glance、neutron 等服务创建了相应的 User。 admin 也可以管理这些 User。</p>
+<p><strong>2. Credentials</strong></p>
+<p>Credentials 是 User 用来证明自己身份的信息，可以是：</p>
+<p>用户名/密码</p>
+<p>Token</p>
+<p>API Key</p>
+<p>其他高级方式</p>
+<p><strong>3. Authentication</strong></p>
+<p>Authentication 是 Keystone 验证 User 身份的过程。User 访问 OpenStack 时向 Keystone 提交用户名和密码形式的 Credentials，Keystone 验证通过后会给 User 签发一个 Token 作为后续访问的 Credential。</p>
+<p><strong>4. Token</strong></p>
+<p>Token 是由数字和字母组成的字符串，User 成功 Authentication 后由 Keystone 分配给 User。Token 用做访问 Service 的 Credential，Service 会通过 Keystone 验证 Token 的有效性。Token 还有 scope 的概念，表明这个 Token 作用在什么范围内的资源，例如某个 Project 范围或者某个 Domain 范围，Token 只能用于认证用户对指定范围内资源的操作。Token 的有效期默认是 24 小时。</p>
+<p>Keystone 提供如下几种 Token，可以根据需要配置使用某种 Token：</p>
+<p>UUID token：服务 API 收到带有 UUID token 的请求时，必须到 Keystone 进行验证token 的合法性，验证通过之后才能响应用户请求。随着集群规模的扩大，Keystone 需处理大量验证 UUID token 的请求，在高并发下容易出现性能问题。</p>
+<p>PKI token：携带更多用户信息并附上了数字签名，服务 API收 到 PKI token 时无需再去Keystone 验证，但是 PKI token 所携带可能随着 OpenStack Region 增多而变得非常长，很容易超出 HTTP Server 允许的最大 HTTP Header（默认为 8 KB），导致 HTTP 请求失败。</p>
+<p>PKIZ token：PKI token 的压缩版，但压缩效果有限，无法良好的处理 token 长度过大问题。</p>
+<p>Fernet token：携带了少量的用户信息，大小约为 255 Byte，采用了对称加密，无需存于数据库中。前三种 token 都会持久性存于数据库，与日俱增积累的大量 token 引起数据库性能下降，所以用户需经常清理数据库的 token；Fernet token没有这样的需要。</p>
+<p><strong>注：在Ocata版本中 Fernet 成为默认的 Token Provider。 PKI 和 PKIz token provider 被移除 。</strong></p>
+<p><strong>5. Project</strong></p>
+<p>Project 用于将 OpenStack 的资源（计算、存储和网络）进行分组和隔离。在企业私有云中，Project 可以是一个部门或者项目组，和公有云的 VPC（虚拟私有网络）概念类似。资源的所有权是属于 Project 的，而不是 User。每个 User（包括 admin）必须挂在 Project 里才能访问该 Project 的资源，一个 User 可以属于多个 Project。</p>
+<p>Horizon 在 “身份管理-&gt;项目” 中管理 Project：<br>可以通过 “管理成员” 将 User 添加到 Project 中。</p>
+<p><strong>6. Service</strong></p>
+<p>OpenStack 的 Service 包括 Compute (Nova)、Block Storage (Cinder)、Object Storage (Swift)、Image Service (Glance) 、Networking Service (Neutron) 等。每个 Service 都会提供若干个 Endpoint，User 通过 Endpoint 访问资源和执行操作。</p>
+<p><strong>7. Endpoint</strong></p>
+<p>Endpoint 是一个网络上可访问的地址，通常是一个 URL。Service 通过 Endpoint 暴露自己的 API。Keystone 负责管理和维护每个 Service 的 Endpoint。</p>
+<p><strong>8. Role</strong></p>
+<p>安全包含两部分：Authentication（认证）和 Authorization（鉴权）。Authentication 解决的是“你是谁？”的问题， Authorization 解决的是“你能干什么？”的问题。Keystone 是借助 Role 来实现 Authorization 的。Role 是全局（global）的，因此在一个 keystone 管辖范围内其名称必须唯一。</p>
+<p>Horizon 在 “身份管理-&gt;角色” 中管理 Role：<br>可以为 User 分配一个或多个 Role。</p>
+<p>Service 决定每个 Role 能做什么事情。Service 通过各自的 policy.json 文件对 Role 进行访问控制。Role 的名称没有意义，其意义在于 policy.json 文件根据 role 的名称所指定的允许进行的操作。</p>
+<p><strong>9. Group</strong></p>
+<p>Group 是一个 domain 部分 user 的集合，其目的是为了方便分配 role。给一个 group 分配 role，结果会给 group 内的所有 users 分配这个 role。</p>
+<p>Horizon 在 “身份管理-&gt;组” 中管理 Group：</p>
+<p><strong>10. Domain</strong></p>
+<p>Domain 表示 Project、Group 和 User 的集合，在公有云或者私有云中常常表示一个客户，和 VDC（虚拟机数据中心）的概念类似。Domain 可以看做一个命名空间，就像域名一样，全局唯一。在一个 Domain 内，Project、Group、User 的名称不可以重复，但是在两个不同的 Domain 内，它们的名称可以重复。因此，在确定这些元素时，需要同时使用它们的名称和它们的 Domain 的 id 或者 name。</p>
+<p>下图表示了 Domain、Project、User、Group、Role 之间的关系：</p>
+<p><img src="/images/openstack-keystone-15.png" alt="image-20200822222609744"></p>
+<p>下面是一个整体关系图：</p>
+<p><img src="/images/openstack-keystone-16.png" alt="image-20200822222653198"></p>
+<h3 id="keystone管理这些概念的方法"><a href="#keystone管理这些概念的方法" class="headerlink" title="keystone管理这些概念的方法"></a>keystone管理这些概念的方法</h3><table>
+<thead>
+<tr>
+<th><strong>组件名称</strong></th>
+<th><strong>管理对象</strong></th>
+<th><strong>生成方法</strong></th>
+<th><strong>保存方式</strong></th>
+<th><strong>配置项</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>identity</td>
+<td>user，以及 user group</td>
+<td>-</td>
+<td><strong>sql</strong>, ldap.core</td>
+<td>[identity]driver = keystone.identity.backends.[<strong>sql</strong>\</td>
+<td>ldap.core].Identity</td>
+</tr>
+<tr>
+<td>token</td>
+<td>用户的临时 token</td>
+<td>pki，pkiz，uuid</td>
+<td>sql, kvs,memcached</td>
+<td>[token]driver = keystone.token.persistence.backends.[<strong>sql</strong>\</td>
+<td>kvs\</td>
+<td>memcache\</td>
+<td>memcache_pool].Tokenprovider=keystone.token.providers.[pkiz\</td>
+<td>pki\</td>
+<td><strong>uuid</strong>].Provider</td>
+</tr>
+<tr>
+<td>credential</td>
+<td>EC2 credential</td>
+<td></td>
+<td><strong>sql</strong></td>
+<td>[credential]driver = keystone.credential.backends.sql.Credentialprovider=keystone.token.providers.[core\</td>
+<td>fernet].Provider</td>
+</tr>
+<tr>
+<td>catalog</td>
+<td>region,service,endpoint</td>
+<td></td>
+<td><strong>sql</strong>\</td>
+<td>templated</td>
+<td>[catalog]driver = keystone.catalog.backends.[<strong>sql</strong>\</td>
+<td>templated].Catalog</td>
+</tr>
+<tr>
+<td>assignment</td>
+<td>tenant，domain，role 以及它们与 user 之间的关系</td>
+<td>external, password, token</td>
+<td>sql</td>
+<td>[assignment]methods = external, password, tokenpassword = keystone.auth.plugins.password.Password</td>
+</tr>
+<tr>
+<td>trust</td>
+<td>trust</td>
+<td><strong>sql</strong></td>
+<td></td>
+<td>[trust]driver = keystone.trust.backends.[<strong>sql</strong>].Trust</td>
+</tr>
+<tr>
+<td>policy</td>
+<td>Keystone service 的用户鉴权策略</td>
+<td></td>
+<td>ruels\</td>
+<td>sql</td>
+<td>[default]policy_file = policy.json[policy]driver = keystone.policy.backends.[ruels\</td>
+<td><strong>sql]</strong>.Policy</td>
+</tr>
+</tbody>
+</table>
+<h2 id="keystone-与各组件交互流程"><a href="#keystone-与各组件交互流程" class="headerlink" title="keystone 与各组件交互流程"></a>keystone 与各组件交互流程</h2><p>（该章节内容皆来自：<a href="https://blog.csdn.net/dylloveyou/article/details/80329732）" target="_blank" rel="external">https://blog.csdn.net/dylloveyou/article/details/80329732）</a></p>
+<p>Keystone 与 OpenStack 其他服务交互流程如下：</p>
+<p><img src="/images/openstack-keystone-17.png" alt="image-20200822231400386"></p>
+<p>首先用户向 Keystone 提供自己的身份验证信息，如用户名和密码。Keystone 会从数据库中读取数据对其验证，如验证通过，会向用户返回一个 token，此后用户所有的请求都会使用该 token 进行身份验证。如用户向 Nova 申请虚拟机服务，nova 会将用户提供的 token 发给 Keystone 进行验证，Keystone 会根据 token 判断用户是否拥有进行此项操作的权限，若验证通过那么 nova 会向其提供相对应的服务。其它组件和 Keystone 的交互也是如此。</p>
+<p>下面通过 “查询可用 image” 这个实际操作示例让大家对相关概念及交互流程建立更加感性的认识。</p>
+<p>示例 ：User admin 要查看 Project 中的 image。<br>第一步，登陆</p>
+<p><img src="/images/openstack-keystone-18.png" alt="image-20200823145159028"></p>
+<p>输入用户名密码后，点击“连接”按钮，OpenStack 内部发生了哪些事情？</p>
+<p><img src="/images/openstack-keystone-19.png" alt="image-20200823145114999"></p>
+<p>返回的 token 中包含了 User 的 Role 信息。</p>
+<p>第二步，显示操作界面。</p>
+<p><img src="/images/openstack-keystone-20.png" alt="image-20200823145213198"></p>
+<p>请注意，顶部显示 admin 可访问的 Project 为 “admin” 和 “demo”。<br>其实在此之前发生了一些事情：</p>
+<p><img src="/images/openstack-keystone-21.png" alt="image-20200823145230924"></p>
+<p>同时，admin 可以访问 “实例”， “卷”，“映像” 等服务：</p>
+<p><img src="/images/openstack-keystone-22.png" alt="image-20200823145251069"></p>
+<p>这是因为 admin 已经从 Keystone 拿到了各 Service 的 Endpoints：</p>
+<p><img src="/images/openstack-keystone-23.png" alt="image-20200823145309848"></p>
+<p>第三步，显示 Image 列表。<br>点击“映像”，会显示映像列表：</p>
+<p><img src="/images/openstack-keystone-24.png" alt="image-20200823145328912"></p>
+<p>背后发生了这些事：<br>首先，admin 将请求发送到 Glance 的 Endpoint：</p>
+<p><img src="/images/openstack-keystone-25.png" alt="image-20200823145345587"></p>
+<p>Glance 向 Keystone 询问 admin 身份的有效性：</p>
+<p><img src="/images/openstack-keystone-26.png" alt="image-20200823145401818"></p>
+<p>接下来 Glance 会查看 <code>/etc/glance/policy.json</code>，判断 admin 是否有查看 image 的权限。</p>
+<p><img src="/images/openstack-keystone-27.png" alt="image-20200823145419552"></p>
+<p>权限判定通过，Glance 将 image 列表发给 admin。</p>
+<h2 id="Keystone-获取-token-方式"><a href="#Keystone-获取-token-方式" class="headerlink" title="Keystone 获取 token 方式"></a>Keystone 获取 token 方式</h2><p>上面的示例是在界面操作完成的，我们也可以通过调用 REST API 来实现。</p>
+<p>要想拿到token, 必须知道用户的相关信息，其中用户名和密码是必须的，如果还想取得更多的信息，例如用户对各种服务包括glance, keystond的访问endpoint, 还需要提供用户的tenant信息。实际上，对于终端用户来说，因为用户名，密码以及tenant名更为直观，所以很少会直接用token进行操作，但对于自动化测试来说，因为要直接和相关api打交道，取得token就相当有必要了。</p>
+<h3 id="方法一：使用-api-获取"><a href="#方法一：使用-api-获取" class="headerlink" title="方法一：使用 api 获取"></a>方法一：使用 api 获取</h3><p>命令行取得用户token的命令为：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">curl -X POST http://localhost:5000/v2.0/tokens -d '&#123;"auth":&#123;"passwordCredentials":&#123;"username": "username", "password":"password"&#125;&#125;&#125;' -H "Content-type: application/json"</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 其中localhost:5000是openstack keystone服务的endpoint, 如果没有特殊的设置，5000就是keystone服务进程的端口号。</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> /v2.0/token 是openstack api里定义的取得token的URI， 请求方式为POST，这个可以从openstack.org里查到。</span></span><br></pre></td></tr></table></figure>
+<p>​    后面json结构的数据‘auth’是提供给keystone服务用户信息，包括用户名和密码。下面看一下输出：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="attr">"access"</span>: &#123;</span><br><span class="line">		<span class="attr">"token"</span>: &#123;</span><br><span class="line">			<span class="attr">"expires"</span>: <span class="string">"2013-06-04T03:06:23Z"</span>,</span><br><span class="line">			<span class="attr">"id"</span>: <span class="string">"5fcf748e0d5d4a02ae3465e0dd301f40"</span></span><br><span class="line">		&#125;,</span><br><span class="line">		<span class="attr">"serviceCatalog"</span>: &#123;&#125;,</span><br><span class="line">		<span class="attr">"user"</span>: &#123;</span><br><span class="line">			<span class="attr">"username"</span>: <span class="string">"username"</span>,</span><br><span class="line">			<span class="attr">"roles_links"</span>: [],</span><br><span class="line">			<span class="attr">"id"</span>: <span class="string">"ce205b61760c463cb46e41909de8495f"</span>,</span><br><span class="line">			<span class="attr">"roles"</span>: [],</span><br><span class="line">			<span class="attr">"name"</span>: <span class="string">"username"</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125; &#123;</span><br><span class="line">	<span class="attr">"message_id"</span>: <span class="string">""</span>,</span><br><span class="line">	<span class="attr">"event_type"</span>: <span class="string">"user.login"</span>,</span><br><span class="line">	<span class="attr">"generated"</span>: <span class="string">"2021-08-21T12:22:00"</span>,</span><br><span class="line">	<span class="attr">"traits"</span>: [&#123;</span><br><span class="line">		<span class="attr">"type"</span>: <span class="string">"1"</span>,</span><br><span class="line">		<span class="attr">"name"</span>: <span class="string">"user_id"</span>,</span><br><span class="line">		<span class="attr">"value"</span>: <span class="string">"653ecae8465b4e3b8988960d19f2a168"</span></span><br><span class="line">	&#125;, &#123;</span><br><span class="line">		<span class="attr">"type"</span>: <span class="string">"1"</span>,</span><br><span class="line">		<span class="attr">"name"</span>: <span class="string">"project_id"</span>,</span><br><span class="line">		<span class="attr">"value"</span>: <span class="string">"afa072073107491b83ea511d6bb538d8"</span></span><br><span class="line">	&#125;, &#123;</span><br><span class="line">		<span class="attr">"type"</span>: <span class="string">"1"</span>,</span><br><span class="line">		<span class="attr">"name"</span>: <span class="string">"browser"</span>,</span><br><span class="line">		<span class="attr">"value"</span>: <span class="string">"chrome"</span></span><br><span class="line">	&#125;, &#123;</span><br><span class="line">		<span class="attr">"type"</span>: <span class="string">"1"</span>,</span><br><span class="line">		<span class="attr">"name"</span>: <span class="string">"site_ip"</span>,</span><br><span class="line">		<span class="attr">"value"</span>: <span class="string">"192.168.2.3"</span></span><br><span class="line">	&#125;, &#123;</span><br><span class="line">		<span class="attr">"type"</span>: <span class="string">"1"</span>,</span><br><span class="line">		<span class="attr">"name"</span>: <span class="string">"task_result"</span>,</span><br><span class="line">		<span class="attr">"value"</span>: <span class="string">"success"</span></span><br><span class="line">	&#125;],</span><br><span class="line">	<span class="attr">"raw"</span>: <span class="string">"&#123;&#125;"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这是openstack/essex版本下的token输出，其中[‘token’][‘id’]就是我们得到的用户token。对于openstack/grizzly版本, 用户的token比这个要长得多，但基本结构是一样的。</p>
+<p>下面看一下使用tenant的情况：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -X POST http://localhost:5000/v2.0/tokens -d &apos;&#123;&quot;auth&quot;:&#123;&quot;passwordCredentials&quot;:&#123;&quot;username&quot;: &quot;admin&quot;, &quot;password&quot;:&quot;crowbar&quot;&#125;, &quot;tenantName&quot;:&quot;tenantname&quot;&#125;&#125;&apos; -H &quot;Content-type: application/json&quot;</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="attr">"access"</span>: &#123;</span><br><span class="line">		<span class="attr">"token"</span>: &#123;</span><br><span class="line">			<span class="attr">"expires"</span>: <span class="string">"2013-06-04T03:14:12Z"</span>,</span><br><span class="line">			<span class="attr">"id"</span>: <span class="string">"fc3e38a93e95462da5028b1fb3a688c0"</span>,</span><br><span class="line">			<span class="attr">"tenant"</span>: &#123;</span><br><span class="line">				<span class="attr">"description"</span>: <span class="string">"description"</span>,</span><br><span class="line">				<span class="attr">"enabled"</span>: <span class="literal">true</span>,</span><br><span class="line">				<span class="attr">"id"</span>: <span class="string">"4e14ab2a2df045f1a6f02081a46deb2c"</span>,</span><br><span class="line">				<span class="attr">"name"</span>: <span class="string">"tenantname"</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;,</span><br><span class="line">		<span class="attr">"serviceCatalog"</span>: [&#123;</span><br><span class="line">			<span class="attr">"endpoints"</span>: [&#123;</span><br><span class="line">				<span class="attr">"adminURL"</span>: <span class="string">"http://localhost:8776/v1/4e14ab2a2df045f1a6f02081a46deb2c"</span>,</span><br><span class="line">				<span class="attr">"region"</span>: <span class="string">"RegionOne"</span>,</span><br><span class="line">				<span class="attr">"internalURL"</span>: <span class="string">"http://localhost:8776/v1/4e14ab2a2df045f1a6f02081a46deb2c"</span>,</span><br><span class="line">				<span class="attr">"publicURL"</span>: <span class="string">"http://localhost:8776/v1/4e14ab2a2df045f1a6f02081a46deb2c"</span></span><br><span class="line">			&#125;],</span><br><span class="line">			<span class="attr">"endpoints_links"</span>: [],</span><br><span class="line">			<span class="attr">"type"</span>: <span class="string">"volume"</span>,</span><br><span class="line">			<span class="attr">"name"</span>: <span class="string">"nova-volume"</span></span><br><span class="line">		&#125;, &#123;</span><br><span class="line">			<span class="attr">"endpoints"</span>: [&#123;</span><br><span class="line">				<span class="attr">"adminURL"</span>: <span class="string">"http://localhost:9292/v1"</span>,</span><br><span class="line">				<span class="attr">"region"</span>: <span class="string">"RegionOne"</span>,</span><br><span class="line">				<span class="attr">"internalURL"</span>: <span class="string">"http://localhost:9292/v1"</span>,</span><br><span class="line">				<span class="attr">"publicURL"</span>: <span class="string">"http://localhost:9292/v1"</span></span><br><span class="line">			&#125;],</span><br><span class="line">			<span class="attr">"endpoints_links"</span>: [],</span><br><span class="line">			<span class="attr">"type"</span>: <span class="string">"image"</span>,</span><br><span class="line">			<span class="attr">"name"</span>: <span class="string">"glance"</span></span><br><span class="line">		&#125;, &#123;</span><br><span class="line">			<span class="attr">"endpoints"</span>: [&#123;</span><br><span class="line">				<span class="attr">"adminURL"</span>: <span class="string">"http://localhost:8774/v2/4e14ab2a2df045f1a6f02081a46deb2c"</span>,</span><br><span class="line">				<span class="attr">"region"</span>: <span class="string">"RegionOne"</span>,</span><br><span class="line">				<span class="attr">"internalURL"</span>: <span class="string">"http://localhost:8774/v2/4e14ab2a2df045f1a6f02081a46deb2c"</span>,</span><br><span class="line">				<span class="attr">"publicURL"</span>: <span class="string">"http://localhost:8774/v2/4e14ab2a2df045f1a6f02081a46deb2c"</span></span><br><span class="line">			&#125;],</span><br><span class="line">			<span class="attr">"endpoints_links"</span>: [],</span><br><span class="line">			<span class="attr">"type"</span>: <span class="string">"compute"</span>,</span><br><span class="line">			<span class="attr">"name"</span>: <span class="string">"nova"</span></span><br><span class="line">		&#125;, &#123;</span><br><span class="line">			<span class="attr">"endpoints"</span>: [&#123;</span><br><span class="line">				<span class="attr">"adminURL"</span>: <span class="string">"http://localhost:8773/services/Admin"</span>,</span><br><span class="line">				<span class="attr">"region"</span>: <span class="string">"RegionOne"</span>,</span><br><span class="line">				<span class="attr">"internalURL"</span>: <span class="string">"http://localhost:8773/services/Cloud"</span>,</span><br><span class="line">				<span class="attr">"publicURL"</span>: <span class="string">"http://localhost:8773/services/Cloud"</span></span><br><span class="line">			&#125;],</span><br><span class="line">			<span class="attr">"endpoints_links"</span>: [],</span><br><span class="line">			<span class="attr">"type"</span>: <span class="string">"ec2"</span>,</span><br><span class="line">			<span class="attr">"name"</span>: <span class="string">"ec2"</span></span><br><span class="line">		&#125;, &#123;</span><br><span class="line">			<span class="attr">"endpoints"</span>: [&#123;</span><br><span class="line">				<span class="attr">"adminURL"</span>: <span class="string">"http://localhost:35357/v2.0"</span>,</span><br><span class="line">				<span class="attr">"region"</span>: <span class="string">"RegionOne"</span>,</span><br><span class="line">				<span class="attr">"internalURL"</span>: <span class="string">"http://localhost:5000/v2.0"</span>,</span><br><span class="line">				<span class="attr">"publicURL"</span>: <span class="string">"http://localhost:5000/v2.0"</span></span><br><span class="line">			&#125;],</span><br><span class="line">			<span class="attr">"endpoints_links"</span>: [],</span><br><span class="line">			<span class="attr">"type"</span>: <span class="string">"identity"</span>,</span><br><span class="line">			<span class="attr">"name"</span>: <span class="string">"keystone"</span></span><br><span class="line">		&#125;],</span><br><span class="line">		<span class="attr">"user"</span>: &#123;</span><br><span class="line">			<span class="attr">"username"</span>: <span class="string">"admin"</span>,</span><br><span class="line">			<span class="attr">"roles_links"</span>: [],</span><br><span class="line">			<span class="attr">"id"</span>: <span class="string">"ce205b61760c463cb46e41909de8495f"</span>,</span><br><span class="line">			<span class="attr">"roles"</span>: [&#123;</span><br><span class="line">				<span class="attr">"id"</span>: <span class="string">"454cb6cbddaf41f2af6f87e68ce58d64"</span>,</span><br><span class="line">				<span class="attr">"name"</span>: <span class="string">"KeystoneAdmin"</span></span><br><span class="line">			&#125;, &#123;</span><br><span class="line">				<span class="attr">"id"</span>: <span class="string">"5a80a5b5d4244f48ac7d3079d56555c6"</span>,</span><br><span class="line">				<span class="attr">"name"</span>: <span class="string">"KeystoneServiceAdmin"</span></span><br><span class="line">			&#125;, &#123;</span><br><span class="line">				<span class="attr">"id"</span>: <span class="string">"c5a190185ea7434eb2c35bbd1bb52051"</span>,</span><br><span class="line">				<span class="attr">"name"</span>: <span class="string">"username"</span></span><br><span class="line">			&#125;],</span><br><span class="line">			<span class="attr">"name"</span>: <span class="string">"tenentname"</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，如果在请求token的时候同时提供了tenant信息，则可以额外获取用户相关的endpoints信息。这样，有了token和相关endpoints, 就能够对openstack的api进行相关的访问和操作了。顺便说明，上述提供的tenant的信息也可以是tenant的id， 格式为”tenantId”:”<tenantid>“。</tenantid></p>
+<p>用户每次发出一次请求，就会生成一个token, 同时会在glance数据库的token表内生成一个记录。每个token的有效时间缺省为24个小时。</p>
+<p>使用编程实现也是可以的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> httplib2</span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"></span><br><span class="line">http_obj = httplib2.Http()</span><br><span class="line">headers = &#123;&#125;</span><br><span class="line">body = &#123;</span><br><span class="line">    <span class="string">"auth"</span>: &#123;</span><br><span class="line">            <span class="string">"passwordCredentials"</span>:&#123;</span><br><span class="line">                <span class="string">"username"</span>: <span class="string">'username'</span>,</span><br><span class="line">                <span class="string">"password"</span>: <span class="string">'password'</span>,</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">"tenantName"</span>: <span class="string">'tenantname'</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">req_url = <span class="string">"http://localhost:5000/v2.0/tokens"</span></span><br><span class="line">method = <span class="string">"POST"</span></span><br><span class="line"></span><br><span class="line">headers[<span class="string">'Content-Type'</span>] = <span class="string">'application/json'</span></span><br><span class="line">headers[<span class="string">'Accept'</span>] = <span class="string">'application/json'</span></span><br><span class="line"></span><br><span class="line">resp, token = http_obj.request(req_url, method,</span><br><span class="line">                               headers=headers, body=json.dumps(body))</span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> resp</span><br><span class="line"><span class="keyword">print</span> token</span><br></pre></td></tr></table></figure>
+<p>如果在body里不提供tenantName或tenantId的数据，则返回的是上述command line命令不包括endpoints的输出。</p>
+<h3 id="方法二：使用-openstack-命令获取"><a href="#方法二：使用-openstack-命令获取" class="headerlink" title="方法二：使用 openstack 命令获取"></a>方法二：使用 openstack 命令获取</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@controller ~]# openstack token issue</span><br><span class="line">+------------+----------------------------------------------------------------------------------------+</span><br><span class="line">| Field      | Value                                                                                  |</span><br><span class="line">+------------+----------------------------------------------------------------------------------------+</span><br><span class="line">| expires    | 2019-05-16T09:20:34.284984Z                                                            |</span><br><span class="line">| id         | gAAAAABc3R1SjOCqsvEg3eem30gGaW3ogfR-                                                   |</span><br><span class="line">|            | nu0sISozNnPoCZJ8a61yeNvrdtVnHzMLxD4R2bz1lhFk0ErnBMGp-k_FfRpU-v3Lwy-                    |</span><br><span class="line">|            | J4htqFoTrpAdfqpYFivjrhjuHE3z3AyxZGjCi5EySJUJchVKwroxjyiekBL2uQQ6iIxvD_F8Ew4pMQN8       |</span><br><span class="line">| project_id | fda820529c814812a7ab5fdcb878b291                                                       |</span><br><span class="line">| user_id    | 840931be05dc4e36945bc8d1a6d0fe1c                                                       |</span><br><span class="line">+------------+----------------------------------------------------------------------------------------+</span><br></pre></td></tr></table></figure>
+<p>其中的 id 行就是 token</p>
+<p>token 生成之后，就可以使用该值放在请求头 X-Auth-Token 字段，访问 openstack 的其余 api 了。</p>
+<h2 id="Keystone-源码分析"><a href="#Keystone-源码分析" class="headerlink" title="Keystone 源码分析"></a>Keystone 源码分析</h2><p>我们从源码角度分析一下 keystone 相关的服务</p>
+<p><img src="/images/openstack-keystone-28.png" alt="image-20200823153812186"></p>
+<p>首先给一张基本架构图，基本架构分为 Keystone Api，Router，Services，Backend Driver</p>
+<h3 id="Keystone-Api"><a href="#Keystone-Api" class="headerlink" title="Keystone Api"></a>Keystone Api</h3><p>Keystone API与Openstack其他服务的API类似，也是基于ReSTFul HTTP实现的。</p>
+<p>Keystone API划分为Admin API和Public API：</p>
+<ul>
+<li>Public API不仅实现获取版本以及相应扩展信息的操作，同时包括获取Token以及Token租户信息的操作；</li>
+<li>Admin API主要提供服务开发者使用，不仅可以完成Public API的操作，同时对User、Tenant、Role和Service Endpoint进行管理操作。</li>
+</ul>
+<h3 id="Router"><a href="#Router" class="headerlink" title="Router"></a>Router</h3><p>Keystone Router主要实现上层API和底层服务的映射和转换功能，包括四种Router类型。<br>（1） AdminRouter<br>负责将Admin API请求映射为相应的行为操作并转发至底层相应的服务执行；<br>（2） PublicRouter<br>与AdminRouter类似；<br>（3） PublicVersionRouter<br>对系统版本的请求API进行映射操作；<br>（4） AdminVersionRouter<br>与PublicVersionRouter类似。</p>
+<h3 id="Services"><a href="#Services" class="headerlink" title="Services"></a>Services</h3><p>Keystone Service接收上层不同Router发来的操作请求，并根据不同后端驱动完成相应操作</p>
+<p>主要包括四种驱动类型Kvs.Token，Memcache.Token，Memcache_pool.Token,Sql.Token；</p>
+<p><strong>Identity Service</strong></p>
+<p>Identity Service提供关于用户和用户组的授权认证及相关数据，即users和groups。</p>
+<p>Keystone-10.0.0支持ldap.core.Identity,Sql.Identity两种后端驱动，系统默认的是Sql.Identity；</p>
+<p><strong>Resource Service</strong></p>
+<p>Resouse服务提供关于projects和domains的数据</p>
+<p><strong>Assignment Service</strong></p>
+<p>Assignment Service提供role及role assignments的数据，即 roles和role assignments</p>
+<p><strong>Token Service</strong></p>
+<p>Token Service提供认证和管理令牌token的功能，用户的credentials认证通过后就得到token</p>
+<p>Keystone-10.0.0对于Token Service<br>支持Kvs.Token，Memcache.Token，Memcache_pool.Token,Sql.Token四种后端驱动，系统默认的是kvs.Token</p>
+<p><strong>Catalog Service</strong></p>
+<p>Catalog Service提供service和Endpoint相关的管理操作（service即openstack所有服务，endpont即访问每个服务的url）</p>
+<p>keystone-10.0.0对Catalog Service支持两种后端驱动：Sql.Catalog、Templated.Catalog两种后端驱动，系统默认的是templated.Catalog；</p>
+<p><strong>Policy Service</strong></p>
+<p>Policy Service提供一个基于规则的授权驱动和规则管理</p>
+<p>keystone-10.0.0对Policy Service支持两种后端驱动：rules.Policy,sql.Policy，默认使用sql.Policy</p>
+<h3 id="Backend-Driver"><a href="#Backend-Driver" class="headerlink" title="Backend Driver"></a>Backend Driver</h3><p>Backend Driver具有多种类型，不同的Service选择不同的Backend Driver。</p>
+<h1 id="Keystone-服务启动"><a href="#Keystone-服务启动" class="headerlink" title="Keystone 服务启动"></a>Keystone 服务启动</h1><p>/usr/bin/keystone-all 会启动 keystone 的两个service：admin and main，它们分别对应 /etc/keystone/keystone-paste.ini 文件中的两个composite：main 和 admin</p>
+<p>可见 admin service 提供给administrator 使用；main 提供给 public 使用。它们分别都有 V2.0 和 V3 版本，只是目前的 keystone Cli 只支持 V2.0.比较下 admin 和 public：</p>
+<table>
+<thead>
+<tr>
+<th><strong>名称</strong></th>
+<th><strong>middlewares</strong></th>
+<th><strong>factory</strong></th>
+<th><strong>功能区别</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>admin</td>
+<td>比 public 多 s3_extension</td>
+<td>keystone.service:public_app_factory</td>
+<td>从 factory 函数来看， admin service 比 public service 多了 identity 管理功能， 以及 assignment 的admin/public 区别：1. admin 多了对 GET /users/{user_id} 的支持，多了 get_all_projects， get_project，get_user_roles 等功能2. keystone 对 admin service 提供 admin extensions, 比如 <a href="http://docs.rackspace.com/openstack-extensions/auth/OS-KSADM-admin-devguide/content/Admin_API_Service_Developer_Operations-d1e1357.html" target="_blank" rel="external">OS-KSADM</a> 等；对 public service 提供 public extensions。<strong>简单总结一下， public service 主要提供了身份验证和目录服务功能；admin service 增加了 tenant、user、role、user group 的管理功能。</strong></td>
+</tr>
+<tr>
+<td>public</td>
+<td>sizelimit url_normalize build_auth_context token_auth admin_token_auth xml_body_v2json_body ec2_extension user_crud_extension</td>
+<td>keystone.service:admin_app_factory</td>
+<td>从 factory 函数来看， admin service 比 public service 多了 identity 管理功能， 以及 assignment 的admin/public 区别：1. admin 多了对 GET /users/{user_id} 的支持，多了 get_all_projects， get_project，get_user_roles 等功能2. keystone 对 admin service 提供 admin extensions, 比如 <a href="http://docs.rackspace.com/openstack-extensions/auth/OS-KSADM-admin-devguide/content/Admin_API_Service_Developer_Operations-d1e1357.html" target="_blank" rel="external">OS-KSADM</a> 等；对 public service 提供 public extensions。<strong>简单总结一下， public service 主要提供了身份验证和目录服务功能；admin service 增加了 tenant、user、role、user group 的管理功能。</strong></td>
+</tr>
+</tbody>
+</table>
+<p>/usr/bin/keystone-all 会启动 admin 和 public 两个 service，分别绑定不同 host 和 端口。默认的话，绑定host 都是 0.0.0.0； admin 的绑定端口是 35357 （admin_port）， public 的绑定端口是 5000 （public_port）。因此，给 admin 使用的 OS_AUTH_URL 为 <a href="http://controller:35357/v2.0，" target="_blank" rel="external">http://controller:35357/v2.0，</a> 给 public 使用的 OS_AUTH_URL=<a href="http://controller:5000/v2.0" target="_blank" rel="external">http://controller:5000/v2.0</a></p>
+<p>进程说明</p>
+<p>WSGI server的父进程(50511号进程)开启两个socket去分别监听本环境的5000和35357号端口，<br>其中5000号端口是为main的WSGI server提供的，35357号端口为admin的WSGI server提供的。<br>即WSGI server的父进程接收到5000号端口的HTTP请求时，则将把该请求转发给为main开启的WSGI server去处理，<br>而WSGI server的父进程接收到35357号端口的HTTP请求时，则将把该请求转发给为admin开启的WSGI server去处理。</p>
+<h1 id="keystoneauth组件介绍"><a href="#keystoneauth组件介绍" class="headerlink" title="keystoneauth组件介绍"></a>keystoneauth组件介绍</h1><p>与openstack api交互有多种方法</p>
+<ol>
+<li>可以自己开发client直接调用api</li>
+<li>可以直接使用openstack提供的封装sdk项目 <a href="https://docs.openstack.org/openstacksdk/latest/" target="_blank" rel="external">openstacksdk</a></li>
+<li>可以使用python-xxxclient等项目，比如 <code>python-novaclient</code> ， <code>python-neutronclient</code></li>
+<li>可以直接使用命令行工具 <code>nova</code> ， <code>neutron</code> ， <code>openstack</code> 等</li>
+</ol>
+<p>首先本文中client指那些与openstack api交互的项目，比如python-xxxclient或openstacksdk，这些client封装了具体的api请求过程，提供给用户更友好的操作方式， 比如nova命令来自 <code>python-novaclieent</code> ，neutron命令来自 <code>python-neutronclient</code> ，openstack命令来自 <code>python-openstackclient</code> 。</p>
+<p>这些client的共性是他们都需要认证和发起请求，因此认证和请求这部分可以独立出来实现，各个client就不需要都自己实现一套认证请求流程了，这就是keystoneauth的作用，各个client可以专注于自己的功能实现</p>
+<p>keystoneauth是一个相对独立的组件，它在整个openstack生态中提供统一认证和服务请求，因此client中不再需要处理token/headers/api地址这些信息，client需要做的只是import keystoneauth，提供必要的参数(region/用户凭据/api版本等)并调用keystoneauth中的接口，keystoneauth负责管理token和组装完整的api url(根据catalog和api的path)并最终发出api请求，client可以对返回值做友好处理后返回给用户</p>
+<p>keystoneauth中实现认证和服务请求的是 <code>keystoneauth1.session.Session</code> 类，我们可以用它来初始化一个Session对象，此对象可以存储用户凭据(用户名密码)和连接信息(比如token)，使用同一个Session对象的各个client之间会共享认证和请求信息。 我们先来看看如何初始化一个Session对象</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#[root@controller openstack]# cat ses.py</span></span><br><span class="line"><span class="comment">#----</span></span><br><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> keystoneauth1.identity <span class="keyword">import</span> v3</span><br><span class="line"><span class="keyword">from</span> keystoneauth1 <span class="keyword">import</span> session</span><br><span class="line"></span><br><span class="line">auth = v3.Password(username=<span class="string">'admin'</span>,</span><br><span class="line">                   password=<span class="string">'admin'</span>,</span><br><span class="line">                   project_name=<span class="string">'admin'</span>,</span><br><span class="line">                   user_domain_name=<span class="string">'Default'</span>,</span><br><span class="line">                   project_domain_name=<span class="string">'Default'</span>,</span><br><span class="line">                   auth_url=<span class="string">'http://controller:35357/v3'</span>)</span><br><span class="line">sess = session.Session(auth=auth)</span><br><span class="line"><span class="comment">#----</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#实例化一个Session对象    </span></span><br><span class="line">[root@controller openstack]<span class="comment"># python</span></span><br><span class="line">Python <span class="number">2.7</span><span class="number">.5</span> (default, Nov  <span class="number">6</span> <span class="number">2016</span>, <span class="number">00</span>:<span class="number">28</span>:<span class="number">07</span>)</span><br><span class="line">[GCC <span class="number">4.8</span><span class="number">.5</span> <span class="number">20150623</span> (Red Hat <span class="number">4.8</span><span class="number">.5</span><span class="number">-11</span>)] on linux2</span><br><span class="line">Type <span class="string">"help"</span>, <span class="string">"copyright"</span>, <span class="string">"credits"</span> <span class="keyword">or</span> <span class="string">"license"</span> <span class="keyword">for</span> more information.</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> ses <span class="keyword">import</span> sess</span><br></pre></td></tr></table></figure>
+<p>如上，我们初始化了一个Session类的实例对象 <code>sess</code> ，初始化Session需要提供必要的参数，我们在使用命令行之前需要source的环境变量( <code>OS_PROJECT_NAME</code> , <code>OS_USERNAME</code> , <code>OS_PASSWORD</code> ,…)其实最后也是传递给了keystoneauth。现在来看看能用这个对象做什么</p>
+<h2 id="获取token"><a href="#获取token" class="headerlink" title="获取token"></a>获取token</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; sess.auth</span><br><span class="line">&lt;keystoneauth1.identity.v3.password.Password object at 0x3c17750&gt;</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; sess.get_token()</span><br><span class="line">&apos;gAAAAABbWX72UZT-RJnHtuFXpqecNuGFIhEAke_Rira3gfUesIuyvM5w2sEV6bnXC_uyo7rOn5RmYbZwADn2eT6AuvHXkRGHVoE25A6bkkXr6vWGZAd8fXHITK751UBrg8obFBGGNWoZpPhG87qFtmZ1yuLM3uebFFB4lfCTXoJ70D0my0X1GRc&apos;      </span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; sess.get_auth_headers()</span><br><span class="line">&#123;&apos;X-Auth-Token&apos;: &apos;gAAAAABbWX72UZT-RJnHtuFXpqecNuGFIhEAke_Rira3gfUesIuyvM5w2sEV6bnXC_uyo7rOn5RmYbZwADn2eT6AuvHXkRGHVoE25A6bkkXr6vWGZAd8fXHITK751UBrg8obFBGGNWoZpPhG87qFtmZ1yuLM3uebFFB4lfCTXoJ70D0my0X1GRc&apos;&#125;</span><br></pre></td></tr></table></figure>
+<p>如上，当执行 <code>get_token()</code> 后，使用 <code>sess.auth</code> 里保存的用户凭证向keystone api提交POST请求( <code>POST http://controller:35357/v3/auth/tokens</code> )获取一个token</p>
+<p>此Token可以被多个使用此sess对象的client共享，这样各个client就不需要都走一边完整的获取token流程</p>
+<h2 id="过滤endpoint地址"><a href="#过滤endpoint地址" class="headerlink" title="过滤endpoint地址"></a>过滤endpoint地址</h2><p>我们平常在使用openstack命令时并没有指定具体的api地址，实际上，组装出完整的api地址也是keystoneauth的责任，那么Session对象是如何知道完整的api地址呢</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">#指定endpoint过滤条件</span><br><span class="line">&gt;&gt;&gt; identity_endpoint_filter=&#123;&apos;service_type&apos;: &apos;identity&apos;,</span><br><span class="line">... &apos;interface&apos;: &apos;admin&apos;,</span><br><span class="line">... &apos;region_name&apos;: &apos;bjff-1&apos;,</span><br><span class="line">... &apos;min_version&apos;: &apos;2.0&apos;,</span><br><span class="line">... &apos;max_version&apos;: &apos;3.4&apos;,&#125;</span><br><span class="line"></span><br><span class="line">#根据endpoint_filter获取对应的endpoint url</span><br><span class="line">&gt;&gt;&gt; sess.get_endpoint(sess.auth, **identity_endpoint_filter)</span><br><span class="line">u&apos;http://controller:35357/v3/&apos;</span><br><span class="line"></span><br><span class="line">#service_type改为compute，再获取endpoint url</span><br><span class="line">&gt;&gt;&gt; identity_endpoint_filter[&apos;service_type&apos;] = &apos;compute&apos;</span><br><span class="line">&gt;&gt;&gt; sess.get_endpoint(sess.auth, **identity_endpoint_filter)</span><br><span class="line">u&apos;http://controller:8774/v2.1/1987639927c94519ab8aaf3413a68df9&apos;</span><br></pre></td></tr></table></figure>
+<p>openstack中的各个服务在安装时都要向endpoint注册( <code>openstack endpoint list</code> 可以看到当前openstack中已注册的所有服务)， <code>identity_endpoint_filter</code> 过滤参数作用就是在openstack endpoint中找出匹配项的url，当然，我们这里是手动指定的 <code>identity_endpoint_filter</code> 参数，实际上的过滤参数是client根据用户输入的命令所属的服务类型以及环境变量生成的</p>
+<p>简单说下过滤参数含义：</p>
+<ul>
+<li>service_type： 服务类型，比如 <code>identity</code> , <code>compute</code> , <code>volume</code> 等(openstack endpoint list中可以看到)</li>
+<li>min_version,max_version: 用于过滤在其范围内的api主版本，openstack中各个服务都有其主版本，比如目前keystone是v3版本，nova是v2版本，注意不是microversion</li>
+</ul>
+<p>上面也提到，组装出完整的api地址是keystoneauth的责任，client只需要提供必要的endpoint过滤参数以及访问路径(比如 <code>/users</code> )，最终完整api url就是endpoint url + ‘/users’</p>
+<h2 id="直接发送api请求"><a href="#直接发送api请求" class="headerlink" title="直接发送api请求"></a>直接发送api请求</h2><p>事实上，我们可以直接用sess对象发起api请求，其它client的api请求最终也是调用的sess对象</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">#确认下endpoint_filter</span><br><span class="line">&gt;&gt;&gt; identity_endpoint_filter</span><br><span class="line">&#123;&apos;service_type&apos;: &apos;identity&apos;, &apos;interface&apos;: &apos;admin&apos;, &apos;min_version&apos;: &apos;2.0&apos;, &apos;max_version&apos;: &apos;3.4&apos;, &apos;region_name&apos;: &apos;bjff-1&apos;&#125;</span><br><span class="line">#获取所有user(user list)</span><br><span class="line">&gt;&gt;&gt; response = sess.get(&apos;/users&apos;,endpoint_filter=identity_endpoint_filter)</span><br><span class="line">&gt;&gt;&gt; response.json()</span><br><span class="line">&#123;u&apos;users&apos;: [&#123;u&apos;password_expires_at&apos;: None, u&apos;links&apos;: &#123;u&apos;self&apos;: u&apos;http://controller:35357/v3/users/006cbddb9dde423695d00d94e68f1b19&apos;&#125;, u&apos;enabled&apos;: True, u&apos;id&apos;: u&apos;006cbddb9dde423695d00d94e68f1b19... &#125;</span><br><span class="line"></span><br><span class="line">#service type改为compute</span><br><span class="line">&gt;&gt;&gt; compute_endpoint_filter[&apos;service_type&apos;] = &apos;compute&apos;</span><br><span class="line">&gt;&gt;&gt; compute_endpoint_filter</span><br><span class="line">&#123;&apos;service_type&apos;: &apos;compute&apos;, &apos;interface&apos;: &apos;admin&apos;, &apos;min_version&apos;: &apos;2.0&apos;, &apos;max_version&apos;: &apos;3.4&apos;, &apos;region_name&apos;: &apos;bjff-1&apos;&#125;</span><br><span class="line">#获取所有虚拟机(server list)</span><br><span class="line">&gt;&gt;&gt; response = sess.get(&apos;/servers&apos;,endpoint_filter=compute_endpoint_filter)</span><br><span class="line">&gt;&gt;&gt; response.json()</span><br><span class="line">&#123;u&apos;servers&apos;: [&#123;u&apos;id&apos;: u&apos;0a57d543-1e8f-49c3-a731-c9198dd3ecb7&apos;, u&apos;links&apos;: [&#123;u&apos;href&apos;: u&apos;http://controller:8774/v2.1/1987639927c94519ab8aaf3413a68df9/servers/0a57d543-1e8f-49c3-a731-c9198dd3ecb7&apos;, u&apos;rel&apos;: u&apos;self&apos;&#125;, &#123;u&apos;href&apos;: ...&#125;</span><br><span class="line"></span><br><span class="line">#当然还可以获取所有虚拟机详细信息  </span><br><span class="line">response = sess.get(&apos;/servers/detail&apos;,endpoint_filter=compute_endpoint_filter)</span><br></pre></td></tr></table></figure>
+<p>简单说下 <code>sess.get(&#39;/servers&#39;,endpoint_filter=compute_endpoint_filter)</code> 处理过程如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">compute_endpoint_filter</span><br><span class="line">http://controller:8774/v2.1/1987639927c94519ab8aaf3413a68df9/servers</span><br></pre></td></tr></table></figure>
+<h2 id="配合client"><a href="#配合client" class="headerlink" title="配合client"></a>配合client</h2><p>上面那种直接调用Session对象发送api还是太麻烦，client对此有更高层次的封装</p>
+<p>比如平常使用的 <code>nova list</code> 命令来自 <code>python-novaclient</code> 项目，下面演示了 <code>python-novaclient</code> 中是如何使用Session对象</p>
+<p>列出所有镜像</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; from glanceclient import Client as gsclient</span><br><span class="line">&gt;&gt;&gt; glance_client = gsclient(&apos;2&apos;, session=sess)</span><br><span class="line">&gt;&gt;&gt; glance_client.images.list()</span><br><span class="line">&lt;generator object list at 0x32b2c80&gt;</span><br></pre></td></tr></table></figure>
+<p>列出所有虚拟机</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; from novaclient import client as noclient</span><br><span class="line">&gt;&gt;&gt; nova_client = noclient.Client(&apos;2&apos;, session=sess)</span><br><span class="line">&gt;&gt;&gt; nova_client.servers.list()</span><br><span class="line">[&lt;Server: bjff-nginx02&gt;, &lt;Server: bjff-nginx03&gt;, &lt;Server: bjff-nginx01&gt;]</span><br><span class="line"></span><br><span class="line">#当然，也可以创建虚拟机</span><br><span class="line">&gt;&gt;&gt; nova_client.servers.create(&apos;instance1&apos;,</span><br><span class="line">... image=&apos;a88fe8b1-15ed-41af-898a-162447ca8d66&apos;,</span><br><span class="line">... flavor=&apos;82f7cfad-d792-4d39-bde1-e89369c36244&apos;,</span><br><span class="line">... nics=[&#123;&apos;net-id&apos;: &apos;2bcb3404-9f7c-4bb9-9bac-521c97be19e2&apos;&#125;],</span><br><span class="line">... min_count=1,max_count=1)</span><br><span class="line">&lt;Server: instance1&gt;</span><br></pre></td></tr></table></figure>
+<h1 id="附录："><a href="#附录：" class="headerlink" title="附录："></a>附录：</h1><h2 id="ini-文件几个属性记录"><a href="#ini-文件几个属性记录" class="headerlink" title="*.ini 文件几个属性记录"></a>*.ini 文件几个属性记录</h2><p>vim /etc/keystone/keystone-paste.ini # 为例</p>
+<p>(1) type = composite</p>
+<p>这个类型的section会把URL请求分发到对应的Application，use表明具体的分发方式，比如”egg:Paste#urlmap”表示使用Paste包中的urlmap模块，这个section里的其他形式如”key = value”的行是使用urlmap进行分发时的参数。</p>
+<p>(2) type = app</p>
+<p>一个app就是一个具体的WSGI Application。</p>
+<p>(3) type = filter-app</p>
+<p>接收一个请求后，会首先调用filter-app中的use所指定的app进行过滤，如果这个请求没有被过滤，就会转发到next所指定的app进行下一步的处理。</p>
+<p>(4) type = filter</p>
+<p>与filter-app类型的区别只是没有next。</p>
+<p>(5) type = pipeline</p>
+<p>pipeline由一系列filter组成。这个filter链条的末尾是一个app。pipeline类型主要是对filter-app进行了简化，<br>否则，如果多个filter，就需要多个filter-app，然后使用next进行连接。OpenStack的paste的deploy的配置文件主要采用的pipeline的方式。<br>因为url为<a href="http://192.168.118.1:5000/v2.0/tokens，因为基本url的后面接的信息为/v2.0，所以将到public_api的section作相应操作。" target="_blank" rel="external">http://192.168.118.1:5000/v2.0/tokens，因为基本url的后面接的信息为/v2.0，所以将到public_api的section作相应操作。</a></p>
+<h2 id="Keystone-V3-API-新特性"><a href="#Keystone-V3-API-新特性" class="headerlink" title="Keystone V3 API 新特性"></a>Keystone V3 API 新特性</h2><p>在 Keystone V3 之前，用户的权限管理以每一个用户为单位，需要对每一个用户进行角色分配，并不存在一种对一组用户进行统一管理的方案，这给系统管理员带来了额外的工作和不便。此外，Keystone V3 之前的版本中，资源分配是以 Tenant 为单位的，这不太符合现实世界中的层级关系。如一个公司在 Openstack 中拥有两个不同的项目，他需要管理两个 Tenant 来分别对应这两个项目，并对这两个 Tenant 中的用户分别分配角色。由于在 Tenant 之上并不存在一个更高层的概念，无法对 Tenant 进行统一的管理，所以这给多 Tenant 的用户带来了不便。为了解决这些问题，Keystone V3 提出了新的概念 Domain 和 Group。</p>
+<p>Keystone V3 做出了许多变化和改进，我们选取其中较为重要的进行阐述：</p>
+<ul>
+<li>将 Tenant 改称为 Project</li>
+<li>引入 Domain 的概念</li>
+<li>引入 Group 的概念</li>
+</ul>
+<p>将 Tenant 改为 Project 并在其上添加 Domain 的概念，这更加符合现实世界和云服务的映射。</p>
+<p>V3 利用 Domain 实现真正的多租户（multi-tenancy）架构，Domain 担任 Project 的高层容器。云服务的客户是 Domain 的所有者，他们可以在自己的 Domain 中创建多个 Projects、Users、Groups 和 Roles。通过引入 Domain，云服务客户可以对其拥有的多个 Project 进行统一管理，而不必再向过去那样对每一个 Project 进行单独管理。</p>
+<p>Group 是一组 Users 的容器，可以向 Group 中添加用户，并直接给 Group 分配角色，那么在这个 Group 中的所有用户就都拥有了 Group 所拥有的角色权限。通过引入 Group 的概念，Keystone V3 实现了对用户组的管理，达到了同时管理一组用户权限的目的。这与 V2 中直接向 User/Project 指定 Role 不同，使得对云服务进行管理更加便捷。</p>
+<h2 id="client-SDK使用"><a href="#client-SDK使用" class="headerlink" title="client SDK使用"></a>client SDK使用</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">1. 使用</span><br><span class="line">&gt;&gt;&gt; from keystoneclient.v2_0 import client</span><br><span class="line">&gt;&gt;&gt; keystone = client.Client(...)</span><br><span class="line">&gt;&gt;&gt; keystone.tenants.list() # List tenants</span><br><span class="line"></span><br><span class="line">2. 获得权限</span><br><span class="line">&gt;&gt;&gt; from keystoneclient.v2_0 import client</span><br><span class="line">&gt;&gt;&gt; username=&apos;adminUser&apos;</span><br><span class="line">&gt;&gt;&gt; password=&apos;secreetword&apos;</span><br><span class="line">&gt;&gt;&gt; tenant_name=&apos;openstackDemo&apos;</span><br><span class="line">&gt;&gt;&gt; auth_url=&apos;http://192.168.206.130:5000/v2.0&apos;</span><br><span class="line">&gt;&gt;&gt; keystone = client.Client(username=username, password=password,</span><br><span class="line">...                          tenant_name=tenant_name, auth_url=auth_url)</span><br><span class="line"></span><br><span class="line">3. 建立租户  </span><br><span class="line">&gt;&gt;&gt; from keystoneclient.v2_0 import client</span><br><span class="line">&gt;&gt;&gt; keystone = client.Client(...)</span><br><span class="line">&gt;&gt;&gt; keystone.tenants.create(tenant_name=&quot;openstackDemo&quot;,</span><br><span class="line">...                         description=&quot;Default Tenant&quot;, enabled=True)</span><br><span class="line"></span><br><span class="line">4. 建立用户 </span><br><span class="line">&gt;&gt;&gt; from keystoneclient.v2_0 import client</span><br><span class="line">&gt;&gt;&gt; keystone = client.Client(...)</span><br><span class="line">&gt;&gt;&gt; tenants = keystone.tenants.list()</span><br><span class="line">&gt;&gt;&gt; my_tenant = [x for x in tenants if x.name==&apos;openstackDemo&apos;][0]</span><br><span class="line">&gt;&gt;&gt; my_user = keystone.users.create(name=&quot;adminUser&quot;,</span><br><span class="line">...                                 password=&quot;secretword&quot;,</span><br><span class="line">...                                 tenant_id=my_tenant.id)</span><br><span class="line"></span><br><span class="line">5. 建立角色和增加用户</span><br><span class="line">&gt;&gt;&gt; from keystoneclient.v2_0 import client</span><br><span class="line">&gt;&gt;&gt; keystone = client.Client(...)</span><br><span class="line">&gt;&gt;&gt; role = keystone.roles.create(&apos;admin&apos;)</span><br><span class="line">&gt;&gt;&gt; my_tenant = ...</span><br><span class="line">&gt;&gt;&gt; my_user = ...</span><br><span class="line">&gt;&gt;&gt; keystone.roles.add_user_role(my_user, role, my_tenant)</span><br><span class="line"></span><br><span class="line">6. 建立服务和endpoints</span><br><span class="line">&gt;&gt;&gt; from keystoneclient.v2_0 import client</span><br><span class="line">&gt;&gt;&gt; keystone = client.Client(...)</span><br><span class="line">&gt;&gt;&gt; service = keystone.services.create(name=&quot;nova&quot;, service_type=&quot;compute&quot;,</span><br><span class="line">...                                    description=&quot;Nova Compute Service&quot;)</span><br><span class="line">&gt;&gt;&gt; keystone.endpoints.create(</span><br><span class="line">...     region=&quot;RegionOne&quot;, service_id=service.id,</span><br><span class="line">...     publicurl=&quot;http://192.168.206.130:8774/v2/%(tenant_id)s&quot;,</span><br><span class="line">...     adminurl=&quot;http://192.168.206.130:8774/v2/%(tenant_id)s&quot;,</span><br><span class="line">...     internalurl=&quot;http://192.168.206.130:8774/v2/%(tenant_id)s&quot;)</span><br></pre></td></tr></table></figure>
+<p>参考：</p>
+<p><a href="https://blog.csdn.net/dylloveyou/article/details/80329732" target="_blank" rel="external">https://blog.csdn.net/dylloveyou/article/details/80329732</a></p>
+<p><a href="https://www.tinymind.net.cn/articles/f439532f8b1a63" target="_blank" rel="external">https://www.tinymind.net.cn/articles/f439532f8b1a63</a></p>
+<p><a href="https://blog.csdn.net/jiajiastudy/article/details/9011407" target="_blank" rel="external">https://blog.csdn.net/jiajiastudy/article/details/9011407</a></p>
+<p><a href="https://blog.csdn.net/weixin_34268753/article/details/85847424" target="_blank" rel="external">https://blog.csdn.net/weixin_34268753/article/details/85847424</a></p>
+<p><a href="https://www.cnblogs.com/hustlijian/p/3603992.html" target="_blank" rel="external">https://www.cnblogs.com/hustlijian/p/3603992.html</a></p>
+<p><a href="https://www.codercto.com/a/19667.html" target="_blank" rel="external">https://www.codercto.com/a/19667.html</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+<blockquote class="blockquote-center" style="color: #ccc;">
+    -------------本文结束 <i class="fa fa-apple"></i> 感谢您的阅读-------------
+</blockquote>
+
+  <span id="inline-green" style="border-radius:3px;">作者</span>：<a class="link-blue" href="https://github.com/magiceses" target="_blank">Magiceses</a><br/>有问题请 <a class="link-blue" href="https://magiceses.github.io/guestbook" target="_blank">留言</a> 或者私信我的 <a class="link-blue" href="https://weibo.com/u/3069595351" target="_blank">微博</a>。
+
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>满分是10分的话，这篇文章你给几分</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/reward/reward_wechat.png" alt="magiceses WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/reward/reward_alipay.png" alt="magiceses Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Openstack/" rel="tag"><i class="fa fa-tag"></i> Openstack</a>
+          
+            <a href="/tags/Keystone/" rel="tag"><i class="fa fa-tag"></i> Keystone</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/01/openstack-pbr的使用/" rel="next" title="openstack之pbr的使用">
+                <i class="fa fa-chevron-left"></i> openstack之pbr的使用
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/10/02/openstack-stevedore的使用/" rel="prev" title="openstack之stevedore的使用">
+                openstack之stevedore的使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar/avatar.png"
+               alt="magiceses" />
+          <p class="site-author-name" itemprop="name">magiceses</p>
+          <p class="site-description motion-element" itemprop="description">Stay Hungry,Stay Foolish</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">61</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/magiceses" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://blog.csdn.net/weixin_43700106" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-chrome"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/weblog" title="建站日志" target="_blank">建站日志</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/reward" title="打赏" target="_blank">打赏</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#广义认证方式简介"><span class="nav-number">1.</span> <span class="nav-text">广义认证方式简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#静态密码"><span class="nav-number">1.1.</span> <span class="nav-text">静态密码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#动态口令牌"><span class="nav-number">1.2.</span> <span class="nav-text">动态口令牌</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数字证书"><span class="nav-number">1.3.</span> <span class="nav-text">数字证书</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#令牌认证"><span class="nav-number">1.4.</span> <span class="nav-text">令牌认证</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Keystone-简介"><span class="nav-number">2.</span> <span class="nav-text">Keystone 简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Keystone-基本概念和理解"><span class="nav-number">2.1.</span> <span class="nav-text">Keystone 基本概念和理解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#keystone管理这些概念的方法"><span class="nav-number">2.2.</span> <span class="nav-text">keystone管理这些概念的方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#keystone-与各组件交互流程"><span class="nav-number">3.</span> <span class="nav-text">keystone 与各组件交互流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Keystone-获取-token-方式"><span class="nav-number">4.</span> <span class="nav-text">Keystone 获取 token 方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#方法一：使用-api-获取"><span class="nav-number">4.1.</span> <span class="nav-text">方法一：使用 api 获取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#方法二：使用-openstack-命令获取"><span class="nav-number">4.2.</span> <span class="nav-text">方法二：使用 openstack 命令获取</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Keystone-源码分析"><span class="nav-number">5.</span> <span class="nav-text">Keystone 源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Keystone-Api"><span class="nav-number">5.1.</span> <span class="nav-text">Keystone Api</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Router"><span class="nav-number">5.2.</span> <span class="nav-text">Router</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Services"><span class="nav-number">5.3.</span> <span class="nav-text">Services</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Backend-Driver"><span class="nav-number">5.4.</span> <span class="nav-text">Backend Driver</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Keystone-服务启动"><span class="nav-number"></span> <span class="nav-text">Keystone 服务启动</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#keystoneauth组件介绍"><span class="nav-number"></span> <span class="nav-text">keystoneauth组件介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#获取token"><span class="nav-number">1.</span> <span class="nav-text">获取token</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#过滤endpoint地址"><span class="nav-number">2.</span> <span class="nav-text">过滤endpoint地址</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#直接发送api请求"><span class="nav-number">3.</span> <span class="nav-text">直接发送api请求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配合client"><span class="nav-number">4.</span> <span class="nav-text">配合client</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#附录："><span class="nav-number"></span> <span class="nav-text">附录：</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ini-文件几个属性记录"><span class="nav-number">1.</span> <span class="nav-text">*.ini 文件几个属性记录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Keystone-V3-API-新特性"><span class="nav-number">2.</span> <span class="nav-text">Keystone V3 API 新特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#client-SDK使用"><span class="nav-number">3.</span> <span class="nav-text">client SDK使用</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+      
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="busuanzi-count">
+
+  <!-- <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script> -->
+  <!-- 上面这个是之前的，不知道为什么失效了，改成下面这个 -->
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">您是第<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>个小伙伴</span>
+  
+
+  
+    <span class="site-pv">本站总浏览<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">magiceses</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Pisces
+  </a>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count" style="color: #e90f92;">全站共 1m 字</span>
+</div>
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+  <!-- 按需加载背景 -->
+  <!-- 背景动画 -->
+<script type="text/javascript">
+  // 按需加载背景
+  // 如果是all，就直接加载了
+  if("pc" == "all") {
+    $.getScript("/js/src/particle.js?v=5.0.1");
+  }
+  // 识别手机或电脑的js开始
+  (function(){
+    var res = GetRequest();
+    var par = res['index'];
+    if(par!='gfan'){
+      var ua=navigator.userAgent.toLowerCase();
+      var contains=function (a, b){
+          if(a.indexOf(b)!=-1){return true;}
+      };
+      if((contains(ua,"android") && contains(ua,"mobile"))||(contains(ua,"android") && contains(ua,"mozilla"))||(contains(ua,"android") && contains(ua,"opera"))||contains(ua,"ucweb7")||contains(ua,"iphone")){
+        return false;
+      } else {
+        $.getScript("/js/src/particle.js?v=5.0.1");
+      }
+    }
+  })();
+  function GetRequest() {
+    var url = location.search;
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+      var str = url.substr(1);
+      strs = str.split("&");
+      for(var i = 0; i < strs.length; i ++) {
+        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+      }
+    }
+    return theRequest;
+  }
+</script>
+<!-- 识别手机或电脑的js结束 -->  
+
+  <!-- 页面点击小红心 -->
+  <!-- 页面点击小红心 -->
+
+  <script type="text/javascript" src="/js/src/love.js?v=5.0.1"></script>
+
+
+  <!-- 鼠标移动，效果 -->
+  <!-- 鼠标移动特效 -->
+
+  <script type="text/javascript" src="/js/src/jquery-stars.js?v=5.0.1"></script>
+  <script type="text/javascript">
+  jQuery('body').jstars({
+  	image_path: '/images',
+  	image: 'candy-cane-stars.png',
+  	style: 'white',
+  	width: 34,
+  	height: 34,
+  	delay: 700,
+  	frequency: 5
+  });
+  </script>
+
+
+  <!-- 页面 title 进入/离开 效果 -->
+
+  <script type="text/javascript">var OriginTitile=document.title,st;document.addEventListener("visibilitychange",function(){document.hidden?(document.title="Waiting for you back！",clearTimeout(st)):(document.title="Thanks for visit~ "+OriginTitile,st=setTimeout(function(){document.title=OriginTitile},4e3))})</script>
+
+
+</body>
+</html>

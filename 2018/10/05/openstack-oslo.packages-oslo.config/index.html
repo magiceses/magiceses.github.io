@@ -1,0 +1,1216 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Courier New:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Openstack,Oslo," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="天青色等烟雨" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="生命太过短暂，今日放弃了明天不必须能得到。
+
+随着OpenStack项目的不断发展与完善，OpenStack社区将所有组件中的具有共性的组件剥离出来，并统一放在oslo组件下。oslo中的组件不仅可以在OpenStack项目中使用，也可以单独作为第三方工具包供其他项目使用。oslo.config项目是oslo组件中用于OpenStack配置文件的一个项目。本文首先以Nova项目为例，介绍了oslo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Oslo系列之oslo.config">
+<meta property="og:url" content="https://magiceses.github.io/2018/10/05/openstack-oslo.packages-oslo.config/index.html">
+<meta property="og:site_name" content="天青色等烟雨">
+<meta property="og:description" content="生命太过短暂，今日放弃了明天不必须能得到。
+
+随着OpenStack项目的不断发展与完善，OpenStack社区将所有组件中的具有共性的组件剥离出来，并统一放在oslo组件下。oslo中的组件不仅可以在OpenStack项目中使用，也可以单独作为第三方工具包供其他项目使用。oslo.config项目是oslo组件中用于OpenStack配置文件的一个项目。本文首先以Nova项目为例，介绍了oslo">
+<meta property="og:updated_time" content="2021-10-14T01:49:26.696Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Oslo系列之oslo.config">
+<meta name="twitter:description" content="生命太过短暂，今日放弃了明天不必须能得到。
+
+随着OpenStack项目的不断发展与完善，OpenStack社区将所有组件中的具有共性的组件剥离出来，并统一放在oslo组件下。oslo中的组件不仅可以在OpenStack项目中使用，也可以单独作为第三方工具包供其他项目使用。oslo.config项目是oslo组件中用于OpenStack配置文件的一个项目。本文首先以Nova项目为例，介绍了oslo">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://magiceses.github.io/2018/10/05/openstack-oslo.packages-oslo.config/"/>
+
+
+<!-- 网页加载条 -->
+<script src="/js/src/pace.min.js"></script>
+  <title> Oslo系列之oslo.config | 天青色等烟雨 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">天青色等烟雨</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">而我在等你</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-guestbook">
+          <a href="/guestbook" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-commenting"></i> <br />
+            
+            留言
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+      
+      
+        <li class="menu-item"> <a title="把这个链接拖到你的工具栏中,任何网页都可以High" href='javascript:(
+/*
+ * Copyright (C) 2016 Never_yu (Neveryu.github.io) <React.dong.yu@gmail.com>
+ * Sina Weibo (http://weibo.com/Neveryu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function go() {
+
+var songs = [
+  "http://dl.stream.qqmusic.qq.com/C400001Qu4I30eVFYb.m4a?vkey=2127178E4405E7B8B268F20F05232485735CCF4FF8C1432F0360D2626D0B6C9564B5627C7AB481BBC685FEDB0946A50E97C66F0D1B008226&guid=7175649092&uin=0&fromtag=66",
+  "",
+  "",
+  ""
+];
+
+function c() {
+  var e = document.createElement("link");
+  e.setAttribute("type", "text/css");
+  e.setAttribute("rel", "stylesheet");
+  e.setAttribute("href", f);
+  e.setAttribute("class", l);
+  document.body.appendChild(e)
+}
+
+function h() {
+  var e = document.getElementsByClassName(l);
+  for (var t = 0; t < e.length; t++) {
+    document.body.removeChild(e[t])
+  }
+}
+
+function p() {
+  var e = document.createElement("div");
+  e.setAttribute("class", a);
+  document.body.appendChild(e);
+  setTimeout(function() {
+    document.body.removeChild(e)
+  }, 100)
+}
+
+function d(e) {
+  return {
+    height : e.offsetHeight,
+    width : e.offsetWidth
+  }
+}
+
+function v(i) {
+  var s = d(i);
+  return s.height > e && s.height < n && s.width > t && s.width < r
+}
+
+function m(e) {
+  var t = e;
+  var n = 0;
+  while (!!t) {
+    n += t.offsetTop;
+    t = t.offsetParent
+  }
+  return n
+}
+
+function g() {
+  var e = document.documentElement;
+  if (!!window.innerWidth) {
+    return window.innerHeight
+  } else if (e && !isNaN(e.clientHeight)) {
+    return e.clientHeight
+  }
+  return 0
+}
+
+function y() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  }
+  return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+}
+
+function E(e) {
+  var t = m(e);
+  return t >= w && t <= b + w
+}
+
+function S() {
+  var e = document.getElementById("audio_element_id");
+  if(e != null){
+    var index = parseInt(e.getAttribute("curSongIndex"));
+    if(index > songs.length - 2) {
+      index = 0;
+    } else {
+      index++;
+    }
+    e.setAttribute("curSongIndex", index);
+    N();
+  }
+
+  e.src = i;
+  e.play()
+}
+
+function x(e) {
+  e.className += " " + s + " " + o
+}
+
+function T(e) {
+  e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+}
+
+function N() {
+  var e = document.getElementsByClassName(s);
+  var t = new RegExp("\\b" + s + "\\b");
+  for (var n = 0; n < e.length; ) {
+    e[n].className = e[n].className.replace(t, "")
+  }
+}
+
+function initAudioEle() {
+  var e = document.getElementById("audio_element_id");
+  if(e === null){
+    e = document.createElement("audio");
+    e.setAttribute("class", l);
+    e.setAttribute("curSongIndex", 0);
+    e.id = "audio_element_id";
+    e.loop = false;
+    e.bgcolor = 0;
+    e.addEventListener("canplay", function() {
+      setTimeout(function() {
+        x(k)
+      }, 500);
+      setTimeout(function() {
+        N();
+        p();
+        for (var e = 0; e < O.length; e++) {
+          T(O[e])
+        }
+      }, 15500)
+    }, true);
+    e.addEventListener("ended", function() {
+      N();
+      h();
+      go();
+    }, true);
+    e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+    document.body.appendChild(e);
+  }
+}
+
+initAudioEle();
+var e = 30;
+var t = 30;
+var n = 350;
+var r = 350;
+
+var curSongIndex = parseInt(document.getElementById("audio_element_id").getAttribute("curSongIndex"));
+var i = songs[curSongIndex];
+
+var s = "mw-harlem_shake_me";
+var o = "im_first";
+var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+var a = "mw-strobe_light";
+
+/* harlem-shake-style.css，替换成你的位置，也可以直接使用：//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css */
+var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+
+var l = "mw_added_css";
+var b = g();
+var w = y();
+var C = document.getElementsByTagName("*");
+var k = null;
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    if (E(A)) {
+      k = A;
+      break
+    }
+  }
+}
+if (A === null) {
+  console.warn("Could not find a node of the right size. Please try a different page.");
+  return
+}
+c();
+S();
+var O = [];
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    O.push(A)
+  }
+}
+})()'><i class="menu-item-icon fa fa-music fa-fw"></i> High一下</a></li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search fa-lg"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Oslo系列之oslo.config
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2018-10-05T23:25:24+08:00" content="2018-10-05">
+              2018-10-05
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Openstack/" itemprop="url" rel="index">
+                    <span itemprop="name">Openstack</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv">热度
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p id="div-border-top-green">生命太过短暂，今日放弃了明天不必须能得到。<br></p>
+
+<p>随着OpenStack项目的不断发展与完善，OpenStack社区将所有组件中的具有共性的组件剥离出来，并统一放在oslo组件下。oslo中的组件不仅可以在OpenStack项目中使用，也可以单独作为第三方工具包供其他项目使用。oslo.config项目是oslo组件中用于OpenStack配置文件的一个项目。本文首先以Nova项目为例，介绍了oslo.config的用法；然后，根据源码详细分析了其实现原理。</p>
+<h1 id="oslo-config用法"><a href="#oslo-config用法" class="headerlink" title="oslo.config用法"></a>oslo.config用法</h1><h2 id="定义配置项"><a href="#定义配置项" class="headerlink" title="定义配置项"></a>定义配置项</h2><p>本小节以nova组件为例介绍oslo.config组件的用法。首先，要使用oslo.config需要导入该模块，一般地，直接导入oslo.config中的cfg即可。</p>
+<a id="more"></a>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> oslo_config <span class="keyword">import</span> cfg</span><br></pre></td></tr></table></figure>
+<p>导入cfg后，需要新建一个表示配置组的OptGroup类，如在Nova中添加api相关配置时可以添加一个api_group类。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">api_group = cfg.OptGroup(<span class="string">'api'</span>,</span><br><span class="line">    title=<span class="string">'API options'</span>,</span><br><span class="line">    help=<span class="string">"""</span></span><br><span class="line"><span class="string">Options under this group are used to define Nova API.</span></span><br><span class="line"><span class="string">"""</span>)</span><br></pre></td></tr></table></figure>
+<p>api_group表示了一组关于api的配置项，其中，api表示该配置组的名称；title描述了该配置组的标题；help则详细描述了该配置组的作用。</p>
+<p>创建了配置组类之后，则需要创建所有的配置项，如在Nova中添加关于api权限相关的配置参数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">auth_opts = [</span><br><span class="line">    cfg.StrOpt(<span class="string">"auth_strategy"</span>,</span><br><span class="line">        default=<span class="string">"keystone"</span>,</span><br><span class="line">        choices=(<span class="string">"keystone"</span>, <span class="string">"noauth2"</span>),</span><br><span class="line">        deprecated_group=<span class="string">"DEFAULT"</span>,</span><br><span class="line">        help=<span class="string">"""</span></span><br><span class="line"><span class="string">This determines the strategy to use for authentication: keystone or noauth2.</span></span><br><span class="line"><span class="string">'noauth2' is designed for testing only, as it does no actual credential</span></span><br><span class="line"><span class="string">checking. 'noauth2' provides administrative credentials only if 'admin' is</span></span><br><span class="line"><span class="string">specified as the username.</span></span><br><span class="line"><span class="string">"""</span>),</span><br><span class="line">    cfg.BoolOpt(<span class="string">"use_forwarded_for"</span>,</span><br><span class="line">        default=<span class="keyword">False</span>,</span><br><span class="line">        deprecated_group=<span class="string">"DEFAULT"</span>,</span><br><span class="line">        help=<span class="string">"""</span></span><br><span class="line"><span class="string">When True, the 'X-Forwarded-For' header is treated as the canonical remote</span></span><br><span class="line"><span class="string">address. When False (the default), the 'remote_address' header is used.</span></span><br><span class="line"><span class="string">You should only enable this if you have an HTML sanitizing proxy.</span></span><br><span class="line"><span class="string">"""</span>),</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>auth_opts配置了一组与api权限等相关的配置项，其中有String和Bool类型的配置项，通过分别创建StrOpt对象和BoolOpt对象设置参数的类型。</p>
+<p>创建配置项之后，则需要将所有配置项都注册到配置组中，如在Nova中将auth_opts等配置项注册到api_group配置组中。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">API_OPTS = (auth_opts +</span><br><span class="line">            metadata_opts +</span><br><span class="line">            file_opts +</span><br><span class="line">            osapi_opts +</span><br><span class="line">            allow_instance_snapshots_opts +</span><br><span class="line">            osapi_hide_opts +</span><br><span class="line">            fping_path_opts +</span><br><span class="line">            os_network_opts +</span><br><span class="line">            enable_inst_pw_opts)</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">register_opts</span><span class="params">(conf)</span>:</span></span><br><span class="line">    conf.register_group(api_group)</span><br><span class="line">    conf.register_opts(API_OPTS, group=api_group)</span><br><span class="line">    conf.register_opts(deprecated_opts)</span><br></pre></td></tr></table></figure>
+<p>其中，调用register_opts(API_OPTS, group=api_group)表示将与api相关的配置项注册到api_group配置组中；register_group(api_group)表示将api_group配置组与具体的配置文件相关联；而register_opts(deprecated_opts)则将一些不再支持的配置项单独配置。</p>
+<h2 id="读取配置文件并使用配置参数"><a href="#读取配置文件并使用配置参数" class="headerlink" title="读取配置文件并使用配置参数"></a>读取配置文件并使用配置参数</h2><p>一般，OpenStack组件在启动服务时便加载了配置文件，读取了各配置项；因此如果想要修改的配置信息被应用到服务中需要重启服务。如Nova启动nova-api服务时，会调用nova/cmd/api.py中的main()函数，在main()函数中，首先便会进行读取文件的操作。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">config.parse_args(sys.argv)</span><br></pre></td></tr></table></figure>
+<p>而parse_args()函数通过sys.argv中指定的配置项和配置文件中的配置项，读取api相关的配置参数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">parse_args</span><span class="params">(argv, default_config_files=None, configure_db=True,</span></span></span><br><span class="line"><span class="function"><span class="params">               init_rpc=True)</span>:</span></span><br><span class="line">    log.register_options(CONF)</span><br><span class="line">    <span class="comment"># We use the oslo.log default log levels which includes suds=INFO</span></span><br><span class="line">    <span class="comment"># and add only the extra levels that Nova needs</span></span><br><span class="line">    <span class="keyword">if</span> CONF.glance.debug:</span><br><span class="line">        extra_default_log_levels = [<span class="string">'glanceclient=DEBUG'</span>]</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        extra_default_log_levels = [<span class="string">'glanceclient=WARN'</span>]</span><br><span class="line">    log.set_defaults(default_log_levels=log.get_default_log_levels() +</span><br><span class="line">                     extra_default_log_levels)</span><br><span class="line">    rpc.set_defaults(control_exchange=<span class="string">'nova'</span>)</span><br><span class="line">    <span class="keyword">if</span> profiler:</span><br><span class="line">        profiler.set_defaults(CONF)</span><br><span class="line">    config.set_middleware_defaults()</span><br><span class="line"> </span><br><span class="line">    CONF(argv[<span class="number">1</span>:],</span><br><span class="line">         project=<span class="string">'nova'</span>,</span><br><span class="line">         version=version.version_string(),</span><br><span class="line">         default_config_files=default_config_files)</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">if</span> init_rpc:</span><br><span class="line">        rpc.init(CONF)</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">if</span> configure_db:</span><br><span class="line">        sqlalchemy_api.configure(CONF)</span><br></pre></td></tr></table></figure>
+<p>nova通过导入nova.conf模块，此时会调用nova.conf的<strong>init</strong>.py文件中的各个register_opt()函数注册所有配置项。然后，调用了Config中的CongifOpts类的<strong>call</strong>()方法通过命令行参数和配置文件将配置项缓存到配置对象CONF中。之后，只需要在需要用到配置参数的文件中导入CONF对象即可使用其中的配置项。如在Nova中可以使用CONF.api.enable_instance_password读取配置文件中是否允许配置实例密码的配置项。</p>
+<h1 id="oslo-config实现原理"><a href="#oslo-config实现原理" class="headerlink" title="oslo.config实现原理"></a>oslo.config实现原理</h1><p>本节结合oslo.config的用法详细介绍oslo.config的实现原理。oslo.config项目相对比较简单，其中主要设计到oslo_config目录下的cfg.py和types.py等文件。其中，cfg.py定义了配置类的数据结构和方法等；types.py则封装了OpenStack中各配置项的类型。</p>
+<p>要使用oslo.config最重要的便是ConfigOpts类，所以本文首先介绍ConfigOpts类。ConfigOpts类是一个用来提供注册配置组和配置项的配置项管理类，其中包含几个重要的属性，_opts表示所有的配置项，_cli_opts表示所有的命令行配置项，_groups表示所有的配置组，_namespace表示各服务的命名空间；OpenStack服务启动后所有的配置参数都会通过这四个参数保存到内存中。</p>
+<p>上面提到启动服务时，会调用ConfigOpts类的<strong>call</strong>()方法将服务的所有配置项缓存到内存中，其定义如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self,</span></span></span><br><span class="line"><span class="function"><span class="params">             args=None,</span></span></span><br><span class="line"><span class="function"><span class="params">             project=None,</span></span></span><br><span class="line"><span class="function"><span class="params">             prog=None,</span></span></span><br><span class="line"><span class="function"><span class="params">             version=None,</span></span></span><br><span class="line"><span class="function"><span class="params">             usage=None,</span></span></span><br><span class="line"><span class="function"><span class="params">             default_config_files=None,</span></span></span><br><span class="line"><span class="function"><span class="params">             default_config_dirs=None,</span></span></span><br><span class="line"><span class="function"><span class="params">             validate_default_values=False,</span></span></span><br><span class="line"><span class="function"><span class="params">             description=None,</span></span></span><br><span class="line"><span class="function"><span class="params">             epilog=None)</span>:</span></span><br><span class="line">    <span class="string">"""Parse command line arguments and config files.</span></span><br><span class="line"><span class="string">    Calling a ConfigOpts object causes the supplied command line arguments</span></span><br><span class="line"><span class="string">    and config files to be parsed, causing opt values to be made available</span></span><br><span class="line"><span class="string">    as attributes of the object.</span></span><br><span class="line"><span class="string">    The object may be called multiple times, each time causing the previous</span></span><br><span class="line"><span class="string">    set of values to be overwritten.</span></span><br><span class="line"><span class="string">    Automatically registers the --config-file option with either a supplied</span></span><br><span class="line"><span class="string">    list of default config files, or a list from find_config_files().</span></span><br><span class="line"><span class="string">    If the --config-dir option is set, any *.conf files from this</span></span><br><span class="line"><span class="string">    directory are pulled in, after all the file(s) specified by the</span></span><br><span class="line"><span class="string">    --config-file option.</span></span><br><span class="line"><span class="string">    :param args: command line arguments (defaults to sys.argv[1:])</span></span><br><span class="line"><span class="string">    :param project: the toplevel project name, used to locate config files</span></span><br><span class="line"><span class="string">    :param prog: the name of the program (defaults to sys.argv[0]</span></span><br><span class="line"><span class="string">        basename, without extension .py)</span></span><br><span class="line"><span class="string">    :param version: the program version (for --version)</span></span><br><span class="line"><span class="string">    :param usage: a usage string (%prog will be expanded)</span></span><br><span class="line"><span class="string">    :param description: A description of what the program does</span></span><br><span class="line"><span class="string">    :param epilog: Text following the argument descriptions</span></span><br><span class="line"><span class="string">    :param default_config_files: config files to use by default</span></span><br><span class="line"><span class="string">    :param default_config_dirs: config dirs to use by default</span></span><br><span class="line"><span class="string">    :param validate_default_values: whether to validate the default values</span></span><br><span class="line"><span class="string">    :raises: SystemExit, ConfigFilesNotFoundError, ConfigFileParseError,</span></span><br><span class="line"><span class="string">             ConfigFilesPermissionDeniedError,</span></span><br><span class="line"><span class="string">             RequiredOptError, DuplicateOptError</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    self.clear()</span><br><span class="line"> </span><br><span class="line">    self._validate_default_values = validate_default_values</span><br><span class="line"> </span><br><span class="line">    prog, default_config_files, default_config_dirs = self._pre_setup(</span><br><span class="line">        project, prog, version, usage, description, epilog,</span><br><span class="line">        default_config_files, default_config_dirs)</span><br><span class="line"> </span><br><span class="line">    self._setup(project, prog, version, usage, default_config_files,</span><br><span class="line">                default_config_dirs)</span><br><span class="line"> </span><br><span class="line">    self._namespace = self._parse_cli_opts(args <span class="keyword">if</span> args <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span></span><br><span class="line">                                           <span class="keyword">else</span> sys.argv[<span class="number">1</span>:])</span><br><span class="line">    <span class="keyword">if</span> self._namespace._files_not_found:</span><br><span class="line">        <span class="keyword">raise</span> ConfigFilesNotFoundError(self._namespace._files_not_found)</span><br><span class="line">    <span class="keyword">if</span> self._namespace._files_permission_denied:</span><br><span class="line">        <span class="keyword">raise</span> ConfigFilesPermissionDeniedError(</span><br><span class="line">            self._namespace._files_permission_denied)</span><br><span class="line"> </span><br><span class="line">    self._check_required_opts()</span><br></pre></td></tr></table></figure>
+<p>在该方法中，首先将所有配置项清空，然后根据项目名称和版本等信息获取配置文件路径，然后根据命令行参数和配置文件读取服务所有配置信息，并进行合法性校验。</p>
+<p>除此之外，ConfigOpts类还定义了register_opt()方法，register_cli_opt()方法和register_group()方法等分别实现注册配置文件或命令行参数的配置项和注册配置组的操作。另外，也提供了unregister_opt()等方法卸载配置项，添加了clear()方法清空ConfigOpts对象中的配置信息。</p>
+<p>在ConfigOpts类定义的属性和方法中，用到了两个重要的类：Opt类和OptGroup类。其中，Opt类定义了一个配置项的模板，主要属性包括配置项名称name，配置项类型type，关联的ConfigOpts对象dest，默认值default和帮助信息help等。为了更好的封装配置项，oslo.config针对具体的配置参数类型为Opt继承了一系列子类，包括StrOpt、BoolOpt、IntOpt、FloatOpt、ListOpt、DictOpt、IPOpt、PortOpt、HostnameOpt、HostAddressOpt、URIOpt、MultiOpt、MultiStrOpt、SubCommandOpt、_ConfigFileOpt、_ConfigDirOpt等。OptGroup类则定义了一个配置组的模板，其主要属性包括配置组名称name，配置组描述title，配置组帮助信息help等。ConfigOpts类利用Opt和OptGroup辅助完成配置项的注册和读取等。</p>
+<p>在读取配置文件时，oslo.config还定义了ConfigParser类将配置文件中的所有配置项封装为Json数据包便于处理。</p>
+<p>最后，oslo.config将所有配置项的数据类型使用ConfigType类进行了封装，定义了各数据类型的类型名称、格式、最大值、最小值、最大长度等；这些数据类型主要包括String、MultiString、Boolean、Number、Integer、Float、Port、List、Range、Dict、IPAddress、Hostname、HostAddress、URI等。在使用时，可以调用<strong>call</strong>()方法校验读取的参数是否符合类型要求，也可以调用_formatter()方法对配置参数进行格式化操作。</p>
+<p>原文链接：<a href="https://blog.csdn.net/Bill_Xiang_/article/details/78392616" target="_blank" rel="external">https://blog.csdn.net/Bill_Xiang_/article/details/78392616</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+<blockquote class="blockquote-center" style="color: #ccc;">
+    -------------本文结束 <i class="fa fa-apple"></i> 感谢您的阅读-------------
+</blockquote>
+
+  <span id="inline-green" style="border-radius:3px;">作者</span>：<a class="link-blue" href="https://github.com/magiceses" target="_blank">Magiceses</a><br/>有问题请 <a class="link-blue" href="https://magiceses.github.io/guestbook" target="_blank">留言</a> 或者私信我的 <a class="link-blue" href="https://weibo.com/u/3069595351" target="_blank">微博</a>。
+
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>满分是10分的话，这篇文章你给几分</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/reward/reward_wechat.png" alt="magiceses WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/reward/reward_alipay.png" alt="magiceses Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Openstack/" rel="tag"><i class="fa fa-tag"></i> Openstack</a>
+          
+            <a href="/tags/Oslo/" rel="tag"><i class="fa fa-tag"></i> Oslo</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/10/05/openstack-oslo.packages-oslo.db/" rel="next" title="Oslo系列之oslo.db">
+                <i class="fa fa-chevron-left"></i> Oslo系列之oslo.db
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/10/05/openstack-oslo.packages-oslo.concurrency/" rel="prev" title="Oslo系列之oslo.concurrency">
+                Oslo系列之oslo.concurrency <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar/avatar.png"
+               alt="magiceses" />
+          <p class="site-author-name" itemprop="name">magiceses</p>
+          <p class="site-description motion-element" itemprop="description">Stay Hungry,Stay Foolish</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">61</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/magiceses" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://blog.csdn.net/weixin_43700106" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-chrome"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/weblog" title="建站日志" target="_blank">建站日志</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/reward" title="打赏" target="_blank">打赏</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#oslo-config用法"><span class="nav-number">1.</span> <span class="nav-text">oslo.config用法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#定义配置项"><span class="nav-number">1.1.</span> <span class="nav-text">定义配置项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#读取配置文件并使用配置参数"><span class="nav-number">1.2.</span> <span class="nav-text">读取配置文件并使用配置参数</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#oslo-config实现原理"><span class="nav-number">2.</span> <span class="nav-text">oslo.config实现原理</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+      
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="busuanzi-count">
+
+  <!-- <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script> -->
+  <!-- 上面这个是之前的，不知道为什么失效了，改成下面这个 -->
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">您是第<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>个小伙伴</span>
+  
+
+  
+    <span class="site-pv">本站总浏览<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">magiceses</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Pisces
+  </a>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count" style="color: #e90f92;">全站共 1m 字</span>
+</div>
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+  <!-- 按需加载背景 -->
+  <!-- 背景动画 -->
+<script type="text/javascript">
+  // 按需加载背景
+  // 如果是all，就直接加载了
+  if("pc" == "all") {
+    $.getScript("/js/src/particle.js?v=5.0.1");
+  }
+  // 识别手机或电脑的js开始
+  (function(){
+    var res = GetRequest();
+    var par = res['index'];
+    if(par!='gfan'){
+      var ua=navigator.userAgent.toLowerCase();
+      var contains=function (a, b){
+          if(a.indexOf(b)!=-1){return true;}
+      };
+      if((contains(ua,"android") && contains(ua,"mobile"))||(contains(ua,"android") && contains(ua,"mozilla"))||(contains(ua,"android") && contains(ua,"opera"))||contains(ua,"ucweb7")||contains(ua,"iphone")){
+        return false;
+      } else {
+        $.getScript("/js/src/particle.js?v=5.0.1");
+      }
+    }
+  })();
+  function GetRequest() {
+    var url = location.search;
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+      var str = url.substr(1);
+      strs = str.split("&");
+      for(var i = 0; i < strs.length; i ++) {
+        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+      }
+    }
+    return theRequest;
+  }
+</script>
+<!-- 识别手机或电脑的js结束 -->  
+
+  <!-- 页面点击小红心 -->
+  <!-- 页面点击小红心 -->
+
+  <script type="text/javascript" src="/js/src/love.js?v=5.0.1"></script>
+
+
+  <!-- 鼠标移动，效果 -->
+  <!-- 鼠标移动特效 -->
+
+  <script type="text/javascript" src="/js/src/jquery-stars.js?v=5.0.1"></script>
+  <script type="text/javascript">
+  jQuery('body').jstars({
+  	image_path: '/images',
+  	image: 'candy-cane-stars.png',
+  	style: 'white',
+  	width: 34,
+  	height: 34,
+  	delay: 700,
+  	frequency: 5
+  });
+  </script>
+
+
+  <!-- 页面 title 进入/离开 效果 -->
+
+  <script type="text/javascript">var OriginTitile=document.title,st;document.addEventListener("visibilitychange",function(){document.hidden?(document.title="Waiting for you back！",clearTimeout(st)):(document.title="Thanks for visit~ "+OriginTitile,st=setTimeout(function(){document.title=OriginTitile},4e3))})</script>
+
+
+</body>
+</html>

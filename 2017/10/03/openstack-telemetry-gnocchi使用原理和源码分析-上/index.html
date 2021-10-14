@@ -1,0 +1,1341 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Courier New:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Openstack,Telemetry,Gnocchi," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="天青色等烟雨" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="生活的模样很残酷，再苦再累，你都不能放弃，因为无路可退，进一步或许你会看到一方的壮阔苍旻；退一步或许你会万劫不复。你无法选择出生，但你可以选择奋发向上，用自己的辛劳和汗水去创造属于自己的人生，努力让自己过上自己想要过得生活。
+
+Gnocchi 介绍简介之前我们已经介绍过了paste、WSGI、pecan等内容，每一个知识点，我们都详细分析了使用方式，pecan还分析了源码，下面我们就结合之前的几个">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Gnocchi 使用原理及源码分析-上">
+<meta property="og:url" content="https://magiceses.github.io/2017/10/03/openstack-telemetry-gnocchi使用原理和源码分析-上/index.html">
+<meta property="og:site_name" content="天青色等烟雨">
+<meta property="og:description" content="生活的模样很残酷，再苦再累，你都不能放弃，因为无路可退，进一步或许你会看到一方的壮阔苍旻；退一步或许你会万劫不复。你无法选择出生，但你可以选择奋发向上，用自己的辛劳和汗水去创造属于自己的人生，努力让自己过上自己想要过得生活。
+
+Gnocchi 介绍简介之前我们已经介绍过了paste、WSGI、pecan等内容，每一个知识点，我们都详细分析了使用方式，pecan还分析了源码，下面我们就结合之前的几个">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-telemetry-1.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-telemetry-2.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-telemetry-3.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-telemetry-4.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-telemetry-5.png">
+<meta property="og:updated_time" content="2021-10-13T12:27:29.823Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Gnocchi 使用原理及源码分析-上">
+<meta name="twitter:description" content="生活的模样很残酷，再苦再累，你都不能放弃，因为无路可退，进一步或许你会看到一方的壮阔苍旻；退一步或许你会万劫不复。你无法选择出生，但你可以选择奋发向上，用自己的辛劳和汗水去创造属于自己的人生，努力让自己过上自己想要过得生活。
+
+Gnocchi 介绍简介之前我们已经介绍过了paste、WSGI、pecan等内容，每一个知识点，我们都详细分析了使用方式，pecan还分析了源码，下面我们就结合之前的几个">
+<meta name="twitter:image" content="https://magiceses.github.io/images/openstack-telemetry-1.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://magiceses.github.io/2017/10/03/openstack-telemetry-gnocchi使用原理和源码分析-上/"/>
+
+
+<!-- 网页加载条 -->
+<script src="/js/src/pace.min.js"></script>
+  <title> Gnocchi 使用原理及源码分析-上 | 天青色等烟雨 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">天青色等烟雨</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">而我在等你</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-guestbook">
+          <a href="/guestbook" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-commenting"></i> <br />
+            
+            留言
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+      
+      
+        <li class="menu-item"> <a title="把这个链接拖到你的工具栏中,任何网页都可以High" href='javascript:(
+/*
+ * Copyright (C) 2016 Never_yu (Neveryu.github.io) <React.dong.yu@gmail.com>
+ * Sina Weibo (http://weibo.com/Neveryu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function go() {
+
+var songs = [
+  "http://dl.stream.qqmusic.qq.com/C400001Qu4I30eVFYb.m4a?vkey=2127178E4405E7B8B268F20F05232485735CCF4FF8C1432F0360D2626D0B6C9564B5627C7AB481BBC685FEDB0946A50E97C66F0D1B008226&guid=7175649092&uin=0&fromtag=66",
+  "",
+  "",
+  ""
+];
+
+function c() {
+  var e = document.createElement("link");
+  e.setAttribute("type", "text/css");
+  e.setAttribute("rel", "stylesheet");
+  e.setAttribute("href", f);
+  e.setAttribute("class", l);
+  document.body.appendChild(e)
+}
+
+function h() {
+  var e = document.getElementsByClassName(l);
+  for (var t = 0; t < e.length; t++) {
+    document.body.removeChild(e[t])
+  }
+}
+
+function p() {
+  var e = document.createElement("div");
+  e.setAttribute("class", a);
+  document.body.appendChild(e);
+  setTimeout(function() {
+    document.body.removeChild(e)
+  }, 100)
+}
+
+function d(e) {
+  return {
+    height : e.offsetHeight,
+    width : e.offsetWidth
+  }
+}
+
+function v(i) {
+  var s = d(i);
+  return s.height > e && s.height < n && s.width > t && s.width < r
+}
+
+function m(e) {
+  var t = e;
+  var n = 0;
+  while (!!t) {
+    n += t.offsetTop;
+    t = t.offsetParent
+  }
+  return n
+}
+
+function g() {
+  var e = document.documentElement;
+  if (!!window.innerWidth) {
+    return window.innerHeight
+  } else if (e && !isNaN(e.clientHeight)) {
+    return e.clientHeight
+  }
+  return 0
+}
+
+function y() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  }
+  return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+}
+
+function E(e) {
+  var t = m(e);
+  return t >= w && t <= b + w
+}
+
+function S() {
+  var e = document.getElementById("audio_element_id");
+  if(e != null){
+    var index = parseInt(e.getAttribute("curSongIndex"));
+    if(index > songs.length - 2) {
+      index = 0;
+    } else {
+      index++;
+    }
+    e.setAttribute("curSongIndex", index);
+    N();
+  }
+
+  e.src = i;
+  e.play()
+}
+
+function x(e) {
+  e.className += " " + s + " " + o
+}
+
+function T(e) {
+  e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+}
+
+function N() {
+  var e = document.getElementsByClassName(s);
+  var t = new RegExp("\\b" + s + "\\b");
+  for (var n = 0; n < e.length; ) {
+    e[n].className = e[n].className.replace(t, "")
+  }
+}
+
+function initAudioEle() {
+  var e = document.getElementById("audio_element_id");
+  if(e === null){
+    e = document.createElement("audio");
+    e.setAttribute("class", l);
+    e.setAttribute("curSongIndex", 0);
+    e.id = "audio_element_id";
+    e.loop = false;
+    e.bgcolor = 0;
+    e.addEventListener("canplay", function() {
+      setTimeout(function() {
+        x(k)
+      }, 500);
+      setTimeout(function() {
+        N();
+        p();
+        for (var e = 0; e < O.length; e++) {
+          T(O[e])
+        }
+      }, 15500)
+    }, true);
+    e.addEventListener("ended", function() {
+      N();
+      h();
+      go();
+    }, true);
+    e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+    document.body.appendChild(e);
+  }
+}
+
+initAudioEle();
+var e = 30;
+var t = 30;
+var n = 350;
+var r = 350;
+
+var curSongIndex = parseInt(document.getElementById("audio_element_id").getAttribute("curSongIndex"));
+var i = songs[curSongIndex];
+
+var s = "mw-harlem_shake_me";
+var o = "im_first";
+var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+var a = "mw-strobe_light";
+
+/* harlem-shake-style.css，替换成你的位置，也可以直接使用：//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css */
+var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+
+var l = "mw_added_css";
+var b = g();
+var w = y();
+var C = document.getElementsByTagName("*");
+var k = null;
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    if (E(A)) {
+      k = A;
+      break
+    }
+  }
+}
+if (A === null) {
+  console.warn("Could not find a node of the right size. Please try a different page.");
+  return
+}
+c();
+S();
+var O = [];
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    O.push(A)
+  }
+}
+})()'><i class="menu-item-icon fa fa-music fa-fw"></i> High一下</a></li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search fa-lg"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Gnocchi 使用原理及源码分析-上
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-10-03T23:25:24+08:00" content="2017-10-03">
+              2017-10-03
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Openstack/" itemprop="url" rel="index">
+                    <span itemprop="name">Openstack</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv">热度
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p id="div-border-top-green">生活的模样很残酷，再苦再累，你都不能放弃，因为无路可退，进一步或许你会看到一方的壮阔苍旻；退一步或许你会万劫不复。你无法选择出生，但你可以选择奋发向上，用自己的辛劳和汗水去创造属于自己的人生，努力让自己过上自己想要过得生活。<br></p>
+
+<h1 id="Gnocchi-介绍"><a href="#Gnocchi-介绍" class="headerlink" title="Gnocchi 介绍"></a>Gnocchi 介绍</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>之前我们已经介绍过了<code>paste</code>、<code>WSGI</code>、<code>pecan</code>等内容，每一个知识点，我们都详细分析了使用方式，<code>pecan</code>还分析了源码，下面我们就结合之前的几个知识点来分析一个项目的启动过程，以 <code>openstack</code> 项目 <code>gnocchi</code> 为例。</p>
+<p>Gnocchi是一个能够高效存储海量监控指标（metric）测量值的系统，其设计目标是能够在云环境中提供时序数据库服务（TDBaaS，Time-series Database as a Service），通过对外暴露HTTPREST API来创建和操作各种监控资源的属性和各项监控指标的测量数据，最终实现了监控指标测量值的查询与存储的数据规模无关。Gnocchi最初由Julien Danjou于2014年发起，旨在为Ceilometer项目解决其最初利用传统关系型数据库作为监控数据存储后端时，遇到的扩展性问题，提供存储海量监控数据的服务。</p>
+<a id="more"></a>
+<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p>Gnocchi的架构实际上并不复杂，主要由三个服务组成：一个HTTP REST API服务（gnocchi-api），一个异步处理监控数据的守护程序（gnocchi-metricd）和一个可选的statsd兼容的守护程序（gnocchi-statsd）负责监听通过TCP或者UDP发送的计量数据。监控数据由HTTP REST API服务和statsd守护程序负责获取，而metricd守护程序则在后台负责对获取的数据进行各种操作，包括测量值的计算和聚合，过期监控指标的清除等。其中，API服务和metricd守护程序都是无状态的，可以轻松的根据负载情况进行扩展。</p>
+<p><img src="/images/openstack-telemetry-1.png" alt="img"></p>
+<p>从图可以看出Gnocchi的服务主要包含两大服务，API和Metricd服务。同时可以看到有三个存储，Measure Storage、Aggregate Storage和Index。</p>
+<p><strong>Measure Storage</strong>：是经过ceilometer-agent-notification服务处理后发送过来的数据，是实际的监控数据，但这些数据还需要经过gnocchi服务处理，处理后就会删除掉。比如这部分数据就可以保存到file中，当然也支持保存到ceph，但这属于临时数据，所以用file保存就可以了。</p>
+<p><strong>Aggregate Storage</strong>：Aggreate是总数、合计的意思，gnocchi服务采用的是一种独特的时间序列存储方法，这个存储存放的是按照预定义的策略进行聚合计算后的数据，这样在获取监控数据展示时速度就会很快，因为已经计算过了。用户看到的是这层数据。后端存储包括file、swift、ceph，influxdb，默认使用file。可以保存到ceph中，这样可在任意一个节点上获取，但由于存储的都是大量小文件，大量的小文件对ceph来说并不友好。</p>
+<p><strong>Index</strong>：通常是一个关系型数据库（比如MYSQL），是监控数据的元数据，用以索引取出resources和metrics，使得可以快速的从Measure Storage和Aggregate Storage中取出所需要的数据。目前支持4种drivers，PostgreSQL(首选)，MySQL(至少版本是5.6.4)，<br>这些drivers提供了大多数相同的性能和特性，PostgreSQL具有更高的性能并且有一些额外的特性（例如 资源持续时长计算）。</p>
+<p><strong>API</strong>：gnocchi-api服务进程，可以托管到httpd服务一起启动，通过Indexer和Storage的driver，提供查询和操作ArchivePolicy，Resource，Metric，Measure的接口，并将新到来的Measure（也就是ceilometer-agent-notification发送到gnocchi-api服务的数据）存入Measure Storage。</p>
+<p><strong>Metricd</strong>：gnocchi-metricd服务进程，根据Metric定义的ArchivePolicy规则周期性的从Measure Storage中获取未处理的Measure数据并进行处理，将处理结果保存到Aggregate Storage中，同时也对Aggregate Storage中的数据进行聚合计算和清理过期的数据。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gnocchi-metricd daemon会测量所有你的CPU功效来最大化CPU使用，当计算metric聚集。你可以使用gnocchi status命令查询HTTP API 获取监控项处理的聚集状态，它将会显示多少个监控项metric正在处理，正如处理存储的gnocchi-metricd。只要积压未办的时请不是持续增长，这意味着gnocchi-metricd能够处理正在被发送的个数的监控项。假如正在处理的measure的数量持续上升，你需要增加gnocchi-metricd daemons。你可以在任意数量的服务器上运行任意数量的metricd-daemon。</span><br></pre></td></tr></table></figure>
+<p><strong>API和Metricd服务都是设计成了无状态的服务，可以横向拓展来加快数据的处理。</strong></p>
+<h2 id="存储"><a href="#存储" class="headerlink" title="存储"></a>存储</h2><p>gnocchi 目前支持不同的存储后端：</p>
+<p>File(默认)，Ceph(首选)，OpenStack Swift，S3，Redis</p>
+<p>这些后端是基于名叫Carbonara的中间件，该中间件是用来处理时间序列的操作，因为上述存储技术无法处理时间序列。Carbonara对于后面上述的支持是比较好的，并且是易于扩展的。Ceph和Sift原本就是比文件driver更具有扩展性的。根据你系统的大小，使用file driver并且存储你在磁盘上的数据一般各哦吟咏了。如果你需要扩展为数台服务器，你可以通过NFS来贡献数据。S3,Ceph和Swift drivers更容易扩展。Ceph提供了更好的一致性，因此推荐用Ceph。</p>
+<p>可以在安装时进行指定：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">pip install gnocchi</span><br><span class="line">根据系统的架构所需要的drivers和特性，安装时需要携带额外的参数</span><br><span class="line">pip install gnocchi[postgresql,ceph,keystone]</span><br><span class="line">着将会安装postgresql来支持indexer driver,Ceph支持存储，Keystone支持验证和授权。</span><br><span class="line">下面时可用的变量列表:</span><br><span class="line">keystone:</span><br><span class="line">mysql:支持indexer</span><br><span class="line">postgresql:支持indexer</span><br><span class="line">swift:支持storage</span><br><span class="line">s3:支持storage</span><br><span class="line">ceph:支持storage</span><br><span class="line">ceph_recommended_lib:支持Ceph &gt;= 0.80的storage</span><br><span class="line">ceph_alternative_lib:支持Ceph &gt;= 10.1.0的storage</span><br><span class="line">file:提供file driver支持</span><br><span class="line">redis:提供storage支持</span><br><span class="line">doc:文档构建支持</span><br><span class="line">test:单元和功能性测试支持</span><br><span class="line"> </span><br><span class="line">为了从source安装Gnocchi,运行python标准的安装程序</span><br><span class="line">pip install -e.</span><br><span class="line">根据drivers和你想使用的特性，你需要安装额外的变量</span><br><span class="line">pip install -e.[postgresql,ceph,ceph_recommended_lib]</span><br></pre></td></tr></table></figure>
+<p>其中如果用ceph作为 back-end的话，需要满足以下要求：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ceph需要一个已经创建的Ceph 用户和一个pool。它们可以被以下的例子来创建</span><br><span class="line">ceph osd pool create metrics 8 8</span><br><span class="line">ceph auth get-or-create client.gnocchi mon &quot;allow r&quot; osd &quot;allow rwx pool=metrics&quot;</span><br><span class="line"></span><br><span class="line">Gnocchi收录了python中的一些特性(omap, async,操作上下文),但是需要python-rados &gt;= 10.1.0【rados是用于控制集群的】。为了处理这种情况，Gnocchi使用cradox python库，使其和相同的API工作相同，但是只需要Ceph &gt;=0.80.0</span><br><span class="line">如果Ceph和python-rados 都&gt;=10.1.0,cradox python库会编程可选的，但仍然推荐这样做。</span><br></pre></td></tr></table></figure>
+<h2 id="指标"><a href="#指标" class="headerlink" title="指标"></a>指标</h2><p>Gnocchi中有三层数据，<code>resources</code> -&gt; <code>metric</code> -&gt; <code>measure</code></p>
+<p><strong>Resource</strong>：是gnocchi对openstack监控数据的一个大体的划分，比如虚拟机的磁盘的所有监控资源作为一个resource，可用命令gnocchi resource list查看</p>
+<p><strong>Metric</strong>：是gnocchi对openstack监控数据的第二层划分，归属于resource，代表一个较具体的资源，比如cpu值，可用命令gnocchi metric list查看</p>
+<p><strong>Measure</strong>：是gnocchi对openstack监控数据的第三层划分，归属于metric，表示在某个时间戳对应资源的值，可用命令gnocchi measures show metric_id</p>
+<p>在Gnocchi中，一个时间序列是点的集合，在时间序列中的每一个点都有measure或者采样值sample。存储格式会被各种技术压缩，因此计算时间序列的大小在最坏情况下被下面的公式计算：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">点的个数 * 8byte = 时间序列大小</span><br><span class="line">点的各数可以被下面的公式确定</span><br><span class="line">点的个数 = 持续时间 / 粒度</span><br></pre></td></tr></table></figure>
+<p>时间序列处理：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">metric的measures到Gnocchi，这些值会被动态聚集。着意味着Gnocchi并不存储所有发送的measures，而是在一个时间段聚集它们。</span><br><span class="line">Gnocchi提供了几种不同的内置聚集函数。</span><br><span class="line">一个归档策略被指定的field中调集集合所定义。每一个条目组成了时间跨度并且京都层次需要被提供，决定了至少使用：2个points,granularity和timespan字段。例如，一个条目会被定义为超过1小时的12个点（每个点5分钟），或者针对天的每小时一个点（24个点）。</span><br><span class="line">默认地，新的带有measures的timestamps的可以在聚集的时间段中被处理。上一次聚集时间段的大小是根据归档策略中最大的granularity。为了允许处理比该时间段更旧的measures，back_window 参数可以被用于设置保存粗略的时间段。</span><br><span class="line">back_window:2表示可以收集两个小时之前的数据</span><br><span class="line">具体参见:https://docs.openstack.org/developer/gnocchi/rest.html</span><br><span class="line"></span><br><span class="line">改变聚集方法通过指定聚集参方法列表，在aggregation_methods中修改</span><br><span class="line">删除加上前缀 -max,添加用+, *表示所有</span><br><span class="line">一旦归档策略被创建，会返回所有属性，归档策略的URL</span><br><span class="line">GET /v1/archive_policy/short HTTP/1.1</span><br><span class="line">Content-Length: 0</span><br><span class="line">已经存在的归档策略可以被修改用来保留更多或者更少的数据。归档策略覆盖可以扩展，</span><br></pre></td></tr></table></figure>
+<h3 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h3><h4 id="通过resource找metric"><a href="#通过resource找metric" class="headerlink" title="通过resource找metric"></a>通过resource找metric</h4><p><strong>gnocchi resource show resource-id</strong></p>
+<p><img src="/images/openstack-telemetry-2.png" alt="img"></p>
+<h4 id="查看-metric-属性"><a href="#查看-metric-属性" class="headerlink" title="查看 metric 属性"></a>查看 metric 属性</h4><p><strong>gnocchi metric show metric-id</strong></p>
+<p><img src="/images/openstack-telemetry-3.png" alt="img"></p>
+<h4 id="通过-metric-找-measures"><a href="#通过-metric-找-measures" class="headerlink" title="通过 metric 找 measures"></a>通过 metric 找 measures</h4><p><img src="/images/openstack-telemetry-4.png" alt="img"></p>
+<p>中间那个granularity值表示采集时间间隔，60表示60秒，1800表示30分钟，这个取决于我们自己设定的聚合计算策略，我这边设的策略如下：</p>
+<p><img src="/images/openstack-telemetry-5.png" alt="image-20210718160627046"></p>
+<h2 id="归档"><a href="#归档" class="headerlink" title="归档"></a>归档</h2><blockquote>
+<p>归档策略表示最后数据存储到后端时是什么形态，间隔多少，保存多久</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&gt; gnocchi archive-policy create -d points:60,granularity:0:01:00 -d points:48,granularity:0:30:00 -m mean thin4</span><br><span class="line">&gt; </span><br><span class="line">&gt; points:60,granularity:0:01:00表示只保存60个点，每个点间隔是1分钟，也就是只保存最新1小时的数据</span><br><span class="line">&gt; </span><br><span class="line">&gt; points:48,granularity:0:30:00表示只保存48个点，每个点间隔是30分钟，也就是只保存最新一天的数据</span><br><span class="line">&gt; </span><br><span class="line">&gt; 一些resource type和要计算的metric都定义在/etc/ceilometer/gnocchi_resources.yaml该文件中</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>Gnocchi中，归档策略定义是被表示为点的数量。如果你的归档策略定义了一个10各点的策略，粒度是1秒，时间序列归档将会维持10秒(有时会多一点)，每一种表示是对超过1秒的聚集。这意味着时间序列将会最大保留最新到最老10秒的数据。但这并不意味着这是连续的10秒：可能数据中存在不规则的部分。</p>
+<p>因此，归档策略和粒度完全依赖于你的使用情况。你可以定义其中归档策略。一个典型的低度使用的方式<br>3600 点，粒度1s ，等于1小时<br>1440点，1分钟，24小时<br>720点，一小时，30天<br>365点，一天，一年<br>这将表示每个聚集方法将花费6125个点 <em> 9 = 54 KB空间。如果你使用<br>8个标准的聚集方法，你的监控项占据的总空间为8 </em> 54KB = 432KB<br>小心定义你的归档策略，它将花费更多的CPU。因此，创建一个归档策略包含两个定义(<br>每天1秒的粒度粒度和针对每个月1分钟的粒度)将会花费两被的CPU比一个定义(例如:每天1秒的粒度)</p>
+<p><strong>默认归档策略</strong></p>
+<p>默认3个归档策略会在调用 gnocchi-upgrade 的时候被创建：<br>low , medium , high<br>描述了存储空间和CPU使用的需求。它们使用<br>default_arrgegation_methods<br>这是默认被设置为 mean , min, max , sum , std, count<br>一个fourth archive policy叫做bool的也默认被提供了。这仅仅用于存储boolean 值（例如，0和1）.它仅仅为每一秒存储1个data point(使用 最后的聚集方法)，是一年的保留时间。<br>最好的存储大小是被如下假设:除了0和1作为测量值measures被发送。如果其他的值被发送，最坏情况下的最大存储大小会被考虑在内。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">Low:</span><br><span class="line">超过30天的5分钟的粒度</span><br><span class="line">使用的聚集函数:默认聚集函数</span><br><span class="line">每个监控项metric最大空间大小:406KB</span><br><span class="line"></span><br><span class="line">Medium:</span><br><span class="line">超过7天的一分钟的粒度</span><br><span class="line">超过365天的1小时粒度</span><br><span class="line">使用的聚集函数：默认聚集函数</span><br><span class="line">每个监控项metric最大空间大小为:887KB</span><br><span class="line"></span><br><span class="line">high:</span><br><span class="line">超过1小时的1秒粒度</span><br><span class="line">超过1星期的一分钟粒度</span><br><span class="line">超过1年的1小时粒度</span><br><span class="line">使用聚集方法：默认聚集方法</span><br><span class="line">每个监控项metric最大空间大小为:1057KB</span><br><span class="line"></span><br><span class="line">超过1年的bool* 1秒的粒度，使用： las*  最好情况小大小为:</span><br><span class="line">1539 KB * 每个监控项最坏情况下大小: 277 172KB</span><br><span class="line">约277MB</span><br></pre></td></tr></table></figure>
+<h1 id="Gnocchi-源码"><a href="#Gnocchi-源码" class="headerlink" title="Gnocchi 源码"></a>Gnocchi 源码</h1><p>之前我们分析过了 wsgi 、 pecan 和 paste 的相关知识，今天梳理一下 <code>Gnocchi</code> 的代码，顺便温习一下。</p>
+<p>基于O版</p>
+<h2 id="api-server"><a href="#api-server" class="headerlink" title="api-server"></a>api-server</h2><p>在源码结构中 rest 目录是api转化为gnocchi可以处理请求的入口类，包含了许多Controller方法。由于gnocchi采用pecan（对象路由web框架来获取资源），这个文件提供的方法就是解析传递过来的url,通过对应方法解析后执行相关命令。</p>
+<p><code>__init__.py</code> ：比较重要的方法包括：</p>
+<ul>
+<li>MetricController(继承自rest.RestController，提供post_measures添加测量值数组，获取某个监控项测量值列表方法get_measures)；</li>
+<li>MetricsController(根据监控项id解析得到监控项交给MetricController处理)；</li>
+<li>NamedMetricController(可根据监控项名称查询到监控项，根据资源id,类型，监控项列表来更新资源)；</li>
+<li>MetricsMeasuresBatchController(重要，监控项测量值批处理控制器，实际上就是遍历每个监控项，将每隔监控项的采样值列表添加到数据库中)。</li>
+</ul>
+<p><code>app.py</code> ：app.py是pecan应用的入口，包含应用初始化代码。</p>
+<ul>
+<li>hooks对应的配置是一些Pecan的hook，作用类似于WSGIMiddlewareGnocchiHook类（提供在Pecan尝试将一个请求分发给控制器的之前被调用）的函数on_route）</li>
+<li>load_app方法(Paste.Deploy主要是用来载入WSGI中的WebApp使用，其核心函数是loadapp()通过loadapp函数和一个配置文件或者egg包来载入WSGI应用，一个配置文件后缀为ini，内容被分为很多段):实际上是获取storage,indexer数据库驱动器，然后部署生成app并返回。</li>
+<li>build_server(): 执行: service.prepare_service(),执行: serving.run_simple</li>
+</ul>
+<p><code>app.wsgi</code> ：主要调用conf = service.prepare_service()，application = app.load_app(conf)</p>
+<p>我在部署 gnocchi-api 的时候使用的是 apache + mod_wsgi ，这种都是需要指定 wsgi 文件的位置，比如，我们可以如下配置：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&lt;VirtualHost *:8041&gt;</span><br><span class="line">    WSGIDaemonProcess gnocchi processes=2 threads=1 user=gnocchi group=gnocchi display-name=%&#123;GROUP&#125;</span><br><span class="line">    WSGIProcessGroup gnocchi</span><br><span class="line">    WSGIScriptAlias / &quot;/usr/lib/python2.7/site-packages/gnocchi/rest/app.wsgi&quot;</span><br><span class="line">    WSGIApplicationGroup %&#123;GLOBAL&#125;</span><br><span class="line"></span><br><span class="line">    ErrorLog /dev/stderr</span><br><span class="line">    SetEnvIf X-Forwarded-For &quot;^.*\..*\..*\..*&quot; forwarded</span><br><span class="line">    CustomLog /dev/stdout combined env=!forwarded</span><br><span class="line">    CustomLog /dev/stdout proxy env=forwarded</span><br><span class="line"></span><br><span class="line">    &lt;Directory &quot;/usr/lib/python2.7/site-packages/gnocchi/rest&quot;&gt;</span><br><span class="line">          Require all granted</span><br><span class="line">    &lt;/Directory&gt;</span><br><span class="line">&lt;/VirtualHost&gt;</span><br></pre></td></tr></table></figure>
+<p>可以看到第四行指定了wsgi启动的路径，我们看下这个目录：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> gnocchi.rest <span class="keyword">import</span> app</span><br><span class="line"></span><br><span class="line">application = app.build_wsgi_app()</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">build_wsgi_app</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">return</span> load_app(service.prepare_service())</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">load_app</span><span class="params">(conf, indexer=None, storage=None,</span></span></span><br><span class="line"><span class="function"><span class="params">             not_implemented_middleware=True)</span>:</span></span><br><span class="line">    <span class="keyword">global</span> APPCONFIGS</span><br><span class="line"></span><br><span class="line">    <span class="comment"># NOTE(sileht): We load config, storage and indexer,</span></span><br><span class="line">    <span class="comment"># so all</span></span><br><span class="line">    <span class="comment"># 配置 back-ends driver</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> storage:</span><br><span class="line">        storage = gnocchi_storage.get_driver(conf)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> indexer:</span><br><span class="line">        indexer = gnocchi_indexer.get_driver(conf)</span><br><span class="line">        indexer.connect()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Build the WSGI app</span></span><br><span class="line">    <span class="comment"># 这里去加载api-paste.ini文件路径</span></span><br><span class="line">    cfg_path = conf.api.paste_config</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> os.path.isabs(cfg_path):</span><br><span class="line">        cfg_path = conf.find_file(cfg_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> cfg_path <span class="keyword">is</span> <span class="keyword">None</span> <span class="keyword">or</span> <span class="keyword">not</span> os.path.exists(cfg_path):</span><br><span class="line">        <span class="keyword">raise</span> cfg.ConfigFilesNotFoundError([conf.api.paste_config])</span><br><span class="line"></span><br><span class="line">    config = dict(conf=conf, indexer=indexer, storage=storage,</span><br><span class="line">                  not_implemented_middleware=not_implemented_middleware)</span><br><span class="line">    configkey = str(uuid.uuid4())</span><br><span class="line">    APPCONFIGS[configkey] = config</span><br><span class="line"></span><br><span class="line">    LOG.info(<span class="string">"WSGI config used: %s"</span>, cfg_path)</span><br><span class="line">    appname = <span class="string">"gnocchi+"</span> + conf.api.auth_mode</span><br><span class="line">    app = deploy.loadapp(<span class="string">"config:"</span> + cfg_path, name=appname,</span><br><span class="line">                         global_conf=&#123;<span class="string">'configkey'</span>: configkey&#125;)</span><br><span class="line">    <span class="keyword">return</span> cors.CORS(app, conf=conf)</span><br></pre></td></tr></table></figure>
+<p>这里启动时，调用了 pasteDeploy 的 loadapp(一个简单的函数)就可以部署WSGI，而且不需要知道WSGI应用的细节。PasteDeploy的工作模式是使用一个配置文件configure.ini去解析URL。gnocchi的配置是api-paste.ini:</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[composite:gnocchi+noauth]</span></span><br><span class="line"><span class="attr">use</span> = egg:Paste#urlmap</span><br><span class="line">/ = gnocchiversions_pipeline</span><br><span class="line">/v1 = gnocchiv1+noauth</span><br><span class="line">/healthcheck = healthcheck</span><br><span class="line"></span><br><span class="line"><span class="section">[composite:gnocchi+basic]</span></span><br><span class="line"><span class="attr">use</span> = egg:Paste#urlmap</span><br><span class="line">/ = gnocchiversions_pipeline</span><br><span class="line">/v1 = gnocchiv1+noauth</span><br><span class="line">/healthcheck = healthcheck</span><br><span class="line"></span><br><span class="line"><span class="section">[composite:gnocchi+keystone]</span></span><br><span class="line"><span class="attr">use</span> = egg:Paste#urlmap</span><br><span class="line">/ = gnocchiversions_pipeline</span><br><span class="line">/v1 = gnocchiv1+keystone</span><br><span class="line">/healthcheck = healthcheck</span><br><span class="line"></span><br><span class="line"><span class="section">[pipeline:gnocchiv1+noauth]</span></span><br><span class="line"><span class="attr">pipeline</span> = http_proxy_to_wsgi gnocchiv1</span><br><span class="line"></span><br><span class="line"><span class="section">[pipeline:gnocchiv1+keystone]</span></span><br><span class="line"><span class="attr">pipeline</span> = http_proxy_to_wsgi keystone_authtoken gnocchiv1</span><br><span class="line"></span><br><span class="line"><span class="section">[pipeline:gnocchiversions_pipeline]</span></span><br><span class="line"><span class="attr">pipeline</span> = http_proxy_to_wsgi gnocchiversions</span><br><span class="line"></span><br><span class="line"><span class="section">[app:gnocchiversions]</span></span><br><span class="line">paste.app_factory = gnocchi.rest.app:app_factory</span><br><span class="line"><span class="attr">root</span> = gnocchi.rest.VersionsController</span><br><span class="line"></span><br><span class="line"><span class="section">[app:gnocchiv1]</span></span><br><span class="line">paste.app_factory = gnocchi.rest.app:app_factory</span><br><span class="line"><span class="attr">root</span> = gnocchi.rest.V1Controller</span><br><span class="line"></span><br><span class="line"><span class="section">[filter:keystone_authtoken]</span></span><br><span class="line"><span class="attr">use</span> = egg:keystonemiddleware#auth_token</span><br><span class="line"><span class="attr">oslo_config_project</span> = gnocchi</span><br><span class="line"></span><br><span class="line"><span class="section">[filter:http_proxy_to_wsgi]</span></span><br><span class="line"><span class="attr">use</span> = egg:oslo.middleware#http_proxy_to_wsgi</span><br><span class="line"><span class="attr">oslo_config_project</span> = gnocchi</span><br><span class="line"></span><br><span class="line"><span class="section">[app:healthcheck]</span></span><br><span class="line"><span class="attr">use</span> = egg:oslo.middleware#healthcheck</span><br><span class="line"><span class="attr">oslo_config_project</span> = gnocchi</span><br></pre></td></tr></table></figure>
+<p>paste.app_factory 是一个应用的工厂函数，指明import对象的类型；值 gnocchi.rest.app:app_factory 指明具体加载的模块和方法。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_setup_app</span><span class="params">(root, conf, indexer, storage, not_implemented_middleware)</span>:</span></span><br><span class="line">    app = pecan.make_app(</span><br><span class="line">        root,</span><br><span class="line">        hooks=(GnocchiHook(storage, indexer, conf),),</span><br><span class="line">        guess_content_type_from_ext=<span class="keyword">False</span>,</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> not_implemented_middleware:</span><br><span class="line">        app = webob.exc.HTTPExceptionMiddleware(NotImplementedMiddleware(app))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> app</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">app_factory</span><span class="params">(global_config, **local_conf)</span>:</span></span><br><span class="line">    <span class="keyword">global</span> APPCONFIGS</span><br><span class="line">    appconfig = APPCONFIGS.get(global_config.get(<span class="string">'configkey'</span>))</span><br><span class="line">    <span class="keyword">return</span> _setup_app(root=local_conf.get(<span class="string">'root'</span>), **appconfig)</span><br></pre></td></tr></table></figure>
+<p>我们知道，要运行一个python的web服务，需要两个条件：</p>
+<ul>
+<li>application</li>
+<li>wsgi server</li>
+</ul>
+<p>这里通过加载pecan.make_app ，返回了一个application，并设置 hooks ，加载数据库连接等信息。</p>
+<p>这里的 root 就是上面<code>api-paste.ini</code>中的<code>root = gnocchi.rest.V1Controller</code></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">V1Controller</span><span class="params">(object)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        self.sub_controllers = &#123;</span><br><span class="line">            <span class="string">"search"</span>: SearchController(),</span><br><span class="line">            <span class="string">"archive_policy"</span>: ArchivePoliciesController(),</span><br><span class="line">            <span class="string">"archive_policy_rule"</span>: ArchivePolicyRulesController(),</span><br><span class="line">            <span class="string">"metric"</span>: MetricsController(),</span><br><span class="line">            <span class="string">"batch"</span>: BatchController(),</span><br><span class="line">            <span class="string">"resource"</span>: ResourcesByTypeController(),</span><br><span class="line">            <span class="string">"resource_type"</span>: ResourceTypesController(),</span><br><span class="line">            <span class="string">"aggregation"</span>: AggregationController(),</span><br><span class="line">            <span class="string">"capabilities"</span>: CapabilityController(),</span><br><span class="line">            <span class="string">"status"</span>: StatusController(),</span><br><span class="line">            <span class="string">"top"</span>: TopController(),</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> name, ctrl <span class="keyword">in</span> self.sub_controllers.items():</span><br><span class="line">            setattr(self, name, ctrl)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @pecan.expose('json')</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">index</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> &#123;</span><br><span class="line">            <span class="string">"version"</span>: <span class="string">"1.0"</span>,</span><br><span class="line">            <span class="string">"links"</span>: [</span><br><span class="line">                &#123;<span class="string">"rel"</span>: <span class="string">"self"</span>,</span><br><span class="line">                 <span class="string">"href"</span>: pecan.request.application_url&#125;</span><br><span class="line">            ] + [</span><br><span class="line">                &#123;<span class="string">"rel"</span>: name,</span><br><span class="line">                 <span class="string">"href"</span>: pecan.request.application_url + <span class="string">"/"</span> + name&#125;</span><br><span class="line">                <span class="keyword">for</span> name <span class="keyword">in</span> sorted(self.sub_controllers)</span><br><span class="line">            ]</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<p>每次请求的路由的入口就是在这里了。具体怎么路由，可以看下之前写的分析pecan源码的文章。</p>
+<p>简单看下监控数据存储的接口吧，<code>POST /v1/batch/resources/metrics/measures?create_metrics=True</code></p>
+<p>根据上面的路由转发，可以看到路径是<code>V1Controller --&gt; BatchController --&gt; ResourcesBatchController --&gt; ResourcesMetricsBatchController --&gt; ResourcesMetricsMeasuresBatchController.post</code></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ResourcesMetricsMeasuresBatchController</span><span class="params">(rest.RestController)</span>:</span></span><br><span class="line"><span class="meta">    @pecan.expose('json')</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">post</span><span class="params">(self, create_metrics=False)</span>:</span></span><br><span class="line">        creator = pecan.request.auth_helper.get_current_user(</span><br><span class="line">            pecan.request.headers)</span><br><span class="line">        MeasuresBatchSchema = voluptuous.Schema(</span><br><span class="line">            &#123;functools.partial(ResourceID, creator=creator):</span><br><span class="line">             &#123;six.text_type: MeasuresListSchema&#125;&#125;</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        body = deserialize_and_validate(MeasuresBatchSchema)</span><br><span class="line"></span><br><span class="line">        known_metrics = []</span><br><span class="line">        unknown_metrics = []</span><br><span class="line">        unknown_resources = []</span><br><span class="line">        body_by_rid = &#123;&#125;</span><br><span class="line">        <span class="keyword">for</span> original_resource_id, resource_id <span class="keyword">in</span> body:</span><br><span class="line">            body_by_rid[resource_id] = body[(original_resource_id,</span><br><span class="line">                                             resource_id)]</span><br><span class="line">            names = body[(original_resource_id, resource_id)].keys()</span><br><span class="line">            <span class="comment">#这里调用indexer从数据库中索引每一个metrics （gnocchi启动时应该会去加载gnocchi_resource...文件下定义的metrics）</span></span><br><span class="line">            metrics = pecan.request.indexer.list_metrics(</span><br><span class="line">                names=names, resource_id=resource_id)</span><br><span class="line"></span><br><span class="line">            known_names = [m.name <span class="keyword">for</span> m <span class="keyword">in</span> metrics]</span><br><span class="line">            <span class="comment"># 创建 metrics </span></span><br><span class="line">            <span class="keyword">if</span> strutils.bool_from_string(create_metrics):</span><br><span class="line">                already_exists_names = []</span><br><span class="line">                <span class="keyword">for</span> name <span class="keyword">in</span> names:</span><br><span class="line">                    <span class="keyword">if</span> name <span class="keyword">not</span> <span class="keyword">in</span> known_names:</span><br><span class="line">                        metric = MetricsController.MetricSchema(&#123;</span><br><span class="line">                            <span class="string">"name"</span>: name</span><br><span class="line">                        &#125;)</span><br><span class="line">                        <span class="keyword">try</span>:</span><br><span class="line">                            m = pecan.request.indexer.create_metric(</span><br><span class="line">                                uuid.uuid4(),</span><br><span class="line">                                creator=creator,</span><br><span class="line">                                resource_id=resource_id,</span><br><span class="line">                                name=metric.get(<span class="string">'name'</span>),</span><br><span class="line">                                unit=metric.get(<span class="string">'unit'</span>),</span><br><span class="line">                                archive_policy_name=metric[</span><br><span class="line">                                    <span class="string">'archive_policy_name'</span>])</span><br><span class="line">                        <span class="keyword">except</span> indexer.NamedMetricAlreadyExists <span class="keyword">as</span> e:</span><br><span class="line">                            already_exists_names.append(e.metric)</span><br><span class="line">                        <span class="keyword">except</span> indexer.NoSuchResource:</span><br><span class="line">                            unknown_resources.append(&#123;</span><br><span class="line">                                <span class="string">'resource_id'</span>: six.text_type(resource_id),</span><br><span class="line">                                <span class="string">'original_resource_id'</span>: original_resource_id&#125;)</span><br><span class="line">                        <span class="keyword">except</span> indexer.IndexerException <span class="keyword">as</span> e:</span><br><span class="line">                            <span class="comment"># This catch NoSuchArchivePolicy, which is unlikely</span></span><br><span class="line">                            <span class="comment"># be still possible</span></span><br><span class="line">                            abort(<span class="number">400</span>, e)</span><br><span class="line">                        <span class="keyword">else</span>:</span><br><span class="line">                            known_metrics.append(m)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> already_exists_names:</span><br><span class="line">                    <span class="comment"># Add metrics created in the meantime</span></span><br><span class="line">                    known_names.extend(already_exists_names)</span><br><span class="line">                    known_metrics.extend(</span><br><span class="line">                        pecan.request.indexer.list_metrics(</span><br><span class="line">                            names=already_exists_names,</span><br><span class="line">                            resource_id=resource_id)</span><br><span class="line">                    )</span><br><span class="line">						<span class="comment"># 比较数据库中用metric_id查出来的metrics和现实发送过来的metrics是否一致。</span></span><br><span class="line">            <span class="keyword">elif</span> len(names) != len(metrics):</span><br><span class="line">                unknown_metrics.extend(</span><br><span class="line">                    [<span class="string">"%s/%s"</span> % (six.text_type(resource_id), m)</span><br><span class="line">                     <span class="keyword">for</span> m <span class="keyword">in</span> names <span class="keyword">if</span> m <span class="keyword">not</span> <span class="keyword">in</span> known_names])</span><br><span class="line"></span><br><span class="line">            known_metrics.extend(metrics)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> unknown_resources:</span><br><span class="line">            abort(<span class="number">400</span>, &#123;<span class="string">"cause"</span>: <span class="string">"Unknown resources"</span>,</span><br><span class="line">                        <span class="string">"detail"</span>: unknown_resources&#125;)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> unknown_metrics:</span><br><span class="line">            abort(<span class="number">400</span>, <span class="string">"Unknown metrics: %s"</span> % <span class="string">", "</span>.join(</span><br><span class="line">                sorted(unknown_metrics)))</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 验证policy.yaml</span></span><br><span class="line">        <span class="keyword">for</span> metric <span class="keyword">in</span> known_metrics:</span><br><span class="line">            enforce(<span class="string">"post measures"</span>, metric)</span><br><span class="line">				<span class="comment"># 这里对metric进行储存，存进 incoming storage</span></span><br><span class="line">        storage = pecan.request.storage.incoming</span><br><span class="line">        <span class="keyword">with</span> futures.ThreadPoolExecutor(max_workers=THREADS) <span class="keyword">as</span> executor:</span><br><span class="line">            list(executor.map(<span class="keyword">lambda</span> x: storage.add_measures(*x),</span><br><span class="line">                              ((metric,</span><br><span class="line">                                body_by_rid[metric.resource_id][metric.name])</span><br><span class="line">                               <span class="keyword">for</span> metric <span class="keyword">in</span> known_metrics)))</span><br><span class="line"></span><br><span class="line">        pecan.response.status = <span class="number">202</span></span><br></pre></td></tr></table></figure>
+<p>这里主要是将发送过来的监控数据存进了 gnocchi 的 incoming storage</p>
+<h2 id="gnocchi-metricd"><a href="#gnocchi-metricd" class="headerlink" title="gnocchi-metricd"></a>gnocchi-metricd</h2><p>gnocchi 的metricd 服务是进行数据聚合，压缩，生成时间序列存储的。</p>
+<p>入口：<code>gnocchi/cli.py</code></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">metricd</span><span class="params">()</span>:</span></span><br><span class="line">    conf = cfg.ConfigOpts()</span><br><span class="line">    conf.register_cli_opts([</span><br><span class="line">        cfg.IntOpt(<span class="string">"stop-after-processing-metrics"</span>,</span><br><span class="line">                   default=<span class="number">0</span>,</span><br><span class="line">                   min=<span class="number">0</span>,</span><br><span class="line">                   help=<span class="string">"Number of metrics to process without workers, "</span></span><br><span class="line">                   <span class="string">"for testing purpose"</span>),</span><br><span class="line">    ])</span><br><span class="line">    conf = service.prepare_service(conf=conf)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> conf.stop_after_processing_metrics:</span><br><span class="line">        metricd_tester(conf)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        MetricdServiceManager(conf).run()</span><br><span class="line">        </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MetricdServiceManager</span><span class="params">(cotyledon.ServiceManager)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, conf)</span>:</span></span><br><span class="line">        super(MetricdServiceManager, self).__init__()</span><br><span class="line">        oslo_config_glue.setup(self, conf)</span><br><span class="line"></span><br><span class="line">        self.conf = conf</span><br><span class="line">        self.queue = multiprocessing.Manager().Queue()</span><br><span class="line"></span><br><span class="line">        self.add(MetricScheduler, args=(self.conf, self.queue))</span><br><span class="line">        self.metric_processor_id = self.add(</span><br><span class="line">            MetricProcessor, args=(self.conf, self.queue),</span><br><span class="line">            workers=conf.metricd.workers)</span><br><span class="line">        <span class="keyword">if</span> self.conf.metricd.metric_reporting_delay &gt;= <span class="number">0</span>:</span><br><span class="line">            self.add(MetricReporting, args=(self.conf,))</span><br><span class="line">        self.add(MetricJanitor, args=(self.conf,))</span><br><span class="line"></span><br><span class="line">        self.register_hooks(on_reload=self.on_reload)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">on_reload</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># NOTE(sileht): We do not implement reload() in Workers so all workers</span></span><br><span class="line">        <span class="comment"># will received SIGHUP and exit gracefully, then their will be</span></span><br><span class="line">        <span class="comment"># restarted with the new number of workers. This is important because</span></span><br><span class="line">        <span class="comment"># we use the number of worker to declare the capability in tooz and</span></span><br><span class="line">        <span class="comment"># to select the block of metrics to proceed.</span></span><br><span class="line">        self.reconfigure(self.metric_processor_id,</span><br><span class="line">                         workers=self.conf.metricd.workers)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(self)</span>:</span></span><br><span class="line">        super(MetricdServiceManager, self).run()</span><br><span class="line">        self.queue.close()</span><br><span class="line">        </span><br><span class="line"><span class="comment"># MetricScheduler服务用于每隔一定时间从incoming数据库中拉取临时的监控数据，放在多进程队列中</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MetricScheduler</span><span class="params">(MetricProcessBase)</span>:</span></span><br><span class="line">  <span class="comment">#...</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 最重要的服务，数据聚合服务，它从MetricScheduler服务存放在多进程队列中获取需要处理的监控数据进行最终的聚合运算。</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MetricProcessor</span><span class="params">(MetricProcessBase)</span>:</span></span><br><span class="line">  <span class="comment">#...</span></span><br><span class="line">  </span><br><span class="line"><span class="comment"># MetricReporting服务每隔2分钟统计并以日志形式输出未处理的监控项个数和未处理的measure数目</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MetricReporting</span><span class="params">(MetricProcessBase)</span>:</span></span><br><span class="line">  <span class="comment">#...</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># MetricJanitor每隔已定时间清理已经删除的metric数据</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MetricJanitor</span><span class="params">(MetricProcessBase)</span>:</span></span><br><span class="line">  <span class="comment">#...</span></span><br></pre></td></tr></table></figure>
+<p>这里用到了cotyledon库，不是本文重点，简单说可以看下这四个类 <code>MetricScheduler、MetricProcessor、MetricReporting、MetricJanitor</code> 的 <code>_run_job</code> 方法，这是启动方法。</p>
+<h3 id="数据接收"><a href="#数据接收" class="headerlink" title="数据接收"></a>数据接收</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MetricScheduler</span><span class="params">(MetricProcessBase)</span>:</span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">_run_job</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">      metrics = set(</span><br><span class="line">        self.store.incoming.list_metric_with_measures_to_process(</span><br><span class="line">          self.block_size, self.block_index))</span><br><span class="line">      <span class="keyword">if</span> metrics <span class="keyword">and</span> <span class="keyword">not</span> self.queue.empty():</span><br><span class="line">        <span class="comment"># NOTE(gordc): drop metrics we previously process to avoid</span></span><br><span class="line">        <span class="comment">#              handling twice</span></span><br><span class="line">        number_of_scheduled_metrics = len(metrics)</span><br><span class="line">        metrics = metrics - self.previously_scheduled_metrics</span><br><span class="line">        <span class="keyword">if</span> (float(number_of_scheduled_metrics - len(metrics)) /</span><br><span class="line">            self.block_size &gt; self.MAX_OVERLAP):</span><br><span class="line">          LOG.warning(<span class="string">'Metric processing lagging scheduling rate. '</span></span><br><span class="line">                      <span class="string">'It is recommended to increase the number of '</span></span><br><span class="line">                      <span class="string">'workers or to lengthen processing interval.'</span>)</span><br><span class="line">          metrics = list(metrics)</span><br><span class="line">          <span class="keyword">for</span> i <span class="keyword">in</span> six.moves.range(<span class="number">0</span>, len(metrics), self.BLOCK_SIZE):</span><br><span class="line">            self.queue.put(metrics[i:i + self.BLOCK_SIZE])</span><br><span class="line">            self.previously_scheduled_metrics = set(metrics)</span><br><span class="line">            LOG.debug(<span class="string">"%d metrics scheduled for processing."</span>, len(metrics))</span><br><span class="line">            <span class="keyword">except</span> Exception:</span><br><span class="line">              LOG.error(<span class="string">"Unexpected error scheduling metrics for processing"</span>,</span><br><span class="line">                        exc_info=<span class="keyword">True</span>)</span><br><span class="line">              </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RedisStorage</span><span class="params">(_carbonara.CarbonaraBasedStorage)</span>:</span>              </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">list_metric_with_measures_to_process</span><span class="params">(self, size, part, full=False)</span>:</span></span><br><span class="line">        match = redis.SEP.join([self.STORAGE_PREFIX, <span class="string">"*"</span>])</span><br><span class="line">        keys = self._client.scan_iter(match=match, count=<span class="number">1000</span>)</span><br><span class="line">        measures = set([k.decode(<span class="string">'utf8'</span>).split(redis.SEP)[<span class="number">1</span>] <span class="keyword">for</span> k <span class="keyword">in</span> keys])</span><br><span class="line">        <span class="keyword">if</span> full:</span><br><span class="line">            <span class="keyword">return</span> measures</span><br><span class="line">        <span class="keyword">return</span> set(list(measures)[size * part:size * (part + <span class="number">1</span>)])</span><br></pre></td></tr></table></figure>
+<p><code>MetricScheduler</code> 进行主要是从 gnocchi 的 incoming storage 去拉取数据，存进 queue，由于我这里用的是redis，所以进到<code>RedisStorage</code>；</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MetricProcessor</span><span class="params">(MetricProcessBase)</span>:</span></span><br><span class="line">    name = <span class="string">"processing"</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, worker_id, conf, queue)</span>:</span></span><br><span class="line">        super(MetricProcessor, self).__init__(worker_id, conf, <span class="number">0</span>)</span><br><span class="line">        self.queue = queue</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_run_job</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">              	<span class="comment"># 从存放监控数据的多进程队列中获取监控数据</span></span><br><span class="line">                metrics = self.queue.get(block=<span class="keyword">True</span>, timeout=<span class="number">10</span>)</span><br><span class="line">            <span class="keyword">except</span> six.moves.queue.Empty:</span><br><span class="line">                <span class="comment"># NOTE(sileht): Allow the process to exit gracefully every</span></span><br><span class="line">                <span class="comment"># 10 seconds</span></span><br><span class="line">                <span class="keyword">return</span></span><br><span class="line">            <span class="comment"># 然后调用self.store实际就是storage数据库(这里一般使用ceph)</span></span><br><span class="line">            self.store.process_background_tasks(self.index, metrics)</span><br><span class="line">        <span class="keyword">except</span> Exception:</span><br><span class="line">            LOG.error(<span class="string">"Unexpected error during measures processing"</span>,</span><br><span class="line">                      exc_info=<span class="keyword">True</span>)</span><br></pre></td></tr></table></figure>
+<p>这里从 queue 中拉取数据，通过 process_background_tasks 处理：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># gnocchi/storage/__init__.py </span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">StorageDriver</span><span class="params">(object)</span>:</span></span><br><span class="line">		<span class="function"><span class="keyword">def</span> <span class="title">process_background_tasks</span><span class="params">(self, index, metrics, sync=False)</span>:</span></span><br><span class="line">        <span class="string">"""Process background tasks for this storage.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        This calls :func:`process_new_measures` to process new measures</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :param index: An indexer to be used for querying metrics</span></span><br><span class="line"><span class="string">        :param block_size: number of metrics to process # 之前这里默认处理128个metrics，现在取消了</span></span><br><span class="line"><span class="string">        :param sync: If True, then process everything synchronously and raise</span></span><br><span class="line"><span class="string">                     on error</span></span><br><span class="line"><span class="string">        :type sync: bool</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        LOG.debug(<span class="string">"Processing new measures"</span>)</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            self.process_new_measures(index, metrics, sync)</span><br><span class="line">        <span class="keyword">except</span> Exception:</span><br><span class="line">            <span class="keyword">if</span> sync:</span><br><span class="line">                <span class="keyword">raise</span></span><br><span class="line">            LOG.error(<span class="string">"Unexpected error during measures processing"</span>,</span><br><span class="line">                      exc_info=<span class="keyword">True</span>)</span><br><span class="line">            </span><br><span class="line"><span class="comment"># gnocchi/storage/_carbonara.py </span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CarbonaraBasedStorage</span><span class="params">(storage.StorageDriver)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">process_new_measures</span><span class="params">(self, indexer, metrics_to_process,</span></span></span><br><span class="line"><span class="function"><span class="params">                             sync=False)</span>:</span></span><br><span class="line">        <span class="comment"># 从 index 中根据 metric id 查询所有需要处理 metrics</span></span><br><span class="line">        metrics = indexer.list_metrics(ids=metrics_to_process)</span><br><span class="line">        <span class="comment"># 一个 metric 的实例如下</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        (Pdb) metrics[0].__dict__</span></span><br><span class="line"><span class="string">        &#123;</span></span><br><span class="line"><span class="string">            'status': u 'active',</span></span><br><span class="line"><span class="string">            '_sa_instance_state': &lt; sqlalchemy.orm.state.InstanceState object at 0x7ff3011e4790 &gt; ,</span></span><br><span class="line"><span class="string">            'name': u 'memory.usage',</span></span><br><span class="line"><span class="string">            'creator': u '24f0a937351a415d89d499b5a5dae765:21214626fd5240cd87ce0bb5351db684',</span></span><br><span class="line"><span class="string">            'resource_id': UUID('2501d896-75e5-4a1e-b66c-0837f9764bde'),</span></span><br><span class="line"><span class="string">            'archive_policy': &lt; gnocchi.indexer.sqlalchemy_base.ArchivePolicy object at 0x7ff3011e48d0 &gt; ,</span></span><br><span class="line"><span class="string">            'archive_policy_name': u 'frequency_300s',</span></span><br><span class="line"><span class="string">            'id': UUID('31e8105c-70a0-4d58-99c9-92ec32e56fd3'),</span></span><br><span class="line"><span class="string">            'unit': u 'MB'</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="comment"># This build the list of deleted metrics, i.e. the metrics we have</span></span><br><span class="line">        <span class="comment"># measures to process for but that are not in the indexer anymore.</span></span><br><span class="line">        <span class="comment"># 删除measures文件下取到的无效metrics</span></span><br><span class="line">        deleted_metrics_id = (set(map(uuid.UUID, metrics_to_process))</span><br><span class="line">                              - set(m.id <span class="keyword">for</span> m <span class="keyword">in</span> metrics))</span><br><span class="line">        <span class="keyword">for</span> metric_id <span class="keyword">in</span> deleted_metrics_id:</span><br><span class="line">            <span class="comment"># NOTE(jd): We need to lock the metric otherwise we might delete</span></span><br><span class="line">            <span class="comment"># measures that another worker might be processing. Deleting</span></span><br><span class="line">            <span class="comment"># measurement files under its feet is not nice!</span></span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                <span class="keyword">with</span> self._lock(metric_id)(blocking=sync):</span><br><span class="line">                    self.incoming.delete_unprocessed_measures_for_metric_id(</span><br><span class="line">                        metric_id)</span><br><span class="line">            <span class="keyword">except</span> coordination.LockAcquireFailed:</span><br><span class="line">                LOG.debug(<span class="string">"Cannot acquire lock for metric %s, postponing "</span></span><br><span class="line">                          <span class="string">"unprocessed measures deletion"</span>, metric_id)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 对 metric 逐个处理</span></span><br><span class="line">        <span class="keyword">for</span> metric <span class="keyword">in</span> metrics:</span><br><span class="line">            lock = self._lock(metric.id)</span><br><span class="line">            <span class="comment"># Do not block if we cannot acquire the lock, that means some other</span></span><br><span class="line">            <span class="comment"># worker is doing the job. We'll just ignore this metric and may</span></span><br><span class="line">            <span class="comment"># get back later to it if needed.</span></span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> lock.acquire(blocking=sync):</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                locksw = timeutils.StopWatch().start()</span><br><span class="line">                LOG.debug(<span class="string">"Processing measures for %s"</span>, metric)</span><br><span class="line">                <span class="comment"># process_measure_for_metric(self, metric): 返回待处理监控项对应的监控数据列表，</span></span><br><span class="line">                <span class="comment"># 每个元素是时间戳和对应的值，样例：[(Timestamp('2018-04-19 02:29:04.925214'), 4.785732057729687)]</span></span><br><span class="line">                <span class="keyword">with</span> self.incoming.process_measure_for_metric(metric) \</span><br><span class="line">                        <span class="keyword">as</span> measures:</span><br><span class="line">                    self._compute_and_store_timeseries(metric, measures)</span><br><span class="line">                LOG.debug(<span class="string">"Metric %s locked during %.2f seconds"</span>,</span><br><span class="line">                          metric.id, locksw.elapsed())</span><br><span class="line">            <span class="keyword">except</span> Exception:</span><br><span class="line">                LOG.debug(<span class="string">"Metric %s locked during %.2f seconds"</span>,</span><br><span class="line">                          metric.id, locksw.elapsed())</span><br><span class="line">                <span class="keyword">if</span> sync:</span><br><span class="line">                    <span class="keyword">raise</span></span><br><span class="line">                LOG.error(<span class="string">"Error processing new measures"</span>, exc_info=<span class="keyword">True</span>)</span><br><span class="line">            <span class="keyword">finally</span>:</span><br><span class="line">                lock.release()</span><br></pre></td></tr></table></figure>
+<p>这里主要做了几件事：</p>
+<ol>
+<li>根据待处理的监控项集合，判断如果有已经删除的监控项，则删除对应incoming storage中的监控数据</li>
+<li>遍历待处理的监控项列表，获取每个监控项在incoming storage中的监控数据列表，然后根据监控项及其待处理监控数据<br>调用_compute_and_store_timeseries方法来计算并存储时间序列</li>
+</ol>
+<h3 id="数据聚合"><a href="#数据聚合" class="headerlink" title="数据聚合"></a>数据聚合</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_compute_and_store_timeseries</span><span class="params">(self, metric, measures)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> len(measures) == <span class="number">0</span>:</span><br><span class="line">        LOG.debug(<span class="string">"Skipping %s (already processed)"</span>, metric)</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line"><span class="comment"># 步骤一：对measures进行排序</span></span><br><span class="line">    measures = sorted(measures, key=operator.itemgetter(<span class="number">0</span>))</span><br><span class="line"></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    (Pdb) p metric</span></span><br><span class="line"><span class="string">    &lt;Metric 01f0658b-f147-482b-bca9-f474a79320dc&gt;</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    (Pdb) p metric.__dict__</span></span><br><span class="line"><span class="string">    &#123;'status': u'active', '_sa_instance_state': &lt;sqlalchemy.orm.state.InstanceState object at 0x5536b50&gt;, 'name': u'cpu_util', 'creator': u'6a18a77646104fcb93e92cb3daf10c91:55e9bc42c004471b9111ffbb516a9bbe', 'resource_id': UUID('d872305c-94b3-4f35-a2d5-602af219945d'), 'archive_policy': &lt;gnocchi.indexer.sqlalchemy_base.ArchivePolicy object at 0x5536c50&gt;, 'archive_policy_name': u'frequency_300s', 'id': UUID('01f0658b-f147-482b-bca9-f474a79320dc'), 'unit': None&#125;</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    (Pdb) p type(metric)</span></span><br><span class="line"><span class="string">    &lt;class 'gnocchi.indexer.sqlalchemy_base.Metric'&gt;</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    (Pdb) p measures</span></span><br><span class="line"><span class="string">    [(Timestamp('2018-04-19 04:21:08.054995'), 4.799075611984741),</span></span><br><span class="line"><span class="string">     (Timestamp('2018-04-19 05:10:10.429245'), 4.574397482330608),</span></span><br><span class="line"><span class="string">     (Timestamp('2018-04-19 04:08:07.438367'), 4.597624310196946)]</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    (Pdb) p metric.archive_policy</span></span><br><span class="line"><span class="string">    &lt;gnocchi.indexer.sqlalchemy_base.ArchivePolicy object at 0x5536c50&gt;</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    (Pdb) p metric.archive_policy.__dict__</span></span><br><span class="line"><span class="string">    &#123;'back_window': 0, 'definition': [&#123;'points': 300, 'granularity': 300.0, 'timespan': 90000.0&#125;, &#123;'points': 100, 'granularity': 900.0, 'timespan': 90000.0&#125;, &#123;'points': 100, 'granularity': 7200.0, 'timespan': 720000.0&#125;, &#123;'points': 200, 'granularity': 86400.0, 'timespan': 17280000.0&#125;], '_sa_instance_state': &lt;sqlalchemy.orm.state.InstanceState object at 0x5536c90&gt;, 'name': u'frequency_300s', 'aggregation_methods': set([u'count', u'max', u'sum', u'mean', u'min'])&#125;</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    (Pdb) p metric.archive_policy.aggregation_methods</span></span><br><span class="line"><span class="string">    set([u'count', u'max', u'sum', u'mean', u'min'])</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    (Pdb) p metric.archive_policy.max_block_size</span></span><br><span class="line"><span class="string">    86400.0</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    (Pdb) p metric.archive_policy.back_window</span></span><br><span class="line"><span class="string">    0</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    (Pdb) p metric.archive_policy.definition</span></span><br><span class="line"><span class="string">    [&#123;'points': 300, 'granularity': 300.0, 'timespan': 90000.0&#125;, &#123;'points': 100, 'granularity': 900.0, 'timespan': 90000.0&#125;, &#123;'points': 100, 'granularity': 7200.0, 'timespan': 720000.0&#125;, &#123;'points': 200, 'granularity': 86400.0, 'timespan': 17280000.0&#125;]</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    agg_methods = list(metric.archive_policy.aggregation_methods)</span><br><span class="line">    block_size = metric.archive_policy.max_block_size</span><br><span class="line">    back_window = metric.archive_policy.back_window</span><br><span class="line">    definition = metric.archive_policy.definition</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">      	<span class="comment"># 步骤二：获取未聚合的时间序列数据进行反序列化，来重新构建为新的时间序列</span></span><br><span class="line">        ts = self._get_unaggregated_timeserie_and_unserialize(</span><br><span class="line">            metric, block_size=block_size, back_window=back_window)</span><br><span class="line">    <span class="keyword">except</span> storage.MetricDoesNotExist:</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            self._create_metric(metric)</span><br><span class="line">        <span class="keyword">except</span> storage.MetricAlreadyExists:</span><br><span class="line">            <span class="comment"># Created in the mean time, do not worry</span></span><br><span class="line">            <span class="keyword">pass</span></span><br><span class="line">        ts = <span class="keyword">None</span></span><br><span class="line">    <span class="keyword">except</span> CorruptionError <span class="keyword">as</span> e:</span><br><span class="line">        LOG.error(e)</span><br><span class="line">        ts = <span class="keyword">None</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ts <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">        ts = carbonara.BoundTimeSerie(block_size=block_size,</span><br><span class="line">                                      back_window=back_window)</span><br><span class="line">        current_first_block_timestamp = <span class="keyword">None</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        current_first_block_timestamp = ts.first_block_timestamp()</span><br><span class="line"></span><br><span class="line">    computed_points = &#123;<span class="string">"number"</span>: <span class="number">0</span>&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_map_add_measures</span><span class="params">(bound_timeserie)</span>:</span></span><br><span class="line">        tstamp = max(bound_timeserie.first, measures[<span class="number">0</span>][<span class="number">0</span>])</span><br><span class="line"></span><br><span class="line">        new_first_block_timestamp = bound_timeserie.first_block_timestamp()</span><br><span class="line">        computed_points[<span class="string">'number'</span>] = len(bound_timeserie)</span><br><span class="line">        <span class="keyword">for</span> d <span class="keyword">in</span> definition:</span><br><span class="line">            ts = bound_timeserie.group_serie(</span><br><span class="line">                d.granularity, carbonara.round_timestamp(</span><br><span class="line">                    tstamp, d.granularity * <span class="number">10e8</span>))</span><br><span class="line">            self._map_in_thread(</span><br><span class="line">                self._add_measures,</span><br><span class="line">                ((aggregation, d, metric, ts,</span><br><span class="line">                    current_first_block_timestamp,</span><br><span class="line">                    new_first_block_timestamp)</span><br><span class="line">                    <span class="keyword">for</span> aggregation <span class="keyword">in</span> agg_methods))</span><br><span class="line"><span class="comment"># 步骤三：计算聚合后的时间序列</span></span><br><span class="line">    <span class="keyword">with</span> timeutils.StopWatch() <span class="keyword">as</span> sw:</span><br><span class="line">        ts.set_values(measures,</span><br><span class="line">                      before_truncate_callback=_map_add_measures,</span><br><span class="line">                      ignore_too_old_timestamps=<span class="keyword">True</span>)</span><br><span class="line"></span><br><span class="line">        elapsed = sw.elapsed()</span><br><span class="line">        number_of_operations = (len(agg_methods) * len(definition))</span><br><span class="line">        perf = <span class="string">""</span></span><br><span class="line">        <span class="keyword">if</span> elapsed &gt; <span class="number">0</span>:</span><br><span class="line">            perf = <span class="string">" (%d points/s, %d measures/s)"</span> % (</span><br><span class="line">                ((number_of_operations * computed_points[<span class="string">'number'</span>]) /</span><br><span class="line">                    elapsed),</span><br><span class="line">                ((number_of_operations * len(measures)) / elapsed)</span><br><span class="line">            )</span><br><span class="line">        LOG.debug(<span class="string">"Computed new metric %s with %d new measures "</span></span><br><span class="line">                  <span class="string">"in %.2f seconds%s"</span>,</span><br><span class="line">                  metric.id, len(measures), elapsed, perf)</span><br><span class="line"><span class="comment"># 步骤四：更新未聚合的时间序列</span></span><br><span class="line">    self._store_unaggregated_timeserie(metric, ts.serialize())</span><br></pre></td></tr></table></figure>
+<ol>
+<li><p>步骤1. 对待处理监控数据按照时间从旧到新排序，获取监控项中聚合方法，采样间隔等信息</p>
+</li>
+<li><p>步骤2. 调用<code>_get_unaggregated_timeserie_and_unserialize</code>方法获取未聚合的时间序列数据进行反序列化，来重新构建为新的时间序列，具体步骤如下<br>2.0. 先根据监控项<code>id</code>构建需要获取的对象名称，形如:<code>gnocchi_01f0658b-f147-482b-bca9-f474a79320dc_none_v3</code><br>从ceph中读取该对象存储的值(是一个字符串)</p>
+<p>​        2.1. 先解压从步骤0中读取的数据（实际是一个字符串），前面一半为时间，后面一半为时间对应的值</p>
+<p>​        2.2. 解压的时间由于采用差值，所以累加计算每个时间；</p>
+<p>​        2.3. 将时间列表，值列表来构建时间序列，然后根据block_size(实际是最大采样间隔)对序列计算出这个时间序列中最后一个数据，在一天之前的起始时间，以该时间为基础，对此时间序列进行切片，得到最终需要处理的时间序列</p>
+<p>​        2.4. 用步骤3的时间序列，block_size等实例化并返回最终需要处理的BoundTimeSerie</p>
+</li>
+<li><p>步骤3 计算聚合后的时间序列，具体调用ts.set_values方法处理过程如下</p>
+<p>​        3.1. 对给定的已经合并了待处理数据生成的时间序列和未聚合的时间序列的合并时间序列boundTimeSerie进行如下操作</p>
+<p>​        3.2. 遍历归档策略，根据采样间隔，聚合方法：</p>
+<p>​                计算每个boundTimeSerie聚合后的时间序列；</p>
+<p>​                并对该聚合的时间序列分割，计算分割序列的偏移量和对应序列化的值；</p>
+<p>​                根据偏移量，将序列化的值写入到对应的ceph对象</p>
+<p>​        总结：步骤3实现了: 计算聚合后的时间序列，将聚合后的时间序列写入到ceph对象中</p>
+</li>
+<li><p>步骤4. 更新未聚合的时间序列，具体调用_store_unaggregated_timeserie方法处理过程如下</p>
+<p>​        4.1. 对时间序列的索引进行numpy.diff的求差值操作，并<br>​        在所求的索引差值列表的最前面加上该时间序列的第一个值，<br>​        得到差值索引列表</p>
+<p>​        4.2. 对差值索引列表的类型转换为uint64类型</p>
+<p>​        4.3. 对时间序列的值列表类型转换为浮点型</p>
+<p>​        4.4 对差值索引列表转换为字节 + 对时间序列的值列表转换为字节，<br>​           得到字符串</p>
+<p>​        4.5. 对该字符串调用lz4.dumps进行压缩，返回该压缩后的字符串</p>
+<p>​        4.6 构建类似gnocchi_01f0658b-f147-482b-bca9-f474a79320dc_none_v3的对象名称，<br>​           向该对象中写入未聚合的时间序列的压缩后的字符串<br>​           该字符串序列化前的前半部分为：时间序列索引，后半部分为时间序列值</p>
+</li>
+</ol>
+<h4 id="步骤1-对待处理监控数据按照时间从旧到新排序，获取监控项中聚合方法，采样间隔等信息"><a href="#步骤1-对待处理监控数据按照时间从旧到新排序，获取监控项中聚合方法，采样间隔等信息" class="headerlink" title="步骤1. 对待处理监控数据按照时间从旧到新排序，获取监控项中聚合方法，采样间隔等信息"></a>步骤1. 对待处理监控数据按照时间从旧到新排序，获取监控项中聚合方法，采样间隔等信息</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_compute_and_store_timeseries</span><span class="params">(self, metric, measures)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> len(measures) == <span class="number">0</span>:</span><br><span class="line">        LOG.debug(<span class="string">"Skipping %s (already processed)"</span>, metric)</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line"><span class="comment"># 对measures进行排序</span></span><br><span class="line">    measures = sorted(measures, key=operator.itemgetter(<span class="number">0</span>))</span><br><span class="line">    ......</span><br></pre></td></tr></table></figure>
+<h4 id="步骤2-调用-get-unaggregated-timeserie-and-unserialize方法获取未聚合的时间序列数据进行反序列化，来重新构建为新的时间序列，"><a href="#步骤2-调用-get-unaggregated-timeserie-and-unserialize方法获取未聚合的时间序列数据进行反序列化，来重新构建为新的时间序列，" class="headerlink" title="步骤2. 调用_get_unaggregated_timeserie_and_unserialize方法获取未聚合的时间序列数据进行反序列化，来重新构建为新的时间序列，"></a>步骤2. 调用_get_unaggregated_timeserie_and_unserialize方法获取未聚合的时间序列数据进行反序列化，来重新构建为新的时间序列，</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CarbonaraBasedStorage</span><span class="params">(storage.StorageDriver)</span>:</span></span><br><span class="line">		<span class="function"><span class="keyword">def</span> <span class="title">_get_unaggregated_timeserie_and_unserialize</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">            self, metric, block_size, back_window)</span>:</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        _get_unaggregated_timeserie</span></span><br><span class="line"><span class="string">        	s0. 先根据监控项id构建需要获取的对象名称，形如:gnocchi_01f0658b-f147-482b-bca9-f474a79320dc_none_v3</span></span><br><span class="line"><span class="string">            	从ceph中读取该对象存储的值(是一个字符串)</span></span><br><span class="line"><span class="string">        unserialize</span></span><br><span class="line"><span class="string">          s1. 先解压从步骤0中读取的数据（实际是一个字符串），前面一半为时间，后面一半为时间对应的值</span></span><br><span class="line"><span class="string">          s2. 解压的时间由于采用差值，所以累加计算每个时间；</span></span><br><span class="line"><span class="string">          s3. 将时间列表，值列表来构建时间序列，然后根据block_size对序列计算出这个时间序列中最后一个数据，</span></span><br><span class="line"><span class="string">           在一天之前的起始时间，以该时间为基础，对此时间序列进行切片，得到最终需要处理的时间序列</span></span><br><span class="line"><span class="string">          s4. 用步骤s3的时间序列，block_size等实例化并返回最终需要处理的BoundTimeSerie</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="keyword">with</span> timeutils.StopWatch() <span class="keyword">as</span> sw:</span><br><span class="line">            raw_measures = (</span><br><span class="line">                self._get_unaggregated_timeserie(</span><br><span class="line">                    metric)</span><br><span class="line">            )</span><br><span class="line">            LOG.debug(</span><br><span class="line">                <span class="string">"Retrieve unaggregated measures "</span></span><br><span class="line">                <span class="string">"for %s in %.2fs"</span>,</span><br><span class="line">                metric.id, sw.elapsed())</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">          	<span class="comment"># 解压，计算</span></span><br><span class="line">            <span class="keyword">return</span> carbonara.BoundTimeSerie.unserialize(</span><br><span class="line">                raw_measures, block_size, back_window)</span><br><span class="line">        <span class="keyword">except</span> ValueError:</span><br><span class="line">            <span class="keyword">raise</span> CorruptionError(</span><br><span class="line">                <span class="string">"Data corruption detected for %s "</span></span><br><span class="line">                <span class="string">"unaggregated timeserie"</span> % metric.id)</span><br></pre></td></tr></table></figure>
+<p>变量分析：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">(Pdb) p metric</span><br><span class="line">&lt;Metric 01f0658b-f147-482b-bca9-f474a79320dc&gt;</span><br><span class="line">(Pdb) p metric.__dict__</span><br><span class="line">&#123;&apos;status&apos;: u&apos;active&apos;, &apos;_sa_instance_state&apos;: &lt;sqlalchemy.orm.state.InstanceState object at 0x5536b50&gt;, &apos;name&apos;: u&apos;cpu_util&apos;, &apos;creator&apos;: u&apos;6a18a77646104fcb93e92cb3daf10c91:55e9bc42c004471b9111ffbb516a9bbe&apos;, &apos;resource_id&apos;: UUID(&apos;d872305c-94b3-4f35-a2d5-602af219945d&apos;), &apos;archive_policy&apos;: &lt;gnocchi.indexer.sqlalchemy_base.ArchivePolicy object at 0x5536c50&gt;, &apos;archive_policy_name&apos;: u&apos;frequency_300s&apos;, &apos;id&apos;: UUID(&apos;01f0658b-f147-482b-bca9-f474a79320dc&apos;), &apos;unit&apos;: None&#125;</span><br><span class="line"></span><br><span class="line">(Pdb) p block_size</span><br><span class="line">86400.0</span><br><span class="line">(Pdb) p back_window</span><br><span class="line">0</span><br><span class="line">(Pdb) p raw_measures</span><br><span class="line">&apos;\xd0\x06\x00\x00\xf5\t\x00T\r\x15\xc4\xc7#\x16\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x10\x00\x04\x18\x00\x04\x08\x00\x0f \x00-\x04H\x00\x04\x08\x00\x0fP\x00\r\x0f(\x00-\x0f`\x00\r\x04 \x00?\xec|o\xf8\x00\x1a\x048\x00\x0f\xa0\x00\x15\x0c`\x00\x0c@\x00\x04H\x00\x04\x08\x00\x0f \x00\r\x0f(\x00\x1d\x0f0\x00\x1d\x0f\x80\x005\x0fH\x005\x0f\xc0\x00e\x0fx\x00\x05\xf8\x05@Ys\x07\x00\x00\x00\x00\x18\xee\x84\x06\x00\x00\x00\x00\xb0\x8e\xf0\x1b\x18\x001\xe2\x88\xc0\x18\x001v\xbe7(\x00\t\x02\x00#\xf0?\x0f\x00\x12@\x08\x00\x13\x08\x08\x00\x13\x10\x08\x00\x13\x14\x08\x00\x13\x18\x08\x00\x13\x1c\x08\x00\x13 \x08\x00\x13&quot;\x08\x00\x13$\x08\x00\x13&amp;\x08\x00\x13(\x08\x00\x13*\x08\x00\x13,\x08\x00\x13.\x08\x00\x130\x08\x00\x131\x08\x00\x132\x08\x00\x133\x08\x00\x134\x08\x00\x135\x08\x00\x136\x08\x00\x137\x08\x00\x138\x08\x00\x139\x08\x00\x13:\x08\x00\x13;\x08\x00\x13&lt;\x08\x00\x13=\x08\x00\x13&gt;\x08\x00\x13?\x08\x00\x12@\x08\x00\x13\x80\x08\x00#\x00A\x10\x00\x03\x08\x00#\x00B\x10\x00\x03\x08\x00#\x00C\x10\x00\x03\x08\x00#\x00D\x10\x00\x03\x08\x00#\x00E\x10\x00\x03\x08\x00#\x00F\x10\x00\x03\x08\x00#\x00G\x10\x00\x03\x08\x00#\x00H\x10\x00\x03\x08\x00#\x00I\x10\x00\x03\x08\x00#\x00J\x10\x00\x03\x08\x00#\x00K\x10\x00\x03\x08\x00#\x00L\x10\x00\x03\x08\x00#\x00M\x10\x00\x03\x08\x00#\x00N\x10\x00\x03\x08\x00#\x00O\x10\x00\x03\x08\x00&quot;\x00P\x10\x00\x13@\x08\x00\x13\x80\x08\x00\x13\xc0\x08\x00#\x00Q \x00\x03\x08\x00\x13\x80\x08\x00\x13\xc0\x08\x00#\x00R \x00\x03\x08\x00\x13\x80\x08\x00\x13\xc0\x08\x00#\x00S \x00\x03\x08\x00\x13\x80\x08\x00\x13\xc0\x08\x00#\x00T \x00\x03\x08\x00\x13\x80\x08\x00\x13\xc0\x08\x00#\x00U \x00\x03\x08\x00\x13\x80\x08\x00\x13\xc0\x08\x00#\x00V \x00\x03\x08\x00\x13\x80\x08\x00\x13\xc0\x08\x00#\x00W \x00\x03\x08\x00\x13\x80\x08\x00\x13\xc0\x08\x00#\x00X \x00\x03\x08\x00\x13\x80\x08\x00\x13\xc0\x08\x00#\x00Y \x00\x03\x08\x00\x13\x80\x08\x00\x04\x02\x00\x13\xc0\x10\x00&quot;@Z(\x00\x04\x02\x00\xb0\x80Z@\x00\x00\x00\x00\x00\x00\xf0?&apos;</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BoundTimeSerie</span><span class="params">(TimeSerie)</span>:</span></span><br><span class="line"><span class="meta">		@classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">unserialize</span><span class="params">(cls, data, block_size, back_window)</span>:</span></span><br><span class="line">				<span class="string">"""</span></span><br><span class="line"><span class="string">				根据ceph中获得的监控数据(包含时间和值)的字符串，即data:</span></span><br><span class="line"><span class="string">          s1. 先解压数据，前面一半为时间，后面一半为时间对应的值</span></span><br><span class="line"><span class="string">          s2. 解压的时间由于采用差值，所以累加计算每个时间；</span></span><br><span class="line"><span class="string">          s3. 将时间列表，值列表来构建时间序列，然后根据block_size对序列计算出这个时间序列中最后一个数据，</span></span><br><span class="line"><span class="string">          在一天之前的起始时间，以该时间为基础，对此时间序列进行切片，得到最终需要处理的时间序列</span></span><br><span class="line"><span class="string">          s4. 用步骤s3的时间序列，block_size等实例化并返回最终需要处理的BoundTimeSerie</span></span><br><span class="line"><span class="string">				"""</span></span><br><span class="line">        uncompressed = lz4.loads(data)</span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">            (Pdb) nb_points</span></span><br><span class="line"><span class="string">            109</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        nb_points = (</span><br><span class="line">            len(uncompressed) // cls._SERIALIZATION_TIMESTAMP_VALUE_LEN</span><br><span class="line">        )</span><br><span class="line">        timestamps_raw = uncompressed[</span><br><span class="line">            :nb_points*cls._SERIALIZATION_TIMESTAMP_LEN]</span><br><span class="line">        timestamps = numpy.frombuffer(timestamps_raw, dtype=<span class="string">'&lt;Q'</span>)</span><br><span class="line">        timestamps = numpy.cumsum(timestamps)</span><br><span class="line">        timestamps = numpy.array(timestamps, dtype=<span class="string">'datetime64[ns]'</span>)</span><br><span class="line">        values_raw = uncompressed[nb_points*cls._SERIALIZATION_TIMESTAMP_LEN:]</span><br><span class="line">        values = numpy.frombuffer(values_raw, dtype=<span class="string">'&lt;d'</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> cls.from_data(</span><br><span class="line">            pandas.to_datetime(timestamps),</span><br><span class="line">            values,</span><br><span class="line">            block_size=block_size,</span><br><span class="line">            back_window=back_window)</span><br><span class="line">      </span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">from_data</span><span class="params">(cls, timestamps=None, values=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                  block_size=None, back_window=<span class="number">0</span>)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> cls(pandas.Series(values, timestamps),</span><br><span class="line">                   block_size=block_size, back_window=back_window)</span><br></pre></td></tr></table></figure>
+<h4 id="步骤3-计算聚合后的时间序列，具体调用ts-set-values方法处理过程如下"><a href="#步骤3-计算聚合后的时间序列，具体调用ts-set-values方法处理过程如下" class="headerlink" title="步骤3. 计算聚合后的时间序列，具体调用ts.set_values方法处理过程如下"></a>步骤3. 计算聚合后的时间序列，具体调用ts.set_values方法处理过程如下</h4><p>经过步骤2，我们得到了<code>ts</code>对象：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">""</span><span class="string">"</span></span><br><span class="line"><span class="string">(Pdb) ts</span></span><br><span class="line"><span class="string">&lt;gnocchi.carbonara.BoundTimeSerie object at 0x7fbdb91fd5d0&gt;</span></span><br><span class="line"><span class="string">(Pdb) ts.__dict__</span></span><br><span class="line"><span class="string">&#123;'back_window': 0, 'block_size': &lt;86400000000000 * Nanos&gt;,</span></span><br><span class="line"><span class="string"> 'ts':</span></span><br><span class="line"><span class="string">    2020-07-21 13:32:18      0.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:33:18      1.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:34:19      2.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:35:19      3.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:36:19      4.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:37:19      5.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:38:20      6.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:39:20      7.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:40:20      8.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:41:20      9.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:42:21     10.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:43:21     11.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:44:21     12.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:45:21     13.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:46:21     14.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:47:21     15.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:48:22     16.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:49:22     17.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:50:22     18.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:51:22     19.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:52:22     20.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:53:23     21.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:54:23     22.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:55:23     23.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:56:23     24.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:57:23     25.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:58:24     26.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:59:24     27.0</span></span><br><span class="line"><span class="string">    2020-07-21 14:00:25     28.0</span></span><br><span class="line"><span class="string">    2020-07-21 14:01:25     29.0</span></span><br><span class="line"><span class="string">    ...</span></span><br><span class="line"><span class="string">    2020-07-21 14:51:40     79.0</span></span><br><span class="line"><span class="string">    2020-07-21 14:52:40     80.0</span></span><br><span class="line"><span class="string">    2020-07-21 14:53:41     81.0</span></span><br><span class="line"><span class="string">    2020-07-21 14:54:41     82.0</span></span><br><span class="line"><span class="string">    2020-07-21 14:55:41     83.0</span></span><br><span class="line"><span class="string">    2020-07-21 14:56:41     84.0</span></span><br><span class="line"><span class="string">    2020-07-21 14:57:41     85.0</span></span><br><span class="line"><span class="string">    2020-07-21 14:58:42     86.0</span></span><br><span class="line"><span class="string">    2020-07-21 14:59:42     87.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:00:42     88.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:01:42     89.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:02:42     90.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:03:43     91.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:04:43     92.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:05:43     93.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:06:43     94.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:07:43     95.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:08:44     96.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:09:44     97.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:10:44     98.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:11:44     99.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:12:44    100.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:13:45    101.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:14:45    102.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:15:17      0.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:15:45    103.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:17:45    105.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:18:17      0.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:18:46    106.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:19:17      1.0</span></span><br><span class="line"><span class="string">Length: 109, dtype: float64&#125;</span></span><br><span class="line"><span class="string">"</span><span class="string">""</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BoundTimeSerie</span><span class="params">(TimeSerie)</span>:</span></span><br><span class="line">		<span class="string">"""</span></span><br><span class="line"><span class="string">    1. 从未聚合的时间序列最后一个时间lastTime为基点，找出能够被最大采样间隔(例如86400)整除且最接近lasTtime</span></span><br><span class="line"><span class="string">       的时间作为最近的起始时间firstTime</span></span><br><span class="line"><span class="string">    2. 然后从待处理监控数据列表中过滤出时间 &gt;= firstTime的待处理监控数据</span></span><br><span class="line"><span class="string">    3. 将待处理的监控数据(有时间，值的元组组成的列表)，构建为待处理时间序列，并检查</span></span><br><span class="line"><span class="string">       重复和是否是单调的，然后用原来未聚合的时间序列和当前待处理时间序列进行合并操作，</span></span><br><span class="line"><span class="string">       得到新生成的时间序列</span></span><br><span class="line"><span class="string">		"""</span></span><br><span class="line">		<span class="function"><span class="keyword">def</span> <span class="title">set_values</span><span class="params">(self, values, before_truncate_callback=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                   ignore_too_old_timestamps=False)</span>:</span></span><br><span class="line">        <span class="comment"># <span class="doctag">NOTE:</span> values must be sorted when passed in.</span></span><br><span class="line">        <span class="string">""""""</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        (Pdb) a</span></span><br><span class="line"><span class="string">        self = &lt;gnocchi.carbonara.BoundTimeSerie object at 0x7fbdb91fd5d0&gt;</span></span><br><span class="line"><span class="string">        values = [(Timestamp('2020-07-21 15:19:46'), 107.0)]</span></span><br><span class="line"><span class="string">        before_truncate_callback = &lt;function _map_add_measures at 0x7fbdb91f6f50&gt;</span></span><br><span class="line"><span class="string">        ignore_too_old_timestamps = True</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="keyword">if</span> self.block_size <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span> <span class="keyword">and</span> <span class="keyword">not</span> self.ts.empty:</span><br><span class="line">            first_block_timestamp = self.first_block_timestamp()</span><br><span class="line">            <span class="keyword">if</span> ignore_too_old_timestamps:</span><br><span class="line">                <span class="keyword">for</span> index, (timestamp, value) <span class="keyword">in</span> enumerate(values):</span><br><span class="line">                    <span class="keyword">if</span> timestamp &gt;= first_block_timestamp:</span><br><span class="line">                        values = values[index:]</span><br><span class="line">                        <span class="keyword">break</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    values = []</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="comment"># Check that the smallest timestamp does not go too much back</span></span><br><span class="line">                <span class="comment"># in time.</span></span><br><span class="line">                smallest_timestamp = values[<span class="number">0</span>][<span class="number">0</span>]</span><br><span class="line">                <span class="keyword">if</span> smallest_timestamp &lt; first_block_timestamp:</span><br><span class="line">                    <span class="keyword">raise</span> NoDeloreanAvailable(first_block_timestamp,</span><br><span class="line">                                              smallest_timestamp)</span><br><span class="line">        super(BoundTimeSerie, self).set_values(values)</span><br><span class="line">        <span class="comment"># before_truncate_callback = &lt;function _map_add_measures at 0x7fbdb91f6f50&gt;</span></span><br><span class="line">        <span class="keyword">if</span> before_truncate_callback:</span><br><span class="line">            before_truncate_callback(self)</span><br><span class="line">        self._truncate()</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CarbonaraBasedStorage</span><span class="params">(storage.StorageDriver)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, conf, incoming)</span>:</span></span><br><span class="line">      	...</span><br><span class="line">        self._map_in_thread = self._map_no_thread</span><br><span class="line">        ...</span><br><span class="line">        </span><br><span class="line"><span class="meta">    @staticmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_map_no_thread</span><span class="params">(method, list_of_args)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> list(itertools.starmap(method, list_of_args))</span><br><span class="line">      </span><br><span class="line">    <span class="string">'''</span></span><br><span class="line"><span class="string">    _map_add_measures(bound_timeserie):</span></span><br><span class="line"><span class="string">    1. 对给定的已经合并了待处理数据生成的时间序列和未聚合的时间序列的合并时间序列boundTimeSerie进行如下操作</span></span><br><span class="line"><span class="string">    2. 遍历归档策略，根据采样间隔，聚合方法：</span></span><br><span class="line"><span class="string">       计算每个boundTimeSerie聚合后的时间序列；</span></span><br><span class="line"><span class="string">       并对该聚合的时间序列分割，计算分割序列的偏移量和对应序列化的值；</span></span><br><span class="line"><span class="string">       根据偏移量，将序列化的值写入到对应的ceph对象</span></span><br><span class="line"><span class="string">    总结：这个函数实现了: 计算聚合后的时间序列，将聚合后的时间序列写入到ceph对象中</span></span><br><span class="line"><span class="string">    '''</span></span><br><span class="line">		<span class="function"><span class="keyword">def</span> <span class="title">_map_add_measures</span><span class="params">(bound_timeserie)</span>:</span></span><br><span class="line">        <span class="string">""""""</span></span><br><span class="line">        <span class="comment"># NOTE (gordc): bound_timeserie is entire set of</span></span><br><span class="line">        <span class="comment"># unaggregated measures matching largest</span></span><br><span class="line">        <span class="comment"># granularity. the following takes only the points</span></span><br><span class="line">        <span class="comment"># affected by new measures for specific granularity</span></span><br><span class="line">        tstamp = max(bound_timeserie.first, measures[<span class="number">0</span>][<span class="number">0</span>])</span><br><span class="line"></span><br><span class="line">        new_first_block_timestamp = bound_timeserie.first_block_timestamp()</span><br><span class="line">        computed_points[<span class="string">'number'</span>] = len(bound_timeserie)</span><br><span class="line">        <span class="keyword">for</span> d <span class="keyword">in</span> definition:</span><br><span class="line">          <span class="string">'''</span></span><br><span class="line"><span class="string">          group_serie(self, granularity, start=0):</span></span><br><span class="line"><span class="string">          1.根据给定的时间开始时间，计算过滤后的时间序列，按照采样间隔计算分组后的时间索引列表</span></span><br><span class="line"><span class="string">          2.对分组后的时间序列索引列表赋值，对时间序列的索引按照采样间隔做去重处理，得到新的索引列表和次数列表</span></span><br><span class="line"><span class="string">          '''</span></span><br><span class="line">          ts = bound_timeserie.group_serie(</span><br><span class="line">            d.granularity, carbonara.round_timestamp(</span><br><span class="line">              tstamp, d.granularity * <span class="number">10e8</span>))</span><br><span class="line"></span><br><span class="line">          self._map_in_thread(</span><br><span class="line">            self._add_measures,</span><br><span class="line">            ((aggregation, d, metric, ts,</span><br><span class="line">              current_first_block_timestamp,</span><br><span class="line">              new_first_block_timestamp)</span><br><span class="line">             <span class="keyword">for</span> aggregation <span class="keyword">in</span> agg_methods))</span><br><span class="line">           </span><br><span class="line">    <span class="string">'''</span></span><br><span class="line"><span class="string">    根据给定的聚合方法，归档策略等信息，以及已经分组的时间序列，计算聚合后的时间序列，</span></span><br><span class="line"><span class="string">    并将聚合后的时间序列写入到ceph的对象中</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    1. 根据给定的聚合方法，对已经索引分组的时间序列等先计算得到聚合后的时间序列</span></span><br><span class="line"><span class="string">    2. 对时间序列做截断操作，得到截断后的时间序列，最终用这些参数初始化AggregatedTimeSerie对象</span></span><br><span class="line"><span class="string">    3. 对已经计算好的时间序列进行分割(例如每个时间序列最多保存3600个点)，对每个分割后的时间序列</span></span><br><span class="line"><span class="string">       计算写入到对象的偏移量值，以及对应序列化的值，然后写入ceph对象；</span></span><br><span class="line"><span class="string">    4. 重复步骤3，直到所有被分割的时间序列都写入到了ceph对象</span></span><br><span class="line"><span class="string">    '''</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_add_measures</span><span class="params">(self, aggregation, archive_policy_def,</span></span></span><br><span class="line"><span class="function"><span class="params">                      metric, grouped_serie,</span></span></span><br><span class="line"><span class="function"><span class="params">                      previous_oldest_mutable_timestamp,</span></span></span><br><span class="line"><span class="function"><span class="params">                      oldest_mutable_timestamp)</span>:</span></span><br><span class="line">      </span><br><span class="line">        ts = carbonara.AggregatedTimeSerie.from_grouped_serie(</span><br><span class="line">            grouped_serie, archive_policy_def.granularity,</span><br><span class="line">            aggregation, max_size=archive_policy_def.points)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Don't do anything if the timeserie is empty</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> ts:</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># We only need to check for rewrite if driver is not in WRITE_FULL mode</span></span><br><span class="line">        <span class="comment"># and if we already stored splits once</span></span><br><span class="line">        need_rewrite = (</span><br><span class="line">            <span class="keyword">not</span> self.WRITE_FULL</span><br><span class="line">            <span class="keyword">and</span> previous_oldest_mutable_timestamp <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span></span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> archive_policy_def.timespan <span class="keyword">or</span> need_rewrite:</span><br><span class="line">            existing_keys = self._list_split_keys_for_metric(</span><br><span class="line">                metric, aggregation, archive_policy_def.granularity)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># First delete old splits</span></span><br><span class="line">        <span class="keyword">if</span> archive_policy_def.timespan:</span><br><span class="line">            oldest_point_to_keep = ts.last - datetime.timedelta(</span><br><span class="line">                seconds=archive_policy_def.timespan)</span><br><span class="line">            oldest_key_to_keep = ts.get_split_key(oldest_point_to_keep)</span><br><span class="line">            oldest_key_to_keep_s = str(oldest_key_to_keep)</span><br><span class="line">            <span class="keyword">for</span> key <span class="keyword">in</span> list(existing_keys):</span><br><span class="line">                <span class="comment"># NOTE(jd) Only delete if the key is strictly inferior to</span></span><br><span class="line">                <span class="comment"># the timestamp; we don't delete any timeserie split that</span></span><br><span class="line">                <span class="comment"># contains our timestamp, so we prefer to keep a bit more</span></span><br><span class="line">                <span class="comment"># than deleting too much</span></span><br><span class="line">                <span class="keyword">if</span> key &lt; oldest_key_to_keep_s:</span><br><span class="line">                    self._delete_metric_measures(</span><br><span class="line">                        metric, key, aggregation,</span><br><span class="line">                        archive_policy_def.granularity)</span><br><span class="line">                    existing_keys.remove(key)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            oldest_key_to_keep = carbonara.SplitKey(<span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Rewrite all read-only splits just for fun (and compression). This</span></span><br><span class="line">        <span class="comment"># only happens if `previous_oldest_mutable_timestamp' exists, which</span></span><br><span class="line">        <span class="comment"># means we already wrote some splits at some point – so this is not the</span></span><br><span class="line">        <span class="comment"># first time we treat this timeserie.</span></span><br><span class="line">        <span class="keyword">if</span> need_rewrite:</span><br><span class="line">            previous_oldest_mutable_key = str(ts.get_split_key(</span><br><span class="line">                previous_oldest_mutable_timestamp))</span><br><span class="line">            oldest_mutable_key = str(ts.get_split_key(</span><br><span class="line">                oldest_mutable_timestamp))</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> previous_oldest_mutable_key != oldest_mutable_key:</span><br><span class="line">                <span class="keyword">for</span> key <span class="keyword">in</span> existing_keys:</span><br><span class="line">                    <span class="keyword">if</span> previous_oldest_mutable_key &lt;= key &lt; oldest_mutable_key:</span><br><span class="line">                        LOG.debug(</span><br><span class="line">                            <span class="string">"Compressing previous split %s (%s) for metric %s"</span>,</span><br><span class="line">                            key, aggregation, metric)</span><br><span class="line">                        <span class="comment"># NOTE(jd) Rewrite it entirely for fun (and later for</span></span><br><span class="line">                        <span class="comment"># compression). For that, we just pass None as split.</span></span><br><span class="line">                        self._store_timeserie_split(</span><br><span class="line">                            metric, carbonara.SplitKey(</span><br><span class="line">                                float(key), archive_policy_def.granularity),</span><br><span class="line">                            <span class="keyword">None</span>, aggregation, archive_policy_def,</span><br><span class="line">                            oldest_mutable_timestamp)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> key, split <span class="keyword">in</span> ts.split():</span><br><span class="line">            <span class="keyword">if</span> key &gt;= oldest_key_to_keep:</span><br><span class="line">                LOG.debug(</span><br><span class="line">                    <span class="string">"Storing split %s (%s) for metric %s"</span>,</span><br><span class="line">                    key, aggregation, metric)</span><br><span class="line">                self._store_timeserie_split(</span><br><span class="line">                    metric, key, split, aggregation, archive_policy_def,</span><br><span class="line">                    oldest_mutable_timestamp)</span><br></pre></td></tr></table></figure>
+<h4 id="步骤4-更新未聚合的时间序列，具体调用-store-unaggregated-timeserie方法处理过程如下"><a href="#步骤4-更新未聚合的时间序列，具体调用-store-unaggregated-timeserie方法处理过程如下" class="headerlink" title="步骤4. 更新未聚合的时间序列，具体调用_store_unaggregated_timeserie方法处理过程如下"></a>步骤4. 更新未聚合的时间序列，具体调用_store_unaggregated_timeserie方法处理过程如下</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_compute_and_store_timeseries</span><span class="params">(self, metric, measures)</span>:</span></span><br><span class="line">  	...</span><br><span class="line">		self._store_unaggregated_timeserie(metric, ts.serialize())</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ts.serialize()</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BoundTimeSerie</span><span class="params">(TimeSerie)</span>:</span></span><br><span class="line">  	<span class="string">"""</span></span><br><span class="line"><span class="string">  	1. 对时间序列的索引进行numpy.diff的求差值操作，并</span></span><br><span class="line"><span class="string">       在所求的索引差值列表的最前面加上该时间序列的第一个值，</span></span><br><span class="line"><span class="string">       得到差值索引列表</span></span><br><span class="line"><span class="string">    2. 对差值索引列表的类型转换为uint64类型</span></span><br><span class="line"><span class="string">    3. 对时间序列的值列表类型转换为浮点型</span></span><br><span class="line"><span class="string">    4. 对差值索引列表转换为字节 + 对时间序列的值列表转换为字节，</span></span><br><span class="line"><span class="string">       得到字符串</span></span><br><span class="line"><span class="string">    5. 对该字符串调用lz4.dumps进行压缩，返回该压缩后的字符串</span></span><br><span class="line"><span class="string">  	"""</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">serialize</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># NOTE(jd) Use a double delta encoding for timestamps</span></span><br><span class="line">        timestamps = numpy.insert(numpy.diff(self.ts.index),</span><br><span class="line">                                  <span class="number">0</span>, self.first.value)</span><br><span class="line">        timestamps = numpy.array(timestamps, dtype=<span class="string">'&lt;Q'</span>)</span><br><span class="line">        values = numpy.array(self.ts.values, dtype=<span class="string">'&lt;d'</span>)</span><br><span class="line">        payload = (timestamps.tobytes() + values.tobytes())</span><br><span class="line">        <span class="keyword">return</span> lz4.dumps(payload)</span><br><span class="line">      </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CephStorage</span><span class="params">(_carbonara.CarbonaraBasedStorage)</span>:</span></span><br><span class="line">  	......</span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    构建类似gnocchi_01f0658b-f147-482b-bca9-f474a79320dc_none_v3的对象名称，向</span></span><br><span class="line"><span class="string">    该对象中写入未聚合的时间序列的压缩后的字符串</span></span><br><span class="line"><span class="string">    该字符串前半部分为：时间序列索引，后半部分为时间序列值</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_store_unaggregated_timeserie</span><span class="params">(self, metric, data, version=<span class="number">3</span>)</span>:</span></span><br><span class="line">        self.ioctx.write_full(</span><br><span class="line">            self._build_unaggregated_timeserie_path(metric, version), data)</span><br><span class="line">        </span><br><span class="line"><span class="meta">    @staticmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_build_unaggregated_timeserie_path</span><span class="params">(metric, version)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> ((<span class="string">'gnocchi_%s_none'</span> % metric.id)</span><br><span class="line">                + (<span class="string">"_v%s"</span> % version <span class="keyword">if</span> version <span class="keyword">else</span> <span class="string">""</span>))</span><br></pre></td></tr></table></figure>
+<p>参考：</p>
+<p><a href="https://pecan.readthedocs.io/en/latest/deployment.html" target="_blank" rel="external">pecan 文档</a></p>
+<p><a href="https://blog.csdn.net/allison_ywt/article/details/54140730" target="_blank" rel="external">pecan</a></p>
+<p><a href="https://so.csdn.net/so/search?q=gnocchi&amp;t=blog&amp;u=qingyuanluofeng" target="_blank" rel="external">Gnocchi 总览</a></p>
+<p><a href="https://blog.csdn.net/qingyuanluofeng/article/details/68961093?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522162659176016780262578824%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fblog.%2522%257D&amp;request_id=162659176016780262578824&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~blog~first_rank_v2~rank_v29-7-68961093.pc_v2_rank_blog_default&amp;utm_term=gnocchi&amp;spm=1018.2226.3001.4450" target="_blank" rel="external">Gnocchi: 2 、Gnocchi架构及其基础</a></p>
+<p><a href="https://blog.csdn.net/qingyuanluofeng/article/details/70245763?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522162659176016780262578824%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fblog.%2522%257D&amp;request_id=162659176016780262578824&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~blog~first_rank_v2~rank_v29-1-70245763.pc_v2_rank_blog_default&amp;utm_term=gnocchi&amp;spm=1018.2226.3001.4450" target="_blank" rel="external">Gnocchi: 3、Gnocchi命令行使用</a></p>
+<p><a href="https://blog.csdn.net/hxpjava1/article/details/86802175" target="_blank" rel="external">OpenStack实践分享：OpenStack Gnocchi项目</a></p>
+<p><a href="https://www.cnblogs.com/luohaixian/p/11145939.html" target="_blank" rel="external">Ceilometer和Gnocchi的监控架构解析</a></p>
+<p><a href="https://blog.csdn.net/qingyuanluofeng/article/details/106770291?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522162659176016780262578824%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fblog.%2522%257D&amp;request_id=162659176016780262578824&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~blog~first_rank_v2~rank_v29-2-106770291.pc_v2_rank_blog_default&amp;utm_term=gnocchi&amp;spm=1018.2226.3001.4450" target="_blank" rel="external">Gnocchi 9、gnocchi聚合算法分析</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+<blockquote class="blockquote-center" style="color: #ccc;">
+    -------------本文结束 <i class="fa fa-apple"></i> 感谢您的阅读-------------
+</blockquote>
+
+  <span id="inline-green" style="border-radius:3px;">作者</span>：<a class="link-blue" href="https://github.com/magiceses" target="_blank">Magiceses</a><br/>有问题请 <a class="link-blue" href="https://magiceses.github.io/guestbook" target="_blank">留言</a> 或者私信我的 <a class="link-blue" href="https://weibo.com/u/3069595351" target="_blank">微博</a>。
+
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>满分是10分的话，这篇文章你给几分</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/reward/reward_wechat.png" alt="magiceses WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/reward/reward_alipay.png" alt="magiceses Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Openstack/" rel="tag"><i class="fa fa-tag"></i> Openstack</a>
+          
+            <a href="/tags/Telemetry/" rel="tag"><i class="fa fa-tag"></i> Telemetry</a>
+          
+            <a href="/tags/Gnocchi/" rel="tag"><i class="fa fa-tag"></i> Gnocchi</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/02/openstack-taskflow的使用/" rel="next" title="openstack之taskflow的使用">
+                <i class="fa fa-chevron-left"></i> openstack之taskflow的使用
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/10/03/openstack-telemetry-gnocchi使用原理和源码分析-续/" rel="prev" title="Gnocchi 使用原理及源码分析-下">
+                Gnocchi 使用原理及源码分析-下 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar/avatar.png"
+               alt="magiceses" />
+          <p class="site-author-name" itemprop="name">magiceses</p>
+          <p class="site-description motion-element" itemprop="description">Stay Hungry,Stay Foolish</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">61</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/magiceses" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://blog.csdn.net/weixin_43700106" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-chrome"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/weblog" title="建站日志" target="_blank">建站日志</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/reward" title="打赏" target="_blank">打赏</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Gnocchi-介绍"><span class="nav-number">1.</span> <span class="nav-text">Gnocchi 介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#架构"><span class="nav-number">1.2.</span> <span class="nav-text">架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#存储"><span class="nav-number">1.3.</span> <span class="nav-text">存储</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#指标"><span class="nav-number">1.4.</span> <span class="nav-text">指标</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#示例"><span class="nav-number">1.4.1.</span> <span class="nav-text">示例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#通过resource找metric"><span class="nav-number">1.4.1.1.</span> <span class="nav-text">通过resource找metric</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#查看-metric-属性"><span class="nav-number">1.4.1.2.</span> <span class="nav-text">查看 metric 属性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#通过-metric-找-measures"><span class="nav-number">1.4.1.3.</span> <span class="nav-text">通过 metric 找 measures</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#归档"><span class="nav-number">1.5.</span> <span class="nav-text">归档</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Gnocchi-源码"><span class="nav-number">2.</span> <span class="nav-text">Gnocchi 源码</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#api-server"><span class="nav-number">2.1.</span> <span class="nav-text">api-server</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#gnocchi-metricd"><span class="nav-number">2.2.</span> <span class="nav-text">gnocchi-metricd</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#数据接收"><span class="nav-number">2.2.1.</span> <span class="nav-text">数据接收</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据聚合"><span class="nav-number">2.2.2.</span> <span class="nav-text">数据聚合</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#步骤1-对待处理监控数据按照时间从旧到新排序，获取监控项中聚合方法，采样间隔等信息"><span class="nav-number">2.2.2.1.</span> <span class="nav-text">步骤1. 对待处理监控数据按照时间从旧到新排序，获取监控项中聚合方法，采样间隔等信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#步骤2-调用-get-unaggregated-timeserie-and-unserialize方法获取未聚合的时间序列数据进行反序列化，来重新构建为新的时间序列，"><span class="nav-number">2.2.2.2.</span> <span class="nav-text">步骤2. 调用_get_unaggregated_timeserie_and_unserialize方法获取未聚合的时间序列数据进行反序列化，来重新构建为新的时间序列，</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#步骤3-计算聚合后的时间序列，具体调用ts-set-values方法处理过程如下"><span class="nav-number">2.2.2.3.</span> <span class="nav-text">步骤3. 计算聚合后的时间序列，具体调用ts.set_values方法处理过程如下</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#步骤4-更新未聚合的时间序列，具体调用-store-unaggregated-timeserie方法处理过程如下"><span class="nav-number">2.2.2.4.</span> <span class="nav-text">步骤4. 更新未聚合的时间序列，具体调用_store_unaggregated_timeserie方法处理过程如下</span></a></li></ol></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+      
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="busuanzi-count">
+
+  <!-- <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script> -->
+  <!-- 上面这个是之前的，不知道为什么失效了，改成下面这个 -->
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">您是第<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>个小伙伴</span>
+  
+
+  
+    <span class="site-pv">本站总浏览<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">magiceses</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Pisces
+  </a>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count" style="color: #e90f92;">全站共 1m 字</span>
+</div>
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+  <!-- 按需加载背景 -->
+  <!-- 背景动画 -->
+<script type="text/javascript">
+  // 按需加载背景
+  // 如果是all，就直接加载了
+  if("pc" == "all") {
+    $.getScript("/js/src/particle.js?v=5.0.1");
+  }
+  // 识别手机或电脑的js开始
+  (function(){
+    var res = GetRequest();
+    var par = res['index'];
+    if(par!='gfan'){
+      var ua=navigator.userAgent.toLowerCase();
+      var contains=function (a, b){
+          if(a.indexOf(b)!=-1){return true;}
+      };
+      if((contains(ua,"android") && contains(ua,"mobile"))||(contains(ua,"android") && contains(ua,"mozilla"))||(contains(ua,"android") && contains(ua,"opera"))||contains(ua,"ucweb7")||contains(ua,"iphone")){
+        return false;
+      } else {
+        $.getScript("/js/src/particle.js?v=5.0.1");
+      }
+    }
+  })();
+  function GetRequest() {
+    var url = location.search;
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+      var str = url.substr(1);
+      strs = str.split("&");
+      for(var i = 0; i < strs.length; i ++) {
+        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+      }
+    }
+    return theRequest;
+  }
+</script>
+<!-- 识别手机或电脑的js结束 -->  
+
+  <!-- 页面点击小红心 -->
+  <!-- 页面点击小红心 -->
+
+  <script type="text/javascript" src="/js/src/love.js?v=5.0.1"></script>
+
+
+  <!-- 鼠标移动，效果 -->
+  <!-- 鼠标移动特效 -->
+
+  <script type="text/javascript" src="/js/src/jquery-stars.js?v=5.0.1"></script>
+  <script type="text/javascript">
+  jQuery('body').jstars({
+  	image_path: '/images',
+  	image: 'candy-cane-stars.png',
+  	style: 'white',
+  	width: 34,
+  	height: 34,
+  	delay: 700,
+  	frequency: 5
+  });
+  </script>
+
+
+  <!-- 页面 title 进入/离开 效果 -->
+
+  <script type="text/javascript">var OriginTitile=document.title,st;document.addEventListener("visibilitychange",function(){document.hidden?(document.title="Waiting for you back！",clearTimeout(st)):(document.title="Thanks for visit~ "+OriginTitile,st=setTimeout(function(){document.title=OriginTitile},4e3))})</script>
+
+
+</body>
+</html>

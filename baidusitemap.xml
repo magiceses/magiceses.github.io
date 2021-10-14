@@ -4,6 +4,559 @@
 
     
   <url>
+    <loc>https://magiceses.github.io/2018/10/05/openstack-oslo.packages-oslo.messaging/</loc>
+    <lastmod>2021-10-14T01:59:41.645Z</lastmod>
+    <data>
+        <display>
+        <title>Oslo系列之oslo.messaging</title>
+        <pubTime>2018-10-05T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+        <tag>Oslo</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2018/10/05/openstack-oslo.packages-oslo.policy/</loc>
+    <lastmod>2021-10-14T01:58:14.506Z</lastmod>
+    <data>
+        <display>
+        <title>Oslo系列之oslo.policy</title>
+        <pubTime>2018-10-05T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+        <tag>Oslo</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2018/10/05/openstack-oslo.packages-oslo.cache/</loc>
+    <lastmod>2021-10-14T01:57:21.097Z</lastmod>
+    <data>
+        <display>
+        <title>Oslo系列之oslo.cache</title>
+        <pubTime>2018-10-05T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+        <tag>Oslo</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2018/10/05/openstack-oslo.packages-oslo.utils/</loc>
+    <lastmod>2021-10-14T01:56:09.551Z</lastmod>
+    <data>
+        <display>
+        <title>Oslo系列之oslo.utils</title>
+        <pubTime>2018-10-05T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+        <tag>Oslo</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2018/10/05/openstack-oslo.packages-oslo.service/</loc>
+    <lastmod>2021-10-14T01:55:06.958Z</lastmod>
+    <data>
+        <display>
+        <title>Oslo系列之oslo.service</title>
+        <pubTime>2018-10-05T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+        <tag>Oslo</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2018/10/05/openstack-oslo.packages-oslo.middleware/</loc>
+    <lastmod>2021-10-14T01:54:06.222Z</lastmod>
+    <data>
+        <display>
+        <title>Oslo系列之oslo.middleware</title>
+        <pubTime>2018-10-05T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+        <tag>Oslo</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2018/10/05/openstack-oslo.packages-oslo.log/</loc>
+    <lastmod>2021-10-14T01:52:19.974Z</lastmod>
+    <data>
+        <display>
+        <title>Oslo系列之oslo.log</title>
+        <pubTime>2018-10-05T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+        <tag>Oslo</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2018/10/05/openstack-oslo.packages-oslo.i18n-%E4%B8%8B/</loc>
+    <lastmod>2021-10-14T01:51:19.190Z</lastmod>
+    <data>
+        <display>
+        <title>Oslo系列之oslo.i18n-下</title>
+        <pubTime>2018-10-05T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+        <tag>Oslo</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2018/10/05/openstack-oslo.packages-oslo.i18n-%E4%B8%8A/</loc>
+    <lastmod>2021-10-14T01:50:21.469Z</lastmod>
+    <data>
+        <display>
+        <title>Oslo系列之oslo.i18n-上</title>
+        <pubTime>2018-10-05T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+        <tag>Oslo</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2018/10/05/openstack-oslo.packages-oslo.db/</loc>
+    <lastmod>2021-10-14T01:49:26.712Z</lastmod>
+    <data>
+        <display>
+        <title>Oslo系列之oslo.db</title>
+        <pubTime>2018-10-05T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+        <tag>Oslo</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2018/10/05/openstack-oslo.packages-oslo.concurrency/</loc>
+    <lastmod>2021-10-14T01:49:26.703Z</lastmod>
+    <data>
+        <display>
+        <title>Oslo系列之oslo.concurrency</title>
+        <pubTime>2018-10-05T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+        <tag>Oslo</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2018/10/05/openstack-oslo.packages-oslo.context/</loc>
+    <lastmod>2021-10-14T01:49:26.699Z</lastmod>
+    <data>
+        <display>
+        <title>Oslo系列之oslo.context</title>
+        <pubTime>2018-10-05T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+        <tag>Oslo</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2018/10/05/openstack-oslo.packages-oslo.config/</loc>
+    <lastmod>2021-10-14T01:49:26.696Z</lastmod>
+    <data>
+        <display>
+        <title>Oslo系列之oslo.config</title>
+        <pubTime>2018-10-05T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+        <tag>Oslo</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/10/04/openstack-telemetry-ceilometer-polling%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</loc>
+    <lastmod>2021-10-13T12:36:59.591Z</lastmod>
+    <data>
+        <display>
+        <title>ceilometer-polling源码分析</title>
+        <pubTime>2017-10-04T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+        <tag>Telemetry</tag>
+         
+        <tag>Ceilometer</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/10/04/openstack-telemetry-ceilometerclient%E5%88%86%E6%9E%90/</loc>
+    <lastmod>2021-10-13T12:36:59.586Z</lastmod>
+    <data>
+        <display>
+        <title>CeilometerClient源码学习记录</title>
+        <pubTime>2017-10-04T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+        <tag>Telemetry</tag>
+         
+        <tag>Ceilometer</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/10/04/openstack-telemetry-ceilometer-alarm%E5%88%86%E6%9E%90/</loc>
+    <lastmod>2021-10-13T12:36:59.583Z</lastmod>
+    <data>
+        <display>
+        <title>Ceilometer-Alarm-API参数详解</title>
+        <pubTime>2017-10-04T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+        <tag>Telemetry</tag>
+         
+        <tag>Ceilometer</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/10/04/openstack-telemetry-ceilometer-notification%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</loc>
+    <lastmod>2021-10-13T12:36:59.580Z</lastmod>
+    <data>
+        <display>
+        <title>ceilometer-notification源码分析</title>
+        <pubTime>2017-10-04T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+        <tag>Telemetry</tag>
+         
+        <tag>Ceilometer</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/10/01/openstack-keystone-%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/</loc>
+    <lastmod>2021-10-13T12:29:44.234Z</lastmod>
+    <data>
+        <display>
+        <title>openstack之keystone学习总结</title>
+        <pubTime>2017-10-01T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+        <tag>Keystone</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/10/03/openstack-telemetry-gnocchi%E4%BD%BF%E7%94%A8%E5%8E%9F%E7%90%86%E5%92%8C%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-%E4%B8%8A/</loc>
+    <lastmod>2021-10-13T12:27:29.823Z</lastmod>
+    <data>
+        <display>
+        <title>Gnocchi 使用原理及源码分析-上</title>
+        <pubTime>2017-10-03T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+        <tag>Telemetry</tag>
+         
+        <tag>Gnocchi</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/10/03/openstack-telemetry-gnocchi%E4%BD%BF%E7%94%A8%E5%8E%9F%E7%90%86%E5%92%8C%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-%E7%BB%AD/</loc>
+    <lastmod>2021-10-13T12:27:29.814Z</lastmod>
+    <data>
+        <display>
+        <title>Gnocchi 使用原理及源码分析-下</title>
+        <pubTime>2017-10-03T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+        <tag>Telemetry</tag>
+         
+        <tag>Gnocchi</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/10/02/openstack-taskflow%E7%9A%84%E4%BD%BF%E7%94%A8/</loc>
+    <lastmod>2021-10-13T11:52:44.546Z</lastmod>
+    <data>
+        <display>
+        <title>openstack之taskflow的使用</title>
+        <pubTime>2017-10-02T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/10/02/openstack-stevedore%E7%9A%84%E4%BD%BF%E7%94%A8/</loc>
+    <lastmod>2021-10-13T11:50:52.422Z</lastmod>
+    <data>
+        <display>
+        <title>openstack之stevedore的使用</title>
+        <pubTime>2017-10-02T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/10/01/openstack-pbr%E7%9A%84%E4%BD%BF%E7%94%A8/</loc>
+    <lastmod>2021-10-13T11:47:58.599Z</lastmod>
+    <data>
+        <display>
+        <title>openstack之pbr的使用</title>
+        <pubTime>2017-10-01T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2016/08/18/aa-example/</loc>
+    <lastmod>2021-10-13T11:45:42.073Z</lastmod>
+    <data>
+        <display>
+        <title>炊烟袅袅吹起</title>
+        <pubTime>2016-08-18T15:25:24.000Z</pubTime>
+        
+        <tag>Coco</tag>
+         
+         
+           
+             
+              <breadCrumb title="coco" url="https://magiceses.github.io/categories/coco/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>https://magiceses.github.io/2017/10/01/openstack-%E8%99%9A%E6%8B%9F%E5%8C%96%E5%90%8D%E8%AF%8D/</loc>
+    <lastmod>2021-10-13T11:43:36.670Z</lastmod>
+    <data>
+        <display>
+        <title>虚拟化技术各个专有名词和概念总结</title>
+        <pubTime>2017-10-01T15:25:24.000Z</pubTime>
+        
+        <tag>Openstack</tag>
+         
+         
+           
+             
+              <breadCrumb title="Openstack" url="https://magiceses.github.io/categories/Openstack/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+    
+  <url>
     <loc>https://magiceses.github.io/2019/10/11/python-%E8%BF%9B%E7%A8%8B%E7%BA%BF%E7%A8%8B%E5%8D%8F%E7%A8%8B-4.1/</loc>
     <lastmod>2021-10-11T09:34:15.543Z</lastmod>
     <data>
@@ -758,7 +1311,6 @@
     </data>
     </url>
 
-    
     
     
     

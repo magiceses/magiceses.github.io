@@ -745,8 +745,8 @@ for (var L = 0; L < C.length; L++) {
             
               
                 
-                <a class="post-title-link" href="/2017/11/11/prometheus-operator-学习总结/" itemprop="url">
-                  Prometheus-Operator 学习总结
+                <a class="post-title-link" href="/2018/10/05/openstack-oslo.packages-oslo.cache/" itemprop="url">
+                  Oslo系列之oslo.cache
                 </a>
               
             
@@ -759,8 +759,8 @@ for (var L = 0; L < C.length; L++) {
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-11-11T03:25:24+08:00" content="2017-11-11">
-              2017-11-11
+            <time itemprop="dateCreated" datetime="2018-10-05T23:25:24+08:00" content="2018-10-05">
+              2018-10-05
             </time>
           </span>
 
@@ -773,8 +773,8 @@ for (var L = 0; L < C.length; L++) {
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Prometheus/" itemprop="url" rel="index">
-                    <span itemprop="name">Prometheus</span>
+                  <a href="/categories/Openstack/" itemprop="url" rel="index">
+                    <span itemprop="name">Openstack</span>
                   </a>
                 </span>
 
@@ -808,14 +808,12 @@ for (var L = 0; L < C.length; L++) {
         
 <!-- 自定义结束 -->
         
-          <p id="div-border-top-green">涓滴之水终可以磨损大石，不是由于它力量强大，而是由于昼夜不舍的滴坠。<br></p>
+          <p id="div-border-top-green">人生需要做到。生活要：热情，乐观。爱情要：专一，用情。友情要：真诚，守信。亲情要：孝敬，疼爱。每一天一点，人生就进步一点。<br></p>
 
-<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>所有的监控的 <code>agent</code> 底层最终都是查询的 <code>/proc 和 /sys</code> 里的信息推送(如果错了轻喷)，因为收集宿主机信息方面也想用 <code>pod</code> 跑，会面临到问题</p>
-<p>常见的 <code>zabbix_agent</code> 默认读取 <code>fs 的 /proc 和 /sys</code> ，容器跑 <code>agent</code> 会导致读取的不是宿主机的<code>/proc 和 /sys</code></p>
-<p>而 <code>prometheus</code> 的 <code>node-exporter</code> 有选项 <code>--path.procfs</code> 和 <code>--path.sysfs</code> 来指定从这俩选项的值的proc和sys读取,容器跑 <code>node-exporter</code> 只需要挂载宿主机的 <code>/proc和/sys</code> 到容器fs的某个路径挂载属性设置为 <code>readonly</code> 后用这两个选项指定即可，<code>zabbix4.0</code> 看了文档和容器都找不到类似选项应该不支持</p>
-<p>虽说上 <code>prometheus</code> 但是 <code>k8s</code> 监控这方面,经常看到如下问题:</p>
+<p>在OpenStack中除了使用数据库对云平台所产生的数据进行持久化外，还需要对一些常用的数据或状态进行缓存。而oslo.cache便通过dogpile.cache库实现了一个缓存机制为OpenStack其他组件提供缓存。目前，oslo.cache支持多种缓存机制，包括Memcache、etcd 3.x、MongoDB、dictionary等。本文将详细介绍oslo.cache提供的缓存机制与常用的使用方法。</p>
+<h2 id="dogpile-cache库"><a href="#dogpile-cache库" class="headerlink" title="dogpile.cache库"></a>dogpile.cache库</h2><p>dogpile.cache是一个缓存API，它为各种类型的缓存后端提供了一个通用的接口；另外，它还提供了API钩子，可以将这些不同的缓存后端与dogpile库提供的锁机制结合使用。由于本文重点介绍oslo.cache，所以不对dogpile.cache库做深入展开，有兴趣的同学可以参考dogpile.cache文档。本文只对dogpile.cache中提供的通用接口进行介绍。</p>
           <div class="post-more-link text-center">
-            <a class="btn" href="/2017/11/11/prometheus-operator-学习总结/" rel="contents">
+            <a class="btn" href="/2018/10/05/openstack-oslo.packages-oslo.cache/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -866,8 +864,8 @@ for (var L = 0; L < C.length; L++) {
             
               
                 
-                <a class="post-title-link" href="/2017/06/25/python-web-有关TCP的问题调查/" itemprop="url">
-                  解决 Cannot assign requested address
+                <a class="post-title-link" href="/2018/10/05/openstack-oslo.packages-oslo.context/" itemprop="url">
+                  Oslo系列之oslo.context
                 </a>
               
             
@@ -880,8 +878,8 @@ for (var L = 0; L < C.length; L++) {
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-06-25T03:25:24+08:00" content="2017-06-25">
-              2017-06-25
+            <time itemprop="dateCreated" datetime="2018-10-05T23:25:24+08:00" content="2018-10-05">
+              2018-10-05
             </time>
           </span>
 
@@ -894,8 +892,8 @@ for (var L = 0; L < C.length; L++) {
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
+                  <a href="/categories/Openstack/" itemprop="url" rel="index">
+                    <span itemprop="name">Openstack</span>
                   </a>
                 </span>
 
@@ -929,13 +927,12 @@ for (var L = 0; L < C.length; L++) {
         
 <!-- 自定义结束 -->
         
-          <p id="div-border-top-green">有一种底气，叫做你能行！有一种豪气，叫做你可以！有一种霸气，叫做你最棒！不要总是瞻前顾后，想做的事，就大胆地做。只有迈出脚下那一步，人生才会与众不同。<br></p>
+          <p id="div-border-top-green">在茫茫沙漠，唯有前时进的脚步才是希望的象征。<br></p>
 
-<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>问题场景：</p>
-<p>容器内访问出现以下错误：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Failed to establish a new connection: [Errno 99] Cannot assign requested address</span><br></pre></td></tr></table></figure>
+<p>在OpenStack中，oslo.context为所有OpenStack组件提供了一个保存请求上下文信息的基类，该类主要有两个作用：一、用来存储一个Web请求的安全信息；二、用来为oslo.log提供上下文详情。本章将详细分析oslo.context组件。</p>
+<h2 id="RequestContext基类"><a href="#RequestContext基类" class="headerlink" title="RequestContext基类"></a>RequestContext基类</h2><p>在oslo.context组件中，主要定义了RequestContext基类，该类的每个实例化对象都保存了一个Web请求上下文信息。该类中保存的字段信息有：请求的Token信息，用户信息，项目信息，服务信息等；在实例化时，该类会为每个对象生成一个request_id在项目中唯一标识该对象。该类还提供了一系列方法以便其他OpenStack项目调用。其中，比较重要的方法主要有以下几个：</p>
           <div class="post-more-link text-center">
-            <a class="btn" href="/2017/06/25/python-web-有关TCP的问题调查/" rel="contents">
+            <a class="btn" href="/2018/10/05/openstack-oslo.packages-oslo.context/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -986,8 +983,8 @@ for (var L = 0; L < C.length; L++) {
             
               
                 
-                <a class="post-title-link" href="/2017/03/20/python-pip的安装与使用/" itemprop="url">
-                  Python pip的安装与使用
+                <a class="post-title-link" href="/2018/10/05/openstack-oslo.packages-oslo.concurrency/" itemprop="url">
+                  Oslo系列之oslo.concurrency
                 </a>
               
             
@@ -1000,8 +997,8 @@ for (var L = 0; L < C.length; L++) {
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-03-20T03:25:24+08:00" content="2017-03-20">
-              2017-03-20
+            <time itemprop="dateCreated" datetime="2018-10-05T23:25:24+08:00" content="2018-10-05">
+              2018-10-05
             </time>
           </span>
 
@@ -1014,8 +1011,8 @@ for (var L = 0; L < C.length; L++) {
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
+                  <a href="/categories/Openstack/" itemprop="url" rel="index">
+                    <span itemprop="name">Openstack</span>
                   </a>
                 </span>
 
@@ -1049,11 +1046,12 @@ for (var L = 0; L < C.length; L++) {
         
 <!-- 自定义结束 -->
         
-          <p id="div-border-top-green">与其每天担心未来，不如努力现在。别对自己丧失信心，成长的路上，只有奋斗才能给你最大的安全感。<br></p>
+          <p id="div-border-top-green">你所选择的朋友，决定你的命运。<br></p>
 
-<p>pip 是 Python 包管理工具，该工具提供了对Python 包的查找、下载、安装、卸载的功能。<br>目前如果你在 <a href="https://www.python.org/">python.org</a> 下载最新版本的安装包，则是已经自带了该工具。<br>Python 2.7.9 + 或 Python 3.4+ 以上版本都自带 pip 工具。<br>pip 官网：<a href="https://pypi.org/project/pip/">https://pypi.org/project/pip/</a></p>
+<p>oslo.concurrency是一个为OpenStack其他项目提供用于管理线程的工具库，这样，OpenStack其他项目可以直接调用oslo.concurrency库利用其锁机制安全的运行多线程和多进程应用，也可以运行外部进程。本文总结了oslo.concurrency中常用的工具类或方法及其对应的使用方法。</p>
+<h2 id="lockutils"><a href="#lockutils" class="headerlink" title="lockutils"></a>lockutils</h2><p>lockutils模块封装了oslo库的锁机制，其中，定义了读写锁、信号量以及同步装饰器方法等。本节分别介绍这些类和方法的实现与使用。</p>
           <div class="post-more-link text-center">
-            <a class="btn" href="/2017/03/20/python-pip的安装与使用/" rel="contents">
+            <a class="btn" href="/2018/10/05/openstack-oslo.packages-oslo.concurrency/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1104,8 +1102,8 @@ for (var L = 0; L < C.length; L++) {
             
               
                 
-                <a class="post-title-link" href="/2017/03/07/python-with语句和上下文管理器对象/" itemprop="url">
-                  Python with语句和上下文管理器对象
+                <a class="post-title-link" href="/2018/10/05/openstack-oslo.packages-oslo.config/" itemprop="url">
+                  Oslo系列之oslo.config
                 </a>
               
             
@@ -1118,8 +1116,8 @@ for (var L = 0; L < C.length; L++) {
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-03-07T13:25:24+08:00" content="2017-03-07">
-              2017-03-07
+            <time itemprop="dateCreated" datetime="2018-10-05T23:25:24+08:00" content="2018-10-05">
+              2018-10-05
             </time>
           </span>
 
@@ -1132,8 +1130,8 @@ for (var L = 0; L < C.length; L++) {
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
+                  <a href="/categories/Openstack/" itemprop="url" rel="index">
+                    <span itemprop="name">Openstack</span>
                   </a>
                 </span>
 
@@ -1167,11 +1165,12 @@ for (var L = 0; L < C.length; L++) {
         
 <!-- 自定义结束 -->
         
-          <p id="div-border-top-green">纠结过去，担心未来，都不如抓住当下。过去是梦，未来是影，现在才是真真切的人生。<br></p>
+          <p id="div-border-top-green">生命太过短暂，今日放弃了明天不必须能得到。<br></p>
 
-<p>我们平时编程时尽量使用with自动关闭资源，这里就有个上下文管理器对象的概念，然后查找资料，对with的解释如下:with的有一些任务，可能事先需要设置，事后做清理工作。对于这种场景，Python的with语句提供了一种非常方便的处理方式。一个很好的例子是文件处理，需要获取一个文件句柄，从文件中读取数据，然后关闭文件句柄。下面就讲下with语句以及上下文管理器对象，希望对你有帮助。</p>
+<p>随着OpenStack项目的不断发展与完善，OpenStack社区将所有组件中的具有共性的组件剥离出来，并统一放在oslo组件下。oslo中的组件不仅可以在OpenStack项目中使用，也可以单独作为第三方工具包供其他项目使用。oslo.config项目是oslo组件中用于OpenStack配置文件的一个项目。本文首先以Nova项目为例，介绍了oslo.config的用法；然后，根据源码详细分析了其实现原理。</p>
+<h1 id="oslo-config用法"><a href="#oslo-config用法" class="headerlink" title="oslo.config用法"></a>oslo.config用法</h1><h2 id="定义配置项"><a href="#定义配置项" class="headerlink" title="定义配置项"></a>定义配置项</h2><p>本小节以nova组件为例介绍oslo.config组件的用法。首先，要使用oslo.config需要导入该模块，一般地，直接导入oslo.config中的cfg即可。</p>
           <div class="post-more-link text-center">
-            <a class="btn" href="/2017/03/07/python-with语句和上下文管理器对象/" rel="contents">
+            <a class="btn" href="/2018/10/05/openstack-oslo.packages-oslo.config/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1222,8 +1221,8 @@ for (var L = 0; L < C.length; L++) {
             
               
                 
-                <a class="post-title-link" href="/2017/01/18/python-web-pasteDeploy模块学习总结/" itemprop="url">
-                  PasteDeploy 模块学习总结
+                <a class="post-title-link" href="/2018/10/05/openstack-oslo.packages-oslo.db/" itemprop="url">
+                  Oslo系列之oslo.db
                 </a>
               
             
@@ -1236,8 +1235,8 @@ for (var L = 0; L < C.length; L++) {
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-01-18T13:25:24+08:00" content="2017-01-18">
-              2017-01-18
+            <time itemprop="dateCreated" datetime="2018-10-05T23:25:24+08:00" content="2018-10-05">
+              2018-10-05
             </time>
           </span>
 
@@ -1250,8 +1249,8 @@ for (var L = 0; L < C.length; L++) {
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
+                  <a href="/categories/Openstack/" itemprop="url" rel="index">
+                    <span itemprop="name">Openstack</span>
                   </a>
                 </span>
 
@@ -1285,12 +1284,12 @@ for (var L = 0; L < C.length; L++) {
         
 <!-- 自定义结束 -->
         
-          <p id="div-border-top-green">人生在世，有得就有失，有付出就有回报，鱼和熊掌不能兼得。有时你的付出不一定能得到回报，但自己要想明白一些，不要太苛求自己，生命总有它的轮回，上帝是公平的，它对每个人都是一样的垂青。人生苦短，就好好的潇洒走一回。<br></p>
+          <p id="div-border-top-green">士搏出惊涛骇流而不沉沦，懦夫在风平浪静也会溺水。<br></p>
 
-<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>官方文档把PasteDeploy介绍为一个发现并配置WSGI应用和服务的一个系统，通过loadapp(一个简单的函数)就可以部署WSGI，而且不需要知道WSGI应用的细节。</p>
-<p>我们先来看下，在WSGI简单的模型中，如果有多个URL，一般是怎么做的呢？直接在代码判断请求方和请求路径的然后分别处理不同的URL。<br>
+<p>oslo.db库为OpenStack其他组件提供了针对不同后端数据库的数据库连接，并提供了各种数据库操作的辅助工具类和方法。OpenStack各组件使用SQLAlchemy框架实现对数据库的连接、查询等操作，因此oslo.db并不是一个完整的ORM库，也没有封装执行SQL语句；其只是对SQLAlchemy进行了封装，其与SQLAlchemy结合使用使得在OpenStack各组件中实现数据库连接、查询等操作变得更加简单。因此，本文不对SQLAlchemy的使用进行详细介绍，如果需要了解SQLAlchemy的使用，可以参考python对Mysql操作和使用ORM框架（SQLAlchemy）和SQLAlchemy技术文档。本文将结合oslo.db的使用详细分析其实现方式。</p>
+<h2 id="Session-Handling"><a href="#Session-Handling" class="headerlink" title="Session Handling"></a>Session Handling</h2><h3 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h3><p>Session handling指的是使用oslo_db.sqlalchemy.enginefacade模块管理数据库连接、会话和事务处理等，该模块一般以装饰器形式使用，也可以使用with语句进行调用。</p>
           <div class="post-more-link text-center">
-            <a class="btn" href="/2017/01/18/python-web-pasteDeploy模块学习总结/" rel="contents">
+            <a class="btn" href="/2018/10/05/openstack-oslo.packages-oslo.db/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1341,8 +1340,8 @@ for (var L = 0; L < C.length; L++) {
             
               
                 
-                <a class="post-title-link" href="/2016/11/18/python-virtualenv的安装与使用/" itemprop="url">
-                  Python virtualenv的安装与使用
+                <a class="post-title-link" href="/2018/10/05/openstack-oslo.packages-oslo.i18n-上/" itemprop="url">
+                  Oslo系列之oslo.i18n-上
                 </a>
               
             
@@ -1355,8 +1354,8 @@ for (var L = 0; L < C.length; L++) {
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-11-18T13:25:24+08:00" content="2016-11-18">
-              2016-11-18
+            <time itemprop="dateCreated" datetime="2018-10-05T23:25:24+08:00" content="2018-10-05">
+              2018-10-05
             </time>
           </span>
 
@@ -1369,8 +1368,8 @@ for (var L = 0; L < C.length; L++) {
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
+                  <a href="/categories/Openstack/" itemprop="url" rel="index">
+                    <span itemprop="name">Openstack</span>
                   </a>
                 </span>
 
@@ -1404,13 +1403,12 @@ for (var L = 0; L < C.length; L++) {
         
 <!-- 自定义结束 -->
         
-          <p id="div-border-top-green">人最大的对手，往往不是别人，而是自己的懒惰。别指望撞大运，运气不可能永远在你身上，任何时候都要靠本事吃饭。你必须拼尽全力，才有资格说自己的运气不好。<br></p>
+          <p id="div-border-top-green">千万人的失败，都有是失败在做事不彻底，往往做到离成功只差一步就终止不做了。<br></p>
 
-<p>pip, virtualenv, fabric通称为pythoner的三大神器</p>
-<p>virtualenv</p>
-<p>virtualenv——用来建立一个虚拟的python环境，一个专属于项目的python环境。用virtualenv 来保持一个干净的环境非常有用</p>
+<p>一般地，一个大型的项目，特别是一个跨国平台，都需要进行国际化支持。OpenStack作为一个开源的云平台方案，同样需要支持国际化。因此，OpenStack社区开发了oslo.i18n组件支持OpenStack项目的国际化。本文便简单的介绍了OpenStack支持国际化的实现与使用。</p>
+<h2 id="oslo-i18n的实现"><a href="#oslo-i18n的实现" class="headerlink" title="oslo.i18n的实现"></a>oslo.i18n的实现</h2><p>OpenStack项目支持国际化的实现非常简单，在oslo.i18n中主要使用TranslatorFactory类实现国际化支持。该类中提供了primary()方法进行国际化翻译，而该类则实际调用了_make_translation_func(domain)实现具体的操作。</p>
           <div class="post-more-link text-center">
-            <a class="btn" href="/2016/11/18/python-virtualenv的安装与使用/" rel="contents">
+            <a class="btn" href="/2018/10/05/openstack-oslo.packages-oslo.i18n-上/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1461,8 +1459,8 @@ for (var L = 0; L < C.length; L++) {
             
               
                 
-                <a class="post-title-link" href="/2016/10/16/python-web-django 框架使用及源码分析/" itemprop="url">
-                  Django 框架使用及源码分析
+                <a class="post-title-link" href="/2018/10/05/openstack-oslo.packages-oslo.i18n-下/" itemprop="url">
+                  Oslo系列之oslo.i18n-下
                 </a>
               
             
@@ -1475,8 +1473,8 @@ for (var L = 0; L < C.length; L++) {
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-10-16T23:25:24+08:00" content="2016-10-16">
-              2016-10-16
+            <time itemprop="dateCreated" datetime="2018-10-05T23:25:24+08:00" content="2018-10-05">
+              2018-10-05
             </time>
           </span>
 
@@ -1489,8 +1487,8 @@ for (var L = 0; L < C.length; L++) {
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
+                  <a href="/categories/Openstack/" itemprop="url" rel="index">
+                    <span itemprop="name">Openstack</span>
                   </a>
                 </span>
 
@@ -1524,12 +1522,12 @@ for (var L = 0; L < C.length; L++) {
         
 <!-- 自定义结束 -->
         
-          <p id="div-border-top-green">任何事情，你想做就有方法，不想做就有借口，你有选择的自由，也有承担后果的义务。不要明天再努力，只有努力过完今天的人才有明天。<br></p>
+          <p id="div-border-top-green">没有人能替你承受痛苦，也没有人能抢走你的坚强。<br></p>
 
-<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>Django 是用 Python 开发的一个免费开源的 Web 框架，几乎囊括了 Web 应用的方方面面，可以用于快速搭建高性能、优雅的网站，Django 提供了许多网站后台开发经常用到的模块，使开发者能够专注于业务部分。</p>
-<p>Django 提供了通用 Web 开发模式的高度抽象，为频繁进行的编程作业提供了快速解决方法，并为“如何解决问题”提供了清晰明了的约定。Django 通过 DRY（Don’t Repeat Yourself，不要重复自己）的理念来鼓励快速开发。<br>
+<p>上一篇我们介绍了这个包的使用方式和在openstack中应用，这篇文章分析一下原理和源码</p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>i18n是用来进行国际化翻译的。经过调查，现在主要有两种翻译方式。</p>
           <div class="post-more-link text-center">
-            <a class="btn" href="/2016/10/16/python-web-django 框架使用及源码分析/" rel="contents">
+            <a class="btn" href="/2018/10/05/openstack-oslo.packages-oslo.i18n-下/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1580,8 +1578,8 @@ for (var L = 0; L < C.length; L++) {
             
               
                 
-                <a class="post-title-link" href="/2016/09/25/python-web-Apache httpd mod_wsgi Nginx uWSGI学习笔记/" itemprop="url">
-                  Apache httpd mod_wsgi Nginx uWSGI学习笔记
+                <a class="post-title-link" href="/2018/10/05/openstack-oslo.packages-oslo.log/" itemprop="url">
+                  Oslo系列之oslo.log
                 </a>
               
             
@@ -1594,8 +1592,8 @@ for (var L = 0; L < C.length; L++) {
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-09-25T23:25:24+08:00" content="2016-09-25">
-              2016-09-25
+            <time itemprop="dateCreated" datetime="2018-10-05T23:25:24+08:00" content="2018-10-05">
+              2018-10-05
             </time>
           </span>
 
@@ -1608,8 +1606,8 @@ for (var L = 0; L < C.length; L++) {
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
+                  <a href="/categories/Openstack/" itemprop="url" rel="index">
+                    <span itemprop="name">Openstack</span>
                   </a>
                 </span>
 
@@ -1643,12 +1641,12 @@ for (var L = 0; L < C.length; L++) {
         
 <!-- 自定义结束 -->
         
-          <p id="div-border-top-green">这座城市人很多，每天在路上都能看到好多拉着行李箱的人，不管他们是来到这座城市还是离开这座城市，至少他们都曾努力过。<br></p>
+          <p id="div-border-top-green">认真能够把事情做对，而用心却能够做到完美。<br></p>
 
-<p><br></p>
-<h1 id="Apache-httpd-mod-wsgi-Nginx-uWSGI学习笔记"><a href="#Apache-httpd-mod-wsgi-Nginx-uWSGI学习笔记" class="headerlink" title="Apache httpd mod_wsgi Nginx uWSGI学习笔记"></a>Apache httpd mod_wsgi Nginx uWSGI学习笔记</h1><p>以下所总结仅是学习记录，如有不对的部分，还请及时指出，十分感谢<br>参考文档目录较多，都在末尾列出，有兴趣的可以直接访问<br>
+<p>oslo.log为OpenStack所有组件提供一种标准的日志记录方式，它也能为用户提供定制的日志记录样式。通过oslo.log提供的日志记录，OpenStack开发者可以通过日志文件更加快速准确的定位问题本章将结合OpenStack项目中日志记录的应用分析oslo.log的实现原理。</p>
+<h1 id="oslo-log的用法"><a href="#oslo-log的用法" class="headerlink" title="oslo.log的用法"></a>oslo.log的用法</h1><h2 id="oslo-log的使用方法"><a href="#oslo-log的使用方法" class="headerlink" title="oslo.log的使用方法"></a>oslo.log的使用方法</h2><p>对于OpenStack项目而言，使用oslo.log记录日志的方式非常简单。</p>
           <div class="post-more-link text-center">
-            <a class="btn" href="/2016/09/25/python-web-Apache httpd mod_wsgi Nginx uWSGI学习笔记/" rel="contents">
+            <a class="btn" href="/2018/10/05/openstack-oslo.packages-oslo.log/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1682,7 +1680,7 @@ for (var L = 0; L < C.length; L++) {
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1692,6 +1690,7 @@ for (var L = 0; L < C.length; L++) {
 
 
           
+
         </div>
         
           
@@ -1722,7 +1721,7 @@ for (var L = 0; L < C.length; L++) {
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">36</span>
+              <span class="site-state-item-count">61</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1730,7 +1729,7 @@ for (var L = 0; L < C.length; L++) {
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-count">5</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -1739,7 +1738,7 @@ for (var L = 0; L < C.length; L++) {
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">15</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -1867,7 +1866,7 @@ for (var L = 0; L < C.length; L++) {
 
 <div class="theme-info">
   <div class="powered-by"></div>
-  <span class="post-count" style="color: #e90f92;">全站共 724k 字</span>
+  <span class="post-count" style="color: #e90f92;">全站共 1m 字</span>
 </div>
         
       </div>

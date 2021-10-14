@@ -1,0 +1,1296 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Courier New:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Openstack,Telemetry,Ceilometer," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="天青色等烟雨" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="实力的来源不是胜利。唯有奋斗才能增强实力。当你历经苦难而不气馁，那就是实力。
+
+以社区 N 版代码为例
+一、启动命令1exec ceilometer-polling --polling-namespaces compute --config-file /etc/ceilometer/ceilometer.conf">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ceilometer-polling源码分析">
+<meta property="og:url" content="https://magiceses.github.io/2017/10/04/openstack-telemetry-ceilometer-polling源码分析/index.html">
+<meta property="og:site_name" content="天青色等烟雨">
+<meta property="og:description" content="实力的来源不是胜利。唯有奋斗才能增强实力。当你历经苦难而不气馁，那就是实力。
+
+以社区 N 版代码为例
+一、启动命令1exec ceilometer-polling --polling-namespaces compute --config-file /etc/ceilometer/ceilometer.conf">
+<meta property="og:updated_time" content="2021-10-13T12:36:59.591Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ceilometer-polling源码分析">
+<meta name="twitter:description" content="实力的来源不是胜利。唯有奋斗才能增强实力。当你历经苦难而不气馁，那就是实力。
+
+以社区 N 版代码为例
+一、启动命令1exec ceilometer-polling --polling-namespaces compute --config-file /etc/ceilometer/ceilometer.conf">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://magiceses.github.io/2017/10/04/openstack-telemetry-ceilometer-polling源码分析/"/>
+
+
+<!-- 网页加载条 -->
+<script src="/js/src/pace.min.js"></script>
+  <title> ceilometer-polling源码分析 | 天青色等烟雨 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">天青色等烟雨</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">而我在等你</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-guestbook">
+          <a href="/guestbook" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-commenting"></i> <br />
+            
+            留言
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+      
+      
+        <li class="menu-item"> <a title="把这个链接拖到你的工具栏中,任何网页都可以High" href='javascript:(
+/*
+ * Copyright (C) 2016 Never_yu (Neveryu.github.io) <React.dong.yu@gmail.com>
+ * Sina Weibo (http://weibo.com/Neveryu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function go() {
+
+var songs = [
+  "http://dl.stream.qqmusic.qq.com/C400001Qu4I30eVFYb.m4a?vkey=2127178E4405E7B8B268F20F05232485735CCF4FF8C1432F0360D2626D0B6C9564B5627C7AB481BBC685FEDB0946A50E97C66F0D1B008226&guid=7175649092&uin=0&fromtag=66",
+  "",
+  "",
+  ""
+];
+
+function c() {
+  var e = document.createElement("link");
+  e.setAttribute("type", "text/css");
+  e.setAttribute("rel", "stylesheet");
+  e.setAttribute("href", f);
+  e.setAttribute("class", l);
+  document.body.appendChild(e)
+}
+
+function h() {
+  var e = document.getElementsByClassName(l);
+  for (var t = 0; t < e.length; t++) {
+    document.body.removeChild(e[t])
+  }
+}
+
+function p() {
+  var e = document.createElement("div");
+  e.setAttribute("class", a);
+  document.body.appendChild(e);
+  setTimeout(function() {
+    document.body.removeChild(e)
+  }, 100)
+}
+
+function d(e) {
+  return {
+    height : e.offsetHeight,
+    width : e.offsetWidth
+  }
+}
+
+function v(i) {
+  var s = d(i);
+  return s.height > e && s.height < n && s.width > t && s.width < r
+}
+
+function m(e) {
+  var t = e;
+  var n = 0;
+  while (!!t) {
+    n += t.offsetTop;
+    t = t.offsetParent
+  }
+  return n
+}
+
+function g() {
+  var e = document.documentElement;
+  if (!!window.innerWidth) {
+    return window.innerHeight
+  } else if (e && !isNaN(e.clientHeight)) {
+    return e.clientHeight
+  }
+  return 0
+}
+
+function y() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  }
+  return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+}
+
+function E(e) {
+  var t = m(e);
+  return t >= w && t <= b + w
+}
+
+function S() {
+  var e = document.getElementById("audio_element_id");
+  if(e != null){
+    var index = parseInt(e.getAttribute("curSongIndex"));
+    if(index > songs.length - 2) {
+      index = 0;
+    } else {
+      index++;
+    }
+    e.setAttribute("curSongIndex", index);
+    N();
+  }
+
+  e.src = i;
+  e.play()
+}
+
+function x(e) {
+  e.className += " " + s + " " + o
+}
+
+function T(e) {
+  e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+}
+
+function N() {
+  var e = document.getElementsByClassName(s);
+  var t = new RegExp("\\b" + s + "\\b");
+  for (var n = 0; n < e.length; ) {
+    e[n].className = e[n].className.replace(t, "")
+  }
+}
+
+function initAudioEle() {
+  var e = document.getElementById("audio_element_id");
+  if(e === null){
+    e = document.createElement("audio");
+    e.setAttribute("class", l);
+    e.setAttribute("curSongIndex", 0);
+    e.id = "audio_element_id";
+    e.loop = false;
+    e.bgcolor = 0;
+    e.addEventListener("canplay", function() {
+      setTimeout(function() {
+        x(k)
+      }, 500);
+      setTimeout(function() {
+        N();
+        p();
+        for (var e = 0; e < O.length; e++) {
+          T(O[e])
+        }
+      }, 15500)
+    }, true);
+    e.addEventListener("ended", function() {
+      N();
+      h();
+      go();
+    }, true);
+    e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+    document.body.appendChild(e);
+  }
+}
+
+initAudioEle();
+var e = 30;
+var t = 30;
+var n = 350;
+var r = 350;
+
+var curSongIndex = parseInt(document.getElementById("audio_element_id").getAttribute("curSongIndex"));
+var i = songs[curSongIndex];
+
+var s = "mw-harlem_shake_me";
+var o = "im_first";
+var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+var a = "mw-strobe_light";
+
+/* harlem-shake-style.css，替换成你的位置，也可以直接使用：//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css */
+var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+
+var l = "mw_added_css";
+var b = g();
+var w = y();
+var C = document.getElementsByTagName("*");
+var k = null;
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    if (E(A)) {
+      k = A;
+      break
+    }
+  }
+}
+if (A === null) {
+  console.warn("Could not find a node of the right size. Please try a different page.");
+  return
+}
+c();
+S();
+var O = [];
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    O.push(A)
+  }
+}
+})()'><i class="menu-item-icon fa fa-music fa-fw"></i> High一下</a></li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search fa-lg"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                ceilometer-polling源码分析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-10-04T23:25:24+08:00" content="2017-10-04">
+              2017-10-04
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Openstack/" itemprop="url" rel="index">
+                    <span itemprop="name">Openstack</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv">热度
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p id="div-border-top-green">实力的来源不是胜利。唯有奋斗才能增强实力。当你历经苦难而不气馁，那就是实力。<br></p>
+
+<p>以社区 N 版代码为例</p>
+<h2 id="一、启动命令"><a href="#一、启动命令" class="headerlink" title="一、启动命令"></a>一、启动命令</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">exec ceilometer-polling --polling-namespaces compute --config-file /etc/ceilometer/ceilometer.conf</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<h2 id="二、代码入口"><a href="#二、代码入口" class="headerlink" title="二、代码入口"></a>二、代码入口</h2><p>ceilometer代码使用setuptools的pbr管理，该部分知识请见:</p>
+<p><a href="https://blog.csdn.net/weixin_43700106/article/details/107144392" target="_blank" rel="external">Python打包之setuptools</a></p>
+<p><a href="https://blog.csdn.net/weixin_43700106/article/details/107070025" target="_blank" rel="external">Openstack中setuptools和pbr软件打包管理</a></p>
+<p>入口在：/ceilometer/cmd/polling.py的main函数</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create_polling_service</span><span class="params">(worker_id)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> manager.AgentManager(CONF.polling_namespaces,</span><br><span class="line">                                CONF.pollster_list,</span><br><span class="line">                                worker_id)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></span><br><span class="line">    service.prepare_service()</span><br><span class="line">    sm = cotyledon.ServiceManager()</span><br><span class="line">    sm.add(create_polling_service)</span><br><span class="line">    sm.run()</span><br><span class="line">    </span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">关键:</span></span><br><span class="line"><span class="string">1 cotyledon.Service(worker_id)</span></span><br><span class="line"><span class="string">作用: 创建一个新的服务</span></span><br><span class="line"><span class="string">参数: worker_id (int) – service实例的标示符</span></span><br><span class="line"><span class="string">2 ServiceManager()</span></span><br><span class="line"><span class="string">2.1 作用</span></span><br><span class="line"><span class="string">类似于主进程，管理服务的生命周期。</span></span><br><span class="line"><span class="string">控制子进程的生命周期，如果子进程意外死亡就重启他们。</span></span><br><span class="line"><span class="string">每一个子进程ServiceWorker运行在一个服务的实例上。</span></span><br><span class="line"><span class="string">一个应用必须创建一个ServiceManager类并且使用</span></span><br><span class="line"><span class="string">ServiceManager.run()做为和应用的主循环</span></span><br><span class="line"><span class="string">样例:</span></span><br><span class="line"><span class="string">class cotyledon.ServiceManager(wait_interval=0.01, graceful_shutdown_timeout=60)</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">2.2 cotyledon.ServiceManager.add</span></span><br><span class="line"><span class="string">cotyledon.ServiceManager.add(service, workers=1, args=None, kwargs=None)</span></span><br><span class="line"><span class="string">作用: 创建一个子进程来运行AgentService服务</span></span><br><span class="line"><span class="string">参数:</span></span><br><span class="line"><span class="string">service (callable) – callable that return an instance of Service</span></span><br><span class="line"><span class="string">workers (int) – number of processes/workers for this service</span></span><br><span class="line"><span class="string">args (tuple) – additional positional arguments for this service</span></span><br><span class="line"><span class="string">kwargs (dict) – additional keywoard arguments for this service</span></span><br><span class="line"><span class="string">Returns:</span></span><br><span class="line"><span class="string">a service id</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">2.3 cotyledon.ServiceManager.run()</span></span><br><span class="line"><span class="string">开启并监督服务工作者</span></span><br><span class="line"><span class="string">这个方法将会开启和监督所有子进程，直到主进程被关闭了</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">参考:</span></span><br><span class="line"><span class="string">https://blog.csdn.net/qingyuanluofeng/article/details/95533476</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure>
+<p>该部分使用cotyledon的多进程框架实现</p>
+<p>实例化子进程调用create_polling_service方法，该方法又调用AgentManager类，传入三个参数，分别是</p>
+<ul>
+<li>CONF.polling_namespaces # 即是你在命令行中传入的参数，compute或者是central，分别代表两个服务</li>
+<li>CONF.pollster_list # 默认为[]</li>
+<li>worker_id # cotyledon中服务实例的标识符</li>
+</ul>
+<p>compute服务即从此处开始，调用AgentManager的 init方法初始化，然后调用run方法进行数据的采集</p>
+<p>让我们来看看AgentManager里面是什么</p>
+<h2 id="三、初始化AgentManager"><a href="#三、初始化AgentManager" class="headerlink" title="三、初始化AgentManager"></a>三、初始化AgentManager</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AgentManager</span><span class="params">(service_base.PipelineBasedService)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, namespaces=None, pollster_list=None, worker_id=<span class="number">0</span>)</span>:</span></span><br><span class="line">        namespaces = namespaces <span class="keyword">or</span> [<span class="string">'compute'</span>, <span class="string">'central'</span>]</span><br><span class="line">        pollster_list = pollster_list <span class="keyword">or</span> []</span><br><span class="line">        group_prefix = cfg.CONF.polling.partitioning_group_prefix</span><br><span class="line">        self._inspector = virt_inspector.get_hypervisor_inspector()</span><br><span class="line">        self.nv = nova_client.Client()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># features of using coordination and pollster-list are exclusive, and</span></span><br><span class="line">        <span class="comment"># cannot be used at one moment to avoid both samples duplication and</span></span><br><span class="line">        <span class="comment"># samples being lost</span></span><br><span class="line">				......</span><br><span class="line">        <span class="comment"># we'll have default ['compute', 'central'] here if no namespaces will</span></span><br><span class="line">        <span class="comment"># be passed</span></span><br><span class="line">        <span class="string">''' </span></span><br><span class="line"><span class="string">        (Pdb) p self.extensions[0].__dict__</span></span><br><span class="line"><span class="string">        &#123;</span></span><br><span class="line"><span class="string">            'obj': &lt; ceilometer.compute.pollsters.cpu.CPUL3CachePollster object at 0x7f392837acd0 &gt; ,</span></span><br><span class="line"><span class="string">            'entry_point': EntryPoint.parse('cpu_l3_cache = ceilometer.compute.pollsters.cpu:CPUL3CachePollster'),</span></span><br><span class="line"><span class="string">            'name': 'cpu_l3_cache',</span></span><br><span class="line"><span class="string">            'plugin': &lt; class 'ceilometer.compute.pollsters.cpu.CPUL3CachePollster' &gt;</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">        (Pdb) p self.extensions[1].__dict__</span></span><br><span class="line"><span class="string">        &#123;</span></span><br><span class="line"><span class="string">            'obj': &lt; ceilometer.compute.pollsters.disk.WriteRequestsRatePollster object at 0x7f3928385650 &gt; ,</span></span><br><span class="line"><span class="string">            'entry_point': EntryPoint.parse('disk.write.requests.rate = ceilometer.compute.pollsters.disk:WriteRequestsRatePollster'),</span></span><br><span class="line"><span class="string">            'name': 'disk.write.requests.rate',</span></span><br><span class="line"><span class="string">            'plugin': &lt; class 'ceilometer.compute.pollsters.disk.WriteRequestsRatePollster' &gt;</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">        (Pdb) p self.extensions[2].__dict__</span></span><br><span class="line"><span class="string">        &#123;</span></span><br><span class="line"><span class="string">            'obj': &lt; ceilometer.compute.pollsters.disk.DisksTotalPoller object at 0x7f39283973d0 &gt; ,</span></span><br><span class="line"><span class="string">            'entry_point': EntryPoint.parse('disks.total = ceilometer.compute.pollsters.disk:DisksTotalPoller'),</span></span><br><span class="line"><span class="string">            'name': 'disks.total',</span></span><br><span class="line"><span class="string">            'plugin': &lt; class 'ceilometer.compute.pollsters.disk.DisksTotalPoller' &gt;</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">                </span></span><br><span class="line"><span class="string">        '''</span></span><br><span class="line">        extensions = (self._extensions(<span class="string">'poll'</span>, namespace).extensions</span><br><span class="line">                      <span class="keyword">for</span> namespace <span class="keyword">in</span> namespaces)</span><br><span class="line">        <span class="comment"># get the extensions from pollster builder</span></span><br><span class="line">        extensions_fb = (self._extensions_from_builder(<span class="string">'poll'</span>, namespace)</span><br><span class="line">                         <span class="keyword">for</span> namespace <span class="keyword">in</span> namespaces)</span><br><span class="line">        <span class="keyword">if</span> pollster_list:</span><br><span class="line">            extensions = (moves.filter(_match, exts)</span><br><span class="line">                          <span class="keyword">for</span> exts <span class="keyword">in</span> extensions)</span><br><span class="line">            extensions_fb = (moves.filter(_match, exts)</span><br><span class="line">                             <span class="keyword">for</span> exts <span class="keyword">in</span> extensions_fb)</span><br><span class="line"></span><br><span class="line">        self.extensions = list(itertools.chain(*list(extensions))) + list(</span><br><span class="line">            itertools.chain(*list(extensions_fb)))</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> self.extensions == []:</span><br><span class="line">            <span class="keyword">raise</span> EmptyPollstersList()</span><br><span class="line"></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        (Pdb) p self.discoveries[0].__dict__</span></span><br><span class="line"><span class="string">        &#123;</span></span><br><span class="line"><span class="string">            'obj': &lt; ceilometer.compute.discovery.InstanceDiscovery object at 0x7f392864d390 &gt; ,</span></span><br><span class="line"><span class="string">            'entry_point': EntryPoint.parse('local_instances = ceilometer.compute.discovery:InstanceDiscovery'),</span></span><br><span class="line"><span class="string">            'name': 'local_instances',</span></span><br><span class="line"><span class="string">            'plugin': &lt; class 'ceilometer.compute.discovery.InstanceDiscovery' &gt;</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        discoveries = (self._extensions(<span class="string">'discover'</span>, namespace).extensions</span><br><span class="line">                       <span class="keyword">for</span> namespace <span class="keyword">in</span> namespaces)</span><br><span class="line">        self.discoveries = list(itertools.chain(*list(discoveries)))</span><br><span class="line">        self.polling_periodics = <span class="keyword">None</span></span><br><span class="line"></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        (Pdb) p self.heartbeat_timer.__dict__</span></span><br><span class="line"><span class="string">        &#123;</span></span><br><span class="line"><span class="string">            '_dead': &lt; threading._Event object at 0x7f3928654c10 &gt; ,</span></span><br><span class="line"><span class="string">            '_waiter': &lt; Condition( &lt; _RLock owner = None count = 0 &gt; , 0) &gt; ,</span></span><br><span class="line"><span class="string">            '_now_func': &lt; function monotonic at 0x18d51b8 &gt; ,</span></span><br><span class="line"><span class="string">            '_schedule': &lt; futurist.periodics._Schedule object at 0x7f3928654d10 &gt; ,</span></span><br><span class="line"><span class="string">            '_active': &lt; threading._Event object at 0x7f3928654c90 &gt; ,</span></span><br><span class="line"><span class="string">            '_initial_schedule_strategy': &lt; function _now_plus_periodicity at 0x1bccc80 &gt; ,</span></span><br><span class="line"><span class="string">            '_watchers': [(&#123;</span></span><br><span class="line"><span class="string">                'successes': 0,</span></span><br><span class="line"><span class="string">                'failures': 0,</span></span><br><span class="line"><span class="string">                'runs': 0,</span></span><br><span class="line"><span class="string">                'elapsed': 0,</span></span><br><span class="line"><span class="string">                'elapsed_waiting': 0</span></span><br><span class="line"><span class="string">            &#125;, &lt; Watcher object at 0x7f3928654d90(runs = 0, successes = 0, failures = 0, elapsed = 0.00, elapsed_waiting = 0.00) &gt; )],</span></span><br><span class="line"><span class="string">            '_on_failure': &lt; functools.partial object at 0x7f3928649b50 &gt; ,</span></span><br><span class="line"><span class="string">            '_executor_factory': &lt; function &lt; lambda &gt; at 0x7f39283809b0 &gt; ,</span></span><br><span class="line"><span class="string">            '_schedule_strategy': &lt; function _last_started_strategy at 0x1bccb90 &gt; ,</span></span><br><span class="line"><span class="string">            '_log': &lt; logging.Logger object at 0x1bbfa90 &gt; ,</span></span><br><span class="line"><span class="string">            '_callables': [( &lt; function &lt; lambda &gt; at 0x7f39286581b8 &gt; , 'ceilometer.utils.&lt;lambda&gt;', (), &#123;&#125;)],</span></span><br><span class="line"><span class="string">            '_cond_cls': &lt; function Condition at 0x7f39364b2938 &gt; ,</span></span><br><span class="line"><span class="string">            '_tombstone': &lt; threading._Event object at 0x7f3928654b10 &gt; ,</span></span><br><span class="line"><span class="string">            '_immediates': deque([0])</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">        (Pdb) p self.partition_coordinator.__dict__</span></span><br><span class="line"><span class="string">        &#123;'_groups': set([]), '_my_id': 'c6ee6425-1bac-4e9c-a026-2022b133c825', '_coordinator': None&#125;</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        self.partition_coordinator = coordination.PartitionCoordinator()</span><br><span class="line">        self.heartbeat_timer = utils.create_periodic(</span><br><span class="line">            target=self.partition_coordinator.heartbeat,</span><br><span class="line">            spacing=cfg.CONF.coordination.heartbeat,</span><br><span class="line">            run_immediately=<span class="keyword">True</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Compose coordination group prefix.</span></span><br><span class="line">        <span class="comment"># We'll use namespaces as the basement for this partitioning.</span></span><br><span class="line">        namespace_prefix = <span class="string">'-'</span>.join(sorted(namespaces))</span><br><span class="line">        self.group_prefix = (<span class="string">'%s-%s'</span> % (namespace_prefix, group_prefix)</span><br><span class="line">                             <span class="keyword">if</span> group_prefix <span class="keyword">else</span> namespace_prefix)</span><br><span class="line"></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        (Pdb) p self.notifier.__dict__</span></span><br><span class="line"><span class="string">        &#123;</span></span><br><span class="line"><span class="string">            '_serializer': &lt; oslo_messaging.serializer.NoOpSerializer object at 0x7f1cc9aa3710 &gt; ,</span></span><br><span class="line"><span class="string">            '_driver_mgr': &lt; stevedore.named.NamedExtensionManager object at 0x7f1cc9aa3890 &gt; ,</span></span><br><span class="line"><span class="string">            'retry': -1,</span></span><br><span class="line"><span class="string">            '_driver_names': ['messagingv2'],</span></span><br><span class="line"><span class="string">            '_topics': ['notifications'],</span></span><br><span class="line"><span class="string">            'publisher_id': 'ceilometer.polling',</span></span><br><span class="line"><span class="string">            'transport': &lt; oslo_messaging.transport.NotificationTransport object at 0x7f1cc9b26550 &gt;</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">        (Pdb) p self.notifier._driver_mgr</span></span><br><span class="line"><span class="string">        &lt;stevedore.named.NamedExtensionManager object at 0x7f1cc9aa3890&gt;</span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">        (Pdb) p self.notifier._driver_mgr.__dict__</span></span><br><span class="line"><span class="string">        &#123;</span></span><br><span class="line"><span class="string">            '_names': ['messagingv2'],</span></span><br><span class="line"><span class="string">            'namespace': 'oslo.messaging.notify.drivers',</span></span><br><span class="line"><span class="string">            '_on_load_failure_callback': None,</span></span><br><span class="line"><span class="string">            'extensions': [ &lt; stevedore.extension.Extension object at 0x7fddfc80e990 &gt; ],</span></span><br><span class="line"><span class="string">            'propagate_map_exceptions': False,</span></span><br><span class="line"><span class="string">            '_extensions_by_name': None,</span></span><br><span class="line"><span class="string">            '_name_order': False,</span></span><br><span class="line"><span class="string">            '_missing_names': set([])</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">        (Pdb) p self.notifier._driver_mgr.__dict__.get('extensions')[0].__dict__</span></span><br><span class="line"><span class="string">        &#123;</span></span><br><span class="line"><span class="string">            'obj': &lt; oslo_messaging.notify.messaging.MessagingV2Driver object at 0x7fddfc80e750 &gt; ,</span></span><br><span class="line"><span class="string">            'entry_point': EntryPoint.parse('messagingv2 = oslo_messaging.notify.messaging:MessagingV2Driver'),</span></span><br><span class="line"><span class="string">            'name': 'messagingv2',</span></span><br><span class="line"><span class="string">            'plugin': &lt; class 'oslo_messaging.notify.messaging.MessagingV2Driver' &gt;</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        self.notifier = oslo_messaging.Notifier(</span><br><span class="line">            messaging.get_transport(),</span><br><span class="line">            driver=cfg.CONF.publisher_notifier.telemetry_driver,</span><br><span class="line">            publisher_id=<span class="string">"ceilometer.polling"</span>)</span><br><span class="line"></span><br><span class="line">        self._keystone = <span class="keyword">None</span></span><br><span class="line">        self._keystone_last_exception = <span class="keyword">None</span></span><br></pre></td></tr></table></figure>
+<p>以上的代码中的一些参数我都用pdb打印出来了，可以更加直观的感受，我们来逐行分析一下这个初始化的过程：</p>
+<ol>
+<li><p>前5行应该不必多说，基本的参数传递，init的参数已经在代码入口处介绍过</p>
+</li>
+<li><p>第6行是为了实现工作负载分区协调</p>
+</li>
+<li><p>第7行调用get_hypervisor_inspector方法来加载libvirt驱动</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_hypervisor_inspector</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        namespace = <span class="string">'ceilometer.compute.virt'</span></span><br><span class="line">        mgr = driver.DriverManager(namespace,</span><br><span class="line">                                   cfg.CONF.hypervisor_inspector,</span><br><span class="line">                                   invoke_on_load=<span class="keyword">True</span>)</span><br><span class="line">        <span class="keyword">return</span> mgr.driver</span><br><span class="line">    <span class="keyword">except</span> ImportError <span class="keyword">as</span> e:</span><br><span class="line">        LOG.error(_(<span class="string">"Unable to load the hypervisor inspector: %s"</span>) % e)</span><br><span class="line">        <span class="keyword">return</span> Inspector()</span><br></pre></td></tr></table></figure>
+<p>这里使用的是stevedore库，在该篇文章不过多介绍，具体请见：<a href="https://blog.csdn.net/weixin_43700106/article/details/107150715" target="_blank" rel="external">Python插件之stevedore</a></p>
+</li>
+<li><p>第8行初始化了个nove的client</p>
+</li>
+<li><p>第40-69行主要就是在加载插件了，加载插件的方式也是使用stevedore库，其中40和43行的namespace就是你传进来的方法，我们来看下_extensions的实现</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_extensions</span><span class="params">(self, category, agent_ns=None)</span>:</span></span><br><span class="line">  namespace = (<span class="string">'ceilometer.%s.%s'</span> % (category, agent_ns) <span class="keyword">if</span> agent_ns</span><br><span class="line">               <span class="keyword">else</span> <span class="string">'ceilometer.%s'</span> % category)</span><br><span class="line">  <span class="keyword">return</span> self._get_ext_mgr(namespace)</span><br></pre></td></tr></table></figure>
+<p>这里主要就是加载在ceilometer.poll.compute命名空间中的插件（如果开启的是central服务，即加载的是ceilometer.poll.central命名空间中的插件），插件在setup.cfg文件中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ceilometer.poll.compute =</span><br><span class="line">    disks.util = ceilometer.compute.pollsters.disk:DisksUtilPoller</span><br><span class="line">    disks.total = ceilometer.compute.pollsters.disk:DisksTotalPoller</span><br><span class="line">    disks.used = ceilometer.compute.pollsters.disk:DisksUsedPoller</span><br><span class="line">    ...</span><br><span class="line">    </span><br><span class="line">ceilometer.poll.central =</span><br><span class="line">    account = ceilometer.chakra.chakra:AccountPollster</span><br><span class="line">    ip.floating = ceilometer.network.floatingip:FloatingIPPollster</span><br><span class="line">    image = ceilometer.image.glance:ImagePollster</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+<p>加载后的extension对象是这样的，是一个存储了在命名空间在所有插件对象的列表：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">(Pdb) p self.extensions[<span class="number">0</span>].__dict__</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">'obj'</span>: &lt; ceilometer.compute.pollsters.cpu.CPUL3CachePollster object at <span class="number">0x7f392837acd0</span> &gt; ,</span><br><span class="line">  <span class="string">'entry_point'</span>: EntryPoint.parse(<span class="string">'cpu_l3_cache = ceilometer.compute.pollsters.cpu:CPUL3CachePollster'</span>),</span><br><span class="line">  <span class="string">'name'</span>: <span class="string">'cpu_l3_cache'</span>,</span><br><span class="line">  <span class="string">'plugin'</span>: &lt; <span class="class"><span class="keyword">class</span> '<span class="title">ceilometer</span>.<span class="title">compute</span>.<span class="title">pollsters</span>.<span class="title">cpu</span>.<span class="title">CPUL3CachePollster</span>' &gt;</span></span><br><span class="line"><span class="class">&#125;</span></span><br><span class="line"><span class="class"><span class="params">(Pdb)</span> <span class="title">p</span> <span class="title">self</span>.<span class="title">extensions</span>[1].<span class="title">__dict__</span></span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">'obj'</span>: &lt; ceilometer.compute.pollsters.disk.WriteRequestsRatePollster object at <span class="number">0x7f3928385650</span> &gt; ,</span><br><span class="line">  <span class="string">'entry_point'</span>: EntryPoint.parse(<span class="string">'disk.write.requests.rate = ceilometer.compute.pollsters.disk:WriteRequestsRatePollster'</span>),</span><br><span class="line">  <span class="string">'name'</span>: <span class="string">'disk.write.requests.rate'</span>,</span><br><span class="line">  <span class="string">'plugin'</span>: &lt; <span class="class"><span class="keyword">class</span> '<span class="title">ceilometer</span>.<span class="title">compute</span>.<span class="title">pollsters</span>.<span class="title">disk</span>.<span class="title">WriteRequestsRatePollster</span>' &gt;</span></span><br><span class="line"><span class="class">&#125;</span></span><br><span class="line"><span class="class"><span class="params">(Pdb)</span> <span class="title">p</span> <span class="title">self</span>.<span class="title">extensions</span>[2].<span class="title">__dict__</span></span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">'obj'</span>: &lt; ceilometer.compute.pollsters.disk.DisksTotalPoller object at <span class="number">0x7f39283973d0</span> &gt; ,</span><br><span class="line">  <span class="string">'entry_point'</span>: EntryPoint.parse(<span class="string">'disks.total = ceilometer.compute.pollsters.disk:DisksTotalPoller'</span>),</span><br><span class="line">  <span class="string">'name'</span>: <span class="string">'disks.total'</span>,</span><br><span class="line">  <span class="string">'plugin'</span>: &lt; <span class="class"><span class="keyword">class</span> '<span class="title">ceilometer</span>.<span class="title">compute</span>.<span class="title">pollsters</span>.<span class="title">disk</span>.<span class="title">DisksTotalPoller</span>' &gt;</span></span><br><span class="line"><span class="class">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>43-69行的加载插件的原理同上，不赘述</p>
+</li>
+<li><p>第99-103行是为了获取一个工作负载分区协调类实例，用来协调多个采集程序worker时的分工处理，每个对象的实例在代码中已经打印，有兴趣的可以了解下，这里使用的是tooz库的一些用法，简单介绍下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">1 Tooz基础</span><br><span class="line"></span><br><span class="line">作用: </span><br><span class="line">1) 提供分布式协调API来管理群组和群组中的成员</span><br><span class="line">2) 提供分布式锁从而允许分布式节点获取和释放锁来实现同步</span><br><span class="line">解决的问题: 多个分布式进程同步问题</span><br><span class="line"></span><br><span class="line">2 Tooz架构</span><br><span class="line"></span><br><span class="line">本质: Tooz是zookeeper,  Raft consensus algorithm, Redis等方案的抽象，</span><br><span class="line">    通过驱动(driver)形式来提供后端功能</span><br><span class="line">驱动分类:</span><br><span class="line">zookeeper, Zake, memcached, redis,</span><br><span class="line">SysV IPC(只提供分布式锁功能)， PostgreSQL(只提供分布式锁功能)， MySQL(只提供分布式锁功能)</span><br><span class="line">驱动特点:</span><br><span class="line">所有驱动都支持分布式进程， Tooz API完全异步，更高校。</span><br><span class="line"></span><br><span class="line">3 Tooz功能</span><br><span class="line"></span><br><span class="line">3.1 群组管理</span><br><span class="line"></span><br><span class="line">管理群组成员。</span><br><span class="line">操作: 群组创建，加入群组，离开群组，查看群组成员，有成员加入或离开群组时通知的功能</span><br><span class="line">应用场景:</span><br><span class="line">ceilometer-notification服务利用群组管理实现负载均衡和真正意义上的服务水平扩展。</span><br><span class="line"></span><br><span class="line">3.2 领导选取</span><br><span class="line"></span><br><span class="line">每个群组都有领导，所有节点可决定是否参与选举；</span><br><span class="line">领导消失则选取新领导节点；</span><br><span class="line">领导被选取其他成员可能得到通知；</span><br><span class="line">各节点可随时获取当前组的领导。</span><br><span class="line">感悟:</span><br><span class="line">考虑可以使用tooz实现自己的leader选举算法和服务高可用。</span><br><span class="line"></span><br><span class="line">3.3 分布式锁</span><br><span class="line"></span><br><span class="line">应用场景:</span><br><span class="line">原来ceilometer中通过RPC检测alarm evaluator进程是否存活。</span><br><span class="line">后来ceilometer通过Tooz群组管理来协调多个alarm evaluator进程。</span><br><span class="line">应用场景2:</span><br><span class="line">gnocchi中利用分布式锁操作监控项与监控数据</span><br><span class="line"></span><br><span class="line">参考：https://blog.csdn.net/qingyuanluofeng/article/details/90349185</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>第154-157比较重要，这里是初始化了个oslo_messaging.Notifier的实例，用来发送采集之后的数据到指定的队列notifications.sample，基本解释如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"""       </span></span><br><span class="line"><span class="string">  self.notifier.topics = ['notifications']</span></span><br><span class="line"><span class="string">  self.notifier._driver_names = 'messagingv2'(定义在ceilometer/publisher/messaging.py 中的 telemetry_driver这个变量)，代表的是ceilometer向消息队列发送消息时使用的驱动类型</span></span><br><span class="line"><span class="string">  self.notifier.publisher_id = 'ceilometer.polling'</span></span><br><span class="line"><span class="string">  self.notifier._driver_mgr 是从oslo.messaging.notify.drivers 中加载名称为messagingv2对应的插件</span></span><br><span class="line"><span class="string">  self.notifier.transport 是从oslo.messaging.drivers 中加载名称为 rabbit对应的插件。因为ceilometer.conf 中 transport_url定义是：transport_url=rabbit://guest:guest@192.168.2.120:5672/</span></span><br><span class="line"><span class="string">"""</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>此时就初始化完毕了，下面就是采集数据了，执行的是sm.run()代码，则是调用到了AgentManager类实例的run方法</p>
+</li>
+</ol>
+<h2 id="四、采集数据"><a href="#四、采集数据" class="headerlink" title="四、采集数据"></a>四、采集数据</h2><p>入口：ceilometer/agent/manager.py:AgentManager.run</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(self)</span>:</span></span><br><span class="line">  super(AgentManager, self).run()</span><br><span class="line"></span><br><span class="line">  self.polling_manager = pipeline.setup_polling()</span><br><span class="line">  self.join_partitioning_groups()</span><br><span class="line">  self.start_polling_tasks()</span><br><span class="line">  self.init_pipeline_refresh()</span><br></pre></td></tr></table></figure>
+<p>run方法看起来比较简单，我们来分析一下：</p>
+<ol>
+<li><p>第4行调用了setup_polling的方法</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">setup_polling</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="string">"""Setup polling manager according to yaml config file."""</span></span><br><span class="line">    cfg_file = cfg.CONF.pipeline_cfg_file</span><br><span class="line">    <span class="keyword">return</span> PollingManager(cfg_file)</span><br></pre></td></tr></table></figure>
+<p>这里面是为了加载配置文件pipeline.yaml文件中的你所配置的采集项，我们来看下这里面发生了什么：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PollingManager</span><span class="params">(ConfigManagerBase)</span>:</span></span><br><span class="line">    <span class="string">"""Polling Manager</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Polling manager sets up polling according to config file.</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, cfg_info)</span>:</span></span><br><span class="line">        <span class="string">"""Setup the polling according to config.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        The configuration is the sources half of the Pipeline Config.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        super(PollingManager, self).__init__()</span><br><span class="line">        <span class="comment"># 加载配置文件中内容</span></span><br><span class="line">        cfg = self.load_config(cfg_info)</span><br><span class="line">        self.sources = []</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> (<span class="string">'sources'</span> <span class="keyword">in</span> cfg <span class="keyword">and</span> <span class="string">'sinks'</span> <span class="keyword">in</span> cfg):</span><br><span class="line">            <span class="keyword">raise</span> PipelineException(<span class="string">"Both sources &amp; sinks are required"</span>,</span><br><span class="line">                                    cfg)</span><br><span class="line">        LOG.info(_LI(<span class="string">'detected decoupled pipeline config format'</span>))</span><br><span class="line"></span><br><span class="line">        unique_names = set()</span><br><span class="line">        <span class="comment"># 初始化并记录配置文件中的 sources 项</span></span><br><span class="line">        <span class="keyword">for</span> s <span class="keyword">in</span> cfg.get(<span class="string">'sources'</span>):</span><br><span class="line">            name = s.get(<span class="string">'name'</span>)</span><br><span class="line">            <span class="keyword">if</span> name <span class="keyword">in</span> unique_names:</span><br><span class="line">                <span class="keyword">raise</span> PipelineException(<span class="string">"Duplicated source names: %s"</span> %</span><br><span class="line">                                        name, self)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                unique_names.add(name)</span><br><span class="line">                <span class="comment"># 将配置文件中的数据皆放进 self.sources 中</span></span><br><span class="line">                self.sources.append(SampleSource(s))</span><br><span class="line">        unique_names.clear()</span><br></pre></td></tr></table></figure>
+<p>初始化好了之后，返回一个 self.polling_manager 的对象， 我们来看下这个对象中存的东西：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"""</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">(Pdb) p self.polling_manager.__dict__</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">&#123;'cfg_mtime': 1592535895.477891, 'cfg_hash': 'ba1311798d634022e4b684b72bf7b42a', 'cfg_loc': '/etc/ceilometer/pipeline.yaml', 'sources': [&lt;ceilometer.pipeline.SampleSource object at 0x7f0eec042110&gt;, &lt;ceilometer.pipeline.SampleSource object at 0x7f0eec0423d0&gt;, &lt;ceilometer.pipeline.SampleSource object at 0x7f0eec042050&gt;, &lt;ceilometer.pipeline.SampleSource object at 0x7f0eec0422d0&gt;, &lt;ceilometer.pipeline.SampleSource object at 0x7f0eec042290&gt;, &lt;ceilometer.pipeline.SampleSource object at 0x7f0eec042390&gt;, &lt;ceilometer.pipeline.SampleSource object at 0x7f0eec042350&gt;]&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">(Pdb) p self.polling_manager.sources</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">[&lt;ceilometer.pipeline.SampleSource object at 0x7f0eec042110&gt;, &lt;ceilometer.pipeline.SampleSource object at 0x7f0eec0423d0&gt;, &lt;ceilometer.pipeline.SampleSource object at 0x7f0eec042050&gt;, &lt;ceilometer.pipeline.SampleSource object at 0x7f0eec0422d0&gt;, &lt;ceilometer.pipeline.SampleSource object at 0x7f0eec042290&gt;, &lt;ceilometer.pipeline.SampleSource object at 0x7f0eec042390&gt;, &lt;ceilometer.pipeline.SampleSource object at 0x7f0eec042350&gt;]</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">(Pdb) p self.polling_manager.sources[0].__dict__</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">&#123;</span></span><br><span class="line"><span class="string">    'name': 'notification_source',</span></span><br><span class="line"><span class="string">    'cfg': &#123;</span></span><br><span class="line"><span class="string">        'interval': 3600,</span></span><br><span class="line"><span class="string">        'meters': ['instance', 'volume', 'image', 'snapshot', 'backup', 'ip.floating', 'router', 'network', 'subnet', 'account'],</span></span><br><span class="line"><span class="string">        'name': 'notification_source',</span></span><br><span class="line"><span class="string">        'sinks': ['notification_sink']</span></span><br><span class="line"><span class="string">    &#125;,</span></span><br><span class="line"><span class="string">    'interval': 3600,</span></span><br><span class="line"><span class="string">    'meters': ['instance', 'volume', 'image', 'snapshot', 'backup', 'ip.floating', 'router', 'network', 'subnet', 'account'],</span></span><br><span class="line"><span class="string">    'discovery': [],</span></span><br><span class="line"><span class="string">    'resources': [],</span></span><br><span class="line"><span class="string">    'sinks': ['notification_sink']</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">(Pdb) p self.polling_manager.sources[1].__dict__</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">&#123;</span></span><br><span class="line"><span class="string">    'name': 'meter_source',</span></span><br><span class="line"><span class="string">    'cfg': &#123;</span></span><br><span class="line"><span class="string">        'interval': 300,</span></span><br><span class="line"><span class="string">        'meters': ['poll.*', 'memory.usage', 'memory.util'],</span></span><br><span class="line"><span class="string">        'name': 'meter_source',</span></span><br><span class="line"><span class="string">        'sinks': ['meter_sink']</span></span><br><span class="line"><span class="string">    &#125;,</span></span><br><span class="line"><span class="string">    'interval': 300,</span></span><br><span class="line"><span class="string">    'meters': ['poll.*', 'memory.usage', 'memory.util'],</span></span><br><span class="line"><span class="string">    'discovery': [],</span></span><br><span class="line"><span class="string">    'resources': [],</span></span><br><span class="line"><span class="string">    'sinks': ['meter_sink']</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">                """</span></span><br></pre></td></tr></table></figure>
+<p>可以看到，这行代码的意义就是为了加载在配置文件的定义的采集项</p>
+</li>
+<li><p>第 6 行调用 start_polling_tasks 方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">start_polling_tasks</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="comment"># allow time for coordination if necessary</span></span><br><span class="line">    delay_start = self.partition_coordinator.is_active()</span><br><span class="line">   </span><br><span class="line">    <span class="comment"># set shuffle time before polling task if necessary</span></span><br><span class="line">    delay_polling_time = random.randint(</span><br><span class="line">        <span class="number">0</span>, cfg.CONF.shuffle_time_before_polling_task)</span><br><span class="line">   </span><br><span class="line">    data = self.setup_polling_tasks()</span><br><span class="line">   </span><br><span class="line">    <span class="comment"># One thread per polling tasks is enough</span></span><br><span class="line">    <span class="comment"># 按照时间间隔创建线程池，相同时间间隔创建一个线程</span></span><br><span class="line">    self.polling_periodics = periodics.PeriodicWorker.create(</span><br><span class="line">        [], executor_factory=<span class="keyword">lambda</span>:</span><br><span class="line">        futures.ThreadPoolExecutor(max_workers=len(data)))</span><br><span class="line">   </span><br><span class="line">    <span class="keyword">for</span> interval, polling_task <span class="keyword">in</span> data.items():</span><br><span class="line">        delay_time = (interval + delay_polling_time <span class="keyword">if</span> delay_start</span><br><span class="line">                      <span class="keyword">else</span> delay_polling_time)</span><br><span class="line">   </span><br><span class="line"><span class="meta">        @periodics.periodic(spacing=interval, run_immediately=False)</span></span><br><span class="line">        <span class="function"><span class="keyword">def</span> <span class="title">task</span><span class="params">(running_task)</span>:</span></span><br><span class="line">            self.interval_task(running_task)</span><br><span class="line">   </span><br><span class="line">        utils.spawn_thread(utils.delayed, delay_time,</span><br><span class="line">                           self.polling_periodics.add, task, polling_task)</span><br><span class="line">   </span><br><span class="line">    <span class="keyword">if</span> data:</span><br><span class="line">        <span class="comment"># Don't start useless threads if no task will run</span></span><br><span class="line">        utils.spawn_thread(self.polling_periodics.start, allow_empty=<span class="keyword">True</span>)</span><br></pre></td></tr></table></figure>
+<ol>
+<li><p>前 8 行不用说，就是简单的参数定义，重要的是第 9 行之后的代码，分析一下</p>
+</li>
+<li><p>第9 行调用了 setup_polling_tasks 的方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">setup_polling_tasks</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="string">"""  </span></span><br><span class="line"><span class="string">    (Pdb) p self.polling_manager.sources[1].__dict__</span></span><br><span class="line"><span class="string">    &#123;</span></span><br><span class="line"><span class="string">        'name': 'meter_source',</span></span><br><span class="line"><span class="string">        'cfg': &#123;</span></span><br><span class="line"><span class="string">            'interval': 300,</span></span><br><span class="line"><span class="string">            'meters': ['poll.*', 'memory.usage', 'memory.util'],</span></span><br><span class="line"><span class="string">            'name': 'meter_source',</span></span><br><span class="line"><span class="string">            'sinks': ['meter_sink']</span></span><br><span class="line"><span class="string">        &#125;,</span></span><br><span class="line"><span class="string">        'interval': 300,</span></span><br><span class="line"><span class="string">        'meters': ['poll.*', 'memory.usage', 'memory.util'],</span></span><br><span class="line"><span class="string">        'discovery': [],</span></span><br><span class="line"><span class="string">        'resources': [],</span></span><br><span class="line"><span class="string">        'sinks': ['meter_sink']</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    (Pdb) p self.extensions[0].__dict__</span></span><br><span class="line"><span class="string">    &#123;</span></span><br><span class="line"><span class="string">        'obj': &lt; ceilometer.compute.pollsters.memory.MemoryUtilizationPollster object at 0x7ff12062e590 &gt; ,</span></span><br><span class="line"><span class="string">        'entry_point': EntryPoint.parse('memory.util = ceilometer.compute.pollsters.memory:MemoryUtilizationPollster'),</span></span><br><span class="line"><span class="string">        'name': 'memory.util',</span></span><br><span class="line"><span class="string">        'plugin': &lt; class 'ceilometer.compute.pollsters.memory.MemoryUtilizationPollster' &gt;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    polling_tasks = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> source <span class="keyword">in</span> self.polling_manager.sources:</span><br><span class="line">        polling_task = <span class="keyword">None</span></span><br><span class="line">        <span class="keyword">for</span> pollster <span class="keyword">in</span> self.extensions:</span><br><span class="line">            <span class="comment"># 将 souce 中的 meters 与 extensions 中的每个对象的 name 进行匹配，如果一样则以采集周期为 key，以 PollingTask 对象为 value，加入到 polling_tasks中</span></span><br><span class="line">            <span class="keyword">if</span> source.support_meter(pollster.name):</span><br><span class="line">                polling_task = polling_tasks.get(source.get_interval())</span><br><span class="line">                <span class="keyword">if</span> <span class="keyword">not</span> polling_task:</span><br><span class="line">                    polling_task = self.create_polling_task()</span><br><span class="line">                    polling_tasks[source.get_interval()] = polling_task</span><br><span class="line">                polling_task.add(pollster, source)</span><br><span class="line">    <span class="keyword">return</span> polling_tasks</span><br></pre></td></tr></table></figure>
+<p>这里是遍历self.polling_manager.sources中的source，同时遍历self.extensions，查看如果对应插件在对应source的meters列表中,代表该插件需要定期执行，获取该插件定义的执行周期，将其加入到polling_tasks中</p>
+<p>我们来看下 polling_tasks 中的 value 对象，其实就是初始化了一些值，然后调用 add 方法</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PollingTask</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="string">"""Polling task for polling samples and notifying.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    A polling task can be invoked periodically or only once.</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, agent_manager)</span>:</span></span><br><span class="line">        self.manager = agent_manager</span><br><span class="line"></span><br><span class="line">        <span class="comment"># elements of the Cartesian product of sources X pollsters</span></span><br><span class="line">        <span class="comment"># with a common interval</span></span><br><span class="line">        self.pollster_matches = collections.defaultdict(set)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># we relate the static resources and per-source discovery to</span></span><br><span class="line">        <span class="comment"># each combination of pollster and matching source</span></span><br><span class="line">        resource_factory = <span class="keyword">lambda</span>: Resources(agent_manager)</span><br><span class="line">        self.resources = collections.defaultdict(resource_factory)</span><br><span class="line"></span><br><span class="line">        self._batch = cfg.CONF.batch_polled_samples</span><br><span class="line">        self._telemetry_secret = cfg.CONF.publisher.telemetry_secret</span><br><span class="line">        </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">add</span><span class="params">(self, pollster, source)</span>:</span></span><br><span class="line">        self.pollster_matches[source.name].add(pollster)</span><br><span class="line">        key = Resources.key(source.name, pollster)</span><br><span class="line">        self.resources[key].setup(source)</span><br></pre></td></tr></table></figure>
+<p>即最终返回后的 data 是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">(Pdb) p data</span><br><span class="line">&#123;</span><br><span class="line">  3600: &lt; ceilometer.agent.manager.PollingTask object at 0x7fe6a4043bd0 &gt; ,</span><br><span class="line">  300: &lt; ceilometer.agent.manager.PollingTask object at 0x7fe6a4043d10 &gt;</span><br><span class="line">&#125;</span><br><span class="line">(Pdb) p data[3600].__dict__</span><br><span class="line">&#123;</span><br><span class="line">  &apos;manager&apos;: &lt; ceilometer.agent.manager.AgentManager object at 0x3230b50 &gt; ,</span><br><span class="line">  &apos;_telemetry_secret&apos;: &apos;change this for valid signing&apos;,</span><br><span class="line">  &apos;pollster_matches&apos;: defaultdict( &lt; type &apos;set&apos; &gt; , &#123;</span><br><span class="line">          &apos;notification_source&apos;: set([ &lt; stevedore.extension.Extension object at 0x7fe6b062ec50 &gt; ])</span><br><span class="line">  &#125;),</span><br><span class="line">  &apos;resources&apos;: defaultdict( &lt; function &lt; lambda &gt; at 0x7fe6a40319b0 &gt; , &#123;</span><br><span class="line">          &apos;notification_source-instance&apos;: &lt; ceilometer.agent.manager.Resources object at 0x7fe6a4043b90 &gt;</span><br><span class="line">  &#125;),</span><br><span class="line">  &apos;_batch&apos;: True</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>第 13 到 30 行即是按照时间间隔创建线程池，相同时间间隔创建一个线程，这里用到了futurist 库（这里不做介绍），实现了一个周期任务，每隔配置文件中定义的采样周期调用 self.interval_task，而 self.interval_task 又调用了 task.poll_and_notify()，下面看下task.poll_and_notify()的实现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">poll_and_notify</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">"""Polling sample and notify."""</span></span><br><span class="line">        cache = &#123;&#125;</span><br><span class="line">        discovery_cache = &#123;&#125;</span><br><span class="line">        poll_history = &#123;&#125;</span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        (Pdb) self.pollster_matches</span></span><br><span class="line"><span class="string">        defaultdict( &lt; type 'set' &gt; , &#123;</span></span><br><span class="line"><span class="string">            'meter_source': set([ &lt; stevedore.extension.Extension object at 0x7f9a645de8d0 &gt; , &lt; stevedore.extension.Extension object at 0x7f9a645d40d0 &gt; ]),</span></span><br><span class="line"><span class="string">            'cpu_source': set([ &lt; stevedore.extension.Extension object at 0x7f9a645d4cd0 &gt; ]),</span></span><br><span class="line"><span class="string">            'cpu_util_source': set([ &lt; stevedore.extension.Extension object at 0x7f9a645dec10 &gt; ]),</span></span><br><span class="line"><span class="string">            'disk_source': set([ &lt; stevedore.extension.Extension object at 0x7f9a64399c90 &gt; , &lt; stevedore.extension.Extension object at 0x7f9a645d4ad0 &gt; , &lt; stevedore.extension.Extension object at 0x7f9a645d49d0 &gt; , &lt; stevedore.extension.Extension object at 0x7f9a645d4950 &gt; , &lt; stevedore.extension.Extension object at 0x7f9a645dea90 &gt; , &lt; stevedore.extension.Extension object at 0x7f9a64389fd0 &gt; , &lt; stevedore.extension.Extension object at 0x7f9a645d43d0 &gt; , &lt; stevedore.extension.Extension object at 0x7f9a645d4d50 &gt; ]),</span></span><br><span class="line"><span class="string">            'network_source': set([ &lt; stevedore.extension.Extension object at 0x7f9a645def10 &gt; , &lt; stevedore.extension.Extension object at 0x7f9a645d4650 &gt; , &lt; stevedore.extension.Extension object at 0x7f9a645d4450 &gt; , &lt; stevedore.extension.Extension object at 0x7f9a645d4550 &gt; ]),</span></span><br><span class="line"><span class="string">            'volume_source': set([ &lt; stevedore.extension.Extension object at 0x7f9a645d4b50 &gt; , &lt; stevedore.extension.Extension object at 0x7f9a645d4c50 &gt; ])</span></span><br><span class="line"><span class="string">        &#125;)</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="comment"># self.pollster_matches 中存的是以你在配置文件中定义的 source name 为 key，以在 source name 中定义的每个采集插件的对象的集合为 value</span></span><br><span class="line">        <span class="comment"># Resources中的 key 是 source.name + 插件的名字</span></span><br><span class="line">        <span class="keyword">for</span> source_name <span class="keyword">in</span> self.pollster_matches:</span><br><span class="line">            <span class="keyword">for</span> pollster <span class="keyword">in</span> self.pollster_matches[source_name]:</span><br><span class="line"></span><br><span class="line">                <span class="string">"""</span></span><br><span class="line"><span class="string">                first</span></span><br><span class="line"><span class="string">                    (Pdb) p key</span></span><br><span class="line"><span class="string">                    'meter_source-memory.util'</span></span><br><span class="line"><span class="string">                    (Pdb) p candidate_res</span></span><br><span class="line"><span class="string">                    []</span></span><br><span class="line"><span class="string">                    (Pdb) p pollster.obj.default_discovery</span></span><br><span class="line"><span class="string">                    'local_instances'                               </span></span><br><span class="line"><span class="string">                """</span></span><br><span class="line">                key = Resources.key(source_name, pollster)</span><br><span class="line">                candidate_res = list(</span><br><span class="line">                    self.resources[key].get(discovery_cache))</span><br><span class="line">                <span class="keyword">if</span> <span class="keyword">not</span> candidate_res <span class="keyword">and</span> pollster.obj.default_discovery:</span><br><span class="line">                    candidate_res = self.manager.discover(</span><br><span class="line">                        [pollster.obj.default_discovery], discovery_cache)</span><br><span class="line">                    <span class="string">"""</span></span><br><span class="line"><span class="string">                    (Pdb) p candidate_res</span></span><br><span class="line"><span class="string">                    [&lt;Server: jy-2&gt;]</span></span><br><span class="line"><span class="string">                    """</span></span><br><span class="line"></span><br><span class="line">                <span class="comment"># Remove duplicated resources and black resources. Using</span></span><br><span class="line">                <span class="comment"># set() requires well defined __hash__ for each resource.</span></span><br><span class="line">                <span class="comment"># Since __eq__ is defined, 'not in' is safe here.</span></span><br><span class="line">                polling_resources = []</span><br><span class="line">                black_res = self.resources[key].blacklist</span><br><span class="line">                history = poll_history.get(pollster.name, [])</span><br><span class="line">                <span class="keyword">for</span> x <span class="keyword">in</span> candidate_res:</span><br><span class="line">                    <span class="keyword">if</span> x <span class="keyword">not</span> <span class="keyword">in</span> history:</span><br><span class="line">                        history.append(x)</span><br><span class="line">                        <span class="keyword">if</span> x <span class="keyword">not</span> <span class="keyword">in</span> black_res:</span><br><span class="line">                            polling_resources.append(x)</span><br><span class="line">                <span class="string">"""</span></span><br><span class="line"><span class="string">                first</span></span><br><span class="line"><span class="string">                    (Pdb) p poll_history</span></span><br><span class="line"><span class="string">                    &#123;'memory.util': [&lt;Server: jy-2&gt;]&#125;</span></span><br><span class="line"><span class="string">                second</span></span><br><span class="line"><span class="string">                    (Pdb) p poll_history</span></span><br><span class="line"><span class="string">                    &#123;'memory.util': [&lt;Server: jy-2&gt;], 'memory.usage': [&lt;Server: jy-2&gt;]&#125;</span></span><br><span class="line"><span class="string">                """</span></span><br><span class="line">                poll_history[pollster.name] = history</span><br><span class="line"></span><br><span class="line">                <span class="comment"># If no resources, skip for this pollster</span></span><br><span class="line">                <span class="keyword">if</span> <span class="keyword">not</span> polling_resources:</span><br><span class="line">                    p_context = <span class="string">'new '</span> <span class="keyword">if</span> history <span class="keyword">else</span> <span class="string">''</span></span><br><span class="line">                    LOG.info(_(<span class="string">"Skip pollster %(name)s, no %(p_context)s"</span></span><br><span class="line">                               <span class="string">"resources found this cycle"</span>),</span><br><span class="line">                             &#123;<span class="string">'name'</span>: pollster.name, <span class="string">'p_context'</span>: p_context&#125;)</span><br><span class="line">                    <span class="keyword">continue</span></span><br><span class="line"></span><br><span class="line">                LOG.info(_(<span class="string">"Polling pollster %(poll)s in the context of "</span></span><br><span class="line">                           <span class="string">"%(src)s"</span>),</span><br><span class="line">                         dict(poll=pollster.name, src=source_name))</span><br><span class="line">                <span class="keyword">try</span>:</span><br><span class="line">                    polling_timestamp = timeutils.utcnow().isoformat()</span><br><span class="line">                    samples = pollster.obj.get_samples(</span><br><span class="line">                        manager=self.manager,</span><br><span class="line">                        cache=cache,</span><br><span class="line">                        resources=polling_resources</span><br><span class="line">                    )</span><br><span class="line">                    sample_batch = []</span><br><span class="line"></span><br><span class="line">                    <span class="comment"># filter None in samples</span></span><br><span class="line">                    <span class="string">"""</span></span><br><span class="line"><span class="string">                    first</span></span><br><span class="line"><span class="string">                        (Pdb) samples</span></span><br><span class="line"><span class="string">                        [&lt;name: memory.util, volume: 18.58, resource_id: 32eb16e0-c8af-4b41-b18c-b63152f0f8fc, timestamp: None&gt;]</span></span><br><span class="line"><span class="string">                    second</span></span><br><span class="line"><span class="string">                        (Pdb) samples</span></span><br><span class="line"><span class="string">                        [&lt;name: memory.usage, volume: 91, resource_id: 32eb16e0-c8af-4b41-b18c-b63152f0f8fc, timestamp: None&gt;]</span></span><br><span class="line"><span class="string">                    """</span></span><br><span class="line">                    samples = [s <span class="keyword">for</span> s <span class="keyword">in</span> samples <span class="keyword">if</span> s <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>]</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">for</span> sample <span class="keyword">in</span> samples:</span><br><span class="line">                        <span class="comment"># Note(yuywz): Unify the timestamp of polled samples</span></span><br><span class="line">                        sample.set_timestamp(polling_timestamp)</span><br><span class="line">                        <span class="string">"""</span></span><br><span class="line"><span class="string">                        (Pdb) sample_dict</span></span><br><span class="line"><span class="string">                        &#123;</span></span><br><span class="line"><span class="string">                            'counter_name': 'memory.util',</span></span><br><span class="line"><span class="string">                            'resource_id': u '32eb16e0-c8af-4b41-b18c-b63152f0f8fc',</span></span><br><span class="line"><span class="string">                            'timestamp': '2020-06-19T06:21:32.542893',</span></span><br><span class="line"><span class="string">                            'counter_volume': 18.58,</span></span><br><span class="line"><span class="string">                            'user_id': u '7431e07e49de2703f1b9e703daf5aff158e32028506f77e05a62e9eb3892dcde',</span></span><br><span class="line"><span class="string">                            'message_signature': '76e6cbd944963855306b829cdf2c49bba9f0b20220c8c738b61b5048be51b24f',</span></span><br><span class="line"><span class="string">                            'resource_metadata': &#123;</span></span><br><span class="line"><span class="string">                                'status': u 'active',</span></span><br><span class="line"><span class="string">                                'ephemeral_gb': 0,</span></span><br><span class="line"><span class="string">                                'disk_gb': 0,</span></span><br><span class="line"><span class="string">                                'instance_host': u 'node-3.domain.tld',</span></span><br><span class="line"><span class="string">                                'kernel_id': None,</span></span><br><span class="line"><span class="string">                                'image': None,</span></span><br><span class="line"><span class="string">                                'ramdisk_id': None,</span></span><br><span class="line"><span class="string">                                'host': u '619a474e64dbedcd55508bda51aea8a611fd15f3f3e8fa39ce0d0552',</span></span><br><span class="line"><span class="string">                                'flavor': &#123;</span></span><br><span class="line"><span class="string">                                    'name': u '1C-0.5G',</span></span><br><span class="line"><span class="string">                                    u 'links': [&#123;</span></span><br><span class="line"><span class="string">                                        u 'href': u 'http://nova-api.openstack.svc.cluster.local:8774/ca80e5ccd445438580c4b128296d1936/flavors/211',</span></span><br><span class="line"><span class="string">                                        u 'rel': u 'bookmark'</span></span><br><span class="line"><span class="string">                                    &#125;],</span></span><br><span class="line"><span class="string">                                    'ram': 512,</span></span><br><span class="line"><span class="string">                                    'ephemeral': 0,</span></span><br><span class="line"><span class="string">                                    'vcpus': 1,</span></span><br><span class="line"><span class="string">                                    'disk': 0,</span></span><br><span class="line"><span class="string">                                    u 'id': u '211'</span></span><br><span class="line"><span class="string">                                &#125;,</span></span><br><span class="line"><span class="string">                                'task_state': None,</span></span><br><span class="line"><span class="string">                                'image_ref_url': None,</span></span><br><span class="line"><span class="string">                                'memory_mb': 512,</span></span><br><span class="line"><span class="string">                                'root_gb': 0,</span></span><br><span class="line"><span class="string">                                'display_name': u 'jy-2',</span></span><br><span class="line"><span class="string">                                'name': u 'instance-00000002',</span></span><br><span class="line"><span class="string">                                'vcpus': 1,</span></span><br><span class="line"><span class="string">                                'instance_id': u '32eb16e0-c8af-4b41-b18c-b63152f0f8fc',</span></span><br><span class="line"><span class="string">                                'instance_type': u '1C-0.5G',</span></span><br><span class="line"><span class="string">                                'state': u 'active',</span></span><br><span class="line"><span class="string">                                'image_ref': None,</span></span><br><span class="line"><span class="string">                                'OS-EXT-AZ:availability_zone': u 'default-az'</span></span><br><span class="line"><span class="string">                            &#125;,</span></span><br><span class="line"><span class="string">                            'source': 'openstack',</span></span><br><span class="line"><span class="string">                            'counter_unit': '%',</span></span><br><span class="line"><span class="string">                            'project_id': u '34ecb9aca8454157bd5c3c64708990bf',</span></span><br><span class="line"><span class="string">                            'message_id': '6fbcdc0e-b1f5-11ea-a901-be1696955049',</span></span><br><span class="line"><span class="string">                            'monotonic_time': None,</span></span><br><span class="line"><span class="string">                            'counter_type': 'gauge'</span></span><br><span class="line"><span class="string">                        &#125;</span></span><br><span class="line"><span class="string">                        """</span></span><br><span class="line">                        sample_dict = (</span><br><span class="line">                            publisher_utils.meter_message_from_counter(</span><br><span class="line">                                sample, self._telemetry_secret</span><br><span class="line">                            ))</span><br><span class="line">                        <span class="keyword">if</span> self._batch:</span><br><span class="line">                            sample_batch.append(sample_dict)</span><br><span class="line">                        <span class="keyword">else</span>:</span><br><span class="line">                            self._send_notification([sample_dict])</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">if</span> sample_batch:</span><br><span class="line">                        self._send_notification(sample_batch)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">except</span> plugin_base.PollsterPermanentError <span class="keyword">as</span> err:</span><br><span class="line">                    LOG.error(_(</span><br><span class="line">                        <span class="string">'Prevent pollster %(name)s for '</span></span><br><span class="line">                        <span class="string">'polling source %(source)s anymore!'</span>)</span><br><span class="line">                        % (&#123;<span class="string">'name'</span>: pollster.name, <span class="string">'source'</span>: source_name&#125;))</span><br><span class="line">                    self.resources[key].blacklist.extend(err.fail_res_list)</span><br><span class="line">                <span class="keyword">except</span> Exception <span class="keyword">as</span> err:</span><br><span class="line">                    LOG.warning(_(</span><br><span class="line">                        <span class="string">'Continue after error from %(name)s: %(error)s'</span>)</span><br><span class="line">                        % (&#123;<span class="string">'name'</span>: pollster.name, <span class="string">'error'</span>: err&#125;),</span><br><span class="line">                        exc_info=<span class="keyword">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_send_notification</span><span class="params">(self, samples)</span>:</span></span><br><span class="line">        self.manager.notifier.sample(</span><br><span class="line">            &#123;&#125;,</span><br><span class="line">            <span class="string">'telemetry.polling'</span>,</span><br><span class="line">            &#123;<span class="string">'samples'</span>: samples&#125;</span><br><span class="line">        )</span><br></pre></td></tr></table></figure>
+<ol>
+<li><p>前 5 行不谈</p>
+</li>
+<li><p>第 19 和 20 行，拿出在 self.pollster_matches 中定义的资源和插件遍历，然后第 31 行到最后都是采集数据的一些转换，其中比较重要的地方都已经打印出来了，很清楚，选几个介绍下（candidate_res这个对象我现在貌似还不能非常清楚的理解，如果有清楚的大佬，还请麻烦留言介绍下，十分感谢）</p>
+</li>
+<li><p>看下第 76 行，这边就是采集数据的地方，调用的就是插件中的方法，比如现在的pollster.name=memory.usage，那么就是调用MemoryUsagePollster类的get_samples方法，可以看见在该方法中实现数据采集之后，yield 返回</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MemoryUsagePollster</span><span class="params">(pollsters.BaseComputePollster)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get_samples</span><span class="params">(self, manager, cache, resources)</span>:</span></span><br><span class="line">        self._inspection_duration = self._record_poll_time()</span><br><span class="line">        <span class="keyword">for</span> instance <span class="keyword">in</span> resources:</span><br><span class="line">            LOG.debug(<span class="string">'Checking memory usage for instance %s'</span>, instance.id)</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                memory_info = self.inspector.inspect_memory_usage(</span><br><span class="line">                    instance, self._inspection_duration)</span><br><span class="line">                LOG.debug(<span class="string">"MEMORY USAGE: %(instance)s %(usage)f"</span>,</span><br><span class="line">                          &#123;<span class="string">'instance'</span>: instance,</span><br><span class="line">                           <span class="string">'usage'</span>: memory_info.usage&#125;)</span><br><span class="line">                <span class="keyword">yield</span> util.make_sample_from_instance(</span><br><span class="line">                    instance,</span><br><span class="line">                    name=<span class="string">'memory.usage'</span>,</span><br><span class="line">                    type=sample.TYPE_GAUGE,</span><br><span class="line">                    unit=<span class="string">'MB'</span>,</span><br><span class="line">                    volume=memory_info.usage,</span><br><span class="line">                )</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>再看下第 157 行，这里是实现发送消息的地方，调用self._send_notification(sample_batch)</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_send_notification</span><span class="params">(self, samples)</span>:</span></span><br><span class="line">    self.manager.notifier.sample(</span><br><span class="line">        &#123;&#125;,</span><br><span class="line">        <span class="string">'telemetry.polling'</span>,</span><br><span class="line">        &#123;<span class="string">'samples'</span>: samples&#125;</span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
+<p>这里使用了oslo_messaging库，继续往里分析，这里的 sample 调用的是 oslo_messaging.py/notify/notifier.py:Notifier 类的 sample 方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">sample</span><span class="params">(self, ctxt, event_type, payload)</span>:</span></span><br><span class="line">           </span><br><span class="line">    self._notify(ctxt, event_type, payload, <span class="string">'SAMPLE'</span>)</span><br></pre></td></tr></table></figure>
+<p>继续往里调用 _notify 方法</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_notify</span><span class="params">(self, ctxt, event_type, payload, priority, publisher_id=None,</span></span></span><br><span class="line"><span class="function"><span class="params">            retry=None)</span>:</span></span><br><span class="line">    payload = self._serializer.serialize_entity(ctxt, payload)</span><br><span class="line">    ctxt = self._serializer.serialize_context(ctxt)</span><br><span class="line">           </span><br><span class="line">    msg = dict(message_id=six.text_type(uuid.uuid4()),</span><br><span class="line">               publisher_id=publisher_id <span class="keyword">or</span> self.publisher_id,</span><br><span class="line">               event_type=event_type,</span><br><span class="line">               priority=priority,</span><br><span class="line">               payload=payload,</span><br><span class="line">               timestamp=six.text_type(timeutils.utcnow()))</span><br><span class="line">           </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">do_notify</span><span class="params">(ext)</span>:</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            ext.obj.notify(ctxt, msg, priority, retry <span class="keyword">or</span> self.retry)</span><br><span class="line">        <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">            _LOG.exception(<span class="string">"Problem '%(e)s' attempting to send to "</span></span><br><span class="line">                           <span class="string">"notification system. Payload=%(payload)s"</span>,</span><br><span class="line">                           &#123;<span class="string">'e'</span>: e, <span class="string">'payload'</span>: payload&#125;)</span><br><span class="line">           </span><br><span class="line">    <span class="keyword">if</span> self._driver_mgr.extensions:</span><br><span class="line">        self._driver_mgr.map(do_notify)</span><br></pre></td></tr></table></figure>
+<p>这里主要是调用了 15 行，我们看下这个对象的信息：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(Pdb) p ext.obj</span><br><span class="line">&lt;oslo_messaging.notify.messaging.MessagingV2Driver object at <span class="number">0x7f72f876d510</span>&gt;</span><br><span class="line">(Pdb) p ext.obj.__dict__</span><br><span class="line">&#123;<span class="string">'topics'</span>: [<span class="string">'notifications'</span>], <span class="string">'version'</span>: <span class="number">2.0</span>, <span class="string">'transport'</span>: &lt;oslo_messaging.transport.Transport object at <span class="number">0x7f72f85dd1d0</span>&gt;, <span class="string">'conf'</span>: &lt;oslo_config.cfg.ConfigOpts object at <span class="number">0x13dc990</span>&gt;&#125;</span><br></pre></td></tr></table></figure>
+<p>继续往里调用 notify 方法（oslo_messaging.py/notify/messaging.py:MessagingDriver类）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">notify</span><span class="params">(self, ctxt, message, priority, retry)</span>:</span></span><br><span class="line">    priority = priority.lower()</span><br><span class="line">    <span class="keyword">for</span> topic <span class="keyword">in</span> self.topics:</span><br><span class="line">        target = oslo_messaging.Target(topic=<span class="string">'%s.%s'</span> % (topic, priority))</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            self.transport._send_notification(target, ctxt, message,</span><br><span class="line">                                              version=self.version,</span><br><span class="line">                                              retry=retry)</span><br><span class="line">        <span class="keyword">except</span> Exception:</span><br><span class="line">            LOG.exception(<span class="string">"Could not send notification to %(topic)s. "</span></span><br><span class="line">                          <span class="string">"Payload=%(message)s"</span>,</span><br><span class="line">                          &#123;<span class="string">'topic'</span>: topic, <span class="string">'message'</span>: message&#125;)</span><br></pre></td></tr></table></figure>
+<p>可以看到这里的 target 就是：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(Pdb) p target</span><br><span class="line">&lt;Target topic=notifications.sample&gt;</span><br></pre></td></tr></table></figure>
+<p>所以最终调用 self.transport._send_notification 将消息发送至 notifications.sample 队列，由此整个 ceilometer-compute 服务的采集任务就完成了</p>
+<p>ceilometer-central 服务和 ceilometer-compute 服务差不多，加载命令空间的插件不同，逻辑基本一致，不赘述。</p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<p>参考：<br><a href="https://www.cnblogs.com/luohaixian/p/11145939.html" target="_blank" rel="external">https://www.cnblogs.com/luohaixian/p/11145939.html</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+<blockquote class="blockquote-center" style="color: #ccc;">
+    -------------本文结束 <i class="fa fa-apple"></i> 感谢您的阅读-------------
+</blockquote>
+
+  <span id="inline-green" style="border-radius:3px;">作者</span>：<a class="link-blue" href="https://github.com/magiceses" target="_blank">Magiceses</a><br/>有问题请 <a class="link-blue" href="https://magiceses.github.io/guestbook" target="_blank">留言</a> 或者私信我的 <a class="link-blue" href="https://weibo.com/u/3069595351" target="_blank">微博</a>。
+
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>满分是10分的话，这篇文章你给几分</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/reward/reward_wechat.png" alt="magiceses WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/reward/reward_alipay.png" alt="magiceses Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Openstack/" rel="tag"><i class="fa fa-tag"></i> Openstack</a>
+          
+            <a href="/tags/Telemetry/" rel="tag"><i class="fa fa-tag"></i> Telemetry</a>
+          
+            <a href="/tags/Ceilometer/" rel="tag"><i class="fa fa-tag"></i> Ceilometer</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/03/openstack-telemetry-gnocchi使用原理和源码分析-续/" rel="next" title="Gnocchi 使用原理及源码分析-下">
+                <i class="fa fa-chevron-left"></i> Gnocchi 使用原理及源码分析-下
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/10/04/openstack-telemetry-ceilometer-notification源码分析/" rel="prev" title="ceilometer-notification源码分析">
+                ceilometer-notification源码分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar/avatar.png"
+               alt="magiceses" />
+          <p class="site-author-name" itemprop="name">magiceses</p>
+          <p class="site-description motion-element" itemprop="description">Stay Hungry,Stay Foolish</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">61</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/magiceses" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://blog.csdn.net/weixin_43700106" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-chrome"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/weblog" title="建站日志" target="_blank">建站日志</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/reward" title="打赏" target="_blank">打赏</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、启动命令"><span class="nav-number">1.</span> <span class="nav-text">一、启动命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、代码入口"><span class="nav-number">2.</span> <span class="nav-text">二、代码入口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、初始化AgentManager"><span class="nav-number">3.</span> <span class="nav-text">三、初始化AgentManager</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、采集数据"><span class="nav-number">4.</span> <span class="nav-text">四、采集数据</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+      
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="busuanzi-count">
+
+  <!-- <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script> -->
+  <!-- 上面这个是之前的，不知道为什么失效了，改成下面这个 -->
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">您是第<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>个小伙伴</span>
+  
+
+  
+    <span class="site-pv">本站总浏览<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">magiceses</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Pisces
+  </a>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count" style="color: #e90f92;">全站共 1m 字</span>
+</div>
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+  <!-- 按需加载背景 -->
+  <!-- 背景动画 -->
+<script type="text/javascript">
+  // 按需加载背景
+  // 如果是all，就直接加载了
+  if("pc" == "all") {
+    $.getScript("/js/src/particle.js?v=5.0.1");
+  }
+  // 识别手机或电脑的js开始
+  (function(){
+    var res = GetRequest();
+    var par = res['index'];
+    if(par!='gfan'){
+      var ua=navigator.userAgent.toLowerCase();
+      var contains=function (a, b){
+          if(a.indexOf(b)!=-1){return true;}
+      };
+      if((contains(ua,"android") && contains(ua,"mobile"))||(contains(ua,"android") && contains(ua,"mozilla"))||(contains(ua,"android") && contains(ua,"opera"))||contains(ua,"ucweb7")||contains(ua,"iphone")){
+        return false;
+      } else {
+        $.getScript("/js/src/particle.js?v=5.0.1");
+      }
+    }
+  })();
+  function GetRequest() {
+    var url = location.search;
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+      var str = url.substr(1);
+      strs = str.split("&");
+      for(var i = 0; i < strs.length; i ++) {
+        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+      }
+    }
+    return theRequest;
+  }
+</script>
+<!-- 识别手机或电脑的js结束 -->  
+
+  <!-- 页面点击小红心 -->
+  <!-- 页面点击小红心 -->
+
+  <script type="text/javascript" src="/js/src/love.js?v=5.0.1"></script>
+
+
+  <!-- 鼠标移动，效果 -->
+  <!-- 鼠标移动特效 -->
+
+  <script type="text/javascript" src="/js/src/jquery-stars.js?v=5.0.1"></script>
+  <script type="text/javascript">
+  jQuery('body').jstars({
+  	image_path: '/images',
+  	image: 'candy-cane-stars.png',
+  	style: 'white',
+  	width: 34,
+  	height: 34,
+  	delay: 700,
+  	frequency: 5
+  });
+  </script>
+
+
+  <!-- 页面 title 进入/离开 效果 -->
+
+  <script type="text/javascript">var OriginTitile=document.title,st;document.addEventListener("visibilitychange",function(){document.hidden?(document.title="Waiting for you back！",clearTimeout(st)):(document.title="Thanks for visit~ "+OriginTitile,st=setTimeout(function(){document.title=OriginTitile},4e3))})</script>
+
+
+</body>
+</html>

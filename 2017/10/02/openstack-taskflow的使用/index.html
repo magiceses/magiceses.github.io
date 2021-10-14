@@ -1,0 +1,1271 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Courier New:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Openstack," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="天青色等烟雨" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="自己强，比什么都强，要知道，寻找一棵大树好乘凉，不如自栽自养自乘凉，别人给的，随时有可能收回去，只有自己创造的才会留下来。
+
+taskflow是oslo中用于为OpenStack项目和其他Python项目实现一个高可用的，易于理解的，声明式的执行工作、任务、流等的库。这个库让任务执行更加容易、一致和可靠。本文将详细介绍taskflow的实现原理与使用方式。
+taskflow的实现原理基本概念tas">
+<meta property="og:type" content="article">
+<meta property="og:title" content="openstack之taskflow的使用">
+<meta property="og:url" content="https://magiceses.github.io/2017/10/02/openstack-taskflow的使用/index.html">
+<meta property="og:site_name" content="天青色等烟雨">
+<meta property="og:description" content="自己强，比什么都强，要知道，寻找一棵大树好乘凉，不如自栽自养自乘凉，别人给的，随时有可能收回去，只有自己创造的才会留下来。
+
+taskflow是oslo中用于为OpenStack项目和其他Python项目实现一个高可用的，易于理解的，声明式的执行工作、任务、流等的库。这个库让任务执行更加容易、一致和可靠。本文将详细介绍taskflow的实现原理与使用方式。
+taskflow的实现原理基本概念tas">
+<meta property="og:updated_time" content="2021-10-13T11:52:44.546Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="openstack之taskflow的使用">
+<meta name="twitter:description" content="自己强，比什么都强，要知道，寻找一棵大树好乘凉，不如自栽自养自乘凉，别人给的，随时有可能收回去，只有自己创造的才会留下来。
+
+taskflow是oslo中用于为OpenStack项目和其他Python项目实现一个高可用的，易于理解的，声明式的执行工作、任务、流等的库。这个库让任务执行更加容易、一致和可靠。本文将详细介绍taskflow的实现原理与使用方式。
+taskflow的实现原理基本概念tas">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://magiceses.github.io/2017/10/02/openstack-taskflow的使用/"/>
+
+
+<!-- 网页加载条 -->
+<script src="/js/src/pace.min.js"></script>
+  <title> openstack之taskflow的使用 | 天青色等烟雨 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">天青色等烟雨</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">而我在等你</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-guestbook">
+          <a href="/guestbook" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-commenting"></i> <br />
+            
+            留言
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+      
+      
+        <li class="menu-item"> <a title="把这个链接拖到你的工具栏中,任何网页都可以High" href='javascript:(
+/*
+ * Copyright (C) 2016 Never_yu (Neveryu.github.io) <React.dong.yu@gmail.com>
+ * Sina Weibo (http://weibo.com/Neveryu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function go() {
+
+var songs = [
+  "http://dl.stream.qqmusic.qq.com/C400001Qu4I30eVFYb.m4a?vkey=2127178E4405E7B8B268F20F05232485735CCF4FF8C1432F0360D2626D0B6C9564B5627C7AB481BBC685FEDB0946A50E97C66F0D1B008226&guid=7175649092&uin=0&fromtag=66",
+  "",
+  "",
+  ""
+];
+
+function c() {
+  var e = document.createElement("link");
+  e.setAttribute("type", "text/css");
+  e.setAttribute("rel", "stylesheet");
+  e.setAttribute("href", f);
+  e.setAttribute("class", l);
+  document.body.appendChild(e)
+}
+
+function h() {
+  var e = document.getElementsByClassName(l);
+  for (var t = 0; t < e.length; t++) {
+    document.body.removeChild(e[t])
+  }
+}
+
+function p() {
+  var e = document.createElement("div");
+  e.setAttribute("class", a);
+  document.body.appendChild(e);
+  setTimeout(function() {
+    document.body.removeChild(e)
+  }, 100)
+}
+
+function d(e) {
+  return {
+    height : e.offsetHeight,
+    width : e.offsetWidth
+  }
+}
+
+function v(i) {
+  var s = d(i);
+  return s.height > e && s.height < n && s.width > t && s.width < r
+}
+
+function m(e) {
+  var t = e;
+  var n = 0;
+  while (!!t) {
+    n += t.offsetTop;
+    t = t.offsetParent
+  }
+  return n
+}
+
+function g() {
+  var e = document.documentElement;
+  if (!!window.innerWidth) {
+    return window.innerHeight
+  } else if (e && !isNaN(e.clientHeight)) {
+    return e.clientHeight
+  }
+  return 0
+}
+
+function y() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  }
+  return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+}
+
+function E(e) {
+  var t = m(e);
+  return t >= w && t <= b + w
+}
+
+function S() {
+  var e = document.getElementById("audio_element_id");
+  if(e != null){
+    var index = parseInt(e.getAttribute("curSongIndex"));
+    if(index > songs.length - 2) {
+      index = 0;
+    } else {
+      index++;
+    }
+    e.setAttribute("curSongIndex", index);
+    N();
+  }
+
+  e.src = i;
+  e.play()
+}
+
+function x(e) {
+  e.className += " " + s + " " + o
+}
+
+function T(e) {
+  e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+}
+
+function N() {
+  var e = document.getElementsByClassName(s);
+  var t = new RegExp("\\b" + s + "\\b");
+  for (var n = 0; n < e.length; ) {
+    e[n].className = e[n].className.replace(t, "")
+  }
+}
+
+function initAudioEle() {
+  var e = document.getElementById("audio_element_id");
+  if(e === null){
+    e = document.createElement("audio");
+    e.setAttribute("class", l);
+    e.setAttribute("curSongIndex", 0);
+    e.id = "audio_element_id";
+    e.loop = false;
+    e.bgcolor = 0;
+    e.addEventListener("canplay", function() {
+      setTimeout(function() {
+        x(k)
+      }, 500);
+      setTimeout(function() {
+        N();
+        p();
+        for (var e = 0; e < O.length; e++) {
+          T(O[e])
+        }
+      }, 15500)
+    }, true);
+    e.addEventListener("ended", function() {
+      N();
+      h();
+      go();
+    }, true);
+    e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+    document.body.appendChild(e);
+  }
+}
+
+initAudioEle();
+var e = 30;
+var t = 30;
+var n = 350;
+var r = 350;
+
+var curSongIndex = parseInt(document.getElementById("audio_element_id").getAttribute("curSongIndex"));
+var i = songs[curSongIndex];
+
+var s = "mw-harlem_shake_me";
+var o = "im_first";
+var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+var a = "mw-strobe_light";
+
+/* harlem-shake-style.css，替换成你的位置，也可以直接使用：//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css */
+var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+
+var l = "mw_added_css";
+var b = g();
+var w = y();
+var C = document.getElementsByTagName("*");
+var k = null;
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    if (E(A)) {
+      k = A;
+      break
+    }
+  }
+}
+if (A === null) {
+  console.warn("Could not find a node of the right size. Please try a different page.");
+  return
+}
+c();
+S();
+var O = [];
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    O.push(A)
+  }
+}
+})()'><i class="menu-item-icon fa fa-music fa-fw"></i> High一下</a></li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search fa-lg"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                openstack之taskflow的使用
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-10-02T23:25:24+08:00" content="2017-10-02">
+              2017-10-02
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Openstack/" itemprop="url" rel="index">
+                    <span itemprop="name">Openstack</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv">热度
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p id="div-border-top-green">自己强，比什么都强，要知道，寻找一棵大树好乘凉，不如自栽自养自乘凉，别人给的，随时有可能收回去，只有自己创造的才会留下来。<br></p>
+
+<p>taskflow是oslo中用于为OpenStack项目和其他Python项目实现一个高可用的，易于理解的，声明式的执行工作、任务、流等的库。这个库让任务执行更加容易、一致和可靠。本文将详细介绍taskflow的实现原理与使用方式。</p>
+<h2 id="taskflow的实现原理"><a href="#taskflow的实现原理" class="headerlink" title="taskflow的实现原理"></a>taskflow的实现原理</h2><h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><p>taskflow库在oslo项目中是一个实现比较复杂的项目，要弄清楚其实现原理，首先需要对其中的相关概念有所了解。所以，本文首先总结了taskflow中常用的一些基本概念，这些概念主要包括如下几个：</p>
+<a id="more"></a>
+<ul>
+<li>Atom：Atom类是taskflow的最小单位，taskflow中其他类，包括Task等都需要继承这个类。一个Atom对象是一个命名对象，通过操作输入数据以执行一些促进整个流程发展的动作，或者产生一个处理结果等。它是一个抽象类，提供了两个抽象方法：execute()用于执行一个动作，revert()用于根据execute()执行结果和失败信息还原到任务执行之前的状态；除此之外，还分别为这两个方法提供了pre_execute()/post_execute()、pre_revert()/post_revert()方法用于定义在执行execute或revert操作前后执行的操作；</li>
+<li>Task：Task类是一个拥有执行和回滚操作的最小工作单元，表示一个任务流中的某一个任务。它是一个继承自Atom类的表示一个任务的父类，开发者可以执行定义一个继承自Task类的任务类，并重写execute()和revert()方法分别表示执行和回滚的操作；</li>
+<li>Flow：Flow类是一个用来关联所有相关Task类，并规定这些Task类的执行和回滚顺序的抽象类。而oslo中为Flow提供了三种实现方式：graph_flow表示图流，linear_flow表示线性流，unordered_flow表示无序流。关于这三种类型的流实现会在之后进行详细分析；</li>
+<li>Retry：Retry类也是一个继承自Atom的抽象类，它主要定义了当有错误发生时，如何进行重试操作。其也包含也不同的类型，将会在接下来的部分进行详细介绍；</li>
+<li>Engine：Engine类是一个表示真正运行Atom对象的抽象类，它的实现类主要用于载入（load）一个Flow对象，然后驱动这个Flow对象的Task对象开始运行。Engine的实现也有多种不同的形式，这也会在接下来的部分进行详细介绍。</li>
+</ul>
+<p>以上的这些基本概念是理解和使用taskflow库的最重要的概念，当然在taskflow中还有一些其他的概念，在这里就不详细介绍了。接下来，将分别从这些基本概念展开介绍oslo项目中taskflow的实现原理。</p>
+<h3 id="Flow的类型"><a href="#Flow的类型" class="headerlink" title="Flow的类型"></a>Flow的类型</h3><p>在介绍taskflow的基本概念时说到Flow类分为三种类型，本小节将详细介绍oslo自定义的Flow的三种类型。oslo自定义的Flow的类型都放在taskflow.patterns包中，在这个包中，定义了三个模块：graph_flow、linear_flow和unordered_flow，在这三个模块中都定义了各自的Flow类。接下来，将分别介绍这三种类型：</p>
+<ul>
+<li>linear_flow：线性流，该类型的Flow对象将按照Task/Flow加入的顺序来依次执行，按照加入的倒序依次回滚；</li>
+<li>graph_flow：图流，该类型的Flow对象会按照给加入的Task/Flow显示指定的依赖关系或通过其间的provides/requires属性隐含的依赖关系执行和回滚；</li>
+<li>unordered_flow：无序流，该类型的Flow对象所加入的Task/Flow会按照任意顺序执行或回滚；</li>
+</ul>
+<p>要弄清楚这三种类型的Flow对象，首先需要了解oslo定义的Flow基类的构成。在oslo定义的Flow基类中，主要包含以下几个重要的属性和方法：</p>
+<ul>
+<li>name：表示初始化Flow对象时，为其指定的名称，并不能唯一表示一个Flow对象；</li>
+<li>retry：表示与该Flow对象关联的重试控制器；</li>
+<li>provides：表示该Flow对象提供的一组符号名称；</li>
+<li>requires：表示该Flow对象所需要的一组”unsatisfied”符号名称；</li>
+<li>add(*items)：该方法用于为该Flow对象添加一个或一组Task/Flow对象；</li>
+<li>iter_links()：迭代Flow对象的子节点之间的依赖关系链接。例如在迭代一个三元组(A, B, meta)时，就是迭代一个从子节点A（一个Atom对象或一个Subflow）指向子节点B（一个Atom对象或一个Subflow）的链接；换句话说，也就代表了子流B依赖于子流A，或者子流B需要子流A；而meta代表了这个依赖关系链接的元数据，是一个字典；</li>
+<li>iter_nodes()：迭代Flow对象中的所有节点。例如在迭代一个二元组（A, meta）时，A（一个Atom对象或一个Subflow）是当前Flow对象的子流或子任务；meta同样代表了这个链接的元数据，是一个字典。</li>
+</ul>
+<p>以上所介绍的Flow类中的属性和方法都是实现taskflow执行和回滚顺序的关键。上文说到Flow类有三种实现，而在每一种实现的Flow类中，各实现类还定义了一个非常重要的属性：</p>
+<ul>
+<li>Graph：一个拥有taskflow实用功能的networkx.Graph的子类，主要为taskflow中的图定义了一些工具方法，包括保持图不变形的freeze()方法，将图导出为点格式的export_to_dot()方法（依赖于pydot库），以及将图格式化为一个字符串的pformat()方法等；</li>
+<li>DiGraph：一个拥有taskflow实用功能的networkx.Graph的子类，代表了一个有向图；</li>
+<li>OrderedGraph：该类也是一个拥有taskflow实用功能的networkx.Graph的子类，但该类保留了节点、边、迭代顺序和插入顺序（以便迭代顺序可以匹配插入顺序）；</li>
+<li>OrderedDiGraph：该类也是一个拥有taskflow实用功能的networkx.Graph的子类，代表的是一个有向图，但该类保留了节点、边、迭代顺序和插入顺序（以便迭代顺序可以匹配插入顺序）。</li>
+</ul>
+<p>除了实现了taskflow所需要的Graph子类外，taskflow.types.graph模块还定义了merge_graphs(graph, <em>graphs, *</em>kwargs)方法将两个或多个图进行合并。</p>
+<p>有了上述图的实现，三种不同类型的Flow类实现便通过上述这些图来具体实现，即在实现add()、requires()、provides()等方法时，通过获取对应图对象的节点或向对应图对象添加节点实现。其中，linear_flow使用的实际上就是OrderedDiGraph对象，graph_flow则使用的是DiGraph对象，unordered_flow使用的是Graph对象。对于这些操作的具体实现，由于不同的Flow类型实现差异很大，且篇幅有限，这里便不一一详解。在此以linear_flow为例解释一下其实现方案：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Flow</span><span class="params">(flow.Flow)</span>:</span></span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, name, retry=None)</span>:</span></span><br><span class="line">        super(Flow, self).__init__(name, retry)</span><br><span class="line">        self._graph = gr.OrderedDiGraph(name=name)</span><br><span class="line">        self._last_item = self._no_last_item</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">add</span><span class="params">(self, *items)</span>:</span></span><br><span class="line">        <span class="string">"""Adds a given task/tasks/flow/flows to this flow."""</span></span><br><span class="line">        <span class="keyword">for</span> item <span class="keyword">in</span> items:</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> self._graph.has_node(item):</span><br><span class="line">                self._graph.add_node(item)</span><br><span class="line">                <span class="keyword">if</span> self._last_item <span class="keyword">is</span> <span class="keyword">not</span> self._no_last_item:</span><br><span class="line">                    self._graph.add_edge(self._last_item, item,</span><br><span class="line">                                         attr_dict=&#123;flow.LINK_INVARIANT: <span class="keyword">True</span>&#125;)</span><br><span class="line">                self._last_item = item</span><br><span class="line">        <span class="keyword">return</span> self</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__len__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> len(self._graph)</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__iter__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">for</span> item <span class="keyword">in</span> self._graph.nodes_iter():</span><br><span class="line">            <span class="keyword">yield</span> item</span><br><span class="line"> </span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">requires</span><span class="params">(self)</span>:</span></span><br><span class="line">        requires = set()</span><br><span class="line">        prior_provides = set()</span><br><span class="line">        <span class="keyword">if</span> self._retry <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>:</span><br><span class="line">            requires.update(self._retry.requires)</span><br><span class="line">            prior_provides.update(self._retry.provides)</span><br><span class="line">        <span class="keyword">for</span> item <span class="keyword">in</span> self:</span><br><span class="line">            requires.update(item.requires - prior_provides)</span><br><span class="line">            prior_provides.update(item.provides)</span><br><span class="line">        <span class="keyword">return</span> frozenset(requires)</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">iter_nodes</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">for</span> (n, n_data) <span class="keyword">in</span> self._graph.nodes_iter(data=<span class="keyword">True</span>):</span><br><span class="line">            <span class="keyword">yield</span> (n, n_data)</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">iter_links</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">for</span> (u, v, e_data) <span class="keyword">in</span> self._graph.edges_iter(data=<span class="keyword">True</span>):</span><br><span class="line">            <span class="keyword">yield</span> (u, v, e_data)</span><br></pre></td></tr></table></figure>
+<p>上述代码便是linear_flow的具体实现，可以看到，初始化对象时将OrderedDiGraph对象赋值给<code>_graph</code>属性，在添加Task/Flow，也就是调用add(*items)方法时，首先就是遍历整个有序图，如果图中没有添加给定的Task/Flow对象，则向该图添加一个节点并保存相应的Task/Flow对象。而在调用iter_nodes()和iter_links()方法时，其实就是遍历图的所有节点或所有边。另外，由于linear_flow是按照插入顺序来进行执行和回滚操作的，所以requires和provides属性的设置和遍历不涉及到相关图的遍历；而如果是graph_flow则还需要考虑到requires和provides的相关影响。</p>
+<h3 id="taskflow重试机制"><a href="#taskflow重试机制" class="headerlink" title="taskflow重试机制"></a>taskflow重试机制</h3><p>上面介绍到，在taskflow执行过程中，如果发生错误，可以通过Retry对象进行重试。Retry是一个抽象类，它继承自Atom类，因此，Retry的子类可以覆写execute()和revert()方法。除此之外，Retry对象还定义了一个on_failure(history, <em>args, *</em>kwargs)方法，这个方法在Task/Flow执行或回滚发生错误时，通常会使用以前异常的信息（如果这个历史失败信息不可用或未保存，则提供的History对象为空），即一个History对象。而这个History对象是一个为了简化与重试历史内容交互的帮助类，其包含两个重要属性：_failure表示发生的异常，_contents表示相关异常的重试内容。当taskflow执行失败时，on_failure()方法会结合传入的History对象获取重试的策略。</p>
+<p>关于重试的策略，taskflow通过一个枚举类型的Decision定义了三种策略：</p>
+<ul>
+<li>REVERT：仅回滚失败Flow对象周围或关联的子流Flow对象。该策略在回滚子流Flow对象之前，会首先咨询其父Atom对象以确定父Atom对象是否使用不同的重试策略。该策略允许安全的嵌套具有不同重试策略的Flow对象。如果父Atom对象中没有定义重试策略，则默认只回滚关联子流Flow对象中的Atom对象。当然，你可以通过defer_revert参数改变默认行为，当其设置为True，表示REVERT策略将继承父Atom的策略，如果父Atom对象没有重试策略，则它也将被回滚；</li>
+<li>REVERT_ALL：不管失败Flow对象的父Atom对象的策略如何，都将回滚整个流程；</li>
+<li>RETRY：重试该失败的Flow/Task对象。</li>
+</ul>
+<p>根据上述重试策略，taskflow为Retry抽象类又定义了多个实现类，这些实现主要包括如下几种：</p>
+<ul>
+<li>AlwaysRevert：该类表示当遇到Flow/Task失败时，总是回滚其子流Flow对象；</li>
+<li>AlwaysRevertAll：该类表示当遇到Flow/Task失败时，总是回滚整个流程；</li>
+<li>Times：该类表示当遇到Flow/Task失败时，重试指定操作指定的次数，而每次执行则会返回已重试次数；</li>
+<li>ForEach：该类表示当遇到Flow/Task失败时，会应用给定的一组静态重试策略。该类在执行重试时，从一个数据结构中获取一组重试策略，然后在每一次重试操作后返回集合的下一个策略元素供下次重试使用；</li>
+<li>ParameterizedForEach：该类表示当遇到Flow/Task失败时，会应用给定的一组静态重试策略。该类在执行重试时，接收来自前驱或存储的一组重试策略作为参数，然后在每一次重试操作后返回集合的下一个策略元素供重试使用。</li>
+</ul>
+<h3 id="Engine的实现"><a href="#Engine的实现" class="headerlink" title="Engine的实现"></a>Engine的实现</h3><p>在文章上述几节中分别从基本概念、Flow的类型和重试策略详细介绍了taskflow提供给开发者实现任务流管理的接口的实现，本小节则将详细介绍taskflow内部实现任务流管理的具体实现方式，即Engine的具体实现。</p>
+<p>上文介绍到taskflow在具体实现Task/Flow管理时，首先定义了一个Engine抽象类，所有实现都需要继承这个抽象类。这个抽象类定义了如下重要属性和方法：</p>
+<ul>
+<li>notifier：一个通知对象，它会分发与Engine对象中包含的Flow对象相关的事件通知；</li>
+<li>atom_notifier：一个通知对象，它会分发与Engine对象中包含的Atom对象相关的事件通知；</li>
+<li>options：相关数据结构传递给Engine对象的选项；</li>
+<li>storage：Engine对象的存储单元；</li>
+<li>statistics：Engine对象收集的运行时统计数据字典。当Engine没有运行时，这个值为空；在Engine正在运行时或已经运行之前，它可能会存储一些对正在运行或运行完成时有用的或包含信息的键值对；</li>
+<li>compile()：该方法可以将Engine对象中包含的Flow对象编译成Engine对象内部表示形式。这个内部表示形式就是Engine对象实际用于运行的流的形式；</li>
+<li>reset()：将Engine对象重置为PENDING状态。如果一个Flow以FAILURE、SUCCESS、REVERTED状态结束运行（即调用Engine对象的run()方法之后），或由于某种状态使得其处于某种中间状态，此时可以调用reset()方法进行重置，然后进行重试操作；</li>
+<li>prepare()：在Engine对象编译完所有包含的Flow对象之后，且在Flow运行之前执行该方法，为流程的执行进行一些准备操作；</li>
+<li>validate()：在Engine对象编译完所有包含的Flow对象之后，且在Flow运行之前执行该方法，为流程的执行进行一些验证操作；</li>
+<li>run()：运行Engine对象中的Flow流程；</li>
+<li>suspend()：该方法尝试暂停Engine对象。如果一个Engine对象正在执行某个Atom对象，则执行该方法会将这个Atom对象之后的所有正要运行的工作都暂停，并将这个Engine对象的状态变为暂停状态，以便之后进行恢复操作。</li>
+</ul>
+<p>taskflow在具体实现Engine时，都需要给上述属性和方法重新赋值或进行覆写操作，以实现一个完整的管理流程Flow/Task对象的Engine类。在taskflow中，目前实现了三种策略的Engine类，而在这三种策略中，有两种是面向行为的action_egine类：SerialActionEngine、ParallelActionEngine；另一种是面向多进程的worker_base类：WorkerBaseActionEngine。这三种类型的Engine类的异同点如下所示：</p>
+<ul>
+<li>SerialActionEngine：这是一个以串行方式运行任务的Engine类，也就是说所有的任务都会在调用engine.run()方法的线程中顺序执行；</li>
+<li>ParallelActionEngine：这是一个以并行方式运行任务的Engine类，即可以在多个线程中运行Engine对象中的任务。在这种策略中，taskflow定义了对应的多个ParallelThreadTaskExecutor创建运行任务的线程；</li>
+<li>WorkerBaseActionEngine：这是一个可以将任务调度到不同worker（即进程）中执行的Engine类。</li>
+</ul>
+<p>这三种不同类型的Engine类在初始化对象时，都需要指定对应的后端（backend）实现其对流程的管理。关于这方面内容，由于涉及较广，本人水平有限且实际使用中并不涉及，因此暂不做分析，感兴趣的朋友可以直接阅读源码。</p>
+<h2 id="taskflow的使用方法"><a href="#taskflow的使用方法" class="headerlink" title="taskflow的使用方法"></a>taskflow的使用方法</h2><p>OpenStack中有很多项目都可以用到taskflow对整个执行流程进行管理，当然我们也可以在自己的Python项目中使用taskflow库管理流程。这里，以cinder项目为例详细介绍taskflow的使用方法。</p>
+<p>使用taskflow时，首先需要根据需要创建表示一个任务Task或流程Flow的类，如cinder在创建硬盘时，定义了如下的Task/Flow类：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> oslo_log <span class="keyword">import</span> log <span class="keyword">as</span> logging</span><br><span class="line"><span class="keyword">from</span> oslo_utils <span class="keyword">import</span> excutils</span><br><span class="line"><span class="keyword">import</span> taskflow.engines</span><br><span class="line"><span class="keyword">from</span> taskflow.patterns <span class="keyword">import</span> linear_flow</span><br><span class="line"> </span><br><span class="line"><span class="keyword">from</span> cinder <span class="keyword">import</span> exception</span><br><span class="line"><span class="keyword">from</span> cinder <span class="keyword">import</span> flow_utils</span><br><span class="line"><span class="keyword">from</span> cinder.message <span class="keyword">import</span> api <span class="keyword">as</span> message_api</span><br><span class="line"><span class="keyword">from</span> cinder.message <span class="keyword">import</span> message_field</span><br><span class="line"><span class="keyword">from</span> cinder <span class="keyword">import</span> rpc</span><br><span class="line"><span class="keyword">from</span> cinder <span class="keyword">import</span> utils</span><br><span class="line"><span class="keyword">from</span> cinder.volume.flows <span class="keyword">import</span> common</span><br><span class="line"> </span><br><span class="line">LOG = logging.getLogger(__name__)</span><br><span class="line"> </span><br><span class="line">ACTION = <span class="string">'volume:create'</span></span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExtractSchedulerSpecTask</span><span class="params">(flow_utils.CinderTask)</span>:</span></span><br><span class="line">    <span class="string">"""Extracts a spec object from a partial and/or incomplete request spec.</span></span><br><span class="line"><span class="string">    Reversion strategy: N/A</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"> </span><br><span class="line">    default_provides = set([<span class="string">'request_spec'</span>])</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, **kwargs)</span>:</span></span><br><span class="line">        super(ExtractSchedulerSpecTask, self).__init__(addons=[ACTION],</span><br><span class="line">                                                       **kwargs)</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_populate_request_spec</span><span class="params">(self, volume, snapshot_id, image_id, backup_id)</span>:</span></span><br><span class="line">        <span class="comment"># Create the full request spec using the volume object.</span></span><br><span class="line">        <span class="comment">#</span></span><br><span class="line">        <span class="comment"># NOTE(dulek): At this point, a volume can be deleted before it gets</span></span><br><span class="line">        <span class="comment"># scheduled.  If a delete API call is made, the volume gets instantly</span></span><br><span class="line">        <span class="comment"># delete and scheduling will fail when it tries to update the DB entry</span></span><br><span class="line">        <span class="comment"># (with the host) in ScheduleCreateVolumeTask below.</span></span><br><span class="line">        volume_type_id = volume.volume_type_id</span><br><span class="line">        vol_type = volume.volume_type</span><br><span class="line">        <span class="keyword">return</span> &#123;</span><br><span class="line">            <span class="string">'volume_id'</span>: volume.id,</span><br><span class="line">            <span class="string">'snapshot_id'</span>: snapshot_id,</span><br><span class="line">            <span class="string">'image_id'</span>: image_id,</span><br><span class="line">            <span class="string">'backup_id'</span>: backup_id,</span><br><span class="line">            <span class="string">'volume_properties'</span>: &#123;</span><br><span class="line">                <span class="string">'size'</span>: utils.as_int(volume.size, quiet=<span class="keyword">False</span>),</span><br><span class="line">                <span class="string">'availability_zone'</span>: volume.availability_zone,</span><br><span class="line">                <span class="string">'volume_type_id'</span>: volume_type_id,</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">'volume_type'</span>: list(dict(vol_type).items()),</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">execute</span><span class="params">(self, context, request_spec, volume, snapshot_id,</span></span></span><br><span class="line"><span class="function"><span class="params">                image_id, backup_id)</span>:</span></span><br><span class="line">        <span class="comment"># For RPC version &lt; 1.2 backward compatibility</span></span><br><span class="line">        <span class="keyword">if</span> request_spec <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">            request_spec = self._populate_request_spec(volume,</span><br><span class="line">                                                       snapshot_id, image_id,</span><br><span class="line">                                                       backup_id)</span><br><span class="line">        <span class="keyword">return</span> &#123;</span><br><span class="line">            <span class="string">'request_spec'</span>: request_spec,</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ScheduleCreateVolumeTask</span><span class="params">(flow_utils.CinderTask)</span>:</span></span><br><span class="line">    <span class="string">"""Activates a scheduler driver and handles any subsequent failures.</span></span><br><span class="line"><span class="string">    Notification strategy: on failure the scheduler rpc notifier will be</span></span><br><span class="line"><span class="string">    activated and a notification will be emitted indicating what errored,</span></span><br><span class="line"><span class="string">    the reason, and the request (and misc. other data) that caused the error</span></span><br><span class="line"><span class="string">    to be triggered.</span></span><br><span class="line"><span class="string">    Reversion strategy: N/A</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    FAILURE_TOPIC = <span class="string">"scheduler.create_volume"</span></span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, driver_api, **kwargs)</span>:</span></span><br><span class="line">        super(ScheduleCreateVolumeTask, self).__init__(addons=[ACTION],</span><br><span class="line">                                                       **kwargs)</span><br><span class="line">        self.driver_api = driver_api</span><br><span class="line">        self.message_api = message_api.API()</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_handle_failure</span><span class="params">(self, context, request_spec, cause)</span>:</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            self._notify_failure(context, request_spec, cause)</span><br><span class="line">        <span class="keyword">finally</span>:</span><br><span class="line">            LOG.error(<span class="string">"Failed to run task %(name)s: %(cause)s"</span>,</span><br><span class="line">                      &#123;<span class="string">'cause'</span>: cause, <span class="string">'name'</span>: self.name&#125;)</span><br><span class="line"> </span><br><span class="line"><span class="meta">    @utils.if_notifications_enabled</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_notify_failure</span><span class="params">(self, context, request_spec, cause)</span>:</span></span><br><span class="line">        <span class="string">"""When scheduling fails send out an event that it failed."""</span></span><br><span class="line">        payload = &#123;</span><br><span class="line">            <span class="string">'request_spec'</span>: request_spec,</span><br><span class="line">            <span class="string">'volume_properties'</span>: request_spec.get(<span class="string">'volume_properties'</span>, &#123;&#125;),</span><br><span class="line">            <span class="string">'volume_id'</span>: request_spec[<span class="string">'volume_id'</span>],</span><br><span class="line">            <span class="string">'state'</span>: <span class="string">'error'</span>,</span><br><span class="line">            <span class="string">'method'</span>: <span class="string">'create_volume'</span>,</span><br><span class="line">            <span class="string">'reason'</span>: cause,</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            rpc.get_notifier(<span class="string">'scheduler'</span>).error(context, self.FAILURE_TOPIC,</span><br><span class="line">                                                payload)</span><br><span class="line">        <span class="keyword">except</span> exception.CinderException:</span><br><span class="line">            LOG.exception(<span class="string">"Failed notifying on %(topic)s "</span></span><br><span class="line">                          <span class="string">"payload %(payload)s"</span>,</span><br><span class="line">                          &#123;<span class="string">'topic'</span>: self.FAILURE_TOPIC, <span class="string">'payload'</span>: payload&#125;)</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">execute</span><span class="params">(self, context, request_spec, filter_properties, volume)</span>:</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            self.driver_api.schedule_create_volume(context, request_spec,</span><br><span class="line">                                                   filter_properties)</span><br><span class="line">        <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">            self.message_api.create(</span><br><span class="line">                context,</span><br><span class="line">                message_field.Action.SCHEDULE_ALLOCATE_VOLUME,</span><br><span class="line">                resource_uuid=request_spec[<span class="string">'volume_id'</span>],</span><br><span class="line">                exception=e)</span><br><span class="line">            <span class="comment"># An error happened, notify on the scheduler queue and log that</span></span><br><span class="line">            <span class="comment"># this happened and set the volume to errored out and reraise the</span></span><br><span class="line">            <span class="comment"># error *if* exception caught isn't NoValidBackend. Otherwise *do</span></span><br><span class="line">            <span class="comment"># not* reraise (since what's the point?)</span></span><br><span class="line">            <span class="keyword">with</span> excutils.save_and_reraise_exception(</span><br><span class="line">                    reraise=<span class="keyword">not</span> isinstance(e, exception.NoValidBackend)):</span><br><span class="line">                <span class="keyword">try</span>:</span><br><span class="line">                    self._handle_failure(context, request_spec, e)</span><br><span class="line">                <span class="keyword">finally</span>:</span><br><span class="line">                    common.error_out(volume, reason=e)</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_flow</span><span class="params">(context, driver_api, request_spec=None,</span></span></span><br><span class="line"><span class="function"><span class="params">             filter_properties=None,</span></span></span><br><span class="line"><span class="function"><span class="params">             volume=None, snapshot_id=None, image_id=None, backup_id=None)</span>:</span></span><br><span class="line"> </span><br><span class="line">    <span class="string">"""Constructs and returns the scheduler entrypoint flow.</span></span><br><span class="line"><span class="string">    This flow will do the following:</span></span><br><span class="line"><span class="string">    1. Inject keys &amp; values for dependent tasks.</span></span><br><span class="line"><span class="string">    2. Extract a scheduler specification from the provided inputs.</span></span><br><span class="line"><span class="string">    3. Use provided scheduler driver to select host and pass volume creation</span></span><br><span class="line"><span class="string">       request further.</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    create_what = &#123;</span><br><span class="line">        <span class="string">'context'</span>: context,</span><br><span class="line">        <span class="string">'raw_request_spec'</span>: request_spec,</span><br><span class="line">        <span class="string">'filter_properties'</span>: filter_properties,</span><br><span class="line">        <span class="string">'volume'</span>: volume,</span><br><span class="line">        <span class="string">'snapshot_id'</span>: snapshot_id,</span><br><span class="line">        <span class="string">'image_id'</span>: image_id,</span><br><span class="line">        <span class="string">'backup_id'</span>: backup_id,</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    flow_name = ACTION.replace(<span class="string">":"</span>, <span class="string">"_"</span>) + <span class="string">"_scheduler"</span></span><br><span class="line">    scheduler_flow = linear_flow.Flow(flow_name)</span><br><span class="line"> </span><br><span class="line">    <span class="comment"># This will extract and clean the spec from the starting values.</span></span><br><span class="line">    scheduler_flow.add(ExtractSchedulerSpecTask(</span><br><span class="line">        rebind=&#123;<span class="string">'request_spec'</span>: <span class="string">'raw_request_spec'</span>&#125;))</span><br><span class="line"> </span><br><span class="line">    <span class="comment"># This will activate the desired scheduler driver (and handle any</span></span><br><span class="line">    <span class="comment"># driver related failures appropriately).</span></span><br><span class="line">    scheduler_flow.add(ScheduleCreateVolumeTask(driver_api))</span><br><span class="line"> </span><br><span class="line">    <span class="comment"># Now load (but do not run) the flow using the provided initial data.</span></span><br><span class="line">    <span class="keyword">return</span> taskflow.engines.load(scheduler_flow, store=create_what)</span><br></pre></td></tr></table></figure>
+<p>由于cinder创建硬盘的功能步骤繁多，操作复杂，且容易出错，因此在api和scheduler服务中都使用了taskflow对创建硬盘过程中的多个任务进行了管理，上面的代码是scheduler服务中创建硬盘时定义的两个任务Task类：ExtractSchedulerSpecTask和ScheduleCreateVolumeTask。接着，cinder-scheduler服务定义了get_flow()方法获取一个Engine对象。这个方法中，首先定义了一个linear_flow类型的Flow对象，然后调用Flow对象的add()方法将上述两个Task添加到Flow对象中，接着根据Flow对象加载一个Engine对象用来执行实际的流程操作。</p>
+<p>在执行流程时只需要调用get_flow()方法首先获得一个Engine对象，然后调用这个Engine对象的run()方法即可。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@objects.Volume.set_workers</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create_volume</span><span class="params">(self, context, volume, snapshot_id=None, image_id=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                  request_spec=None, filter_properties=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                  backup_id=None)</span>:</span></span><br><span class="line">    self._wait_for_scheduler()</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        flow_engine = create_volume.get_flow(context,</span><br><span class="line">                                             self.driver,</span><br><span class="line">                                             request_spec,</span><br><span class="line">                                             filter_properties,</span><br><span class="line">                                             volume,</span><br><span class="line">                                             snapshot_id,</span><br><span class="line">                                             image_id,</span><br><span class="line">                                             backup_id)</span><br><span class="line">    <span class="keyword">except</span> Exception:</span><br><span class="line">        msg = _(<span class="string">"Failed to create scheduler manager volume flow"</span>)</span><br><span class="line">        LOG.exception(msg)</span><br><span class="line">        <span class="keyword">raise</span> exception.CinderException(msg)</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">with</span> flow_utils.DynamicLogListener(flow_engine, logger=LOG):</span><br><span class="line">        flow_engine.run()</span><br></pre></td></tr></table></figure>
+<p>如这个例子中，就是调用cinder-scheduler服务中定义的get_flow()方法获取一个Engine对象flow_engine，然后调用flow_engine.run()方法即可执行定义的流程。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+<blockquote class="blockquote-center" style="color: #ccc;">
+    -------------本文结束 <i class="fa fa-apple"></i> 感谢您的阅读-------------
+</blockquote>
+
+  <span id="inline-green" style="border-radius:3px;">作者</span>：<a class="link-blue" href="https://github.com/magiceses" target="_blank">Magiceses</a><br/>有问题请 <a class="link-blue" href="https://magiceses.github.io/guestbook" target="_blank">留言</a> 或者私信我的 <a class="link-blue" href="https://weibo.com/u/3069595351" target="_blank">微博</a>。
+
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>满分是10分的话，这篇文章你给几分</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/reward/reward_wechat.png" alt="magiceses WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/reward/reward_alipay.png" alt="magiceses Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Openstack/" rel="tag"><i class="fa fa-tag"></i> Openstack</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/02/openstack-stevedore的使用/" rel="next" title="openstack之stevedore的使用">
+                <i class="fa fa-chevron-left"></i> openstack之stevedore的使用
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/10/03/openstack-telemetry-gnocchi使用原理和源码分析-上/" rel="prev" title="Gnocchi 使用原理及源码分析-上">
+                Gnocchi 使用原理及源码分析-上 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar/avatar.png"
+               alt="magiceses" />
+          <p class="site-author-name" itemprop="name">magiceses</p>
+          <p class="site-description motion-element" itemprop="description">Stay Hungry,Stay Foolish</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">61</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/magiceses" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://blog.csdn.net/weixin_43700106" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-chrome"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/weblog" title="建站日志" target="_blank">建站日志</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/reward" title="打赏" target="_blank">打赏</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#taskflow的实现原理"><span class="nav-number">1.</span> <span class="nav-text">taskflow的实现原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本概念"><span class="nav-number">1.1.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Flow的类型"><span class="nav-number">1.2.</span> <span class="nav-text">Flow的类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#taskflow重试机制"><span class="nav-number">1.3.</span> <span class="nav-text">taskflow重试机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Engine的实现"><span class="nav-number">1.4.</span> <span class="nav-text">Engine的实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#taskflow的使用方法"><span class="nav-number">2.</span> <span class="nav-text">taskflow的使用方法</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+      
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="busuanzi-count">
+
+  <!-- <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script> -->
+  <!-- 上面这个是之前的，不知道为什么失效了，改成下面这个 -->
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">您是第<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>个小伙伴</span>
+  
+
+  
+    <span class="site-pv">本站总浏览<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">magiceses</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Pisces
+  </a>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count" style="color: #e90f92;">全站共 1m 字</span>
+</div>
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+  <!-- 按需加载背景 -->
+  <!-- 背景动画 -->
+<script type="text/javascript">
+  // 按需加载背景
+  // 如果是all，就直接加载了
+  if("pc" == "all") {
+    $.getScript("/js/src/particle.js?v=5.0.1");
+  }
+  // 识别手机或电脑的js开始
+  (function(){
+    var res = GetRequest();
+    var par = res['index'];
+    if(par!='gfan'){
+      var ua=navigator.userAgent.toLowerCase();
+      var contains=function (a, b){
+          if(a.indexOf(b)!=-1){return true;}
+      };
+      if((contains(ua,"android") && contains(ua,"mobile"))||(contains(ua,"android") && contains(ua,"mozilla"))||(contains(ua,"android") && contains(ua,"opera"))||contains(ua,"ucweb7")||contains(ua,"iphone")){
+        return false;
+      } else {
+        $.getScript("/js/src/particle.js?v=5.0.1");
+      }
+    }
+  })();
+  function GetRequest() {
+    var url = location.search;
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+      var str = url.substr(1);
+      strs = str.split("&");
+      for(var i = 0; i < strs.length; i ++) {
+        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+      }
+    }
+    return theRequest;
+  }
+</script>
+<!-- 识别手机或电脑的js结束 -->  
+
+  <!-- 页面点击小红心 -->
+  <!-- 页面点击小红心 -->
+
+  <script type="text/javascript" src="/js/src/love.js?v=5.0.1"></script>
+
+
+  <!-- 鼠标移动，效果 -->
+  <!-- 鼠标移动特效 -->
+
+  <script type="text/javascript" src="/js/src/jquery-stars.js?v=5.0.1"></script>
+  <script type="text/javascript">
+  jQuery('body').jstars({
+  	image_path: '/images',
+  	image: 'candy-cane-stars.png',
+  	style: 'white',
+  	width: 34,
+  	height: 34,
+  	delay: 700,
+  	frequency: 5
+  });
+  </script>
+
+
+  <!-- 页面 title 进入/离开 效果 -->
+
+  <script type="text/javascript">var OriginTitile=document.title,st;document.addEventListener("visibilitychange",function(){document.hidden?(document.title="Waiting for you back！",clearTimeout(st)):(document.title="Thanks for visit~ "+OriginTitile,st=setTimeout(function(){document.title=OriginTitile},4e3))})</script>
+
+
+</body>
+</html>

@@ -1,0 +1,1241 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Courier New:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Openstack," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="天青色等烟雨" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="你所浪费的今天，是昨天死去的人奢望的明天。你所厌恶的现在，是未来的你回不去的曾经。
+
+stevedore库是oslo项目中为OpenStack其他项目提供动态加载功能的公共组件库。stevedore利用python的特性，使得动态加载代码变得更加容易，其也允许你在运行时通过发现和加载扩展插件来配置和扩展你的应用程序。stevedore库基于setuptools的entry points来定义和加载">
+<meta property="og:type" content="article">
+<meta property="og:title" content="openstack之stevedore的使用">
+<meta property="og:url" content="https://magiceses.github.io/2017/10/02/openstack-stevedore的使用/index.html">
+<meta property="og:site_name" content="天青色等烟雨">
+<meta property="og:description" content="你所浪费的今天，是昨天死去的人奢望的明天。你所厌恶的现在，是未来的你回不去的曾经。
+
+stevedore库是oslo项目中为OpenStack其他项目提供动态加载功能的公共组件库。stevedore利用python的特性，使得动态加载代码变得更加容易，其也允许你在运行时通过发现和加载扩展插件来配置和扩展你的应用程序。stevedore库基于setuptools的entry points来定义和加载">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-3.png">
+<meta property="og:updated_time" content="2021-10-13T11:50:52.422Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="openstack之stevedore的使用">
+<meta name="twitter:description" content="你所浪费的今天，是昨天死去的人奢望的明天。你所厌恶的现在，是未来的你回不去的曾经。
+
+stevedore库是oslo项目中为OpenStack其他项目提供动态加载功能的公共组件库。stevedore利用python的特性，使得动态加载代码变得更加容易，其也允许你在运行时通过发现和加载扩展插件来配置和扩展你的应用程序。stevedore库基于setuptools的entry points来定义和加载">
+<meta name="twitter:image" content="https://magiceses.github.io/images/openstack-3.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://magiceses.github.io/2017/10/02/openstack-stevedore的使用/"/>
+
+
+<!-- 网页加载条 -->
+<script src="/js/src/pace.min.js"></script>
+  <title> openstack之stevedore的使用 | 天青色等烟雨 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">天青色等烟雨</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">而我在等你</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-guestbook">
+          <a href="/guestbook" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-commenting"></i> <br />
+            
+            留言
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+      
+      
+        <li class="menu-item"> <a title="把这个链接拖到你的工具栏中,任何网页都可以High" href='javascript:(
+/*
+ * Copyright (C) 2016 Never_yu (Neveryu.github.io) <React.dong.yu@gmail.com>
+ * Sina Weibo (http://weibo.com/Neveryu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function go() {
+
+var songs = [
+  "http://dl.stream.qqmusic.qq.com/C400001Qu4I30eVFYb.m4a?vkey=2127178E4405E7B8B268F20F05232485735CCF4FF8C1432F0360D2626D0B6C9564B5627C7AB481BBC685FEDB0946A50E97C66F0D1B008226&guid=7175649092&uin=0&fromtag=66",
+  "",
+  "",
+  ""
+];
+
+function c() {
+  var e = document.createElement("link");
+  e.setAttribute("type", "text/css");
+  e.setAttribute("rel", "stylesheet");
+  e.setAttribute("href", f);
+  e.setAttribute("class", l);
+  document.body.appendChild(e)
+}
+
+function h() {
+  var e = document.getElementsByClassName(l);
+  for (var t = 0; t < e.length; t++) {
+    document.body.removeChild(e[t])
+  }
+}
+
+function p() {
+  var e = document.createElement("div");
+  e.setAttribute("class", a);
+  document.body.appendChild(e);
+  setTimeout(function() {
+    document.body.removeChild(e)
+  }, 100)
+}
+
+function d(e) {
+  return {
+    height : e.offsetHeight,
+    width : e.offsetWidth
+  }
+}
+
+function v(i) {
+  var s = d(i);
+  return s.height > e && s.height < n && s.width > t && s.width < r
+}
+
+function m(e) {
+  var t = e;
+  var n = 0;
+  while (!!t) {
+    n += t.offsetTop;
+    t = t.offsetParent
+  }
+  return n
+}
+
+function g() {
+  var e = document.documentElement;
+  if (!!window.innerWidth) {
+    return window.innerHeight
+  } else if (e && !isNaN(e.clientHeight)) {
+    return e.clientHeight
+  }
+  return 0
+}
+
+function y() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  }
+  return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+}
+
+function E(e) {
+  var t = m(e);
+  return t >= w && t <= b + w
+}
+
+function S() {
+  var e = document.getElementById("audio_element_id");
+  if(e != null){
+    var index = parseInt(e.getAttribute("curSongIndex"));
+    if(index > songs.length - 2) {
+      index = 0;
+    } else {
+      index++;
+    }
+    e.setAttribute("curSongIndex", index);
+    N();
+  }
+
+  e.src = i;
+  e.play()
+}
+
+function x(e) {
+  e.className += " " + s + " " + o
+}
+
+function T(e) {
+  e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+}
+
+function N() {
+  var e = document.getElementsByClassName(s);
+  var t = new RegExp("\\b" + s + "\\b");
+  for (var n = 0; n < e.length; ) {
+    e[n].className = e[n].className.replace(t, "")
+  }
+}
+
+function initAudioEle() {
+  var e = document.getElementById("audio_element_id");
+  if(e === null){
+    e = document.createElement("audio");
+    e.setAttribute("class", l);
+    e.setAttribute("curSongIndex", 0);
+    e.id = "audio_element_id";
+    e.loop = false;
+    e.bgcolor = 0;
+    e.addEventListener("canplay", function() {
+      setTimeout(function() {
+        x(k)
+      }, 500);
+      setTimeout(function() {
+        N();
+        p();
+        for (var e = 0; e < O.length; e++) {
+          T(O[e])
+        }
+      }, 15500)
+    }, true);
+    e.addEventListener("ended", function() {
+      N();
+      h();
+      go();
+    }, true);
+    e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+    document.body.appendChild(e);
+  }
+}
+
+initAudioEle();
+var e = 30;
+var t = 30;
+var n = 350;
+var r = 350;
+
+var curSongIndex = parseInt(document.getElementById("audio_element_id").getAttribute("curSongIndex"));
+var i = songs[curSongIndex];
+
+var s = "mw-harlem_shake_me";
+var o = "im_first";
+var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+var a = "mw-strobe_light";
+
+/* harlem-shake-style.css，替换成你的位置，也可以直接使用：//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css */
+var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+
+var l = "mw_added_css";
+var b = g();
+var w = y();
+var C = document.getElementsByTagName("*");
+var k = null;
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    if (E(A)) {
+      k = A;
+      break
+    }
+  }
+}
+if (A === null) {
+  console.warn("Could not find a node of the right size. Please try a different page.");
+  return
+}
+c();
+S();
+var O = [];
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    O.push(A)
+  }
+}
+})()'><i class="menu-item-icon fa fa-music fa-fw"></i> High一下</a></li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search fa-lg"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                openstack之stevedore的使用
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-10-02T23:25:24+08:00" content="2017-10-02">
+              2017-10-02
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Openstack/" itemprop="url" rel="index">
+                    <span itemprop="name">Openstack</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv">热度
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p id="div-border-top-green">你所浪费的今天，是昨天死去的人奢望的明天。你所厌恶的现在，是未来的你回不去的曾经。<br></p>
+
+<p>stevedore库是oslo项目中为OpenStack其他项目提供动态加载功能的公共组件库。stevedore利用python的特性，使得动态加载代码变得更加容易，其也允许你在运行时通过发现和加载扩展插件来配置和扩展你的应用程序。stevedore库基于setuptools的entry points来定义和加载扩展插件，stevedore提供了manager类来实现动态加载扩展插件的通用模式。本文将详细分析stevedore的实现原理以及使用方式。</p>
+<h2 id="stevedore的实现"><a href="#stevedore的实现" class="headerlink" title="stevedore的实现"></a>stevedore的实现</h2><h3 id="管理基类"><a href="#管理基类" class="headerlink" title="管理基类"></a>管理基类</h3><p>本文开头介绍到stevedore通过提供manager类来实现动态加载扩展插件的管理，因此在实现stevedore时，首先为其他父类定义了一个manager基类ExtensionManager类。ExtensionManager类是一个所有其他manager类的基类，其主要的属性和方法如下：</p>
+<a id="more"></a>
+<ul>
+<li>namespace：string类型，命名空间，表示entry points的命名空间；</li>
+<li>invoke_on_load：bool类型，表示是否自动加载扩展插件；</li>
+<li>invoke_args：tuple类型，表示自动加载extension时传入的参数；</li>
+<li>invoke_kwds：dict类型，表示自动加载extension时传入的参数；</li>
+<li>propagate_map_exceptions：bool类型，表示使用map调用时，是否向上传递调用信息；</li>
+<li>on_load_failure_callback：func类型，表示加载失败时调用的方法；</li>
+<li>verify_requirements：bool类型，表示是否使用setuptools安装插件所需要的依赖；</li>
+<li>map(func, <em>args, *</em>kwds)：为每一个extension触发func()函数；</li>
+<li>map_method(method_name, <em>args, *</em>kwds)：为每一个extension触发method_name指定的函数；</li>
+<li>names()：获取所有发现的extension名称；</li>
+<li>entry_points_names()：返回所有entry_points的名称列表，每个列表元素是一个有entry points的名称和entry points列表的map对象；</li>
+<li>list_entry_points()：某个命名空间的所有entry points列表。</li>
+</ul>
+<p>stevedore中其他所有manager类都需要继承ExtensionManager类，而ExtensionManager类初始化时便会通过namespace等加载所有extension，并对插件进行初始化。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, namespace,</span></span></span><br><span class="line"><span class="function"><span class="params">             invoke_on_load=False,</span></span></span><br><span class="line"><span class="function"><span class="params">             invoke_args=<span class="params">()</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">             invoke_kwds=&#123;&#125;,</span></span></span><br><span class="line"><span class="function"><span class="params">             propagate_map_exceptions=False,</span></span></span><br><span class="line"><span class="function"><span class="params">             on_load_failure_callback=None,</span></span></span><br><span class="line"><span class="function"><span class="params">             verify_requirements=False)</span>:</span></span><br><span class="line">    self._init_attributes(</span><br><span class="line">        namespace,</span><br><span class="line">        propagate_map_exceptions=propagate_map_exceptions,</span><br><span class="line">        on_load_failure_callback=on_load_failure_callback)</span><br><span class="line">    extensions = self._load_plugins(invoke_on_load,</span><br><span class="line">                                    invoke_args,</span><br><span class="line">                                    invoke_kwds,</span><br><span class="line">                                    verify_requirements)</span><br><span class="line">    self._init_plugins(extensions)</span><br></pre></td></tr></table></figure>
+<p>在ExtensionManager实例化对象时，首先调用_init_attributes()方法初始化namespace等参数，然后会调用_load_plugins()方法加载所有的extension插件；最后会调用_init_plugins()方法设置对象的属性。</p>
+<p>在定义ExtensionManager时，还涉及到一个重要的类Extension，该类表示一个extension，该类主要包含如下属性：</p>
+<ul>
+<li>name：表示一个entry point的名称；</li>
+<li>entry_point：表示从pkg_resources获得的一个EntryPoint对象；</li>
+<li>plugin：通过调用entry_point.load()方法返回的plugin类；</li>
+<li>obj：extension被manager类加载时，会调用plugin(<em>args, *</em>kwds)返回一个plugin对象。</li>
+</ul>
+<p>在ExtensionManager的map()方法中，为每一个entry point调用func()函数，而func()函数的第一个参数即为Extension对象。</p>
+<h2 id="加载插件的方式"><a href="#加载插件的方式" class="headerlink" title="加载插件的方式"></a>加载插件的方式</h2><p>根据entry points配置的不同，stevedore提供了三种加载插件的方式：ExtensionManager、DriverManager、HookManager。下面将分别介绍这三种加载插件的方式：</p>
+<ul>
+<li>ExtensionManager：一种通用的加载方式。这种方式下，对于给定的命名空间，会加载该命名空间下的所有插件，同时也允许同一个命名空间下的插件拥有相同的名称，其实现即为stevedore.extension.ExtensionManager类；</li>
+<li>HookManager：在这种加载方式下，对于给定的命名空间，允许同一个命名空间下的插件拥有相同的名称，程序可以根据给定的命名空间和名称加载该名称对应的多个插件，其实现为stevedore.hook.HookManager类；</li>
+<li>DriverManager：在这种加载方式下，对于给定的命名空间，一个名字只能对应一个entry point，对于同一类资源有多个不同插件的情况，只能选择一个进行注册；这样，在使用时就可以根据命名空间和名称定位到某一个插件，其实现为stevedore.driver.DriverManager类。</li>
+</ul>
+<p>在实现这些加载方式的类时，stevedore还定义了多个其他类型的辅助manager类，这些manager类之间的关系如图1所示。</p>
+<p><img src="/images/openstack-3.png" alt="img"></p>
+<p>由图可知，ExtensionManager类时所有stevedore的manager类的父类，DriverManager类和HookManager类是ExtensionManager子类NamedExtensionManager类的子类。而NamedExtensionManager类中增加了一个属性names，所以DriverManager类和HookManager类在加载对应插件时，只加载names属性所包含的名称的entry point插件。除了这几个类之外，stevedore还定义了其他三个辅助的manager类：</p>
+<ul>
+<li>EnabledExtensionManager类：该类在ExtensionManager类的基础上添加了一个check_func属性，表示一个验证方法，因此在加载时只加载通过check_func()方法验证的extension插件；</li>
+<li>DispatchExtensionManager类：该类继承自EnabledExtensionManager类，该类重写了ExtensionManger类中定义的map()和map_method()方法，其为这两个方法添加了filter_func参数，表示只对通过filter_func()方法过滤的extension才会执行func()函数；</li>
+<li>NameDispatcherExtensionManager类：该类继承自DispathExtensionManager类，该类也定义了一个names属性，在使用时，只有names包含的名称的extension执行map()和map_method()方法时才会执行对应的func()方法。</li>
+</ul>
+<h2 id="stevedore的使用"><a href="#stevedore的使用" class="headerlink" title="stevedore的使用"></a>stevedore的使用</h2><p>有了stevedore，OpenStack其他项目加载一个扩展插件就要方便的多了。下面通过nova中的加载扩展插件为例详细介绍stevedore的使用方法。在使用stevedore时，nova首先定义了相关的插件，如nova-scheduler服务实现了多种调度方法，这些调度方法便是通过stevedore来进行动态加载的。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> abc</span><br><span class="line"> </span><br><span class="line"><span class="keyword">import</span> six</span><br><span class="line"><span class="keyword">from</span> stevedore <span class="keyword">import</span> driver</span><br><span class="line"> </span><br><span class="line"><span class="keyword">import</span> nova.conf</span><br><span class="line"><span class="keyword">from</span> nova <span class="keyword">import</span> objects</span><br><span class="line"><span class="keyword">from</span> nova <span class="keyword">import</span> servicegroup</span><br><span class="line"> </span><br><span class="line">CONF = nova.conf.CONF</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="meta">@six.add_metaclass(abc.ABCMeta)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Scheduler</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="string">"""The base class that all Scheduler classes should inherit from."""</span></span><br><span class="line"> </span><br><span class="line">    USES_ALLOCATION_CANDIDATES = <span class="keyword">True</span></span><br><span class="line">    <span class="string">"""Indicates that the scheduler driver calls the Placement API for</span></span><br><span class="line"><span class="string">    allocation candidates and uses those allocation candidates in its</span></span><br><span class="line"><span class="string">    decision-making.</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        self.host_manager = driver.DriverManager(</span><br><span class="line">                <span class="string">"nova.scheduler.host_manager"</span>,</span><br><span class="line">                CONF.scheduler.host_manager,</span><br><span class="line">                invoke_on_load=<span class="keyword">True</span>).driver</span><br><span class="line">        self.servicegroup_api = servicegroup.API()</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">run_periodic_tasks</span><span class="params">(self, context)</span>:</span></span><br><span class="line">        <span class="string">"""Manager calls this so drivers can perform periodic tasks."""</span></span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">hosts_up</span><span class="params">(self, context, topic)</span>:</span></span><br><span class="line">        <span class="string">"""Return the list of hosts that have a running service for topic."""</span></span><br><span class="line"> </span><br><span class="line">        services = objects.ServiceList.get_by_topic(context, topic)</span><br><span class="line">        <span class="keyword">return</span> [service.host</span><br><span class="line">                <span class="keyword">for</span> service <span class="keyword">in</span> services</span><br><span class="line">                <span class="keyword">if</span> self.servicegroup_api.service_is_up(service)]</span><br><span class="line"> </span><br><span class="line"><span class="meta">    @abc.abstractmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">select_destinations</span><span class="params">(self, context, spec_obj, instance_uuids,</span></span></span><br><span class="line"><span class="function"><span class="params">            provider_summaries)</span>:</span></span><br><span class="line">        <span class="string">"""Returns a list of HostState objects that have been chosen by the</span></span><br><span class="line"><span class="string">        scheduler driver, one for each requested instance</span></span><br><span class="line"><span class="string">        (spec_obj.num_instances)</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="keyword">return</span> []</span><br></pre></td></tr></table></figure>
+<p>nova-scheduler首先通过abc定义了一个抽象类Scheduler，用来定义所有调度方法的抽象类，并定义了一个select_destinations()的抽象方法，这个方法即为调度方法，需要具体实现的调度类来实现。接着，nova-scheduler分别实现了FilterScheduler、CachingScheduler、ChanceScheduler、FakeScheduler类来实现具体的调度方法，这里仅以FilterScheduler为例。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br><span class="line">352</span><br><span class="line">353</span><br><span class="line">354</span><br><span class="line">355</span><br><span class="line">356</span><br><span class="line">357</span><br><span class="line">358</span><br><span class="line">359</span><br><span class="line">360</span><br><span class="line">361</span><br><span class="line">362</span><br><span class="line">363</span><br><span class="line">364</span><br><span class="line">365</span><br><span class="line">366</span><br><span class="line">367</span><br><span class="line">368</span><br><span class="line">369</span><br><span class="line">370</span><br><span class="line">371</span><br><span class="line">372</span><br><span class="line">373</span><br><span class="line">374</span><br><span class="line">375</span><br><span class="line">376</span><br><span class="line">377</span><br><span class="line">378</span><br><span class="line">379</span><br><span class="line">380</span><br><span class="line">381</span><br><span class="line">382</span><br><span class="line">383</span><br><span class="line">384</span><br><span class="line">385</span><br><span class="line">386</span><br><span class="line">387</span><br><span class="line">388</span><br><span class="line">389</span><br><span class="line">390</span><br><span class="line">391</span><br><span class="line">392</span><br><span class="line">393</span><br><span class="line">394</span><br><span class="line">395</span><br><span class="line">396</span><br><span class="line">397</span><br><span class="line">398</span><br><span class="line">399</span><br><span class="line">400</span><br><span class="line">401</span><br><span class="line">402</span><br><span class="line">403</span><br><span class="line">404</span><br><span class="line">405</span><br><span class="line">406</span><br><span class="line">407</span><br><span class="line">408</span><br><span class="line">409</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> random</span><br><span class="line"> </span><br><span class="line"><span class="keyword">from</span> oslo_log <span class="keyword">import</span> log <span class="keyword">as</span> logging</span><br><span class="line"><span class="keyword">from</span> six.moves <span class="keyword">import</span> range</span><br><span class="line"> </span><br><span class="line"><span class="keyword">import</span> nova.conf</span><br><span class="line"><span class="keyword">from</span> nova <span class="keyword">import</span> exception</span><br><span class="line"><span class="keyword">from</span> nova.i18n <span class="keyword">import</span> _</span><br><span class="line"><span class="keyword">from</span> nova <span class="keyword">import</span> rpc</span><br><span class="line"><span class="keyword">from</span> nova.scheduler <span class="keyword">import</span> client</span><br><span class="line"><span class="keyword">from</span> nova.scheduler <span class="keyword">import</span> driver</span><br><span class="line"> </span><br><span class="line">CONF = nova.conf.CONF</span><br><span class="line">LOG = logging.getLogger(__name__)</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FilterScheduler</span><span class="params">(driver.Scheduler)</span>:</span></span><br><span class="line">    <span class="string">"""Scheduler that can be used for filtering and weighing."""</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, *args, **kwargs)</span>:</span></span><br><span class="line">        super(FilterScheduler, self).__init__(*args, **kwargs)</span><br><span class="line">        self.notifier = rpc.get_notifier(<span class="string">'scheduler'</span>)</span><br><span class="line">        scheduler_client = client.SchedulerClient()</span><br><span class="line">        self.placement_client = scheduler_client.reportclient</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">select_destinations</span><span class="params">(self, context, spec_obj, instance_uuids,</span></span></span><br><span class="line"><span class="function"><span class="params">            alloc_reqs_by_rp_uuid, provider_summaries)</span>:</span></span><br><span class="line">        <span class="string">"""Returns a list of sorted lists of HostState objects (1 for each</span></span><br><span class="line"><span class="string">        instance) that would satisfy the supplied request_spec. Each of those</span></span><br><span class="line"><span class="string">        lists consist of [chosen_host, alternate1, ..., alternateN], where the</span></span><br><span class="line"><span class="string">        'chosen_host' has already had its resources claimed in Placement,</span></span><br><span class="line"><span class="string">        followed by zero or more alternates. The alternates are hosts that can</span></span><br><span class="line"><span class="string">        satisfy the request, and are included so that if the build for the</span></span><br><span class="line"><span class="string">        chosen host fails, the cell conductor can retry.</span></span><br><span class="line"><span class="string">        :param context: The RequestContext object</span></span><br><span class="line"><span class="string">        :param spec_obj: The RequestSpec object</span></span><br><span class="line"><span class="string">        :param instance_uuids: List of UUIDs, one for each value of the spec</span></span><br><span class="line"><span class="string">                               object's num_instances attribute</span></span><br><span class="line"><span class="string">        :param alloc_reqs_by_rp_uuid: Optional dict, keyed by resource provider</span></span><br><span class="line"><span class="string">                                      UUID, of the allocation_requests that may</span></span><br><span class="line"><span class="string">                                      be used to claim resources against</span></span><br><span class="line"><span class="string">                                      matched hosts. If None, indicates either</span></span><br><span class="line"><span class="string">                                      the placement API wasn't reachable or</span></span><br><span class="line"><span class="string">                                      that there were no allocation_requests</span></span><br><span class="line"><span class="string">                                      returned by the placement API. If the</span></span><br><span class="line"><span class="string">                                      latter, the provider_summaries will be an</span></span><br><span class="line"><span class="string">                                      empty dict, not None.</span></span><br><span class="line"><span class="string">        :param provider_summaries: Optional dict, keyed by resource provider</span></span><br><span class="line"><span class="string">                                   UUID, of information that will be used by</span></span><br><span class="line"><span class="string">                                   the filters/weighers in selecting matching</span></span><br><span class="line"><span class="string">                                   hosts for a request. If None, indicates that</span></span><br><span class="line"><span class="string">                                   the scheduler driver should grab all compute</span></span><br><span class="line"><span class="string">                                   node information locally and that the</span></span><br><span class="line"><span class="string">                                   Placement API is not used. If an empty dict,</span></span><br><span class="line"><span class="string">                                   indicates the Placement API returned no</span></span><br><span class="line"><span class="string">                                   potential matches for the requested</span></span><br><span class="line"><span class="string">                                   resources.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        self.notifier.info(</span><br><span class="line">            context, <span class="string">'scheduler.select_destinations.start'</span>,</span><br><span class="line">            dict(request_spec=spec_obj.to_legacy_request_spec_dict()))</span><br><span class="line"> </span><br><span class="line">        <span class="comment"># NOTE(sbauza): The RequestSpec.num_instances field contains the number</span></span><br><span class="line">        <span class="comment"># of instances created when the RequestSpec was used to first boot some</span></span><br><span class="line">        <span class="comment"># instances. This is incorrect when doing a move or resize operation,</span></span><br><span class="line">        <span class="comment"># so prefer the length of instance_uuids unless it is None.</span></span><br><span class="line">        num_instances = (len(instance_uuids) <span class="keyword">if</span> instance_uuids</span><br><span class="line">                         <span class="keyword">else</span> spec_obj.num_instances)</span><br><span class="line">        selected_host_lists = self._schedule(context, spec_obj, instance_uuids,</span><br><span class="line">            alloc_reqs_by_rp_uuid, provider_summaries)</span><br><span class="line"> </span><br><span class="line">        <span class="comment"># Couldn't fulfill the request_spec</span></span><br><span class="line">        <span class="keyword">if</span> len(selected_host_lists) &lt; num_instances:</span><br><span class="line">            <span class="comment"># NOTE(Rui Chen): If multiple creates failed, set the updated time</span></span><br><span class="line">            <span class="comment"># of selected HostState to None so that these HostStates are</span></span><br><span class="line">            <span class="comment"># refreshed according to database in next schedule, and release</span></span><br><span class="line">            <span class="comment"># the resource consumed by instance in the process of selecting</span></span><br><span class="line">            <span class="comment"># host.</span></span><br><span class="line">            <span class="keyword">for</span> host_list <span class="keyword">in</span> selected_host_lists:</span><br><span class="line">                host_list[<span class="number">0</span>].updated = <span class="keyword">None</span></span><br><span class="line"> </span><br><span class="line">            <span class="comment"># Log the details but don't put those into the reason since</span></span><br><span class="line">            <span class="comment"># we don't want to give away too much information about our</span></span><br><span class="line">            <span class="comment"># actual environment.</span></span><br><span class="line">            LOG.debug(<span class="string">'There are %(hosts)d hosts available but '</span></span><br><span class="line">                      <span class="string">'%(num_instances)d instances requested to build.'</span>,</span><br><span class="line">                      &#123;<span class="string">'hosts'</span>: len(selected_host_lists),</span><br><span class="line">                       <span class="string">'num_instances'</span>: num_instances&#125;)</span><br><span class="line"> </span><br><span class="line">            reason = _(<span class="string">'There are not enough hosts available.'</span>)</span><br><span class="line">            <span class="keyword">raise</span> exception.NoValidHost(reason=reason)</span><br><span class="line"> </span><br><span class="line">        self.notifier.info(</span><br><span class="line">            context, <span class="string">'scheduler.select_destinations.end'</span>,</span><br><span class="line">            dict(request_spec=spec_obj.to_legacy_request_spec_dict()))</span><br><span class="line">        <span class="comment"># NOTE(edleafe) - In this patch we only create the lists of [chosen,</span></span><br><span class="line">        <span class="comment"># alt1, alt2, etc.]. In a later patch we will change what we return, so</span></span><br><span class="line">        <span class="comment"># for this patch just return the selected hosts.</span></span><br><span class="line">        selected_hosts = [sel_host[<span class="number">0</span>] <span class="keyword">for</span> sel_host <span class="keyword">in</span> selected_host_lists]</span><br><span class="line">        <span class="keyword">return</span> selected_hosts</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_schedule</span><span class="params">(self, context, spec_obj, instance_uuids,</span></span></span><br><span class="line"><span class="function"><span class="params">            alloc_reqs_by_rp_uuid, provider_summaries)</span>:</span></span><br><span class="line">        <span class="string">"""Returns a list of hosts that meet the required specs, ordered by</span></span><br><span class="line"><span class="string">        their fitness.</span></span><br><span class="line"><span class="string">        These hosts will have already had their resources claimed in Placement.</span></span><br><span class="line"><span class="string">        :param context: The RequestContext object</span></span><br><span class="line"><span class="string">        :param spec_obj: The RequestSpec object</span></span><br><span class="line"><span class="string">        :param instance_uuids: List of instance UUIDs to place or move.</span></span><br><span class="line"><span class="string">        :param alloc_reqs_by_rp_uuid: Optional dict, keyed by resource provider</span></span><br><span class="line"><span class="string">                                      UUID, of the allocation_requests that may</span></span><br><span class="line"><span class="string">                                      be used to claim resources against</span></span><br><span class="line"><span class="string">                                      matched hosts. If None, indicates either</span></span><br><span class="line"><span class="string">                                      the placement API wasn't reachable or</span></span><br><span class="line"><span class="string">                                      that there were no allocation_requests</span></span><br><span class="line"><span class="string">                                      returned by the placement API. If the</span></span><br><span class="line"><span class="string">                                      latter, the provider_summaries will be an</span></span><br><span class="line"><span class="string">                                      empty dict, not None.</span></span><br><span class="line"><span class="string">        :param provider_summaries: Optional dict, keyed by resource provider</span></span><br><span class="line"><span class="string">                                   UUID, of information that will be used by</span></span><br><span class="line"><span class="string">                                   the filters/weighers in selecting matching</span></span><br><span class="line"><span class="string">                                   hosts for a request. If None, indicates that</span></span><br><span class="line"><span class="string">                                   the scheduler driver should grab all compute</span></span><br><span class="line"><span class="string">                                   node information locally and that the</span></span><br><span class="line"><span class="string">                                   Placement API is not used. If an empty dict,</span></span><br><span class="line"><span class="string">                                   indicates the Placement API returned no</span></span><br><span class="line"><span class="string">                                   potential matches for the requested</span></span><br><span class="line"><span class="string">                                   resources.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        elevated = context.elevated()</span><br><span class="line"> </span><br><span class="line">        <span class="comment"># Find our local list of acceptable hosts by repeatedly</span></span><br><span class="line">        <span class="comment"># filtering and weighing our options. Each time we choose a</span></span><br><span class="line">        <span class="comment"># host, we virtually consume resources on it so subsequent</span></span><br><span class="line">        <span class="comment"># selections can adjust accordingly.</span></span><br><span class="line"> </span><br><span class="line">        <span class="comment"># Note: remember, we are using an iterator here. So only</span></span><br><span class="line">        <span class="comment"># traverse this list once. This can bite you if the hosts</span></span><br><span class="line">        <span class="comment"># are being scanned in a filter or weighing function.</span></span><br><span class="line">        hosts = self._get_all_host_states(elevated, spec_obj,</span><br><span class="line">            provider_summaries)</span><br><span class="line"> </span><br><span class="line">        <span class="comment"># NOTE(sbauza): The RequestSpec.num_instances field contains the number</span></span><br><span class="line">        <span class="comment"># of instances created when the RequestSpec was used to first boot some</span></span><br><span class="line">        <span class="comment"># instances. This is incorrect when doing a move or resize operation,</span></span><br><span class="line">        <span class="comment"># so prefer the length of instance_uuids unless it is None.</span></span><br><span class="line">        num_instances = (len(instance_uuids) <span class="keyword">if</span> instance_uuids</span><br><span class="line">                         <span class="keyword">else</span> spec_obj.num_instances)</span><br><span class="line"> </span><br><span class="line">        <span class="comment"># For each requested instance, we want to return a host whose resources</span></span><br><span class="line">        <span class="comment"># for the instance have been claimed, along with zero or more</span></span><br><span class="line">        <span class="comment"># alternates. These alternates will be passed to the cell that the</span></span><br><span class="line">        <span class="comment"># selected host is in, so that if for some reason the build fails, the</span></span><br><span class="line">        <span class="comment"># cell conductor can retry building the instance on one of these</span></span><br><span class="line">        <span class="comment"># alternates instead of having to simply fail. The number of alternates</span></span><br><span class="line">        <span class="comment"># is based on CONF.scheduler.max_attempts; note that if there are not</span></span><br><span class="line">        <span class="comment"># enough filtered hosts to provide the full number of alternates, the</span></span><br><span class="line">        <span class="comment"># list of hosts may be shorter than this amount.</span></span><br><span class="line">        num_to_return = CONF.scheduler.max_attempts</span><br><span class="line"> </span><br><span class="line">        <span class="keyword">if</span> (instance_uuids <span class="keyword">is</span> <span class="keyword">None</span> <span class="keyword">or</span></span><br><span class="line">                <span class="keyword">not</span> self.USES_ALLOCATION_CANDIDATES <span class="keyword">or</span></span><br><span class="line">                alloc_reqs_by_rp_uuid <span class="keyword">is</span> <span class="keyword">None</span>):</span><br><span class="line">            <span class="comment"># We need to support the caching scheduler, which doesn't use the</span></span><br><span class="line">            <span class="comment"># placement API (and has USES_ALLOCATION_CANDIDATE = False) and</span></span><br><span class="line">            <span class="comment"># therefore we skip all the claiming logic for that scheduler</span></span><br><span class="line">            <span class="comment"># driver. Also, if there was a problem communicating with the</span></span><br><span class="line">            <span class="comment"># placement API, alloc_reqs_by_rp_uuid will be None, so we skip</span></span><br><span class="line">            <span class="comment"># claiming in that case as well. In the case where instance_uuids</span></span><br><span class="line">            <span class="comment"># is None, that indicates an older conductor, so we need to return</span></span><br><span class="line">            <span class="comment"># the older-style HostState objects without alternates.</span></span><br><span class="line">            <span class="comment"># NOTE(edleafe): moving this logic into a separate method, as this</span></span><br><span class="line">            <span class="comment"># method is already way too long. It will also make it easier to</span></span><br><span class="line">            <span class="comment"># clean up once we no longer have to worry about older conductors.</span></span><br><span class="line">            include_alternates = (instance_uuids <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>)</span><br><span class="line">            <span class="keyword">return</span> self._legacy_find_hosts(num_instances, spec_obj, hosts,</span><br><span class="line">                    num_to_return, include_alternates)</span><br><span class="line"> </span><br><span class="line">        <span class="comment"># A list of the instance UUIDs that were successfully claimed against</span></span><br><span class="line">        <span class="comment"># in the placement API. If we are not able to successfully claim for</span></span><br><span class="line">        <span class="comment"># all involved instances, we use this list to remove those allocations</span></span><br><span class="line">        <span class="comment"># before returning</span></span><br><span class="line">        claimed_instance_uuids = []</span><br><span class="line"> </span><br><span class="line">        <span class="comment"># The list of hosts that have been selected (and claimed).</span></span><br><span class="line">        claimed_hosts = []</span><br><span class="line"> </span><br><span class="line">        <span class="keyword">for</span> num <span class="keyword">in</span> range(num_instances):</span><br><span class="line">            hosts = self._get_sorted_hosts(spec_obj, hosts, num)</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> hosts:</span><br><span class="line">                <span class="comment"># NOTE(jaypipes): If we get here, that means not all instances</span></span><br><span class="line">                <span class="comment"># in instance_uuids were able to be matched to a selected host.</span></span><br><span class="line">                <span class="comment"># So, let's clean up any already-claimed allocations here</span></span><br><span class="line">                <span class="comment"># before breaking and returning</span></span><br><span class="line">                self._cleanup_allocations(claimed_instance_uuids)</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line"> </span><br><span class="line">            instance_uuid = instance_uuids[num]</span><br><span class="line">            <span class="comment"># Attempt to claim the resources against one or more resource</span></span><br><span class="line">            <span class="comment"># providers, looping over the sorted list of possible hosts</span></span><br><span class="line">            <span class="comment"># looking for an allocation_request that contains that host's</span></span><br><span class="line">            <span class="comment"># resource provider UUID</span></span><br><span class="line">            claimed_host = <span class="keyword">None</span></span><br><span class="line">            <span class="keyword">for</span> host <span class="keyword">in</span> hosts:</span><br><span class="line">                cn_uuid = host.uuid</span><br><span class="line">                <span class="keyword">if</span> cn_uuid <span class="keyword">not</span> <span class="keyword">in</span> alloc_reqs_by_rp_uuid:</span><br><span class="line">                    LOG.debug(<span class="string">"Found host state %s that wasn't in "</span></span><br><span class="line">                              <span class="string">"allocation_requests. Skipping."</span>, cn_uuid)</span><br><span class="line">                    <span class="keyword">continue</span></span><br><span class="line"> </span><br><span class="line">                alloc_reqs = alloc_reqs_by_rp_uuid[cn_uuid]</span><br><span class="line">                <span class="keyword">if</span> self._claim_resources(elevated, spec_obj, instance_uuid,</span><br><span class="line">                        alloc_reqs):</span><br><span class="line">                    claimed_host = host</span><br><span class="line">                    <span class="keyword">break</span></span><br><span class="line"> </span><br><span class="line">            <span class="keyword">if</span> claimed_host <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">                <span class="comment"># We weren't able to claim resources in the placement API</span></span><br><span class="line">                <span class="comment"># for any of the sorted hosts identified. So, clean up any</span></span><br><span class="line">                <span class="comment"># successfully-claimed resources for prior instances in</span></span><br><span class="line">                <span class="comment"># this request and return an empty list which will cause</span></span><br><span class="line">                <span class="comment"># select_destinations() to raise NoValidHost</span></span><br><span class="line">                LOG.debug(<span class="string">"Unable to successfully claim against any host."</span>)</span><br><span class="line">                self._cleanup_allocations(claimed_instance_uuids)</span><br><span class="line">                <span class="keyword">return</span> []</span><br><span class="line"> </span><br><span class="line">            claimed_instance_uuids.append(instance_uuid)</span><br><span class="line">            claimed_hosts.append(claimed_host)</span><br><span class="line"> </span><br><span class="line">            <span class="comment"># Now consume the resources so the filter/weights will change for</span></span><br><span class="line">            <span class="comment"># the next instance.</span></span><br><span class="line">            self._consume_selected_host(claimed_host, spec_obj)</span><br><span class="line"> </span><br><span class="line">        <span class="comment"># We have selected and claimed hosts for each instance. Now we need to</span></span><br><span class="line">        <span class="comment"># find alternates for each host.</span></span><br><span class="line">        selections_to_return = self._get_alternate_hosts(</span><br><span class="line">            claimed_hosts, spec_obj, hosts, num, num_to_return)</span><br><span class="line">        <span class="keyword">return</span> selections_to_return</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_cleanup_allocations</span><span class="params">(self, instance_uuids)</span>:</span></span><br><span class="line">        <span class="string">"""Removes allocations for the supplied instance UUIDs."""</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> instance_uuids:</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        LOG.debug(<span class="string">"Cleaning up allocations for %s"</span>, instance_uuids)</span><br><span class="line">        <span class="keyword">for</span> uuid <span class="keyword">in</span> instance_uuids:</span><br><span class="line">            self.placement_client.delete_allocation_for_instance(uuid)</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_claim_resources</span><span class="params">(self, ctx, spec_obj, instance_uuid, alloc_reqs)</span>:</span></span><br><span class="line">        <span class="string">"""Given an instance UUID (representing the consumer of resources), the</span></span><br><span class="line"><span class="string">        HostState object for the host that was chosen for the instance, and a</span></span><br><span class="line"><span class="string">        list of allocation_request JSON objects, attempt to claim resources for</span></span><br><span class="line"><span class="string">        the instance in the placement API. Returns True if the claim process</span></span><br><span class="line"><span class="string">        was successful, False otherwise.</span></span><br><span class="line"><span class="string">        :param ctx: The RequestContext object</span></span><br><span class="line"><span class="string">        :param spec_obj: The RequestSpec object</span></span><br><span class="line"><span class="string">        :param instance_uuid: The UUID of the consuming instance</span></span><br><span class="line"><span class="string">        :param cn_uuid: UUID of the host to allocate against</span></span><br><span class="line"><span class="string">        :param alloc_reqs: A list of allocation_request JSON objects that</span></span><br><span class="line"><span class="string">                           allocate against (at least) the compute host</span></span><br><span class="line"><span class="string">                           selected by the _schedule() method. These</span></span><br><span class="line"><span class="string">                           allocation_requests were constructed from a call to</span></span><br><span class="line"><span class="string">                           the GET /allocation_candidates placement API call.</span></span><br><span class="line"><span class="string">                           Each allocation_request satisfies the original</span></span><br><span class="line"><span class="string">                           request for resources and can be supplied as-is</span></span><br><span class="line"><span class="string">                           (along with the project and user ID to the placement</span></span><br><span class="line"><span class="string">                           API's PUT /allocations/&#123;consumer_uuid&#125; call to claim</span></span><br><span class="line"><span class="string">                           resources for the instance</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        LOG.debug(<span class="string">"Attempting to claim resources in the placement API for "</span></span><br><span class="line">                  <span class="string">"instance %s"</span>, instance_uuid)</span><br><span class="line"> </span><br><span class="line">        project_id = spec_obj.project_id</span><br><span class="line"> </span><br><span class="line">        <span class="comment"># NOTE(jaypipes): So, the RequestSpec doesn't store the user_id,</span></span><br><span class="line">        <span class="comment"># only the project_id, so we need to grab the user information from</span></span><br><span class="line">        <span class="comment"># the context. Perhaps we should consider putting the user ID in</span></span><br><span class="line">        <span class="comment"># the spec object?</span></span><br><span class="line">        user_id = ctx.user_id</span><br><span class="line"> </span><br><span class="line">        <span class="comment"># TODO(jaypipes): Loop through all allocation_requests instead of just</span></span><br><span class="line">        <span class="comment"># trying the first one. For now, since we'll likely want to order the</span></span><br><span class="line">        <span class="comment"># allocation_requests in the future based on information in the</span></span><br><span class="line">        <span class="comment"># provider summaries, we'll just try to claim resources using the first</span></span><br><span class="line">        <span class="comment"># allocation_request</span></span><br><span class="line">        alloc_req = alloc_reqs[<span class="number">0</span>]</span><br><span class="line"> </span><br><span class="line">        <span class="keyword">return</span> self.placement_client.claim_resources(instance_uuid,</span><br><span class="line">            alloc_req, project_id, user_id)</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_legacy_find_hosts</span><span class="params">(self, num_instances, spec_obj, hosts,</span></span></span><br><span class="line"><span class="function"><span class="params">            num_to_return, include_alternates)</span>:</span></span><br><span class="line">        <span class="string">"""Some schedulers do not do claiming, or we can sometimes not be able</span></span><br><span class="line"><span class="string">        to if the Placement service is not reachable. Additionally, we may be</span></span><br><span class="line"><span class="string">        working with older conductors that don't pass in instance_uuids.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="comment"># The list of hosts selected for each instance</span></span><br><span class="line">        selected_hosts = []</span><br><span class="line">        <span class="comment"># This the overall list of values to be returned. There will be one</span></span><br><span class="line">        <span class="comment"># item per instance, and when 'include_alternates' is True, that item</span></span><br><span class="line">        <span class="comment"># will be a list of HostState objects representing the selected host</span></span><br><span class="line">        <span class="comment"># along with alternates from the same cell. When 'include_alternates'</span></span><br><span class="line">        <span class="comment"># is False, the return value will be a list of HostState objects, with</span></span><br><span class="line">        <span class="comment"># one per requested instance.</span></span><br><span class="line">        selections_to_return = []</span><br><span class="line"> </span><br><span class="line">        <span class="keyword">for</span> num <span class="keyword">in</span> range(num_instances):</span><br><span class="line">            hosts = self._get_sorted_hosts(spec_obj, hosts, num)</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> hosts:</span><br><span class="line">                <span class="keyword">return</span> []</span><br><span class="line">            selected_host = hosts[<span class="number">0</span>]</span><br><span class="line">            selected_hosts.append(selected_host)</span><br><span class="line">            self._consume_selected_host(selected_host, spec_obj)</span><br><span class="line"> </span><br><span class="line">        <span class="keyword">if</span> include_alternates:</span><br><span class="line">            selections_to_return = self._get_alternate_hosts(</span><br><span class="line">                selected_hosts, spec_obj, hosts, num, num_to_return)</span><br><span class="line">            <span class="keyword">return</span> selections_to_return</span><br><span class="line">        <span class="keyword">return</span> selected_hosts</span><br><span class="line"> </span><br><span class="line"><span class="meta">    @staticmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_consume_selected_host</span><span class="params">(selected_host, spec_obj)</span>:</span></span><br><span class="line">        LOG.debug(<span class="string">"Selected host: %(host)s"</span>, &#123;<span class="string">'host'</span>: selected_host&#125;)</span><br><span class="line">        selected_host.consume_from_request(spec_obj)</span><br><span class="line">        <span class="keyword">if</span> spec_obj.instance_group <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>:</span><br><span class="line">            spec_obj.instance_group.hosts.append(selected_host.host)</span><br><span class="line">            <span class="comment"># hosts has to be not part of the updates when saving</span></span><br><span class="line">            spec_obj.instance_group.obj_reset_changes([<span class="string">'hosts'</span>])</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_get_alternate_hosts</span><span class="params">(self, selected_hosts, spec_obj, hosts, index,</span></span></span><br><span class="line"><span class="function"><span class="params">                             num_to_return)</span>:</span></span><br><span class="line">        <span class="comment"># We only need to filter/weigh the hosts again if we're dealing with</span></span><br><span class="line">        <span class="comment"># more than one instance since the single selected host will get</span></span><br><span class="line">        <span class="comment"># filtered out of the list of alternates below.</span></span><br><span class="line">        <span class="keyword">if</span> index &gt; <span class="number">0</span>:</span><br><span class="line">            <span class="comment"># The selected_hosts have all had resources 'claimed' via</span></span><br><span class="line">            <span class="comment"># _consume_selected_host, so we need to filter/weigh and sort the</span></span><br><span class="line">            <span class="comment"># hosts again to get an accurate count for alternates.</span></span><br><span class="line">            hosts = self._get_sorted_hosts(spec_obj, hosts, index)</span><br><span class="line">        <span class="comment"># This is the overall list of values to be returned. There will be one</span></span><br><span class="line">        <span class="comment"># item per instance, and that item will be a list of HostState objects</span></span><br><span class="line">        <span class="comment"># representing the selected host along with alternates from the same</span></span><br><span class="line">        <span class="comment"># cell.</span></span><br><span class="line">        selections_to_return = []</span><br><span class="line">        <span class="keyword">for</span> selected_host <span class="keyword">in</span> selected_hosts:</span><br><span class="line">            <span class="comment"># This is the list of hosts for one particular instance.</span></span><br><span class="line">            selected_plus_alts = [selected_host]</span><br><span class="line">            cell_uuid = selected_host.cell_uuid</span><br><span class="line">            <span class="comment"># This will populate the alternates with many of the same unclaimed</span></span><br><span class="line">            <span class="comment"># hosts. This is OK, as it should be rare for a build to fail. And</span></span><br><span class="line">            <span class="comment"># if there are not enough hosts to fully populate the alternates,</span></span><br><span class="line">            <span class="comment"># it's fine to return fewer than we'd like. Note that we exclude</span></span><br><span class="line">            <span class="comment"># any claimed host from consideration as an alternate because it</span></span><br><span class="line">            <span class="comment"># will have had its resources reduced and will have a much lower</span></span><br><span class="line">            <span class="comment"># chance of being able to fit another instance on it.</span></span><br><span class="line">            <span class="keyword">for</span> host <span class="keyword">in</span> hosts:</span><br><span class="line">                <span class="keyword">if</span> len(selected_plus_alts) &gt;= num_to_return:</span><br><span class="line">                    <span class="keyword">break</span></span><br><span class="line">                <span class="keyword">if</span> host.cell_uuid == cell_uuid <span class="keyword">and</span> host <span class="keyword">not</span> <span class="keyword">in</span> selected_hosts:</span><br><span class="line">                    selected_plus_alts.append(host)</span><br><span class="line">            selections_to_return.append(selected_plus_alts)</span><br><span class="line">        <span class="keyword">return</span> selections_to_return</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_get_sorted_hosts</span><span class="params">(self, spec_obj, host_states, index)</span>:</span></span><br><span class="line">        <span class="string">"""Returns a list of HostState objects that match the required</span></span><br><span class="line"><span class="string">        scheduling constraints for the request spec object and have been sorted</span></span><br><span class="line"><span class="string">        according to the weighers.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        filtered_hosts = self.host_manager.get_filtered_hosts(host_states,</span><br><span class="line">            spec_obj, index)</span><br><span class="line"> </span><br><span class="line">        LOG.debug(<span class="string">"Filtered %(hosts)s"</span>, &#123;<span class="string">'hosts'</span>: filtered_hosts&#125;)</span><br><span class="line"> </span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> filtered_hosts:</span><br><span class="line">            <span class="keyword">return</span> []</span><br><span class="line"> </span><br><span class="line">        weighed_hosts = self.host_manager.get_weighed_hosts(filtered_hosts,</span><br><span class="line">            spec_obj)</span><br><span class="line">        <span class="comment"># Strip off the WeighedHost wrapper class...</span></span><br><span class="line">        weighed_hosts = [h.obj <span class="keyword">for</span> h <span class="keyword">in</span> weighed_hosts]</span><br><span class="line"> </span><br><span class="line">        LOG.debug(<span class="string">"Weighed %(hosts)s"</span>, &#123;<span class="string">'hosts'</span>: weighed_hosts&#125;)</span><br><span class="line"> </span><br><span class="line">        <span class="comment"># We randomize the first element in the returned list to alleviate</span></span><br><span class="line">        <span class="comment"># congestion where the same host is consistently selected among</span></span><br><span class="line">        <span class="comment"># numerous potential hosts for similar request specs.</span></span><br><span class="line">        host_subset_size = CONF.filter_scheduler.host_subset_size</span><br><span class="line">        <span class="keyword">if</span> host_subset_size &lt; len(weighed_hosts):</span><br><span class="line">            weighed_subset = weighed_hosts[<span class="number">0</span>:host_subset_size]</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            weighed_subset = weighed_hosts</span><br><span class="line">        chosen_host = random.choice(weighed_subset)</span><br><span class="line">        weighed_hosts.remove(chosen_host)</span><br><span class="line">        <span class="keyword">return</span> [chosen_host] + weighed_hosts</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_get_all_host_states</span><span class="params">(self, context, spec_obj, provider_summaries)</span>:</span></span><br><span class="line">        <span class="string">"""Template method, so a subclass can implement caching."""</span></span><br><span class="line">        <span class="comment"># NOTE(jaypipes): provider_summaries being None is treated differently</span></span><br><span class="line">        <span class="comment"># from an empty dict. provider_summaries is None when we want to grab</span></span><br><span class="line">        <span class="comment"># all compute nodes, for instance when using the caching scheduler.</span></span><br><span class="line">        <span class="comment"># The provider_summaries variable will be an empty dict when the</span></span><br><span class="line">        <span class="comment"># Placement API found no providers that match the requested</span></span><br><span class="line">        <span class="comment"># constraints, which in turn makes compute_uuids an empty list and</span></span><br><span class="line">        <span class="comment"># get_host_states_by_uuids will return an empty tuple also, which will</span></span><br><span class="line">        <span class="comment"># eventually result in a NoValidHost error.</span></span><br><span class="line">        compute_uuids = <span class="keyword">None</span></span><br><span class="line">        <span class="keyword">if</span> provider_summaries <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>:</span><br><span class="line">            compute_uuids = list(provider_summaries.keys())</span><br><span class="line">        <span class="keyword">return</span> self.host_manager.get_host_states_by_uuids(context,</span><br><span class="line">                                                          compute_uuids,</span><br><span class="line">                                                          spec_obj)</span><br></pre></td></tr></table></figure>
+<p>FilterScheduler类首先继承了nova定义的Scheduler抽象类，然后实现了select_destinations()方法来实现具体的调度方法。</p>
+<p>定义了各种调度策略之后，接下来就需要将这些不同的调度类作为entry point配置到setup.cfg文件中，nova的调度策略配置信息如下所示：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[entry_points]</span><br><span class="line">...</span><br><span class="line"> </span><br><span class="line">nova.scheduler.driver =</span><br><span class="line">    filter_scheduler = nova.scheduler.filter_scheduler:FilterScheduler</span><br><span class="line">    caching_scheduler = nova.scheduler.caching_scheduler:CachingScheduler</span><br><span class="line">    chance_scheduler = nova.scheduler.chance:ChanceScheduler</span><br><span class="line">    fake_scheduler = nova.tests.unit.scheduler.fakes:FakeScheduler</span><br></pre></td></tr></table></figure>
+<p>通过以上配置信息可以看出，针对nova-scheduler服务定义的调度策略，nova在setup.cfg配置文件中为调度策略定义了nova.scheduler.driver作为entry points的命名空间，并在这个命名空间下配置了四种不同的调度策略。</p>
+<p>最后，nova便可以在需要使用调度策略的地方载入不同的调度策略插件。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SchedulerManager</span><span class="params">(manager.Manager)</span>:</span></span><br><span class="line">    <span class="string">"""Chooses a host to run instances on."""</span></span><br><span class="line"> </span><br><span class="line">    target = messaging.Target(version=<span class="string">'4.4'</span>)</span><br><span class="line"> </span><br><span class="line">    _sentinel = object()</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, scheduler_driver=None, *args, **kwargs)</span>:</span></span><br><span class="line">        client = scheduler_client.SchedulerClient()</span><br><span class="line">        self.placement_client = client.reportclient</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> scheduler_driver:</span><br><span class="line">            scheduler_driver = CONF.scheduler.driver</span><br><span class="line">        self.driver = driver.DriverManager(</span><br><span class="line">                <span class="string">"nova.scheduler.driver"</span>,</span><br><span class="line">                scheduler_driver,</span><br><span class="line">                invoke_on_load=<span class="keyword">True</span>).driver</span><br><span class="line">        super(SchedulerManager, self).__init__(service_name=<span class="string">'scheduler'</span>,</span><br><span class="line">                                               *args, **kwargs)</span><br><span class="line"> </span><br><span class="line"><span class="meta">    @periodic_task.periodic_task(</span></span><br><span class="line">        spacing=CONF.scheduler.discover_hosts_in_cells_interval,</span><br><span class="line">        run_immediately=<span class="keyword">True</span>)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_discover_hosts_in_cells</span><span class="params">(self, context)</span>:</span></span><br><span class="line">        host_mappings = host_mapping_obj.discover_hosts(context)</span><br><span class="line">        <span class="keyword">if</span> host_mappings:</span><br><span class="line">            LOG.info(_LI(<span class="string">'Discovered %(count)i new hosts: %(hosts)s'</span>),</span><br><span class="line">                     &#123;<span class="string">'count'</span>: len(host_mappings),</span><br><span class="line">                      <span class="string">'hosts'</span>: <span class="string">','</span>.join([<span class="string">'%s:%s'</span> % (hm.cell_mapping.name,</span><br><span class="line">                                                    hm.host)</span><br><span class="line">                                         <span class="keyword">for</span> hm <span class="keyword">in</span> host_mappings])&#125;)</span><br><span class="line"> </span><br><span class="line"><span class="meta">    @periodic_task.periodic_task(spacing=CONF.scheduler.periodic_task_interval,</span></span><br><span class="line">                                 run_immediately=<span class="keyword">True</span>)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_run_periodic_tasks</span><span class="params">(self, context)</span>:</span></span><br><span class="line">        self.driver.run_periodic_tasks(context)</span><br><span class="line"> </span><br><span class="line"><span class="meta">    @messaging.expected_exceptions(exception.NoValidHost)</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">select_destinations</span><span class="params">(self, ctxt,</span></span></span><br><span class="line"><span class="function"><span class="params">                            request_spec=None, filter_properties=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                            spec_obj=_sentinel, instance_uuids=None)</span>:</span></span><br><span class="line">        <span class="string">"""Returns destinations(s) best suited for this RequestSpec.</span></span><br><span class="line"><span class="string">        The result should be a list of dicts with 'host', 'nodename' and</span></span><br><span class="line"><span class="string">        'limits' as keys.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        LOG.debug(<span class="string">"Starting to schedule for instances: %s"</span>, instance_uuids)</span><br><span class="line"> </span><br><span class="line">        <span class="comment"># TODO(sbauza): Change the method signature to only accept a spec_obj</span></span><br><span class="line">        <span class="comment"># argument once API v5 is provided.</span></span><br><span class="line">        <span class="keyword">if</span> spec_obj <span class="keyword">is</span> self._sentinel:</span><br><span class="line">            spec_obj = objects.RequestSpec.from_primitives(ctxt,</span><br><span class="line">                                                           request_spec,</span><br><span class="line">                                                           filter_properties)</span><br><span class="line">        resources = utils.resources_from_request_spec(spec_obj)</span><br><span class="line">        alloc_reqs_by_rp_uuid, provider_summaries = <span class="keyword">None</span>, <span class="keyword">None</span></span><br><span class="line">        <span class="keyword">if</span> self.driver.USES_ALLOCATION_CANDIDATES:</span><br><span class="line">            res = self.placement_client.get_allocation_candidates(resources)</span><br><span class="line">            <span class="keyword">if</span> res <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">                <span class="comment"># We have to handle the case that we failed to connect to the</span></span><br><span class="line">                <span class="comment"># Placement service and the safe_connect decorator on</span></span><br><span class="line">                <span class="comment"># get_allocation_candidates returns None.</span></span><br><span class="line">                alloc_reqs, provider_summaries = <span class="keyword">None</span>, <span class="keyword">None</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                alloc_reqs, provider_summaries = res</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> alloc_reqs:</span><br><span class="line">                LOG.debug(<span class="string">"Got no allocation candidates from the Placement "</span></span><br><span class="line">                          <span class="string">"API. This may be a temporary occurrence as compute "</span></span><br><span class="line">                          <span class="string">"nodes start up and begin reporting inventory to "</span></span><br><span class="line">                          <span class="string">"the Placement service."</span>)</span><br><span class="line">                <span class="keyword">raise</span> exception.NoValidHost(reason=<span class="string">""</span>)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="comment"># Build a dict of lists of allocation requests, keyed by</span></span><br><span class="line">                <span class="comment"># provider UUID, so that when we attempt to claim resources for</span></span><br><span class="line">                <span class="comment"># a host, we can grab an allocation request easily</span></span><br><span class="line">                alloc_reqs_by_rp_uuid = collections.defaultdict(list)</span><br><span class="line">                <span class="keyword">for</span> ar <span class="keyword">in</span> alloc_reqs:</span><br><span class="line">                    <span class="keyword">for</span> rr <span class="keyword">in</span> ar[<span class="string">'allocations'</span>]:</span><br><span class="line">                        rp_uuid = rr[<span class="string">'resource_provider'</span>][<span class="string">'uuid'</span>]</span><br><span class="line">                        alloc_reqs_by_rp_uuid[rp_uuid].append(ar)</span><br><span class="line"> </span><br><span class="line">        dests = self.driver.select_destinations(ctxt, spec_obj, instance_uuids,</span><br><span class="line">            alloc_reqs_by_rp_uuid, provider_summaries)</span><br><span class="line">        dest_dicts = [_host_state_obj_to_dict(d) <span class="keyword">for</span> d <span class="keyword">in</span> dests]</span><br><span class="line">        <span class="keyword">return</span> jsonutils.to_primitive(dest_dicts)</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">update_aggregates</span><span class="params">(self, ctxt, aggregates)</span>:</span></span><br><span class="line">        <span class="string">"""Updates HostManager internal aggregates information.</span></span><br><span class="line"><span class="string">        :param aggregates: Aggregate(s) to update</span></span><br><span class="line"><span class="string">        :type aggregates: :class:`nova.objects.Aggregate`</span></span><br><span class="line"><span class="string">                          or :class:`nova.objects.AggregateList`</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="comment"># NOTE(sbauza): We're dropping the user context now as we don't need it</span></span><br><span class="line">        self.driver.host_manager.update_aggregates(aggregates)</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">delete_aggregate</span><span class="params">(self, ctxt, aggregate)</span>:</span></span><br><span class="line">        <span class="string">"""Deletes HostManager internal information about a specific aggregate.</span></span><br><span class="line"><span class="string">        :param aggregate: Aggregate to delete</span></span><br><span class="line"><span class="string">        :type aggregate: :class:`nova.objects.Aggregate`</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="comment"># NOTE(sbauza): We're dropping the user context now as we don't need it</span></span><br><span class="line">        self.driver.host_manager.delete_aggregate(aggregate)</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">update_instance_info</span><span class="params">(self, context, host_name, instance_info)</span>:</span></span><br><span class="line">        <span class="string">"""Receives information about changes to a host's instances, and</span></span><br><span class="line"><span class="string">        updates the driver's HostManager with that information.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        self.driver.host_manager.update_instance_info(context, host_name,</span><br><span class="line">                                                      instance_info)</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">delete_instance_info</span><span class="params">(self, context, host_name, instance_uuid)</span>:</span></span><br><span class="line">        <span class="string">"""Receives information about the deletion of one of a host's</span></span><br><span class="line"><span class="string">        instances, and updates the driver's HostManager with that information.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        self.driver.host_manager.delete_instance_info(context, host_name,</span><br><span class="line">                                                      instance_uuid)</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">sync_instance_info</span><span class="params">(self, context, host_name, instance_uuids)</span>:</span></span><br><span class="line">        <span class="string">"""Receives a sync request from a host, and passes it on to the</span></span><br><span class="line"><span class="string">        driver's HostManager.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        self.driver.host_manager.sync_instance_info(context, host_name,</span><br><span class="line">                                                    instance_uuids)</span><br></pre></td></tr></table></figure>
+<p>针对nova的调度策略，nova定义了SchedulerManager类专门用于管理调度方法的实现，在这个类中包含了一个driver属性，而在初始化SchedulerManager对象时，这个driver属性会被赋值，由于nova的调度方法的entry points都是名称和调度方法一一对应的，因此driver属性会被赋值为一个DriverManager对象，也就是说每个SchedulerManager对象只能加载一种调度方法进行操作。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+<blockquote class="blockquote-center" style="color: #ccc;">
+    -------------本文结束 <i class="fa fa-apple"></i> 感谢您的阅读-------------
+</blockquote>
+
+  <span id="inline-green" style="border-radius:3px;">作者</span>：<a class="link-blue" href="https://github.com/magiceses" target="_blank">Magiceses</a><br/>有问题请 <a class="link-blue" href="https://magiceses.github.io/guestbook" target="_blank">留言</a> 或者私信我的 <a class="link-blue" href="https://weibo.com/u/3069595351" target="_blank">微博</a>。
+
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>满分是10分的话，这篇文章你给几分</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/reward/reward_wechat.png" alt="magiceses WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/reward/reward_alipay.png" alt="magiceses Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Openstack/" rel="tag"><i class="fa fa-tag"></i> Openstack</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/01/openstack-keystone-学习总结/" rel="next" title="openstack之keystone学习总结">
+                <i class="fa fa-chevron-left"></i> openstack之keystone学习总结
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/10/02/openstack-taskflow的使用/" rel="prev" title="openstack之taskflow的使用">
+                openstack之taskflow的使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar/avatar.png"
+               alt="magiceses" />
+          <p class="site-author-name" itemprop="name">magiceses</p>
+          <p class="site-description motion-element" itemprop="description">Stay Hungry,Stay Foolish</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">61</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/magiceses" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://blog.csdn.net/weixin_43700106" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-chrome"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/weblog" title="建站日志" target="_blank">建站日志</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/reward" title="打赏" target="_blank">打赏</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#stevedore的实现"><span class="nav-number">1.</span> <span class="nav-text">stevedore的实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#管理基类"><span class="nav-number">1.1.</span> <span class="nav-text">管理基类</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#加载插件的方式"><span class="nav-number">2.</span> <span class="nav-text">加载插件的方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#stevedore的使用"><span class="nav-number">3.</span> <span class="nav-text">stevedore的使用</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+      
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="busuanzi-count">
+
+  <!-- <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script> -->
+  <!-- 上面这个是之前的，不知道为什么失效了，改成下面这个 -->
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">您是第<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>个小伙伴</span>
+  
+
+  
+    <span class="site-pv">本站总浏览<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">magiceses</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Pisces
+  </a>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count" style="color: #e90f92;">全站共 1m 字</span>
+</div>
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+  <!-- 按需加载背景 -->
+  <!-- 背景动画 -->
+<script type="text/javascript">
+  // 按需加载背景
+  // 如果是all，就直接加载了
+  if("pc" == "all") {
+    $.getScript("/js/src/particle.js?v=5.0.1");
+  }
+  // 识别手机或电脑的js开始
+  (function(){
+    var res = GetRequest();
+    var par = res['index'];
+    if(par!='gfan'){
+      var ua=navigator.userAgent.toLowerCase();
+      var contains=function (a, b){
+          if(a.indexOf(b)!=-1){return true;}
+      };
+      if((contains(ua,"android") && contains(ua,"mobile"))||(contains(ua,"android") && contains(ua,"mozilla"))||(contains(ua,"android") && contains(ua,"opera"))||contains(ua,"ucweb7")||contains(ua,"iphone")){
+        return false;
+      } else {
+        $.getScript("/js/src/particle.js?v=5.0.1");
+      }
+    }
+  })();
+  function GetRequest() {
+    var url = location.search;
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+      var str = url.substr(1);
+      strs = str.split("&");
+      for(var i = 0; i < strs.length; i ++) {
+        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+      }
+    }
+    return theRequest;
+  }
+</script>
+<!-- 识别手机或电脑的js结束 -->  
+
+  <!-- 页面点击小红心 -->
+  <!-- 页面点击小红心 -->
+
+  <script type="text/javascript" src="/js/src/love.js?v=5.0.1"></script>
+
+
+  <!-- 鼠标移动，效果 -->
+  <!-- 鼠标移动特效 -->
+
+  <script type="text/javascript" src="/js/src/jquery-stars.js?v=5.0.1"></script>
+  <script type="text/javascript">
+  jQuery('body').jstars({
+  	image_path: '/images',
+  	image: 'candy-cane-stars.png',
+  	style: 'white',
+  	width: 34,
+  	height: 34,
+  	delay: 700,
+  	frequency: 5
+  });
+  </script>
+
+
+  <!-- 页面 title 进入/离开 效果 -->
+
+  <script type="text/javascript">var OriginTitile=document.title,st;document.addEventListener("visibilitychange",function(){document.hidden?(document.title="Waiting for you back！",clearTimeout(st)):(document.title="Thanks for visit~ "+OriginTitile,st=setTimeout(function(){document.title=OriginTitile},4e3))})</script>
+
+
+</body>
+</html>

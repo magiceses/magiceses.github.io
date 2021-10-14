@@ -1,0 +1,1271 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Courier New:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Openstack,Oslo," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="天青色等烟雨" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="没有人能替你承受痛苦，也没有人能抢走你的坚强。
+
+上一篇我们介绍了这个包的使用方式和在openstack中应用，这篇文章分析一下原理和源码
+简介i18n是用来进行国际化翻译的。经过调查，现在主要有两种翻译方式。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Oslo系列之oslo.i18n-下">
+<meta property="og:url" content="https://magiceses.github.io/2018/10/05/openstack-oslo.packages-oslo.i18n-下/index.html">
+<meta property="og:site_name" content="天青色等烟雨">
+<meta property="og:description" content="没有人能替你承受痛苦，也没有人能抢走你的坚强。
+
+上一篇我们介绍了这个包的使用方式和在openstack中应用，这篇文章分析一下原理和源码
+简介i18n是用来进行国际化翻译的。经过调查，现在主要有两种翻译方式。">
+<meta property="og:updated_time" content="2021-10-14T01:51:19.190Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Oslo系列之oslo.i18n-下">
+<meta name="twitter:description" content="没有人能替你承受痛苦，也没有人能抢走你的坚强。
+
+上一篇我们介绍了这个包的使用方式和在openstack中应用，这篇文章分析一下原理和源码
+简介i18n是用来进行国际化翻译的。经过调查，现在主要有两种翻译方式。">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://magiceses.github.io/2018/10/05/openstack-oslo.packages-oslo.i18n-下/"/>
+
+
+<!-- 网页加载条 -->
+<script src="/js/src/pace.min.js"></script>
+  <title> Oslo系列之oslo.i18n-下 | 天青色等烟雨 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">天青色等烟雨</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">而我在等你</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-guestbook">
+          <a href="/guestbook" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-commenting"></i> <br />
+            
+            留言
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+      
+      
+        <li class="menu-item"> <a title="把这个链接拖到你的工具栏中,任何网页都可以High" href='javascript:(
+/*
+ * Copyright (C) 2016 Never_yu (Neveryu.github.io) <React.dong.yu@gmail.com>
+ * Sina Weibo (http://weibo.com/Neveryu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function go() {
+
+var songs = [
+  "http://dl.stream.qqmusic.qq.com/C400001Qu4I30eVFYb.m4a?vkey=2127178E4405E7B8B268F20F05232485735CCF4FF8C1432F0360D2626D0B6C9564B5627C7AB481BBC685FEDB0946A50E97C66F0D1B008226&guid=7175649092&uin=0&fromtag=66",
+  "",
+  "",
+  ""
+];
+
+function c() {
+  var e = document.createElement("link");
+  e.setAttribute("type", "text/css");
+  e.setAttribute("rel", "stylesheet");
+  e.setAttribute("href", f);
+  e.setAttribute("class", l);
+  document.body.appendChild(e)
+}
+
+function h() {
+  var e = document.getElementsByClassName(l);
+  for (var t = 0; t < e.length; t++) {
+    document.body.removeChild(e[t])
+  }
+}
+
+function p() {
+  var e = document.createElement("div");
+  e.setAttribute("class", a);
+  document.body.appendChild(e);
+  setTimeout(function() {
+    document.body.removeChild(e)
+  }, 100)
+}
+
+function d(e) {
+  return {
+    height : e.offsetHeight,
+    width : e.offsetWidth
+  }
+}
+
+function v(i) {
+  var s = d(i);
+  return s.height > e && s.height < n && s.width > t && s.width < r
+}
+
+function m(e) {
+  var t = e;
+  var n = 0;
+  while (!!t) {
+    n += t.offsetTop;
+    t = t.offsetParent
+  }
+  return n
+}
+
+function g() {
+  var e = document.documentElement;
+  if (!!window.innerWidth) {
+    return window.innerHeight
+  } else if (e && !isNaN(e.clientHeight)) {
+    return e.clientHeight
+  }
+  return 0
+}
+
+function y() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  }
+  return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+}
+
+function E(e) {
+  var t = m(e);
+  return t >= w && t <= b + w
+}
+
+function S() {
+  var e = document.getElementById("audio_element_id");
+  if(e != null){
+    var index = parseInt(e.getAttribute("curSongIndex"));
+    if(index > songs.length - 2) {
+      index = 0;
+    } else {
+      index++;
+    }
+    e.setAttribute("curSongIndex", index);
+    N();
+  }
+
+  e.src = i;
+  e.play()
+}
+
+function x(e) {
+  e.className += " " + s + " " + o
+}
+
+function T(e) {
+  e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+}
+
+function N() {
+  var e = document.getElementsByClassName(s);
+  var t = new RegExp("\\b" + s + "\\b");
+  for (var n = 0; n < e.length; ) {
+    e[n].className = e[n].className.replace(t, "")
+  }
+}
+
+function initAudioEle() {
+  var e = document.getElementById("audio_element_id");
+  if(e === null){
+    e = document.createElement("audio");
+    e.setAttribute("class", l);
+    e.setAttribute("curSongIndex", 0);
+    e.id = "audio_element_id";
+    e.loop = false;
+    e.bgcolor = 0;
+    e.addEventListener("canplay", function() {
+      setTimeout(function() {
+        x(k)
+      }, 500);
+      setTimeout(function() {
+        N();
+        p();
+        for (var e = 0; e < O.length; e++) {
+          T(O[e])
+        }
+      }, 15500)
+    }, true);
+    e.addEventListener("ended", function() {
+      N();
+      h();
+      go();
+    }, true);
+    e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+    document.body.appendChild(e);
+  }
+}
+
+initAudioEle();
+var e = 30;
+var t = 30;
+var n = 350;
+var r = 350;
+
+var curSongIndex = parseInt(document.getElementById("audio_element_id").getAttribute("curSongIndex"));
+var i = songs[curSongIndex];
+
+var s = "mw-harlem_shake_me";
+var o = "im_first";
+var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+var a = "mw-strobe_light";
+
+/* harlem-shake-style.css，替换成你的位置，也可以直接使用：//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css */
+var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+
+var l = "mw_added_css";
+var b = g();
+var w = y();
+var C = document.getElementsByTagName("*");
+var k = null;
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    if (E(A)) {
+      k = A;
+      break
+    }
+  }
+}
+if (A === null) {
+  console.warn("Could not find a node of the right size. Please try a different page.");
+  return
+}
+c();
+S();
+var O = [];
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    O.push(A)
+  }
+}
+})()'><i class="menu-item-icon fa fa-music fa-fw"></i> High一下</a></li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search fa-lg"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Oslo系列之oslo.i18n-下
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2018-10-05T23:25:24+08:00" content="2018-10-05">
+              2018-10-05
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Openstack/" itemprop="url" rel="index">
+                    <span itemprop="name">Openstack</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv">热度
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p id="div-border-top-green">没有人能替你承受痛苦，也没有人能抢走你的坚强。<br></p>
+
+<p>上一篇我们介绍了这个包的使用方式和在openstack中应用，这篇文章分析一下原理和源码</p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>i18n是用来进行国际化翻译的。经过调查，现在主要有两种翻译方式。</p>
+<a id="more"></a>
+<ul>
+<li><p>直接通过<code>gettext</code>方法，显示调用</p>
+<p>实例: horizon的国际化:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">scope.operationlogi18n = &#123;</span><br><span class="line">  <span class="string">'Create Instance'</span>: gettext(<span class="string">'Create Instance'</span>),</span><br><span class="line">  <span class="string">'Shutdown Instance'</span>: gettext(<span class="string">'Shutdown Instance'</span>),</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>分析:<br>直接调用gettext方法，获取翻译结果</p>
+</li>
+<li><p>通过<code>_</code>方法使用懒汉加载模式</p>
+<p><code>_</code>方法实际是:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span>  oslo_i18n</span><br><span class="line"><span class="comment"># ref: https://docs.openstack.org/oslo.i18n/ocata/usage.html</span></span><br><span class="line">DOMAIN = <span class="string">"myproject"</span></span><br><span class="line">_translators = oslo_i18n.TranslatorFactory(domain=DOMAIN)</span><br><span class="line">_ = _translators.primary</span><br></pre></td></tr></table></figure>
+<p>这种方式具体参见后续源码分析。</p>
+</li>
+</ul>
+<p>i18n的懒加载模式</p>
+<blockquote>
+<p>Lazy Translation¶<br>Lazy translation delays converting a message string to the translated form as long as possible, including possibly never if the message is not logged or delivered to the user in some other way. It also supports logging translated messages in multiple languages, by configuring separate log handlers.</p>
+<p>Lazy translation is implemented by returning a special object from the translation function, instead of a unicode string. That special message object supports some, but not all, string manipulation APIs. For example, concatenation with addition is not supported, but interpolation of variables is supported. Depending on how translated strings are used in an application, these restrictions may mean that lazy translation cannot be used, and so it is not enabled by default.</p>
+<p>To enable lazy translation, call enable_lazy().</p>
+<p>import oslo_i18n</p>
+<p>oslo_i18n.enable_lazy()</p>
+</blockquote>
+<p>以aodh为例，在aodh/service.py中有 <code>oslo_i18n.enable_lazy()</code> 这么一行代码，直接来看源码</p>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>自己实现一个简单的<code>i18n.py</code>文件：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span>  oslo_i18n</span><br><span class="line"></span><br><span class="line"><span class="comment"># ref: https://docs.openstack.org/oslo.i18n/ocata/usage.html</span></span><br><span class="line"></span><br><span class="line">DOMAIN = <span class="string">"myproject"</span></span><br><span class="line"></span><br><span class="line">_translators = oslo_i18n.TranslatorFactory(domain=DOMAIN)</span><br><span class="line"></span><br><span class="line">_ = _translators.primary</span><br><span class="line"></span><br><span class="line">_LI = _translators.log_info</span><br><span class="line">_LW = _translators.log_warning</span><br><span class="line">_LE = _translators.log_eror</span><br><span class="line">_LC = _translators.log_critical</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_available_languages</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">return</span> oslo_i18n.get_available_languages(DOMAIN)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">translate</span><span class="params">(value, user_locale)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> oslo_i18n.translate(value, user_locale)</span><br></pre></td></tr></table></figure>
+<p>分析:<br>1）上述先设置了<em>方法<br>2） 假设有需要使用国际化翻译的地方，可以使用如下形式进行国际化<br>引用`</em>，_LI`等</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> i18n <span class="keyword">import</span> _, _LI</span><br><span class="line">  LOG.info(LI(<span class="string">'enter app_factory'</span>))</span><br></pre></td></tr></table></figure>
+<p>或者这种用法，推荐用_而不是_LI</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">result = _(<span class="string">'enter app_factory'</span>)</span><br><span class="line">LOG.info(result)</span><br></pre></td></tr></table></figure>
+<p>3） <code>_方法</code>内部调用了_make_translation_func方法，内容如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_make_translation_func</span><span class="params">(self, domain=None)</span>:</span></span><br><span class="line">    <span class="string">"""Return a translation function ready for use with messages.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    The returned function takes a single value, the unicode string</span></span><br><span class="line"><span class="string">    to be translated.  The return type varies depending on whether</span></span><br><span class="line"><span class="string">    lazy translation is being done. When lazy translation is</span></span><br><span class="line"><span class="string">    enabled, :class:`Message` objects are returned instead of</span></span><br><span class="line"><span class="string">    regular :class:`unicode` strings.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    The domain argument can be specified to override the default</span></span><br><span class="line"><span class="string">    from the factory, but the localedir from the factory is always</span></span><br><span class="line"><span class="string">    used because we assume the log-level translation catalogs are</span></span><br><span class="line"><span class="string">    installed in the same directory as the main application</span></span><br><span class="line"><span class="string">    catalog.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="keyword">if</span> domain <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">        domain = self.domain</span><br><span class="line">    t = gettext.translation(domain,</span><br><span class="line">                            localedir=self.localedir,</span><br><span class="line">                            fallback=<span class="keyword">True</span>)</span><br><span class="line">    <span class="comment"># Use the appropriate method of the translation object based</span></span><br><span class="line">    <span class="comment"># on the python version.</span></span><br><span class="line">    m = t.gettext <span class="keyword">if</span> six.PY3 <span class="keyword">else</span> t.ugettext</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">f</span><span class="params">(msg)</span>:</span></span><br><span class="line">        <span class="string">"""oslo_i18n.gettextutils translation function."""</span></span><br><span class="line">        <span class="keyword">if</span> _lazy.USE_LAZY:</span><br><span class="line">            <span class="keyword">return</span> _message.Message(msg, domain=domain)</span><br><span class="line">        <span class="keyword">return</span> m(msg)</span><br><span class="line">    <span class="keyword">return</span> f</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Message</span><span class="params">(six.text_type)</span>:</span></span><br><span class="line">    <span class="string">"""A Message object is a unicode object that can be translated.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Translation of Message is done explicitly using the translate() method.</span></span><br><span class="line"><span class="string">    For all non-translation intents and purposes, a Message is simply unicode,</span></span><br><span class="line"><span class="string">    and can be treated as such.</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__new__</span><span class="params">(cls, msgid, msgtext=None, params=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                domain=<span class="string">'oslo'</span>, has_contextual_form=False,</span></span></span><br><span class="line"><span class="function"><span class="params">                has_plural_form=False, *args)</span>:</span></span><br><span class="line">        <span class="string">"""Create a new Message object.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        In order for translation to work gettext requires a message ID, this</span></span><br><span class="line"><span class="string">        msgid will be used as the base unicode text. It is also possible</span></span><br><span class="line"><span class="string">        for the msgid and the base unicode text to be different by passing</span></span><br><span class="line"><span class="string">        the msgtext parameter.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="comment"># If the base msgtext is not given, we use the default translation</span></span><br><span class="line">        <span class="comment"># of the msgid (which is in English) just in case the system locale is</span></span><br><span class="line">        <span class="comment"># not English, so that the base text will be in that locale by default.</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> msgtext:</span><br><span class="line">            msgtext = Message._translate_msgid(msgid, domain)</span><br><span class="line">        <span class="comment"># We want to initialize the parent unicode with the actual object that</span></span><br><span class="line">        <span class="comment"># would have been plain unicode if 'Message' was not enabled.</span></span><br><span class="line">        msg = super(Message, cls).__new__(cls, msgtext)</span><br><span class="line">        msg.msgid = msgid</span><br><span class="line">        msg.domain = domain</span><br><span class="line">        msg.params = params</span><br><span class="line">        msg.has_contextual_form = has_contextual_form</span><br><span class="line">        msg.has_plural_form = has_plural_form</span><br><span class="line">        <span class="keyword">return</span> msg</span><br><span class="line">      </span><br><span class="line"><span class="meta">    @staticmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_translate_msgid</span><span class="params">(msgid, domain, desired_locale=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                         has_contextual_form=False, has_plural_form=False)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> desired_locale:</span><br><span class="line">            system_locale = locale.getdefaultlocale() <span class="comment"># ('zh_CN', 'UTF-8')</span></span><br><span class="line">            <span class="comment"># If the system locale is not available to the runtime use English</span></span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> system_locale <span class="keyword">or</span> <span class="keyword">not</span> system_locale[<span class="number">0</span>]:</span><br><span class="line">                desired_locale = <span class="string">'en_US'</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                desired_locale = system_locale[<span class="number">0</span>] <span class="comment"># zh_CN</span></span><br><span class="line"></span><br><span class="line">        locale_dir = os.environ.get(</span><br><span class="line">            _locale.get_locale_dir_variable_name(domain) <span class="comment"># return domain.upper().replace('.', '_').replace('-', '_') + '_LOCALEDIR'，即AODH_LOCALEDIR</span></span><br><span class="line">        )</span><br><span class="line">        <span class="comment"># &lt;gettext.GNUTranslations instance at 0x7f8ad9e3e200&gt;</span></span><br><span class="line">        lang = gettext.translation(domain,</span><br><span class="line">                                   localedir=locale_dir,</span><br><span class="line">                                   languages=[desired_locale],</span><br><span class="line">                                   fallback=<span class="keyword">True</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> has_contextual_form <span class="keyword">and</span> <span class="keyword">not</span> has_plural_form:</span><br><span class="line">            <span class="comment"># This is the most common case, so check it first.</span></span><br><span class="line">            translator = lang.gettext <span class="keyword">if</span> six.PY3 <span class="keyword">else</span> lang.ugettext</span><br><span class="line">            translated_message = translator(msgid) <span class="comment"># u'\u8fdb\u5165app\u5de5\u5382'</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">elif</span> has_contextual_form <span class="keyword">and</span> has_plural_form:</span><br><span class="line">            <span class="comment"># Reserved for contextual and plural translation function,</span></span><br><span class="line">            <span class="comment"># which is not yet implemented.</span></span><br><span class="line">            <span class="keyword">raise</span> ValueError(<span class="string">"Unimplemented."</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">elif</span> has_contextual_form:</span><br><span class="line">            (msgctx, msgtxt) = msgid</span><br><span class="line">            translator = lang.gettext <span class="keyword">if</span> six.PY3 <span class="keyword">else</span> lang.ugettext</span><br><span class="line"></span><br><span class="line">            msg_with_ctx = <span class="string">"%s%s%s"</span> % (msgctx, CONTEXT_SEPARATOR, msgtxt)</span><br><span class="line">            translated_message = translator(msg_with_ctx)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> CONTEXT_SEPARATOR <span class="keyword">in</span> translated_message:</span><br><span class="line">                <span class="comment"># Translation not found, use the original text</span></span><br><span class="line">                translated_message = msgtxt</span><br><span class="line"></span><br><span class="line">        <span class="keyword">elif</span> has_plural_form:</span><br><span class="line">            (msgsingle, msgplural, msgcount) = msgid</span><br><span class="line">            translator = lang.ngettext <span class="keyword">if</span> six.PY3 <span class="keyword">else</span> lang.ungettext</span><br><span class="line">            translated_message = translator(msgsingle, msgplural, msgcount)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> translated_message</span><br></pre></td></tr></table></figure>
+<p>上面分析了aodh已经开启了懒加载模式，所以这里实例化了一个Message类，调用 <code>_translate_msgid</code> 方法</p>
+<p>经过调试发现，所谓的oslo_i18n的懒加载模式实际是获取localedir,获取当前环境变量中的语言，然后找到对应的翻译方法，对msgid进行翻译，获取对应的msgstr，因而能翻译出对应的语言。使用不使用懒加载模式，按照道理应该不影响。</p>
+<p>来看下获取环境变量的过程， <code>getdefaultlocale</code></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">getdefaultlocale</span><span class="params">(envvars=<span class="params">(<span class="string">'LC_ALL'</span>, <span class="string">'LC_CTYPE'</span>, <span class="string">'LANG'</span>, <span class="string">'LANGUAGE'</span>)</span>)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="comment"># check if it's supported by the _locale module</span></span><br><span class="line">        <span class="keyword">import</span> _locale</span><br><span class="line">        code, encoding = _locale._getdefaultlocale()</span><br><span class="line">    <span class="keyword">except</span> (ImportError, AttributeError):</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="comment"># make sure the code/encoding values are valid</span></span><br><span class="line">        <span class="keyword">if</span> sys.platform == <span class="string">"win32"</span> <span class="keyword">and</span> code <span class="keyword">and</span> code[:<span class="number">2</span>] == <span class="string">"0x"</span>:</span><br><span class="line">            <span class="comment"># map windows language identifier to language name</span></span><br><span class="line">            code = windows_locale.get(int(code, <span class="number">0</span>))</span><br><span class="line">        <span class="comment"># ...add other platform-specific processing here, if</span></span><br><span class="line">        <span class="comment"># necessary...</span></span><br><span class="line">        <span class="keyword">return</span> code, encoding</span><br><span class="line"></span><br><span class="line">    <span class="comment"># fall back on POSIX behaviour</span></span><br><span class="line">    <span class="keyword">import</span> os</span><br><span class="line">    lookup = os.environ.get</span><br><span class="line">    <span class="keyword">for</span> variable <span class="keyword">in</span> envvars:</span><br><span class="line">        localename = lookup(variable,<span class="keyword">None</span>)</span><br><span class="line">        <span class="keyword">if</span> localename:</span><br><span class="line">            <span class="keyword">if</span> variable == <span class="string">'LANGUAGE'</span>:</span><br><span class="line">                localename = localename.split(<span class="string">':'</span>)[<span class="number">0</span>]</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        localename = <span class="string">'C'</span></span><br><span class="line">    <span class="keyword">return</span> _parse_localename(localename)</span><br></pre></td></tr></table></figure>
+<p>这里整体的逻辑是在寻找语言编码的时候默认是按照这个顺序:(‘LC_ALL’, ‘LC_CTYPE’, ‘LANG’, ‘LANGUAGE’)去查找对应环境变量，一旦找到环境变量，就对该环境变量解析，</p>
+<p>然后调用下面的方法:<code>_parse_localename</code></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_parse_localename</span><span class="params">(localename)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="string">""" Parses the locale code for localename and returns the</span></span><br><span class="line"><span class="string">        result as tuple (language code, encoding).</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        The localename is normalized and passed through the locale</span></span><br><span class="line"><span class="string">        alias engine. A ValueError is raised in case the locale name</span></span><br><span class="line"><span class="string">        cannot be parsed.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        The language code corresponds to RFC 1766.  code and encoding</span></span><br><span class="line"><span class="string">        can be None in case the values cannot be determined or are</span></span><br><span class="line"><span class="string">        unknown to this implementation.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    code = normalize(localename)</span><br><span class="line">    <span class="keyword">if</span> <span class="string">'@'</span> <span class="keyword">in</span> code:</span><br><span class="line">        <span class="comment"># Deal with locale modifiers</span></span><br><span class="line">        code, modifier = code.split(<span class="string">'@'</span>, <span class="number">1</span>)</span><br><span class="line">        <span class="keyword">if</span> modifier == <span class="string">'euro'</span> <span class="keyword">and</span> <span class="string">'.'</span> <span class="keyword">not</span> <span class="keyword">in</span> code:</span><br><span class="line">            <span class="comment"># Assume Latin-9 for @euro locales. This is bogus,</span></span><br><span class="line">            <span class="comment"># since some systems may use other encodings for these</span></span><br><span class="line">            <span class="comment"># locales. Also, we ignore other modifiers.</span></span><br><span class="line">            <span class="keyword">return</span> code, <span class="string">'iso-8859-15'</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="string">'.'</span> <span class="keyword">in</span> code:</span><br><span class="line">        <span class="keyword">return</span> tuple(code.split(<span class="string">'.'</span>)[:<span class="number">2</span>]) <span class="comment"># 按点号分割得到: ('zh_CN', 'UTF-8')</span></span><br><span class="line">    <span class="keyword">elif</span> code == <span class="string">'C'</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">None</span>, <span class="keyword">None</span></span><br><span class="line">    <span class="keyword">raise</span> ValueError, <span class="string">'unknown locale: %s'</span> % localename</span><br></pre></td></tr></table></figure>
+<p>按点号分割得到: (‘zh_CN’, ‘UTF-8’)</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>i18n的懒加载翻译模式中通过使用<code>oslo_i18n.TranslatorFactory(domain=DOMAIN).primary</code>方法进行翻译，里面调用<code>=_make_translation_func</code>方法返回<code>i18n</code>自己定义<code>Message</code>对象，该对象包含了待翻译的信息，最后调用<code>_translate_msgid</code>获取<code>msgid</code>对应的国际化翻译内容<code>msgstr</code>。其中需要设置两样东西:一个是项目本身的<code>localedir</code>目录，为的是找到对应的<code>mo,po</code>等文件信息；一个是设置语言环境变量，优先级从高到低如下: <code>&#39;LC_ALL&#39;, &#39;LC_CTYPE&#39;, &#39;LANG&#39;, &#39;LANGUAGE&#39;</code>。设置<code>LC_ALL</code>即可不用设置其他环境变量。另外注意: 设置不同语言环境变量，需要重启组件的服务才可以生效。</p>
+<h2 id="番外：-po和-mo文件"><a href="#番外：-po和-mo文件" class="headerlink" title="番外：.po和.mo文件"></a>番外：.po和.mo文件</h2><p>介绍：PO 是 Portable Object (可移植对象)的缩写形式；MO 是 Machine Object (机器对象) 的缩写形式。PO 文件是面向翻译人员的、提取于源代码的一种资源文件。当软件升级的时候，通过使用 gettext 软件包处理 PO 文件，可以在一定程度上使翻译成果得以继承，减轻翻译人员的负担。MO 文件是面向计算机的、由 PO 文件通过 gettext 软件包编译而成的二进制文件。程序通过读取 MO 文件使自身的界面转换成用户使用的语言。</p>
+<p>po文件和mo文件通过msgfmt工具和pygettext转化。</p>
+<ol>
+<li>创建po文件:在Python安装目录下的 ./Tools/i18n/ 中找到pygettext.py运行之,生成翻译文件模版messages.pot。内容如下：</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># SOME DESCRIPTIVE TITLE.</span></span><br><span class="line"><span class="comment"># Copyright (C) YEAR ORGANIZATION</span></span><br><span class="line"><span class="comment"># FIRST AUTHOR &lt;EMAIL@ADDRESS&gt;, YEAR.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">msgid <span class="string">""</span></span><br><span class="line">msgstr <span class="string">""</span></span><br><span class="line"><span class="string">"Project-Id-Version: PACKAGE VERSION\n"</span></span><br><span class="line"><span class="string">"POT-Creation-Date: 2018-03-13 11:01+0800\n"</span></span><br><span class="line"><span class="string">"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"</span></span><br><span class="line"><span class="string">"Last-Translator: FULL NAME &lt;EMAIL@ADDRESS&gt;\n"</span></span><br><span class="line"><span class="string">"Language-Team: LANGUAGE &lt;LL@li.org&gt;\n"</span></span><br><span class="line"><span class="string">"MIME-Version: 1.0\n"</span></span><br><span class="line"><span class="string">"Content-Type: text/plain; charset=cp936\n"</span></span><br><span class="line"><span class="string">"Content-Transfer-Encoding: 8bit\n"</span></span><br><span class="line"><span class="string">"Generated-By: pygettext.py 1.5\n"</span></span><br></pre></td></tr></table></figure>
+<p>将charset改为charset=UTF-8，其余的可以不用改动。其中的msgid为键值，对应你程序里写的文本，如：_(“New File”)，而msgstr为翻译后的值。添加翻译语句：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># SOME DESCRIPTIVE TITLE.</span></span><br><span class="line"><span class="comment"># Copyright (C) YEAR ORGANIZATION</span></span><br><span class="line"><span class="comment"># FIRST AUTHOR &lt;EMAIL@ADDRESS&gt;, YEAR.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">msgid <span class="string">""</span></span><br><span class="line">msgstr <span class="string">""</span></span><br><span class="line"><span class="string">"Project-Id-Version: PACKAGE VERSION\n"</span></span><br><span class="line"><span class="string">"POT-Creation-Date: 2018-03-13 11:01+0800\n"</span></span><br><span class="line"><span class="string">"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"</span></span><br><span class="line"><span class="string">"Last-Translator: FULL NAME &lt;EMAIL@ADDRESS&gt;\n"</span></span><br><span class="line"><span class="string">"Language-Team: LANGUAGE &lt;LL@li.org&gt;\n"</span></span><br><span class="line"><span class="string">"MIME-Version: 1.0\n"</span></span><br><span class="line"><span class="string">"Content-Type: text/plain; charset=UTF-8\n"</span></span><br><span class="line"><span class="string">"Content-Transfer-Encoding: 8bit\n"</span></span><br><span class="line"><span class="string">"Generated-By: pygettext.py 1.5\n"</span></span><br><span class="line">msgid <span class="string">" Hello world!"</span></span><br><span class="line">msgstr <span class="string">"世界你好!"</span></span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">msgid <span class="string">" Python is a good Language."</span></span><br><span class="line">msgstr <span class="string">"Python 是门好语言."</span></span><br></pre></td></tr></table></figure>
+<p>保存该文件，并重命名为messages.po</p>
+<ol>
+<li>创建mo文件：在Python安装目录下的 ./Tools/i18n/ 中找到msgfmt.py，在Python模式下，注意messages.po存在的路径：</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python msgfmt.py messages.po</span><br></pre></td></tr></table></figure>
+<p>也可以使用msgfmt命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">msgfmt /aodh/aodh/locale/zh_CN/LC_MESSAGES/messages.mo -o aodh/aodh/locale/zh_CN/LC_MESSAGES/messages.mo</span><br></pre></td></tr></table></figure>
+<p>将生成一个messages.mo文件。</p>
+<ol>
+<li>建立翻译文件路径：在src目录下创建/locale/zh_CN/LC_MESSAGES/，将messages.po和messages.mo文件拷贝其中。</li>
+</ol>
+<p>即：./src/locale/zh_CN/LC_MESSAGES/messages.po</p>
+<p>./src/locale/zh_CN/LC_MESSAGES/messages.mo</p>
+<ol>
+<li>建立demo.py，Python通过gettext模块支持国际化(i18n),可以实现程序的多语言界面的支持,如下引入gettext模块：</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="keyword">import</span> gettext</span><br><span class="line">gettext.install(<span class="string">'messages'</span>, <span class="string">'./locale'</span>, codeset=<span class="keyword">False</span>)</span><br><span class="line">gettext.translation(<span class="string">'messages'</span>, <span class="string">'./locale'</span>, languages=[<span class="string">'zh_CN'</span>]).install(<span class="keyword">True</span>)</span><br><span class="line">print(_(<span class="string">"Hello world!"</span>))</span><br><span class="line">print(_(<span class="string">"Python is a good Language."</span>))</span><br></pre></td></tr></table></figure>
+<p>一切工作准备就绪，运行demo.py，查看是否输出中文：世界你好! Python是门好语言.</p>
+<p>另外可以借助工具生成.po和.mo文件，比如Poedit、Zenata等。以下介绍Poedit：</p>
+<h3 id="Poedit"><a href="#Poedit" class="headerlink" title="Poedit"></a>Poedit</h3><p>下载并安装Poedit，打开Poedit，上方工具栏File，新建，在弹出的弹框填入名称messages，确定后按ctrl+s，就创建了messages.po模板文件。将要翻译的语言写入，如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Copyright (C) 2018 THE PACKAGE'S COPYRIGHT HOLDER</span></span><br><span class="line"><span class="comment"># This file is distributed under the same license as the PACKAGE package.</span></span><br><span class="line"><span class="comment"># Automatically generated, 2018.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">msgid <span class="string">""</span></span><br><span class="line">msgstr <span class="string">""</span></span><br><span class="line"><span class="string">"Project-Id-Version: \n"</span></span><br><span class="line"><span class="string">"Report-Msgid-Bugs-To: \n"</span></span><br><span class="line"><span class="string">"POT-Creation-Date: 2018-02-26 12:20+0800\n"</span></span><br><span class="line"><span class="string">"PO-Revision-Date: 2018-02-26 15:58+0800\n"</span></span><br><span class="line"><span class="string">"Last-Translator: Automatically generated\n"</span></span><br><span class="line"><span class="string">"Language-Team: none\n"</span></span><br><span class="line"><span class="string">"Language: zh_CN\n"</span></span><br><span class="line"><span class="string">"MIME-Version: 1.0\n"</span></span><br><span class="line"><span class="string">"Content-Type: text/plain; charset=UTF-8\n"</span></span><br><span class="line"><span class="string">"Content-Transfer-Encoding: 8bit\n"</span></span><br><span class="line"><span class="string">"X-Generator: Poedit 2.0.6\n"</span></span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">msgid <span class="string">"Hello world!"</span></span><br><span class="line">msgstr <span class="string">"世界你好!"</span></span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">msgid <span class="string">"Python is a good Language."</span></span><br><span class="line">msgstr <span class="string">"Python是门好语言."</span></span><br></pre></td></tr></table></figure>
+<p>保存后，用Poedit打开po文件，并在File中的下拉框“编译为mo文件”，生成messages.mo文件。生成两个文件后拷贝在/locale/zh_CN/LC_MESSAGES/。</p>
+<p>重写i18n的实现。i18n.py:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*- coding:utf-8 -*-</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> gettext</span><br><span class="line"><span class="keyword">import</span> threading</span><br><span class="line"> </span><br><span class="line">localedir = os.path.join(os.path.dirname(__file__), <span class="string">'locale'</span>)</span><br><span class="line">domain = <span class="string">'messages'</span></span><br><span class="line">threadLocalData = threading.local()</span><br><span class="line">threadLocalData.locale = <span class="string">'en_US'</span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># find out all supported locales in locale directory</span></span><br><span class="line">locales = []</span><br><span class="line"><span class="keyword">for</span> dirpath, dirnames, filenames <span class="keyword">in</span> os.walk(localedir):</span><br><span class="line">  <span class="keyword">for</span> dirname <span class="keyword">in</span> dirnames:</span><br><span class="line">    locales.append(dirname)</span><br><span class="line">  <span class="keyword">break</span></span><br><span class="line"> </span><br><span class="line">AllTranslations = &#123;&#125;</span><br><span class="line"><span class="keyword">for</span> locale <span class="keyword">in</span> locales:</span><br><span class="line">  AllTranslations[locale] = gettext.translation(domain, localedir, [locale])</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">gettext</span><span class="params">(message)</span>:</span></span><br><span class="line">  <span class="keyword">return</span> AllTranslations[ threadLocalData.locale ].gettext(message)</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">ugettext</span><span class="params">(message)</span>:</span></span><br><span class="line">  <span class="keyword">return</span> AllTranslations[ threadLocalData.locale ].ugettext(message)</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">ngettext</span><span class="params">(singular, plural, n)</span>:</span></span><br><span class="line">  <span class="keyword">return</span> AllTranslations[ threadLocalData.locale ].ngettext(singular, plural, n)</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">ungettext</span><span class="params">(singular, plural, n)</span>:</span></span><br><span class="line">  <span class="keyword">return</span> AllTranslations[ threadLocalData.locale ].ungettext(singular, plural, n)</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">setLocale</span><span class="params">(locale)</span>:</span></span><br><span class="line">  <span class="keyword">if</span> locale <span class="keyword">in</span> locales:</span><br><span class="line">    threadLocalData.locale = locale</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">   <span class="comment">#for test purpose</span></span><br><span class="line">   <span class="keyword">for</span> dirpath, dirnames, filenames <span class="keyword">in</span> os.walk(localedir):</span><br><span class="line">          <span class="keyword">for</span> dirname <span class="keyword">in</span> dirnames:</span><br><span class="line">               print(dirname)</span><br><span class="line">          <span class="keyword">break</span></span><br></pre></td></tr></table></figure>
+<p>demo2.py:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*- coding:utf-8 -*-</span></span><br><span class="line"><span class="keyword">import</span> i18n</span><br><span class="line"> </span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    i18n.setLocale(<span class="string">"zh_CN"</span>)</span><br><span class="line">    print(i18n.gettext(<span class="string">"Hello world!"</span>))</span><br><span class="line">    print(i18n.gettext(<span class="string">"Python is a good Language."</span>))</span><br></pre></td></tr></table></figure>
+<p>保存，运行demo2.py,查看结果！</p>
+<p>参考：</p>
+<p><a href="https://www.huaweicloud.com/articles/725cf3f2bf8930362f0422ee1124910b.html" target="_blank" rel="external">python库之i18n原理分析</a></p>
+<p><a href="https://blog.csdn.net/ANXIN997483092/article/details/79539203?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-7.no_search_link&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-7.no_search_link" target="_blank" rel="external">关于OpenStack的i18n语言国际化实现</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+<blockquote class="blockquote-center" style="color: #ccc;">
+    -------------本文结束 <i class="fa fa-apple"></i> 感谢您的阅读-------------
+</blockquote>
+
+  <span id="inline-green" style="border-radius:3px;">作者</span>：<a class="link-blue" href="https://github.com/magiceses" target="_blank">Magiceses</a><br/>有问题请 <a class="link-blue" href="https://magiceses.github.io/guestbook" target="_blank">留言</a> 或者私信我的 <a class="link-blue" href="https://weibo.com/u/3069595351" target="_blank">微博</a>。
+
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>满分是10分的话，这篇文章你给几分</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/reward/reward_wechat.png" alt="magiceses WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/reward/reward_alipay.png" alt="magiceses Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Openstack/" rel="tag"><i class="fa fa-tag"></i> Openstack</a>
+          
+            <a href="/tags/Oslo/" rel="tag"><i class="fa fa-tag"></i> Oslo</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/10/05/openstack-oslo.packages-oslo.log/" rel="next" title="Oslo系列之oslo.log">
+                <i class="fa fa-chevron-left"></i> Oslo系列之oslo.log
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/10/05/openstack-oslo.packages-oslo.i18n-上/" rel="prev" title="Oslo系列之oslo.i18n-上">
+                Oslo系列之oslo.i18n-上 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar/avatar.png"
+               alt="magiceses" />
+          <p class="site-author-name" itemprop="name">magiceses</p>
+          <p class="site-description motion-element" itemprop="description">Stay Hungry,Stay Foolish</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">61</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/magiceses" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://blog.csdn.net/weixin_43700106" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-chrome"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/weblog" title="建站日志" target="_blank">建站日志</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/reward" title="打赏" target="_blank">打赏</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#源码分析"><span class="nav-number">2.</span> <span class="nav-text">源码分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#番外：-po和-mo文件"><span class="nav-number">4.</span> <span class="nav-text">番外：.po和.mo文件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Poedit"><span class="nav-number">4.1.</span> <span class="nav-text">Poedit</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+      
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="busuanzi-count">
+
+  <!-- <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script> -->
+  <!-- 上面这个是之前的，不知道为什么失效了，改成下面这个 -->
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">您是第<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>个小伙伴</span>
+  
+
+  
+    <span class="site-pv">本站总浏览<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">magiceses</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Pisces
+  </a>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count" style="color: #e90f92;">全站共 1m 字</span>
+</div>
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+  <!-- 按需加载背景 -->
+  <!-- 背景动画 -->
+<script type="text/javascript">
+  // 按需加载背景
+  // 如果是all，就直接加载了
+  if("pc" == "all") {
+    $.getScript("/js/src/particle.js?v=5.0.1");
+  }
+  // 识别手机或电脑的js开始
+  (function(){
+    var res = GetRequest();
+    var par = res['index'];
+    if(par!='gfan'){
+      var ua=navigator.userAgent.toLowerCase();
+      var contains=function (a, b){
+          if(a.indexOf(b)!=-1){return true;}
+      };
+      if((contains(ua,"android") && contains(ua,"mobile"))||(contains(ua,"android") && contains(ua,"mozilla"))||(contains(ua,"android") && contains(ua,"opera"))||contains(ua,"ucweb7")||contains(ua,"iphone")){
+        return false;
+      } else {
+        $.getScript("/js/src/particle.js?v=5.0.1");
+      }
+    }
+  })();
+  function GetRequest() {
+    var url = location.search;
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+      var str = url.substr(1);
+      strs = str.split("&");
+      for(var i = 0; i < strs.length; i ++) {
+        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+      }
+    }
+    return theRequest;
+  }
+</script>
+<!-- 识别手机或电脑的js结束 -->  
+
+  <!-- 页面点击小红心 -->
+  <!-- 页面点击小红心 -->
+
+  <script type="text/javascript" src="/js/src/love.js?v=5.0.1"></script>
+
+
+  <!-- 鼠标移动，效果 -->
+  <!-- 鼠标移动特效 -->
+
+  <script type="text/javascript" src="/js/src/jquery-stars.js?v=5.0.1"></script>
+  <script type="text/javascript">
+  jQuery('body').jstars({
+  	image_path: '/images',
+  	image: 'candy-cane-stars.png',
+  	style: 'white',
+  	width: 34,
+  	height: 34,
+  	delay: 700,
+  	frequency: 5
+  });
+  </script>
+
+
+  <!-- 页面 title 进入/离开 效果 -->
+
+  <script type="text/javascript">var OriginTitile=document.title,st;document.addEventListener("visibilitychange",function(){document.hidden?(document.title="Waiting for you back！",clearTimeout(st)):(document.title="Thanks for visit~ "+OriginTitile,st=setTimeout(function(){document.title=OriginTitile},4e3))})</script>
+
+
+</body>
+</html>

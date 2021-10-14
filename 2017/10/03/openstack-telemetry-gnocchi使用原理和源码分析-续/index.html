@@ -1,0 +1,1564 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Courier New:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Openstack,Telemetry,Gnocchi," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="天青色等烟雨" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="任何你的不足，在你成功的那刻，都会被人说为特色。所以，坚持做你自己，而不是在路上被别人修改的面目全非。
+
+继续上篇的内容之前，先介绍下和今天有关系的两个库 numpy 、 pandas
+工具pandas简介Python Data Analysis Library 或 pandas 是基于NumPy 的一种工具，该工具是为了解决数据分析任务而创建的。Pandas 纳入了大量库和一些标准的数据模型，提">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Gnocchi 使用原理及源码分析-下">
+<meta property="og:url" content="https://magiceses.github.io/2017/10/03/openstack-telemetry-gnocchi使用原理和源码分析-续/index.html">
+<meta property="og:site_name" content="天青色等烟雨">
+<meta property="og:description" content="任何你的不足，在你成功的那刻，都会被人说为特色。所以，坚持做你自己，而不是在路上被别人修改的面目全非。
+
+继续上篇的内容之前，先介绍下和今天有关系的两个库 numpy 、 pandas
+工具pandas简介Python Data Analysis Library 或 pandas 是基于NumPy 的一种工具，该工具是为了解决数据分析任务而创建的。Pandas 纳入了大量库和一些标准的数据模型，提">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-telemetry-6.png">
+<meta property="og:image" content="https://magiceses.github.io/images/openstack-telemetry-7.png">
+<meta property="og:updated_time" content="2021-10-13T12:27:29.814Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Gnocchi 使用原理及源码分析-下">
+<meta name="twitter:description" content="任何你的不足，在你成功的那刻，都会被人说为特色。所以，坚持做你自己，而不是在路上被别人修改的面目全非。
+
+继续上篇的内容之前，先介绍下和今天有关系的两个库 numpy 、 pandas
+工具pandas简介Python Data Analysis Library 或 pandas 是基于NumPy 的一种工具，该工具是为了解决数据分析任务而创建的。Pandas 纳入了大量库和一些标准的数据模型，提">
+<meta name="twitter:image" content="https://magiceses.github.io/images/openstack-telemetry-6.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://magiceses.github.io/2017/10/03/openstack-telemetry-gnocchi使用原理和源码分析-续/"/>
+
+
+<!-- 网页加载条 -->
+<script src="/js/src/pace.min.js"></script>
+  <title> Gnocchi 使用原理及源码分析-下 | 天青色等烟雨 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">天青色等烟雨</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">而我在等你</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-guestbook">
+          <a href="/guestbook" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-commenting"></i> <br />
+            
+            留言
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+      
+      
+        <li class="menu-item"> <a title="把这个链接拖到你的工具栏中,任何网页都可以High" href='javascript:(
+/*
+ * Copyright (C) 2016 Never_yu (Neveryu.github.io) <React.dong.yu@gmail.com>
+ * Sina Weibo (http://weibo.com/Neveryu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function go() {
+
+var songs = [
+  "http://dl.stream.qqmusic.qq.com/C400001Qu4I30eVFYb.m4a?vkey=2127178E4405E7B8B268F20F05232485735CCF4FF8C1432F0360D2626D0B6C9564B5627C7AB481BBC685FEDB0946A50E97C66F0D1B008226&guid=7175649092&uin=0&fromtag=66",
+  "",
+  "",
+  ""
+];
+
+function c() {
+  var e = document.createElement("link");
+  e.setAttribute("type", "text/css");
+  e.setAttribute("rel", "stylesheet");
+  e.setAttribute("href", f);
+  e.setAttribute("class", l);
+  document.body.appendChild(e)
+}
+
+function h() {
+  var e = document.getElementsByClassName(l);
+  for (var t = 0; t < e.length; t++) {
+    document.body.removeChild(e[t])
+  }
+}
+
+function p() {
+  var e = document.createElement("div");
+  e.setAttribute("class", a);
+  document.body.appendChild(e);
+  setTimeout(function() {
+    document.body.removeChild(e)
+  }, 100)
+}
+
+function d(e) {
+  return {
+    height : e.offsetHeight,
+    width : e.offsetWidth
+  }
+}
+
+function v(i) {
+  var s = d(i);
+  return s.height > e && s.height < n && s.width > t && s.width < r
+}
+
+function m(e) {
+  var t = e;
+  var n = 0;
+  while (!!t) {
+    n += t.offsetTop;
+    t = t.offsetParent
+  }
+  return n
+}
+
+function g() {
+  var e = document.documentElement;
+  if (!!window.innerWidth) {
+    return window.innerHeight
+  } else if (e && !isNaN(e.clientHeight)) {
+    return e.clientHeight
+  }
+  return 0
+}
+
+function y() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  }
+  return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+}
+
+function E(e) {
+  var t = m(e);
+  return t >= w && t <= b + w
+}
+
+function S() {
+  var e = document.getElementById("audio_element_id");
+  if(e != null){
+    var index = parseInt(e.getAttribute("curSongIndex"));
+    if(index > songs.length - 2) {
+      index = 0;
+    } else {
+      index++;
+    }
+    e.setAttribute("curSongIndex", index);
+    N();
+  }
+
+  e.src = i;
+  e.play()
+}
+
+function x(e) {
+  e.className += " " + s + " " + o
+}
+
+function T(e) {
+  e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+}
+
+function N() {
+  var e = document.getElementsByClassName(s);
+  var t = new RegExp("\\b" + s + "\\b");
+  for (var n = 0; n < e.length; ) {
+    e[n].className = e[n].className.replace(t, "")
+  }
+}
+
+function initAudioEle() {
+  var e = document.getElementById("audio_element_id");
+  if(e === null){
+    e = document.createElement("audio");
+    e.setAttribute("class", l);
+    e.setAttribute("curSongIndex", 0);
+    e.id = "audio_element_id";
+    e.loop = false;
+    e.bgcolor = 0;
+    e.addEventListener("canplay", function() {
+      setTimeout(function() {
+        x(k)
+      }, 500);
+      setTimeout(function() {
+        N();
+        p();
+        for (var e = 0; e < O.length; e++) {
+          T(O[e])
+        }
+      }, 15500)
+    }, true);
+    e.addEventListener("ended", function() {
+      N();
+      h();
+      go();
+    }, true);
+    e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+    document.body.appendChild(e);
+  }
+}
+
+initAudioEle();
+var e = 30;
+var t = 30;
+var n = 350;
+var r = 350;
+
+var curSongIndex = parseInt(document.getElementById("audio_element_id").getAttribute("curSongIndex"));
+var i = songs[curSongIndex];
+
+var s = "mw-harlem_shake_me";
+var o = "im_first";
+var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+var a = "mw-strobe_light";
+
+/* harlem-shake-style.css，替换成你的位置，也可以直接使用：//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css */
+var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+
+var l = "mw_added_css";
+var b = g();
+var w = y();
+var C = document.getElementsByTagName("*");
+var k = null;
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    if (E(A)) {
+      k = A;
+      break
+    }
+  }
+}
+if (A === null) {
+  console.warn("Could not find a node of the right size. Please try a different page.");
+  return
+}
+c();
+S();
+var O = [];
+for (var L = 0; L < C.length; L++) {
+  var A = C[L];
+  if (v(A)) {
+    O.push(A)
+  }
+}
+})()'><i class="menu-item-icon fa fa-music fa-fw"></i> High一下</a></li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search fa-lg"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Gnocchi 使用原理及源码分析-下
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-10-03T23:25:24+08:00" content="2017-10-03">
+              2017-10-03
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Openstack/" itemprop="url" rel="index">
+                    <span itemprop="name">Openstack</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv">热度
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p id="div-border-top-green">任何你的不足，在你成功的那刻，都会被人说为特色。所以，坚持做你自己，而不是在路上被别人修改的面目全非。<br></p>
+
+<p>继续上篇的内容之前，先介绍下和今天有关系的两个库 numpy 、 pandas</p>
+<h1 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h1><h2 id="pandas"><a href="#pandas" class="headerlink" title="pandas"></a>pandas</h2><h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>Python Data Analysis Library 或 pandas 是基于NumPy 的一种工具，该工具是为了解决数据分析任务而创建的。Pandas 纳入了大量库和一些标准的数据模型，提供了高效地操作大型数据集所需的工具。pandas提供了大量能使我们快速便捷地处理数据的函数和方法。你很快就会发现，它是使Python成为强大而高效的数据分析环境的重要因素之一。</p>
+<p>Pandas 是python的一个数据分析包，最初由AQR Capital Management于2008年4月开发，并于2009年底开源出来，目前由专注于Python数据包开发的PyData开发team继续开发和维护，属于PyData项目的一部分。Pandas最初被作为金融数据分析工具而开发出来，因此，pandas为时间序列分析提供了很好的支持。 Pandas的名称来自于面板数据（panel data）和python数据分析（data analysis）。panel data是经济学中关于多维数据集的一个术语，在Pandas中也提供了panel的数据类型。</p>
+<a id="more"></a>
+<h3 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h3><p>Series：一维数组，与Numpy中的一维array类似。二者与Python基本的数据结构List也很相近，其区别是：List中的元素可以是不同的数据类型，而Array和Series中则只允许存储相同的数据类型，这样可以更有效的使用内存，提高运算效率。以下内容基本以这种结构为主。</p>
+<p>Time- Series：以时间为索引的Series。</p>
+<p>DataFrame：二维的表格型数据结构。很多功能与R中的data.frame类似。可以将DataFrame理解为Series的容器。</p>
+<p>Panel ：三维的数组，可以理解为DataFrame的容器。</p>
+<p>Pandas 有两种自己独有的基本数据结构。读者应该注意的是，它固然有着两种数据结构，因为它依然是 Python 的一个库，所以，Python 中有的数据类型在这里依然适用，也同样还可以使用类自己定义数据类型。只不过，Pandas 里面又定义了两种数据类型：Series 和 DataFrame，它们让数据操作更简单了。</p>
+<h3 id="使用-Series"><a href="#使用-Series" class="headerlink" title="使用 Series"></a>使用 Series</h3><h4 id="创建-series"><a href="#创建-series" class="headerlink" title="创建 series"></a>创建 series</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#导入 Pandas 包</span></span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"></span><br><span class="line"><span class="comment">#创建Series</span></span><br><span class="line"><span class="comment">#1.1.1 通过列表 List</span></span><br><span class="line">listSer=pd.Series([<span class="number">10</span>,<span class="number">20</span>,<span class="number">30</span>,<span class="number">40</span>])</span><br><span class="line">print(listSer)</span><br><span class="line"></span><br><span class="line"><span class="comment">#1.1.2 通过字典 dict</span></span><br><span class="line">dictSer=pd.Series(&#123;<span class="string">'a'</span>:<span class="number">10</span>,<span class="string">'b'</span>:<span class="number">40</span>,<span class="string">'c'</span>:<span class="number">5</span>,<span class="string">'d'</span>:<span class="number">90</span>,<span class="string">'e'</span>:<span class="number">35</span>,<span class="string">'f'</span>:<span class="number">40</span>&#125;,name=<span class="string">'数值'</span>)</span><br><span class="line">print(dictSer)</span><br><span class="line"></span><br><span class="line"><span class="comment">#1.1.3 通过 array</span></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line">arrySer=pd.Series(np.arange(<span class="number">10</span>,<span class="number">15</span>),index=[<span class="string">'a'</span>,<span class="string">'b'</span>,<span class="string">'c'</span>,<span class="string">'d'</span>,<span class="string">'e'</span>])</span><br><span class="line">print(arrySer)</span><br><span class="line"></span><br><span class="line">[output]</span><br><span class="line"><span class="number">0</span>    <span class="number">10</span></span><br><span class="line"><span class="number">1</span>    <span class="number">20</span></span><br><span class="line"><span class="number">2</span>    <span class="number">30</span></span><br><span class="line"><span class="number">3</span>    <span class="number">40</span></span><br><span class="line">dtype: int64</span><br><span class="line">a    <span class="number">10</span></span><br><span class="line">b    <span class="number">40</span></span><br><span class="line">c     <span class="number">5</span></span><br><span class="line">d    <span class="number">90</span></span><br><span class="line">e    <span class="number">35</span></span><br><span class="line">f    <span class="number">40</span></span><br><span class="line">Name: 数值, dtype: int64</span><br><span class="line">a    <span class="number">10</span></span><br><span class="line">b    <span class="number">11</span></span><br><span class="line">c    <span class="number">12</span></span><br><span class="line">d    <span class="number">13</span></span><br><span class="line">e    <span class="number">14</span></span><br><span class="line">dtype: int64</span><br></pre></td></tr></table></figure>
+<h4 id="index及value属性"><a href="#index及value属性" class="headerlink" title="index及value属性"></a>index及value属性</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Series类型包括(index,values)两部分</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#index</span></span><br><span class="line">print(arrySer.index)</span><br><span class="line"><span class="comment">#values</span></span><br><span class="line">print(arrySer.values)</span><br><span class="line"></span><br><span class="line">[output]</span><br><span class="line">Index([<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>, <span class="string">'d'</span>, <span class="string">'e'</span>],dtype=<span class="string">'object'</span>)</span><br><span class="line">[<span class="number">10</span> <span class="number">11</span> <span class="number">12</span> <span class="number">13</span> <span class="number">14</span>]</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">pandas.Index.is_monotonic <span class="comment"># Alias for is_monotonic_increasing</span></span><br><span class="line"></span><br><span class="line">pandas.Index.is_monotonic_increasing</span><br><span class="line"><span class="comment"># Return if the index is monotonic increasing (only equal or increasing) values.</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># example</span></span><br><span class="line">Index([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]).is_monotonic_increasing</span><br><span class="line"><span class="keyword">True</span></span><br><span class="line">Index([<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>]).is_monotonic_increasing</span><br><span class="line"><span class="keyword">True</span></span><br><span class="line">Index([<span class="number">1</span>, <span class="number">3</span>, <span class="number">2</span>]).is_monotonic_increasing</span><br><span class="line"><span class="keyword">False</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">pandas.Index.has_duplicates</span><br><span class="line"><span class="comment"># Check if the Index has duplicate values.</span></span><br><span class="line"></span><br><span class="line">idx = pd.Index([<span class="number">1</span>, <span class="number">5</span>, <span class="number">7</span>, <span class="number">7</span>])</span><br><span class="line">idx.has_duplicates</span><br><span class="line"><span class="keyword">True</span></span><br><span class="line"></span><br><span class="line">idx = pd.Index([<span class="number">1</span>, <span class="number">5</span>, <span class="number">7</span>])</span><br><span class="line">idx.has_duplicates</span><br><span class="line"><span class="keyword">False</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">pandas.Series.combine_first(other)</span><br><span class="line"><span class="comment"># 用“other”中相同位置的值更新空元素。</span></span><br><span class="line"><span class="comment"># 通过用另一个系列的非空值填充一个系列中的空值来组合两个系列对象。结果索引将是两个索引的并集。</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># example</span></span><br><span class="line">s1 = pd.Series([<span class="number">1</span>, np.nan])</span><br><span class="line">s2 = pd.Series([<span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>])</span><br><span class="line">s1.combine_first(s2)</span><br><span class="line"><span class="number">0</span>    <span class="number">1.0</span></span><br><span class="line"><span class="number">1</span>    <span class="number">4.0</span></span><br><span class="line"><span class="number">2</span>    <span class="number">5.0</span></span><br><span class="line">dtype: float64</span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line"><span class="comment"># 如果该空值的位置不存在于 other</span></span><br><span class="line">s1 = pd.Series(&#123;<span class="string">'falcon'</span>: np.nan, <span class="string">'eagle'</span>: <span class="number">160.0</span>&#125;)</span><br><span class="line">s2 = pd.Series(&#123;<span class="string">'eagle'</span>: <span class="number">200.0</span>, <span class="string">'duck'</span>: <span class="number">30.0</span>&#125;)</span><br><span class="line">s1.combine_first(s2)</span><br><span class="line">duck       <span class="number">30.0</span></span><br><span class="line">eagle     <span class="number">160.0</span></span><br><span class="line">falcon      NaN</span><br><span class="line">dtype: float64</span><br></pre></td></tr></table></figure>
+<p><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Index.has_duplicates.html" target="_blank" rel="external">pandas methed</a></p>
+<h4 id="获取数据"><a href="#获取数据" class="headerlink" title="获取数据"></a>获取数据</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#iloc通过位置获取数据</span></span><br><span class="line">dictSer[<span class="number">0</span>:<span class="number">1</span>] <span class="comment">#相当于dictSer.iloc[0:1]</span></span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">a    <span class="number">10</span></span><br><span class="line">Name: 数值, dtype: int64</span><br><span class="line"></span><br><span class="line"><span class="comment">#loc通过索引获取数据</span></span><br><span class="line">dictSer[[<span class="string">'a'</span>,<span class="string">'b'</span>]]  <span class="comment">#相当于dictSer.loc[['a','b']]</span></span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">a    <span class="number">10</span></span><br><span class="line">b    <span class="number">40</span></span><br><span class="line">Name: 数值, dtype: int64</span><br><span class="line"></span><br><span class="line"><span class="comment">#boolean indexing获取值</span></span><br><span class="line">dictSer[dictSer.values&lt;=<span class="number">10</span>] <span class="comment">#获取值不超过10的数据</span></span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">a    <span class="number">10</span></span><br><span class="line">c     <span class="number">5</span></span><br><span class="line">Name: 数值, dtype: int64</span><br><span class="line"></span><br><span class="line">dictSer[dictSer.index!=<span class="string">'a'</span>]  <span class="comment">#获取索引值不是a的数据</span></span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">b    <span class="number">40</span></span><br><span class="line">c     <span class="number">5</span></span><br><span class="line">d    <span class="number">90</span></span><br><span class="line">e    <span class="number">35</span></span><br><span class="line">f    <span class="number">40</span></span><br><span class="line">Name: 数值, dtype: int64</span><br></pre></td></tr></table></figure>
+<h4 id="基本运算"><a href="#基本运算" class="headerlink" title="基本运算"></a>基本运算</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看描述性统计数据</span></span><br><span class="line"></span><br><span class="line">dictSer.describe() </span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">count     <span class="number">6.000000</span></span><br><span class="line">mean     <span class="number">36.666667</span></span><br><span class="line">std      <span class="number">30.276504</span></span><br><span class="line">min       <span class="number">5.000000</span></span><br><span class="line"><span class="number">25</span>%      <span class="number">16.250000</span></span><br><span class="line"><span class="number">50</span>%      <span class="number">37.500000</span></span><br><span class="line"><span class="number">75</span>%      <span class="number">40.000000</span></span><br><span class="line">max      <span class="number">90.000000</span></span><br><span class="line">Name: 数值, dtype: float64</span><br><span class="line"></span><br><span class="line">dictSer.mean() <span class="comment">#均值</span></span><br><span class="line">dictSer.median() <span class="comment">#中位数</span></span><br><span class="line">dictSer.sum() <span class="comment">#求和</span></span><br><span class="line">dictSer.std() <span class="comment">#标准差</span></span><br><span class="line">dictSer.mode() <span class="comment">#众数</span></span><br><span class="line">dictSer.value_counts() <span class="comment">#每个值的数量</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 数学运算</span></span><br><span class="line"></span><br><span class="line">dictSer/<span class="number">2</span> <span class="comment">#对每个值除2</span></span><br><span class="line">dictSer//<span class="number">2</span> <span class="comment">#对每个值除2后取整</span></span><br><span class="line">dictSer%<span class="number">2</span> <span class="comment">#取余</span></span><br><span class="line">dictSer**<span class="number">2</span> <span class="comment">#求平方</span></span><br><span class="line">np.sqrt(dictSer) <span class="comment">#求开方</span></span><br><span class="line">np.log(dictSer) <span class="comment">#求对数</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 对齐计算</span></span><br><span class="line"></span><br><span class="line">dictSer2=pd.Series(&#123;<span class="string">'a'</span>:<span class="number">10</span>,<span class="string">'b'</span>:<span class="number">20</span>,<span class="string">'d'</span>:<span class="number">23</span>,<span class="string">'g'</span>:<span class="number">90</span>,<span class="string">'h'</span>:<span class="number">35</span>,<span class="string">'i'</span>:<span class="number">40</span>&#125;,name=<span class="string">'数值'</span>)</span><br><span class="line">dictSer3=dictSer+dictSer2</span><br><span class="line">dictSer3</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">a     <span class="number">20.0</span></span><br><span class="line">b     <span class="number">60.0</span></span><br><span class="line">c      NaN</span><br><span class="line">d    <span class="number">113.0</span></span><br><span class="line">e      NaN</span><br><span class="line">f      NaN</span><br><span class="line">g      NaN</span><br><span class="line">h      NaN</span><br><span class="line">i      NaN</span><br><span class="line">Name: 数值, dtype: float64</span><br></pre></td></tr></table></figure>
+<h4 id="缺失值处理"><a href="#缺失值处理" class="headerlink" title="缺失值处理"></a>缺失值处理</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#找出空/非空值</span></span><br><span class="line">dictSer3[dictSer3.notnull()] <span class="comment">#非空值</span></span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">a     <span class="number">20.0</span></span><br><span class="line">b     <span class="number">60.0</span></span><br><span class="line">d    <span class="number">113.0</span></span><br><span class="line">Name: 数值, dtype: float64</span><br><span class="line"></span><br><span class="line">dictSer3[dictSer3.isnull()]  <span class="comment">#空值</span></span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">c   NaN</span><br><span class="line">e   NaN</span><br><span class="line">f   NaN</span><br><span class="line">g   NaN</span><br><span class="line">h   NaN</span><br><span class="line">i   NaN</span><br><span class="line">Name: 数值, dtype: float64</span><br><span class="line"></span><br><span class="line"><span class="comment">#填充空值</span></span><br><span class="line">dictSer3=dictSer3.fillna(dictSer3.mean()) <span class="comment">#用均值来填充缺失值</span></span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">a     <span class="number">20.000000</span></span><br><span class="line">b     <span class="number">60.000000</span></span><br><span class="line">c     <span class="number">64.333333</span></span><br><span class="line">d    <span class="number">113.000000</span></span><br><span class="line">e     <span class="number">64.333333</span></span><br><span class="line">f     <span class="number">64.333333</span></span><br><span class="line">g     <span class="number">64.333333</span></span><br><span class="line">h     <span class="number">64.333333</span></span><br><span class="line">i     <span class="number">64.333333</span></span><br><span class="line">Name: 数值, dtype: float64</span><br></pre></td></tr></table></figure>
+<h4 id="删除值"><a href="#删除值" class="headerlink" title="删除值"></a>删除值</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">dictSer3=dictSer3.drop(<span class="string">'b'</span>)</span><br><span class="line">print(dictSer3)</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">a     <span class="number">20.000000</span></span><br><span class="line">c     <span class="number">64.333333</span></span><br><span class="line">d    <span class="number">113.000000</span></span><br><span class="line">e     <span class="number">64.333333</span></span><br><span class="line">f     <span class="number">64.333333</span></span><br><span class="line">g     <span class="number">64.333333</span></span><br><span class="line">h     <span class="number">64.333333</span></span><br><span class="line">i     <span class="number">64.333333</span></span><br><span class="line">Name: 数值, dtype: float64</span><br></pre></td></tr></table></figure>
+<p>总结归纳：</p>
+<p><img src="/images/openstack-telemetry-6.png" alt="Array/Series/DataFrame对比学习"></p>
+<p><img src="/images/openstack-telemetry-7.png" alt="Pandas包之Series"></p>
+<h3 id="使用-timestamp"><a href="#使用-timestamp" class="headerlink" title="使用 timestamp"></a>使用 timestamp</h3><h4 id="Timestamp"><a href="#Timestamp" class="headerlink" title="Timestamp()"></a>Timestamp()</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime <span class="keyword">as</span> dt</span><br><span class="line">p1=pd.Timestamp(<span class="number">2017</span>,<span class="number">6</span>,<span class="number">19</span>)</span><br><span class="line">p2=pd.Timestamp(dt(<span class="number">2017</span>,<span class="number">6</span>,<span class="number">19</span>,hour=<span class="number">9</span>,minute=<span class="number">13</span>,second=<span class="number">45</span>))</span><br><span class="line">p3=pd.Timestamp(<span class="string">"2017-6-19 9:13:45"</span>)</span><br><span class="line"></span><br><span class="line">print(<span class="string">"type of p1:"</span>,type(p1))</span><br><span class="line">print(p1)</span><br><span class="line">print(<span class="string">"type of p2:"</span>,type(p2))</span><br><span class="line">print(p2)</span><br><span class="line">print(<span class="string">"type of p3:"</span>,type(p3))</span><br><span class="line">print(p3)</span><br><span class="line"></span><br><span class="line">输出：</span><br><span class="line">(<span class="string">'type of p1:'</span>, &lt;<span class="class"><span class="keyword">class</span> '<span class="title">pandas</span>.<span class="title">tslib</span>.<span class="title">Timestamp</span>'&gt;)</span></span><br><span class="line"><span class="class">2017-06-19 00:</span><span class="number">00</span>:<span class="number">00</span></span><br><span class="line">(<span class="string">'type of p2:'</span>, &lt;<span class="class"><span class="keyword">class</span> '<span class="title">pandas</span>.<span class="title">tslib</span>.<span class="title">Timestamp</span>'&gt;)</span></span><br><span class="line"><span class="class">2017-06-19 09:</span><span class="number">13</span>:<span class="number">45</span></span><br><span class="line">(<span class="string">'type of p3:'</span>, &lt;<span class="class"><span class="keyword">class</span> '<span class="title">pandas</span>.<span class="title">tslib</span>.<span class="title">Timestamp</span>'&gt;)</span></span><br><span class="line"><span class="class">2017-06-19 09:</span><span class="number">13</span>:<span class="number">45</span></span><br></pre></td></tr></table></figure>
+<h4 id="to-datetime"><a href="#to-datetime" class="headerlink" title="to_datetime()"></a>to_datetime()</h4><p><code>pandas.to_datetime（arg，errors =&#39;raise&#39;，utc = None，format = None，unit = None ）</code></p>
+<p><strong>errors</strong>：三种取值，‘ignore’, ‘raise’, ‘coerce’，默认为raise。</p>
+<ul>
+<li><p>‘raise’，则无效的解析将引发异常</p>
+</li>
+<li><p>‘coerce’，那么无效解析将被设置为NaT</p>
+</li>
+<li><p>‘ignore’，那么无效的解析将返回输入值</p>
+</li>
+</ul>
+<p><strong>utc</strong>：布尔值，默认为none。返回utc即协调世界时。<br><strong>format</strong>：格式化显示时间的格式。<br><strong>unit</strong>：默认值为‘ns’，则将会精确到微妙，‘s’为秒。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime <span class="keyword">as</span> dt</span><br><span class="line"></span><br><span class="line">p4=pd.to_datetime(<span class="string">"2017-6-19 9:13:45"</span>)</span><br><span class="line">p5=pd.to_datetime(dt(<span class="number">2017</span>,<span class="number">6</span>,<span class="number">19</span>,hour=<span class="number">9</span>,minute=<span class="number">13</span>,second=<span class="number">45</span>))</span><br><span class="line"></span><br><span class="line">print(<span class="string">"type of p4:"</span>,type(p4))</span><br><span class="line">print(p4)</span><br><span class="line">print(<span class="string">"type of p5:"</span>,type(p5))</span><br><span class="line">print(p5)</span><br><span class="line"></span><br><span class="line">输出：</span><br><span class="line">(<span class="string">'type of p4:'</span>, &lt;<span class="class"><span class="keyword">class</span> '<span class="title">pandas</span>.<span class="title">tslib</span>.<span class="title">Timestamp</span>'&gt;)</span></span><br><span class="line"><span class="class">2017-06-19 09:</span><span class="number">13</span>:<span class="number">45</span></span><br><span class="line">(<span class="string">'type of p5:'</span>, &lt;<span class="class"><span class="keyword">class</span> '<span class="title">pandas</span>.<span class="title">tslib</span>.<span class="title">Timestamp</span>'&gt;)</span></span><br><span class="line"><span class="class">2017-06-19 09:</span><span class="number">13</span>:<span class="number">45</span></span><br></pre></td></tr></table></figure>
+<h2 id="numpy"><a href="#numpy" class="headerlink" title="numpy"></a>numpy</h2><p>Numpy（Numerical Python 的简称）时高性能科学计算和数据分析的基础包，提供了矩阵运算的功能。</p>
+<p>相关链接<a href="https://docs.scipy.org/doc/numpy/user/quickstart.html" target="_blank" rel="external">Numpy官方推荐教程</a></p>
+<p>Numpy具有以下几点能力：</p>
+<ul>
+<li>ndarry——一个具有向量算数运算和复杂广播能力的多位数组对象</li>
+<li>用于对数组数据进行快速运算的标准数学函数</li>
+<li>用于读写磁盘数据的工具以及用于操作内存映射文件的工具</li>
+<li>非常有用的线性代数，傅立叶变换和随机数操作</li>
+<li>用于继承c/c++和Fortran代码的工具</li>
+</ul>
+<h3 id="创建Numpy数组"><a href="#创建Numpy数组" class="headerlink" title="创建Numpy数组"></a>创建Numpy数组</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用numpy.array()可直接导入数组或矩阵</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line">a = np.array([<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>])</span><br><span class="line">b = np.array([[<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>],[<span class="number">2</span>,<span class="number">2</span>,<span class="number">2</span>],[<span class="number">3</span>,<span class="number">3</span>,<span class="number">3</span>]])</span><br><span class="line">print(a)</span><br><span class="line">print(b)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 结果</span></span><br><span class="line">[<span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>]</span><br><span class="line">[[<span class="number">1</span> <span class="number">1</span> <span class="number">1</span>]</span><br><span class="line"> [<span class="number">2</span> <span class="number">2</span> <span class="number">2</span>]</span><br><span class="line"> [<span class="number">3</span> <span class="number">3</span> <span class="number">3</span>]]</span><br></pre></td></tr></table></figure>
+<h3 id="获取与创建数组时设置纬度"><a href="#获取与创建数组时设置纬度" class="headerlink" title="获取与创建数组时设置纬度"></a>获取与创建数组时设置纬度</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># reshape将当前一位数组设置成对应的m*n的矩阵</span></span><br><span class="line"></span><br><span class="line">a = np.array([<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>,<span class="number">10</span>,<span class="number">11</span>,<span class="number">12</span>,<span class="number">13</span>,<span class="number">14</span>,<span class="number">15</span>])</span><br><span class="line">a = a.reshape(<span class="number">3</span>,<span class="number">5</span>)</span><br><span class="line">print(a)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 结果</span></span><br><span class="line">[[ <span class="number">1</span>  <span class="number">2</span>  <span class="number">3</span>  <span class="number">4</span>  <span class="number">5</span>]</span><br><span class="line"> [ <span class="number">6</span>  <span class="number">7</span>  <span class="number">8</span>  <span class="number">9</span> <span class="number">10</span>]</span><br><span class="line"> [<span class="number">11</span> <span class="number">12</span> <span class="number">13</span> <span class="number">14</span> <span class="number">15</span>]]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 通过a.shape()可以查看当前矩阵的纬度，返回值是一个元组</span></span><br><span class="line"></span><br><span class="line">tu = a.shape</span><br><span class="line">print(tu)</span><br><span class="line"><span class="comment"># 结果</span></span><br><span class="line">(<span class="number">3</span>, <span class="number">5</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="数组索引、切片、比较"><a href="#数组索引、切片、比较" class="headerlink" title="数组索引、切片、比较"></a>数组索引、切片、比较</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">matrix = np.array([[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>],[<span class="number">20</span>,<span class="number">30</span>,<span class="number">40</span>]])</span><br><span class="line"><span class="comment"># *索引与正常二位数组相同*</span></span><br><span class="line">print(matrix[<span class="number">0</span>,<span class="number">1</span>])</span><br><span class="line">matrix = np.array([</span><br><span class="line">[<span class="number">5</span>,<span class="number">10</span>,<span class="number">15</span>],</span><br><span class="line">[<span class="number">20</span>,<span class="number">25</span>,<span class="number">30</span>],</span><br><span class="line">[<span class="number">35</span>,<span class="number">40</span>,<span class="number">45</span>]])</span><br><span class="line"><span class="comment"># *切片与正常二维数组相同*</span></span><br><span class="line">print(matrix[:,<span class="number">1</span>])</span><br><span class="line">print(matrix[:,<span class="number">0</span>:<span class="number">2</span>])</span><br><span class="line">print(matrix[<span class="number">1</span>:<span class="number">3</span>,:])</span><br><span class="line">print(matrix[<span class="number">1</span>:<span class="number">3</span>,<span class="number">0</span>:<span class="number">2</span>])</span><br><span class="line"><span class="comment"># *结果*</span></span><br><span class="line"><span class="number">2</span></span><br><span class="line">[<span class="number">10</span> <span class="number">25</span> <span class="number">40</span>]</span><br><span class="line">[[ <span class="number">5</span> <span class="number">10</span>]</span><br><span class="line"> [<span class="number">20</span> <span class="number">25</span>]</span><br><span class="line"> [<span class="number">35</span> <span class="number">40</span>]]</span><br><span class="line">[[<span class="number">20</span> <span class="number">25</span> <span class="number">30</span>]</span><br><span class="line"> [<span class="number">35</span> <span class="number">40</span> <span class="number">45</span>]]</span><br><span class="line">[[<span class="number">20</span> <span class="number">25</span>]</span><br><span class="line"> [<span class="number">35</span> <span class="number">40</span>]]</span><br><span class="line"><span class="comment"># *比较返回的是每一个数组元素比较之后的值，返回的也是一个数组，都是布尔类型*</span></span><br><span class="line"> z = (matrix[<span class="number">1</span>,:]==<span class="number">25</span>)</span><br><span class="line">print(z)</span><br><span class="line"><span class="comment"># *结果*</span></span><br><span class="line">[<span class="keyword">False</span>  <span class="keyword">True</span> <span class="keyword">False</span>]</span><br></pre></td></tr></table></figure>
+<h3 id="数组值的替换"><a href="#数组值的替换" class="headerlink" title="数组值的替换"></a>数组值的替换</h3><p>值的替换在自然语言处理中很有用，例如我们在处理一个文本数组的时候，有几个数据元素是空，那么我们可以结合判断语句来获得是否为空的一个布尔数组，然后利用这个布尔数组进行元素替换</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">matrix=np.array([[<span class="string">'1'</span>,<span class="string">'2'</span>,<span class="string">''</span>],[<span class="string">'3'</span>,<span class="string">'4'</span>,<span class="string">'5'</span>],[<span class="string">'5'</span>,<span class="string">'6'</span>,<span class="string">''</span>]])</span><br><span class="line">m = (matrix[:,<span class="number">2</span>] == <span class="string">''</span>)</span><br><span class="line">matrix[m,<span class="number">2</span>]=<span class="string">'0'</span></span><br><span class="line">print(matrix)</span><br><span class="line"></span><br><span class="line"><span class="comment"># *这里判断第三列中值为空的数据，返回一个bool类型的数组，再将bool类型的数组当成是数组的下标进行替换数据就可以了，这里只会替换值为真的时候的值，所以完全不必担心替换不必要的数据*</span></span><br></pre></td></tr></table></figure>
+<h3 id="数据类型转换"><a href="#数据类型转换" class="headerlink" title="数据类型转换"></a>数据类型转换</h3><p>初始化时设置数据类型用dtype<br>astype用于更改数据类型</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">vector = np.array([<span class="string">'1'</span>,<span class="string">'2'</span>,<span class="string">'3'</span>])</span><br><span class="line">vector = vector.astype(float)</span><br><span class="line">print(vector)</span><br><span class="line">*结果*</span><br><span class="line">[<span class="number">1.</span> <span class="number">2.</span> <span class="number">3.</span>]</span><br></pre></td></tr></table></figure>
+<h3 id="统计计算方法"><a href="#统计计算方法" class="headerlink" title="统计计算方法"></a>统计计算方法</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">sum</span><br><span class="line">mean</span><br><span class="line">max</span><br><span class="line">**********</span><br><span class="line">vector.sum()</span><br><span class="line">vector.mean()</span><br><span class="line">vector.max()</span><br><span class="line">**********</span><br><span class="line"><span class="number">6.0</span>    和</span><br><span class="line"><span class="number">2.0</span>   平均</span><br><span class="line"><span class="number">3.0</span>   最大</span><br><span class="line">************</span><br><span class="line">对于矩阵需要设置行或者列</span><br><span class="line">matrix = np.array([[<span class="number">20</span>,<span class="number">10</span>,<span class="number">15</span>],[<span class="number">30</span>,<span class="number">20</span>,<span class="number">14</span>],[<span class="number">30</span>,<span class="number">29</span>,<span class="number">43</span>]])</span><br><span class="line">matrix.sum(axis=<span class="number">1</span>)//每行相加求和</span><br><span class="line">*结果*</span><br><span class="line">array([ <span class="number">45</span>,  <span class="number">64</span>, <span class="number">102</span>])</span><br><span class="line"></span><br><span class="line">matrix.sum(axis=<span class="number">0</span>)//每列相加求和</span><br><span class="line">*结果*</span><br><span class="line">array([<span class="number">80</span>, <span class="number">59</span>, <span class="number">72</span>])</span><br></pre></td></tr></table></figure>
+<h3 id="计算差值"><a href="#计算差值" class="headerlink" title="计算差值"></a>计算差值</h3><p><code>numpy.diff(a, n=1,axis=-1)</code></p>
+<p>沿着指定轴计算第N维的离散差值<br>参数：<br>a：输入矩阵<br>n：可选，代表要执行几次差值<br>axis：默认是最后一个<br>示例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">A = np.arange(<span class="number">2</span> , <span class="number">14</span>).reshape((<span class="number">3</span> , <span class="number">4</span>))</span><br><span class="line">A[<span class="number">1</span> , <span class="number">1</span>] = <span class="number">8</span></span><br><span class="line">print(<span class="string">'A:'</span> , A)</span><br><span class="line"><span class="comment"># A: [[ 2  3  4  5]</span></span><br><span class="line"><span class="comment">#  [ 6  8  8  9]</span></span><br><span class="line"><span class="comment">#  [10 11 12 13]]</span></span><br><span class="line"></span><br><span class="line">print(np.diff(A))</span><br><span class="line"><span class="comment"># [[1 1 1]</span></span><br><span class="line"><span class="comment">#  [2 0 1]</span></span><br><span class="line"><span class="comment">#  [1 1 1]]</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 从输出结果可以看出，其实diff函数就是执行的是后一个元素减去前一个元素。</span></span><br></pre></td></tr></table></figure>
+<h3 id="添加元素-insert"><a href="#添加元素-insert" class="headerlink" title="添加元素 insert"></a>添加元素 insert</h3><p><code>numpy.insert(arr, obj, values, axis=None)</code></p>
+<p>第一个参数arr是一个数组，可以是一维的也可以是多维的，在arr的基础上插入元素</p>
+<p>第二个参数obj是元素插入的位置</p>
+<p>第三个参数values是需要插入的数值</p>
+<p>第四个参数axis是指示在哪一个轴上对应的插入位置进行插入</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 一维数组示例</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">a = np.arange(<span class="number">4</span>)</span><br><span class="line">print(a)</span><br><span class="line"><span class="comment"># [0 1 2 3]</span></span><br><span class="line"></span><br><span class="line">print(np.insert(a, <span class="number">2</span>, <span class="number">100</span>))</span><br><span class="line"><span class="comment"># [  0   1 100   2   3]</span></span><br><span class="line"></span><br><span class="line">print(np.insert(a, <span class="number">1</span>, [<span class="number">100</span>, <span class="number">101</span>, <span class="number">102</span>]))</span><br><span class="line"><span class="comment"># [  0 100 101 102   1   2   3]</span></span><br><span class="line"></span><br><span class="line">print(np.insert(a, [<span class="number">0</span>, <span class="number">2</span>, <span class="number">4</span>], [<span class="number">100</span>, <span class="number">101</span>, <span class="number">102</span>]))</span><br><span class="line"><span class="comment"># [100   0   1 101   2   3 102]</span></span><br></pre></td></tr></table></figure>
+<p>多维数组可以看下 –&gt; <a href="https://blog.csdn.net/qq_18351157/article/details/107831008?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_title~default-0.control&amp;spm=1001.2101.3001.4242" target="_blank" rel="external">numpy.insert  详解</a></p>
+<h3 id="缓冲区读取"><a href="#缓冲区读取" class="headerlink" title="缓冲区读取"></a>缓冲区读取</h3><p><code>numpy.frombuffer(buffer, dtype = float, count = -1, offset = 0)</code></p>
+<p>第一个参数 <strong>buffer</strong> ：<code>buffer_like</code>：公开缓冲区接口的对象。</p>
+<p>第二个参数 <strong>dtype</strong> ：<code>data-type</code>, 可选：返回array的数据类型;默认值:float。</p>
+<p>第三个参数 <strong>count</strong> ：<code>int</code>, 可选：要阅读的条目数。<code>-1</code>表示缓冲区中的所有数据。</p>
+<p>第四个参数 <strong>offset</strong> ：<code>int</code>, 可选：从这个偏移量(以字节为单位)开始读取缓冲区;默认值:<code>0</code>。</p>
+<p>此函数将缓冲区解释为一维数组。 暴露缓冲区接口的任何对象都用作参数来返回<code>ndarray</code>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np </span><br><span class="line">s =  <span class="string">'Hello World'</span> </span><br><span class="line">a = np.frombuffer(s, dtype =  <span class="string">'S1'</span>)  </span><br><span class="line"><span class="keyword">print</span> a</span><br><span class="line"></span><br><span class="line"><span class="comment"># 输出</span></span><br><span class="line"><span class="comment"># ['H'  'e'  'l'  'l'  'o'  ' '  'W'  'o'  'r'  'l'  'd']</span></span><br></pre></td></tr></table></figure>
+<h3 id="计算给定轴上数组元素的累计和"><a href="#计算给定轴上数组元素的累计和" class="headerlink" title="计算给定轴上数组元素的累计和"></a>计算给定轴上数组元素的累计和</h3><p><code>numpy.cumsum(arr, axis=None, dtype=None, out=None)</code></p>
+<p>第一个参数 <strong>arr :</strong> [数组]包含需要累计综合的数字的数组。如果arr不是数组，则尝试进行转换。</p>
+<p>第二个参数 <strong>axis :</strong> 计算累计的轴，默认值是计算展平数组的综合。</p>
+<ul>
+<li>axis=0，按照行累加。</li>
+<li>axis=1，按照列累加。</li>
+<li>axis不给定具体值，就把numpy数组当成一个一维数组。</li>
+</ul>
+<p>第三个参数 <strong>dtype :</strong> 返回数组的类型，以及与元素相乘的累加器的类型。如果未指定dtype，则默认为arr的dtype，除非arr的整数dtype的精度小于默认平台整数的精度。在这种情況下，将使用默认平台整数。</p>
+<p>第四个参数 <strong>out :</strong>[ndarray，可选]将结果存储到的位置。</p>
+<ul>
+<li>如果提供，则必須具有广播输入的形狀。</li>
+<li>如果未提供或沒有，则返回新分配的数组。</li>
+</ul>
+<p>返回 <strong>Return :</strong>除非指定out，否则将返回保存结果的新数组，在这种情況下将返回该数组。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">a = np.array([[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>], [<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>]])</span><br><span class="line"></span><br><span class="line">np.cumsum(a)</span><br><span class="line"><span class="comment"># array([ 1,  3,  6, 10, 15, 21])</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#按照行累加，行求和</span></span><br><span class="line">np.cumsum(a,axis=<span class="number">0</span>) </span><br><span class="line"></span><br><span class="line">array([[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>],</span><br><span class="line"></span><br><span class="line">       [<span class="number">5</span>, <span class="number">7</span>, <span class="number">9</span>]])    </span><br><span class="line">  </span><br><span class="line">                        [1, 2, 3]------&gt;     |1     |2     |3    |</span><br><span class="line"></span><br><span class="line">                        [4, 5, 6]------&gt;     |5=1+4 |7=2+5 |9=3+6|  </span><br><span class="line">      </span><br><span class="line"><span class="comment">#按照列累加，列求和</span></span><br><span class="line">np.cumsum(a,axis=<span class="number">1</span>)</span><br><span class="line">array([[ <span class="number">1</span>,  <span class="number">3</span>,  <span class="number">6</span>],</span><br><span class="line"></span><br><span class="line">       [ <span class="number">4</span>,  <span class="number">9</span>, <span class="number">15</span>]])</span><br><span class="line">                        [1, 2, 3]------&gt;     |1     |2+1    |3+2+1   |</span><br><span class="line"></span><br><span class="line">                        [4, 5, 6]------&gt;     |4     |4+5    |4+5+6   |  </span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定输出类型</span></span><br><span class="line">np.cumsum(a, dtype=float)</span><br><span class="line"><span class="comment"># 注意啦！没有指定轴参数(axis)！输出就变成1维数组了。</span></span><br><span class="line">  array([  <span class="number">1.</span>,  <span class="number">3.</span>,  <span class="number">6.</span>,  <span class="number">10.</span>,  <span class="number">15.</span>,  <span class="number">21.</span>])第一步:每个值都变成float了</span><br><span class="line"></span><br><span class="line">  array([<span class="number">1</span>，<span class="number">1</span>+<span class="number">2</span>=<span class="number">3</span>，<span class="number">1</span>+<span class="number">2</span>+<span class="number">3</span>=<span class="number">6</span>，<span class="number">1</span>+<span class="number">2</span>+<span class="number">3</span>+<span class="number">4</span>=<span class="number">10</span>，<span class="number">1</span>+<span class="number">2</span>+<span class="number">3</span>+<span class="number">4</span>+<span class="number">5</span>=<span class="number">15</span>，<span class="number">1</span>+<span class="number">2</span>+<span class="number">3</span>+<span class="number">4</span>+<span class="number">5</span>+<span class="number">6</span>=<span class="number">21</span>]）第二部：累加</span><br></pre></td></tr></table></figure>
+<p><a href="https://docs.scipy.org/doc/numpy/user/quickstart.html" target="_blank" rel="external">Numpy官方推荐教程</a></p>
+<p>上述两个库的体量很大，这里只是简单介绍，有兴趣的同学可自行 google</p>
+<h2 id="struct"><a href="#struct" class="headerlink" title="struct"></a>struct</h2><p>python中struct 模块用于python数据结构与C结构之间的相互转换，其中C结构是用一种格式化字符串表示的，学习struct 模块的难点就在这个格式化字符串上</p>
+<h3 id="常见方法"><a href="#常见方法" class="headerlink" title="常见方法"></a>常见方法</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 常见方法</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#将v1 v2按照fmt 转化为一个字节流(bytes)</span></span><br><span class="line">struct.pack(fmt, v1, v2, ...)</span><br><span class="line"><span class="comment">#将v1 v2按照fmt 转化为一个字节流(bytes),并写入buffer，从位置offset处开始写入</span></span><br><span class="line">struct.pack_into(fmt, buffer, offset, v1, v2, ...)</span><br><span class="line"><span class="comment">#将字节流按照fmt转化为python对象返回</span></span><br><span class="line">struct.unpack(fmt, string)</span><br><span class="line"><span class="comment">#同unpack，只是针特定buffer转化为python对象返回</span></span><br><span class="line">struct.unpack_from(fmt, buffer[, offset=<span class="number">0</span>])</span><br><span class="line"><span class="comment">#返回fmt的所表示的C结构体所占字节大小</span></span><br><span class="line">struct.calcsize(fmt)</span><br><span class="line"><span class="comment">#如果一述函数使用过程中fmt格式不对，会抛出这个异常</span></span><br><span class="line">exception struct.error</span><br></pre></td></tr></table></figure>
+<h3 id="格式化串"><a href="#格式化串" class="headerlink" title="格式化串"></a>格式化串</h3><p>格式化串的字符根据功能不同可以分为两类，一类用于控制字节顺序、大小及对齐(Byte Order, Size, and Alignment)，另一类用于表示结构体的组成(Format Characters)。</p>
+<h4 id="Byte-Order-Size-and-Alignment"><a href="#Byte-Order-Size-and-Alignment" class="headerlink" title="Byte Order, Size, and Alignment"></a>Byte Order, Size, and Alignment</h4><p>字节顺序对齐相关知识详见 <a href="https://www.cnblogs.com/prettyshuang/p/5553140.html C语言字节对齐问题详解（对齐、字节序、网络序等）" target="_blank" rel="external">C语言字节对齐问题详解（对齐、字节序、网络序等）</a></p>
+<table>
+<thead>
+<tr>
+<th>字符</th>
+<th>字节序</th>
+<th>大小</th>
+<th>对齐方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>@</td>
+<td>原生</td>
+<td>原生</td>
+<td>原生</td>
+</tr>
+<tr>
+<td>=</td>
+<td>原生</td>
+<td>标准</td>
+<td>无</td>
+</tr>
+<tr>
+<td>&lt;</td>
+<td>小端</td>
+<td>标准</td>
+<td>无</td>
+</tr>
+<tr>
+<td>&gt;</td>
+<td>大端</td>
+<td>标准</td>
+<td>无</td>
+</tr>
+<tr>
+<td>!</td>
+<td>网络字节序</td>
+<td>标准</td>
+<td>无</td>
+</tr>
+</tbody>
+</table>
+<p>注：原生指使用本地机器的字节序、大小和对齐方式<br>这些字符出现在格式化字符串的开头，如果没有给出，默认为@，字节大小一列中的标准是指下面的 Format Characters。</p>
+<h4 id="Format-Characters"><a href="#Format-Characters" class="headerlink" title="Format Characters"></a>Format Characters</h4><table>
+<thead>
+<tr>
+<th style="text-align:left">格式</th>
+<th style="text-align:left">C 类型</th>
+<th style="text-align:left">Python 类型</th>
+<th style="text-align:left">标准大小</th>
+<th style="text-align:left">注释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>x</code></td>
+<td style="text-align:left">填充字节</td>
+<td style="text-align:left">无</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>c</code></td>
+<td style="text-align:left"><code>char</code></td>
+<td style="text-align:left">长度为 1 的字节串</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>b</code></td>
+<td style="text-align:left"><code>signed char</code></td>
+<td style="text-align:left">整数</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">(1), (2)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>B</code></td>
+<td style="text-align:left"><code>unsigned char</code></td>
+<td style="text-align:left">整数</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">(2)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>?</code></td>
+<td style="text-align:left"><code>_Bool</code></td>
+<td style="text-align:left">bool</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">(1)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>h</code></td>
+<td style="text-align:left"><code>short</code></td>
+<td style="text-align:left">整数</td>
+<td style="text-align:left">2</td>
+<td style="text-align:left">(2)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>H</code></td>
+<td style="text-align:left"><code>unsigned short</code></td>
+<td style="text-align:left">整数</td>
+<td style="text-align:left">2</td>
+<td style="text-align:left">(2)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>i</code></td>
+<td style="text-align:left"><code>int</code></td>
+<td style="text-align:left">整数</td>
+<td style="text-align:left">4</td>
+<td style="text-align:left">(2)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>I</code></td>
+<td style="text-align:left"><code>unsigned int</code></td>
+<td style="text-align:left">整数</td>
+<td style="text-align:left">4</td>
+<td style="text-align:left">(2)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>l</code></td>
+<td style="text-align:left"><code>long</code></td>
+<td style="text-align:left">整数</td>
+<td style="text-align:left">4</td>
+<td style="text-align:left">(2)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>L</code></td>
+<td style="text-align:left"><code>unsigned long</code></td>
+<td style="text-align:left">整数</td>
+<td style="text-align:left">4</td>
+<td style="text-align:left">(2)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>q</code></td>
+<td style="text-align:left"><code>long long</code></td>
+<td style="text-align:left">整数</td>
+<td style="text-align:left">8</td>
+<td style="text-align:left">(2)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>Q</code></td>
+<td style="text-align:left"><code>unsigned long long</code></td>
+<td style="text-align:left">整数</td>
+<td style="text-align:left">8</td>
+<td style="text-align:left">(2)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>n</code></td>
+<td style="text-align:left"><code>ssize_t</code></td>
+<td style="text-align:left">整数</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">(3)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>N</code></td>
+<td style="text-align:left"><code>size_t</code></td>
+<td style="text-align:left">整数</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">(3)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>e</code></td>
+<td style="text-align:left">(6)</td>
+<td style="text-align:left">浮点数</td>
+<td style="text-align:left">2</td>
+<td style="text-align:left">(4)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>f</code></td>
+<td style="text-align:left"><code>float</code></td>
+<td style="text-align:left">浮点数</td>
+<td style="text-align:left">4</td>
+<td style="text-align:left">(4)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>d</code></td>
+<td style="text-align:left"><code>double</code></td>
+<td style="text-align:left">浮点数</td>
+<td style="text-align:left">8</td>
+<td style="text-align:left">(4)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>s</code></td>
+<td style="text-align:left"><code>char[]</code></td>
+<td style="text-align:left">字节串</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>p</code></td>
+<td style="text-align:left"><code>char[]</code></td>
+<td style="text-align:left">字节串</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>P</code></td>
+<td style="text-align:left"><code>void *</code></td>
+<td style="text-align:left">整数</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">(5)</td>
+</tr>
+</tbody>
+</table>
+<h1 id="序列化和反序列化"><a href="#序列化和反序列化" class="headerlink" title="序列化和反序列化"></a>序列化和反序列化</h1><p>上篇我们说到 ceilometer-collector 会先将监控数据发给 gnocchi-api ，gnocchi-api 先和 mysql 即 index storage 中的 metric 进行对比，metric  不存在就创建，存在就更新，然后将监控数据 metric + measures 存进 redis 即 incoming storage，然后 gnocch-metricd 服务每隔 30s 到 redis 中拿取数据，进行处理，数据处理主要分为以下几步：</p>
+<ol>
+<li>遍历 metrics ，通过每个 metric 的 id 从 redis 拿到相应的 measures</li>
+<li>从 ceph 查询拿到该 metric 没有聚合过的时间序列进行反序列化（为什么会有未序列化的数据？）</li>
+<li>根据给定的聚合方法，归档策略等信息，以及已经分组的时间序列，计算聚合后的时间序列，并将聚合后的时间序列写入到ceph的对象中</li>
+<li>序列化没有聚合过的时间序列后，再压缩后存进 ceph （同2，为什么会有未序列化的数据？）</li>
+</ol>
+<p>我们对上面的步骤进行拆解下，详细分析一下过程：</p>
+<p>上面分析过了，到 <code>_compute_and_store_timeseries</code> 方法对 measures 进行排序之后，变量大概是这样的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">&quot;&quot;&quot;</span><br><span class="line">(Pdb) p metric</span><br><span class="line">&lt;Metric 01f0658b-f147-482b-bca9-f474a79320dc&gt;</span><br><span class="line"></span><br><span class="line">(Pdb) p metric.__dict__</span><br><span class="line">&#123;&apos;status&apos;: u&apos;active&apos;, &apos;_sa_instance_state&apos;: &lt;sqlalchemy.orm.state.InstanceState object at 0x5536b50&gt;, &apos;name&apos;: u&apos;cpu_util&apos;, &apos;creator&apos;: u&apos;6a18a77646104fcb93e92cb3daf10c91:55e9bc42c004471b9111ffbb516a9bbe&apos;, &apos;resource_id&apos;: UUID(&apos;d872305c-94b3-4f35-a2d5-602af219945d&apos;), &apos;archive_policy&apos;: &lt;gnocchi.indexer.sqlalchemy_base.ArchivePolicy object at 0x5536c50&gt;, &apos;archive_policy_name&apos;: u&apos;frequency_300s&apos;, &apos;id&apos;: UUID(&apos;01f0658b-f147-482b-bca9-f474a79320dc&apos;), &apos;unit&apos;: None&#125;</span><br><span class="line"></span><br><span class="line">(Pdb) p type(metric)</span><br><span class="line">&lt;class &apos;gnocchi.indexer.sqlalchemy_base.Metric&apos;&gt;</span><br><span class="line"></span><br><span class="line">(Pdb) p measures</span><br><span class="line">[(Timestamp(&apos;2018-04-19 04:21:08.054995&apos;), 4.799075611984741),</span><br><span class="line">(Timestamp(&apos;2018-04-19 05:10:10.429245&apos;), 4.574397482330608),</span><br><span class="line">(Timestamp(&apos;2018-04-19 04:08:07.438367&apos;), 4.597624310196946)]</span><br><span class="line"></span><br><span class="line">(Pdb) p metric.archive_policy</span><br><span class="line">&lt;gnocchi.indexer.sqlalchemy_base.ArchivePolicy object at 0x5536c50&gt;</span><br><span class="line"></span><br><span class="line">(Pdb) p metric.archive_policy.__dict__</span><br><span class="line">&#123;&apos;back_window&apos;: 0, &apos;definition&apos;: [&#123;&apos;points&apos;: 300, &apos;granularity&apos;: 300.0, &apos;timespan&apos;: 90000.0&#125;, &#123;&apos;points&apos;: 100, &apos;granularity&apos;: 900.0, &apos;timespan&apos;: 90000.0&#125;, &#123;&apos;points&apos;: 100, &apos;granularity&apos;: 7200.0, &apos;timespan&apos;: 720000.0&#125;, &#123;&apos;points&apos;: 200, &apos;granularity&apos;: 86400.0, &apos;timespan&apos;: 17280000.0&#125;], &apos;_sa_instance_state&apos;: &lt;sqlalchemy.orm.state.InstanceState object at 0x5536c90&gt;, &apos;name&apos;: u&apos;frequency_300s&apos;, &apos;aggregation_methods&apos;: set([u&apos;count&apos;, u&apos;max&apos;, u&apos;sum&apos;, u&apos;mean&apos;, u&apos;min&apos;])&#125;</span><br><span class="line"></span><br><span class="line">(Pdb) p metric.archive_policy.aggregation_methods</span><br><span class="line">set([u&apos;count&apos;, u&apos;max&apos;, u&apos;sum&apos;, u&apos;mean&apos;, u&apos;min&apos;])</span><br><span class="line"></span><br><span class="line">(Pdb) p metric.archive_policy.max_block_size</span><br><span class="line">86400.0</span><br><span class="line"></span><br><span class="line">(Pdb) p metric.archive_policy.back_window</span><br><span class="line">0</span><br><span class="line"></span><br><span class="line">(Pdb) p metric.archive_policy.definition</span><br><span class="line">[&#123;&apos;points&apos;: 300, &apos;granularity&apos;: 300.0, &apos;timespan&apos;: 90000.0&#125;, &#123;&apos;points&apos;: 100, &apos;granularity&apos;: 900.0, &apos;timespan&apos;: 90000.0&#125;, &#123;&apos;points&apos;: 100, &apos;granularity&apos;: 7200.0, &apos;timespan&apos;: 720000.0&#125;, &#123;&apos;points&apos;: 200, &apos;granularity&apos;: 86400.0, &apos;timespan&apos;: 17280000.0&#125;]</span><br><span class="line">&quot;&quot;&quot;</span><br></pre></td></tr></table></figure>
+<p>下一步开始取出未聚合的时间序列进行反序列化，这里是与最后的 <code>_store_unaggregated_timeserie</code> 过程其实是相反的，一个是序列化，一个是反序列化。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">_SERIALIZATION_TIMESTAMP_VALUE_LEN = struct.calcsize(<span class="string">"&lt;Qd"</span>) <span class="comment"># 16</span></span><br><span class="line">_SERIALIZATION_TIMESTAMP_LEN = struct.calcsize(<span class="string">"&lt;Q"</span>) <span class="comment"># 8</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 序列化</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">serialize</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># NOTE(jd) Use a double delta encoding for timestamps</span></span><br><span class="line">        timestamps = numpy.insert(numpy.diff(self.ts.index),</span><br><span class="line">                                  <span class="number">0</span>, self.first.value)</span><br><span class="line">        timestamps = numpy.array(timestamps, dtype=<span class="string">'&lt;Q'</span>)</span><br><span class="line">        values = numpy.array(self.ts.values, dtype=<span class="string">'&lt;d'</span>)</span><br><span class="line">        payload = (timestamps.tobytes() + values.tobytes())</span><br><span class="line">        <span class="keyword">return</span> lz4.dumps(payload)</span><br><span class="line">      </span><br><span class="line"><span class="comment"># 反序列化</span></span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">unserialize</span><span class="params">(cls, data, block_size, back_window)</span>:</span></span><br><span class="line">        uncompressed = lz4.loads(data)</span><br><span class="line"></span><br><span class="line">        nb_points = (</span><br><span class="line">            len(uncompressed) // cls._SERIALIZATION_TIMESTAMP_VALUE_LEN</span><br><span class="line">        )</span><br><span class="line">        timestamps_raw = uncompressed[</span><br><span class="line">            :nb_points*cls._SERIALIZATION_TIMESTAMP_LEN]</span><br><span class="line">        timestamps = numpy.frombuffer(timestamps_raw, dtype=<span class="string">'&lt;Q'</span>)</span><br><span class="line">        timestamps = numpy.cumsum(timestamps)</span><br><span class="line">        timestamps = numpy.array(timestamps, dtype=<span class="string">'datetime64[ns]'</span>)</span><br><span class="line"></span><br><span class="line">        values_raw = uncompressed[nb_points*cls._SERIALIZATION_TIMESTAMP_LEN:]</span><br><span class="line">        values = numpy.frombuffer(values_raw, dtype=<span class="string">'&lt;d'</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> cls.from_data(</span><br><span class="line">            pandas.to_datetime(timestamps),</span><br><span class="line">            values,</span><br><span class="line">            block_size=block_size,</span><br><span class="line">            back_window=back_window)</span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">from_data</span><span class="params">(cls, timestamps=None, values=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                  block_size=None, back_window=<span class="number">0</span>)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> cls(pandas.Series(values, timestamps),</span><br><span class="line">                   block_size=block_size, back_window=back_window)</span><br></pre></td></tr></table></figure>
+<h2 id="序列化"><a href="#序列化" class="headerlink" title="序列化"></a>序列化</h2><p>根据上面的工具专栏介绍我们知道了 numpy 的一些用法，以此为基础分析：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 序列化</span></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">first</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self.ts.index[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">serialize</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># NOTE(jd) Use a double delta encoding for timestamps</span></span><br><span class="line">        <span class="comment"># 对时间序列的索引进行diff的求差值操作，并在所求的索引差值列表的最前面加上该时间序列的第一个值，得到差值索引列表</span></span><br><span class="line">        timestamps = numpy.insert(numpy.diff(self.ts.index),</span><br><span class="line">                                  <span class="number">0</span>, self.first.value)</span><br><span class="line">        <span class="comment"># 对差值索引列表的类型转换为uint64类型</span></span><br><span class="line">        timestamps = numpy.array(timestamps, dtype=<span class="string">'&lt;Q'</span>)</span><br><span class="line">        <span class="comment"># 对时间序列的值列表类型转换为浮点型</span></span><br><span class="line">        values = numpy.array(self.ts.values, dtype=<span class="string">'&lt;d'</span>)</span><br><span class="line">        <span class="comment"># 对差值索引列表转换为字节 + 对时间序列的值列表转换为字节，得到字符串</span></span><br><span class="line">        payload = (timestamps.tobytes() + values.tobytes())</span><br><span class="line">        <span class="comment"># 对该字符串调用lz4.dumps进行压缩，返回该压缩后的字符串</span></span><br><span class="line">        <span class="keyword">return</span> lz4.dumps(payload)</span><br></pre></td></tr></table></figure>
+<p>序列化的过程发生在存储未聚合的时间序列的数据的时候，一个 ts 类似是以下对象：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"""</span></span><br><span class="line"><span class="string">(Pdb) ts</span></span><br><span class="line"><span class="string">  &lt;gnocchi.carbonara.BoundTimeSerie object at 0x7fbdb91fd5d0&gt;</span></span><br><span class="line"><span class="string">(Pdb) ts.__dict__</span></span><br><span class="line"><span class="string">  &#123;'back_window': 0, 'block_size': &lt;86400000000000 * Nanos&gt;, 'ts':</span></span><br><span class="line"><span class="string">    2020-07-21 13:32:18      0.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:33:18      1.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:34:19      2.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:35:19      3.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:36:19      4.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:37:19      5.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:38:20      6.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:39:20      7.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:40:20      8.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:41:20      9.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:42:21     10.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:43:21     11.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:44:21     12.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:45:21     13.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:46:21     14.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:47:21     15.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:48:22     16.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:49:22     17.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:50:22     18.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:51:22     19.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:52:22     20.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:53:23     21.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:54:23     22.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:55:23     23.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:56:23     24.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:57:23     25.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:58:24     26.0</span></span><br><span class="line"><span class="string">    2020-07-21 13:59:24     27.0</span></span><br><span class="line"><span class="string">    2020-07-21 14:00:25     28.0</span></span><br><span class="line"><span class="string">    2020-07-21 14:01:25     29.0</span></span><br><span class="line"><span class="string">                           ...</span></span><br><span class="line"><span class="string">    2020-07-21 14:51:40     79.0</span></span><br><span class="line"><span class="string">    2020-07-21 14:52:40     80.0</span></span><br><span class="line"><span class="string">    2020-07-21 14:53:41     81.0</span></span><br><span class="line"><span class="string">    2020-07-21 14:54:41     82.0</span></span><br><span class="line"><span class="string">    2020-07-21 14:55:41     83.0</span></span><br><span class="line"><span class="string">    2020-07-21 14:56:41     84.0</span></span><br><span class="line"><span class="string">    2020-07-21 14:57:41     85.0</span></span><br><span class="line"><span class="string">    2020-07-21 14:58:42     86.0</span></span><br><span class="line"><span class="string">    2020-07-21 14:59:42     87.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:00:42     88.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:01:42     89.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:02:42     90.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:03:43     91.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:04:43     92.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:05:43     93.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:06:43     94.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:07:43     95.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:08:44     96.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:09:44     97.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:10:44     98.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:11:44     99.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:12:44    100.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:13:45    101.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:14:45    102.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:15:17      0.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:15:45    103.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:17:45    105.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:18:17      0.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:18:46    106.0</span></span><br><span class="line"><span class="string">    2020-07-21 15:19:17      1.0</span></span><br><span class="line"><span class="string">    Length: 109, dtype: float64&#125;</span></span><br><span class="line"><span class="string">"""</span></span><br></pre></td></tr></table></figure>
+<h2 id="反序列化"><a href="#反序列化" class="headerlink" title="反序列化"></a>反序列化</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 反序列化</span></span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">unserialize</span><span class="params">(cls, data, block_size, back_window)</span>:</span></span><br><span class="line">        uncompressed = lz4.loads(data)</span><br><span class="line"></span><br><span class="line">        nb_points = (</span><br><span class="line">            len(uncompressed) // cls._SERIALIZATION_TIMESTAMP_VALUE_LEN</span><br><span class="line">        )</span><br><span class="line">        <span class="comment"># 先解压从步骤0中读取的数据（实际是一个字符串），前面一半为时间，后面一半为时间对应的值</span></span><br><span class="line">        timestamps_raw = uncompressed[</span><br><span class="line">            :nb_points*cls._SERIALIZATION_TIMESTAMP_LEN]</span><br><span class="line">        <span class="comment"># 解压的时间由于采用差值，所以累加计算每个时间</span></span><br><span class="line">        timestamps = numpy.frombuffer(timestamps_raw, dtype=<span class="string">'&lt;Q'</span>)</span><br><span class="line">        timestamps = numpy.cumsum(timestamps)</span><br><span class="line">        timestamps = numpy.array(timestamps, dtype=<span class="string">'datetime64[ns]'</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 这里一半取的是值</span></span><br><span class="line">        values_raw = uncompressed[nb_points*cls._SERIALIZATION_TIMESTAMP_LEN:]</span><br><span class="line">        values = numpy.frombuffer(values_raw, dtype=<span class="string">'&lt;d'</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> cls.from_data(</span><br><span class="line">            pandas.to_datetime(timestamps),</span><br><span class="line">            values,</span><br><span class="line">            block_size=block_size,</span><br><span class="line">            back_window=back_window)</span><br><span class="line">      </span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">from_data</span><span class="params">(cls, timestamps=None, values=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                  block_size=None, back_window=<span class="number">0</span>)</span>:</span></span><br><span class="line">        <span class="comment"># 将时间列表，值列表来构建时间序列，然后根据block_size(实际是最大采样间隔)对序列计算出这个时间序列中最后一个数据，</span></span><br><span class="line">        <span class="comment"># 在一天之前的起始时间，以该时间为基础，对此时间序列进行切片，得到最终需要处理的时间序列。</span></span><br><span class="line">        <span class="comment"># 实例化类并返回最终需要处理的BoundTimeSerie</span></span><br><span class="line">        <span class="keyword">return</span> cls(pandas.Series(values, timestamps),</span><br><span class="line">                   block_size=block_size, back_window=back_window)</span><br></pre></td></tr></table></figure>
+<p>我们从 ceph 中拿到的一个解压后的字符串大概是这样的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">\x00T\r\x15\xc4\xc7#\x16\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x00\xec|o\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00\xec|o\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00&quot;\xe23\x0e\x00\x00\x00\x00XG\xf8\r\x00\x00\x00\x00@Ys\x07\x00\x00\x00\x00\x18\xee\x84\x06\x00\x00\x00\x00\xb0\x8e\xf0\x1b\x00\x00\x00\x00@Ys\x07\x00\x00\x00\x00\xe2\x88\xc0\x06\x00\x00\x00\x00v\xbe7\x07\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xf0?\x00\x00\x00\x00\x00\x00\x00@\x00\x00\x00\x00\x00\x00\x08@\x00\x00\x00\x00\x00\x00\x10@\x00\x00\x00\x00\x00\x00\x14@\x00\x00\x00\x00\x00\x00\x18@\x00\x00\x00\x00\x00\x00\x1c@\x00\x00\x00\x00\x00\x00 @\x00\x00\x00\x00\x00\x00&quot;@\x00\x00\x00\x00\x00\x00$@\x00\x00\x00\x00\x00\x00&amp;@\x00\x00\x00\x00\x00\x00(@\x00\x00\x00\x00\x00\x00*@\x00\x00\x00\x00\x00\x00,@\x00\x00\x00\x00\x00\x00.@\x00\x00\x00\x00\x00\x000@\x00\x00\x00\x00\x00\x001@\x00\x00\x00\x00\x00\x002@\x00\x00\x00\x00\x00\x003@\x00\x00\x00\x00\x00\x004@\x00\x00\x00\x00\x00\x005@\x00\x00\x00\x00\x00\x006@\x00\x00\x00\x00\x00\x007@\x00\x00\x00\x00\x00\x008@\x00\x00\x00\x00\x00\x009@\x00\x00\x00\x00\x00\x00:@\x00\x00\x00\x00\x00\x00;@\x00\x00\x00\x00\x00\x00&lt;@\x00\x00\x00\x00\x00\x00=@\x00\x00\x00\x00\x00\x00&gt;@\x00\x00\x00\x00\x00\x00?@\x00\x00\x00\x00\x00\x00@@\x00\x00\x00\x00\x00\x80@@\x00\x00\x00\x00\x00\x00A@\x00\x00\x00\x00\x00\x80A@\x00\x00\x00\x00\x00\x00B@\x00\x00\x00\x00\x00\x80B@\x00\x00\x00\x00\x00\x00C@\x00\x00\x00\x00\x00\x80C@\x00\x00\x00\x00\x00\x00D@\x00\x00\x00\x00\x00\x80D@\x00\x00\x00\x00\x00\x00E@\x00\x00\x00\x00\x00\x80E@\x00\x00\x00\x00\x00\x00F@\x00\x00\x00\x00\x00\x80F@\x00\x00\x00\x00\x00\x00G@\x00\x00\x00\x00\x00\x80G@\x00\x00\x00\x00\x00\x00H@\x00\x00\x00\x00\x00\x80H@\x00\x00\x00\x00\x00\x00I@\x00\x00\x00\x00\x00\x80I@\x00\x00\x00\x00\x00\x00J@\x00\x00\x00\x00\x00\x80J@\x00\x00\x00\x00\x00\x00K@\x00\x00\x00\x00\x00\x80K@\x00\x00\x00\x00\x00\x00L@\x00\x00\x00\x00\x00\x80L@\x00\x00\x00\x00\x00\x00M@\x00\x00\x00\x00\x00\x80M@\x00\x00\x00\x00\x00\x00N@\x00\x00\x00\x00\x00\x80N@\x00\x00\x00\x00\x00\x00O@\x00\x00\x00\x00\x00\x80O@\x00\x00\x00\x00\x00\x00P@\x00\x00\x00\x00\x00@P@\x00\x00\x00\x00\x00\x80P@\x00\x00\x00\x00\x00\xc0P@\x00\x00\x00\x00\x00\x00Q@\x00\x00\x00\x00\x00@Q@\x00\x00\x00\x00\x00\x80Q@\x00\x00\x00\x00\x00\xc0Q@\x00\x00\x00\x00\x00\x00R@\x00\x00\x00\x00\x00@R@\x00\x00\x00\x00\x00\x80R@\x00\x00\x00\x00\x00\xc0R@\x00\x00\x00\x00\x00\x00S@\x00\x00\x00\x00\x00@S@\x00\x00\x00\x00\x00\x80S@\x00\x00\x00\x00\x00\xc0S@\x00\x00\x00\x00\x00\x00T@\x00\x00\x00\x00\x00@T@\x00\x00\x00\x00\x00\x80T@\x00\x00\x00\x00\x00\xc0T@\x00\x00\x00\x00\x00\x00U@\x00\x00\x00\x00\x00@U@\x00\x00\x00\x00\x00\x80U@\x00\x00\x00\x00\x00\xc0U@\x00\x00\x00\x00\x00\x00V@\x00\x00\x00\x00\x00@V@\x00\x00\x00\x00\x00\x80V@\x00\x00\x00\x00\x00\xc0V@\x00\x00\x00\x00\x00\x00W@\x00\x00\x00\x00\x00@W@\x00\x00\x00\x00\x00\x80W@\x00\x00\x00\x00\x00\xc0W@\x00\x00\x00\x00\x00\x00X@\x00\x00\x00\x00\x00@X@\x00\x00\x00\x00\x00\x80X@\x00\x00\x00\x00\x00\xc0X@\x00\x00\x00\x00\x00\x00Y@\x00\x00\x00\x00\x00@Y@\x00\x00\x00\x00\x00\x80Y@\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xc0Y@\x00\x00\x00\x00\x00@Z@\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80Z@\x00\x00\x00\x00\x00\x00\xf0?</span><br></pre></td></tr></table></figure>
+<h1 id="聚合和归档"><a href="#聚合和归档" class="headerlink" title="聚合和归档"></a>聚合和归档</h1><p>聚合和归档操作发生在：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> timeutils.StopWatch() <span class="keyword">as</span> sw:</span><br><span class="line">    ts.set_values(measures,</span><br><span class="line">                  before_truncate_callback=_map_add_measures,</span><br><span class="line">                  ignore_too_old_timestamps=<span class="keyword">True</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="合并时间序列"><a href="#合并时间序列" class="headerlink" title="合并时间序列"></a>合并时间序列</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BoundTimeSerie</span><span class="params">(TimeSerie)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">set_values</span><span class="params">(self, values, before_truncate_callback=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                   ignore_too_old_timestamps=False)</span>:</span></span><br><span class="line">        <span class="comment"># <span class="doctag">NOTE:</span> values must be sorted when passed in.</span></span><br><span class="line">        <span class="string">""""""</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        (Pdb) a</span></span><br><span class="line"><span class="string">        self = &lt;gnocchi.carbonara.BoundTimeSerie object at 0x7fbdb91fd5d0&gt;</span></span><br><span class="line"><span class="string">        values = [(Timestamp('2020-07-21 15:19:46'), 107.0)]</span></span><br><span class="line"><span class="string">        before_truncate_callback = &lt;function _map_add_measures at 0x7fbdb91f6f50&gt;</span></span><br><span class="line"><span class="string">        ignore_too_old_timestamps = True</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="comment"># 从未聚合的时间序列最后一个时间lastTime为基点，找出能够被最大采样间隔(例如86400)整除且最接近lasTtime</span></span><br><span class="line">        <span class="comment"># 的时间作为最近的起始时间firstTime</span></span><br><span class="line">        <span class="keyword">if</span> self.block_size <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span> <span class="keyword">and</span> <span class="keyword">not</span> self.ts.empty:</span><br><span class="line">            first_block_timestamp = self.first_block_timestamp()</span><br><span class="line">            <span class="keyword">if</span> ignore_too_old_timestamps:</span><br><span class="line">                <span class="keyword">for</span> index, (timestamp, value) <span class="keyword">in</span> enumerate(values):</span><br><span class="line">                    <span class="comment"># 然后从待处理监控数据列表中过滤出时间 &gt;= firstTime的待处理监控数据</span></span><br><span class="line">                    <span class="keyword">if</span> timestamp &gt;= first_block_timestamp:</span><br><span class="line">                        values = values[index:]</span><br><span class="line">                        <span class="keyword">break</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    values = []</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="comment"># Check that the smallest timestamp does not go too much back</span></span><br><span class="line">                <span class="comment"># in time.</span></span><br><span class="line">                smallest_timestamp = values[<span class="number">0</span>][<span class="number">0</span>]</span><br><span class="line">                <span class="keyword">if</span> smallest_timestamp &lt; first_block_timestamp:</span><br><span class="line">                    <span class="keyword">raise</span> NoDeloreanAvailable(first_block_timestamp,</span><br><span class="line">                                              smallest_timestamp)</span><br><span class="line">				<span class="comment"># 在这个步骤中，会将我们从ceph中拿出来的未聚合的时间序列和从redis中拿到的待处理时间序列进行合并，去重，排序等操作</span></span><br><span class="line">        super(BoundTimeSerie, self).set_values(values)</span><br><span class="line">        <span class="comment"># 再调用 before_truncate_callback = _map_add_measures 方法</span></span><br><span class="line">        <span class="keyword">if</span> before_truncate_callback:</span><br><span class="line">            before_truncate_callback(self)</span><br><span class="line">        <span class="comment"># 对时间序列进行分割</span></span><br><span class="line">        self._truncate()</span><br><span class="line">        </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_truncate</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">"""Truncate the timeserie."""</span></span><br><span class="line">        <span class="keyword">if</span> self.block_size <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span> <span class="keyword">and</span> <span class="keyword">not</span> self.ts.empty:</span><br><span class="line">            <span class="comment"># Change that to remove the amount of block needed to have</span></span><br><span class="line">            <span class="comment"># the size &lt;= max_size. A block is a number of "seconds" (a</span></span><br><span class="line">            <span class="comment"># timespan)</span></span><br><span class="line">            self.ts = self.ts[self.first_block_timestamp():]</span><br><span class="line">            </span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">first_block_timestamp</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">"""Return the timestamp of the first block."""</span></span><br><span class="line">        rounded = round_timestamp(self.ts.index[<span class="number">-1</span>],</span><br><span class="line">                                  self.block_size.delta.value)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> rounded - (self.block_size * self.back_window)</span><br><span class="line">      </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">round_timestamp</span><span class="params">(ts, freq)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> pandas.Timestamp(</span><br><span class="line">        (pandas.Timestamp(ts).value // freq) * freq)</span><br></pre></td></tr></table></figure>
+<p>ts的索引是时间，value是时间对应的值，上面的方法主要做了几个事情：</p>
+<ol>
+<li>根据之前未聚合的时间序列最后一个时间lastTime为基点（这个未聚合的数据就是下面第四步将时间序列分割之后存进ceph的），计算出能够被最大采样间隔(例如86400)整除且最接近lasTtime的时间作为最近的起始时间firstTime，然后从待处理监控数据列表中过滤出时间 &gt;= firstTime的待处理监控数据，太老的数据直接丢弃；</li>
+<li>将待处理的监控数据(有时间，值的元组组成的列表)，构建为待处理时间序列，并检查重复和是否是单调的，然后用原来未聚合的时间序列和当前待处理时间序列进行合并操作，得到新生成的时间序列</li>
+<li>调用 <code>_map_add_measures</code> 聚合归档</li>
+<li>对时间序列进行分割，之后便是调用 <code>self._store_unaggregated_timeserie(metric, ts.serialize())</code> ，将分割后的时间序列经过序列化和压缩后存进ceph，用于下一次的计算。</li>
+</ol>
+<h2 id="归档聚合"><a href="#归档聚合" class="headerlink" title="归档聚合"></a>归档聚合</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">        current_first_block_timestamp = ts.first_block_timestamp() <span class="comment"># 这个ts是未聚合的时间序列</span></span><br><span class="line">  </span><br><span class="line">  			<span class="comment"># # 这里的 bound_timeserie 就是经过上个章节得到的新生成的时间序列。gnocchi.carbonara.BoundTimeSerie object</span></span><br><span class="line">  			<span class="function"><span class="keyword">def</span> <span class="title">_map_add_measures</span><span class="params">(bound_timeserie)</span>:</span></span><br><span class="line">            tstamp = max(bound_timeserie.first, measures[<span class="number">0</span>][<span class="number">0</span>])</span><br><span class="line"></span><br><span class="line">            new_first_block_timestamp = bound_timeserie.first_block_timestamp()</span><br><span class="line">            computed_points[<span class="string">'number'</span>] = len(bound_timeserie)</span><br><span class="line">            <span class="keyword">for</span> d <span class="keyword">in</span> definition:</span><br><span class="line">                ts = bound_timeserie.group_serie(</span><br><span class="line">                    d.granularity, carbonara.round_timestamp(</span><br><span class="line">                        tstamp, d.granularity * <span class="number">10e8</span>))</span><br><span class="line"></span><br><span class="line">                self._map_in_thread(</span><br><span class="line">                    self._add_measures,</span><br><span class="line">                    ((aggregation, d, metric, ts,</span><br><span class="line">                        current_first_block_timestamp,</span><br><span class="line">                        new_first_block_timestamp)</span><br><span class="line">                        <span class="keyword">for</span> aggregation <span class="keyword">in</span> agg_methods))</span><br><span class="line">         </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TimeSerie</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">group_serie</span><span class="params">(self, granularity, start=<span class="number">0</span>)</span>:</span></span><br><span class="line">        <span class="comment"># NOTE(jd) Our whole serialization system is based on Epoch, and we</span></span><br><span class="line">        <span class="comment"># store unsigned integer, so we can't store anything before Epoch.</span></span><br><span class="line">        <span class="comment"># Sorry!</span></span><br><span class="line">        <span class="keyword">if</span> self.ts.index[<span class="number">0</span>].value &lt; <span class="number">0</span>:</span><br><span class="line">            <span class="keyword">raise</span> BeforeEpochError(self.ts.index[<span class="number">0</span>])</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> GroupedTimeSeries(self.ts[start:], granularity)</span><br><span class="line">      </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">GroupedTimeSeries</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, ts, granularity)</span>:</span></span><br><span class="line">        <span class="comment"># NOTE(sileht): The whole class assumes ts is ordered and don't have</span></span><br><span class="line">        <span class="comment"># duplicate timestamps, it uses numpy.unique that sorted list, but</span></span><br><span class="line">        <span class="comment"># we always assume the orderd to be the same as the input.</span></span><br><span class="line">        freq = granularity * <span class="number">10e8</span></span><br><span class="line">        self._ts = ts</span><br><span class="line">        self.indexes = (numpy.array(ts.index, <span class="string">'float'</span>) // freq) * freq</span><br><span class="line">        self.tstamps, self.counts = numpy.unique(self.indexes,</span><br><span class="line">                                                 return_counts=<span class="keyword">True</span>)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">mean</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self._scipy_aggregate(ndimage.mean)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">sum</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self._scipy_aggregate(ndimage.sum)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">min</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self._scipy_aggregate(ndimage.minimum)</span><br><span class="line">    ......</span><br></pre></td></tr></table></figure>
+<ol>
+<li>BoundTimeSerie 继承 TimeSerie，这里的first就是第一个索引值，我们知道 ts 是pandas.series对象，包括索引和值，索引是时间，值是时间对应的值，而 measures 是 <code>[(Timestamp(&#39;2018-04-19 04:21:08.054995&#39;), 4.799075611984741)]</code> 这样的对象，这里就是比较新生成的时间序列和从redis取的当前待处理时间序列，取出最大时间，接着计算出新生成的时间序列的第一个时间和需要计算的point；</li>
+<li>然后遍历归档策略：<ol>
+<li>先根据采样间隔和上步生成的最大边界的时间，算出这个间隔的另一个时间边界，返回一个 GroupedTimeSeries 对象，这个对象里面有很多的聚合方法，mean、min、max等。</li>
+<li>然后再遍历聚合方法，通过 <code>_add_measures(聚合方法，归档策略，metric指标，ts(GroupedTimeSeries对象)，未聚合的时间序列的第一个时间戳，聚合后的时间序列的第一个时间戳)</code> 对事件序列进行聚合计算存进 ceph：</li>
+</ol>
+</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AggregatedTimeSerie</span><span class="params">(TimeSerie)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, sampling, aggregation_method, ts=None, max_size=None)</span>:</span></span><br><span class="line">        <span class="string">"""A time serie that is downsampled.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Used to represent the downsampled timeserie for a single</span></span><br><span class="line"><span class="string">        granularity/aggregation-function pair stored for a metric.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        super(AggregatedTimeSerie, self).__init__(ts)</span><br><span class="line">        self.sampling = self._to_offset(sampling).nanos / <span class="number">10e8</span></span><br><span class="line">        self.max_size = max_size</span><br><span class="line">        self.aggregation_method = aggregation_method</span><br><span class="line">        self._truncate(quick=<span class="keyword">True</span>)</span><br><span class="line">        </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CarbonaraBasedStorage</span><span class="params">(storage.StorageDriver)</span>:</span></span><br><span class="line">		<span class="function"><span class="keyword">def</span> <span class="title">_add_measures</span><span class="params">(self, aggregation, archive_policy_def,</span></span></span><br><span class="line"><span class="function"><span class="params">                      metric, grouped_serie,</span></span></span><br><span class="line"><span class="function"><span class="params">                      previous_oldest_mutable_timestamp,</span></span></span><br><span class="line"><span class="function"><span class="params">                      oldest_mutable_timestamp)</span>:</span></span><br><span class="line">        <span class="comment"># 步骤一</span></span><br><span class="line">				<span class="comment"># （ts(GroupedTimeSeries对象)，归档策略中定义的采集计算间隔，聚合方法，当前归档策略需要计算的最大点）</span></span><br><span class="line">        ts = carbonara.AggregatedTimeSerie.from_grouped_serie(</span><br><span class="line">            grouped_serie, archive_policy_def.granularity,</span><br><span class="line">            aggregation, max_size=archive_policy_def.points)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Don't do anything if the timeserie is empty</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> ts:</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># We only need to check for rewrite if driver is not in WRITE_FULL mode</span></span><br><span class="line">        <span class="comment"># and if we already stored splits once</span></span><br><span class="line">        <span class="comment"># true</span></span><br><span class="line">        need_rewrite = (</span><br><span class="line">            <span class="keyword">not</span> self.WRITE_FULL</span><br><span class="line">            <span class="keyword">and</span> previous_oldest_mutable_timestamp <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span></span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 步骤二</span></span><br><span class="line">        <span class="keyword">if</span> archive_policy_def.timespan <span class="keyword">or</span> need_rewrite:</span><br><span class="line">            existing_keys = self._list_split_keys_for_metric(</span><br><span class="line">                metric, aggregation, archive_policy_def.granularity)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># First delete old splits</span></span><br><span class="line">        <span class="comment"># 步骤三</span></span><br><span class="line">        <span class="keyword">if</span> archive_policy_def.timespan:</span><br><span class="line">            oldest_point_to_keep = ts.last - datetime.timedelta(</span><br><span class="line">                seconds=archive_policy_def.timespan)</span><br><span class="line">            oldest_key_to_keep = ts.get_split_key(oldest_point_to_keep)</span><br><span class="line">            oldest_key_to_keep_s = str(oldest_key_to_keep)</span><br><span class="line">            <span class="keyword">for</span> key <span class="keyword">in</span> list(existing_keys):</span><br><span class="line">                <span class="comment"># NOTE(jd) Only delete if the key is strictly inferior to</span></span><br><span class="line">                <span class="comment"># the timestamp; we don't delete any timeserie split that</span></span><br><span class="line">                <span class="comment"># contains our timestamp, so we prefer to keep a bit more</span></span><br><span class="line">                <span class="comment"># than deleting too much</span></span><br><span class="line">                <span class="keyword">if</span> key &lt; oldest_key_to_keep_s:</span><br><span class="line">                    self._delete_metric_measures(</span><br><span class="line">                        metric, key, aggregation,</span><br><span class="line">                        archive_policy_def.granularity)</span><br><span class="line">                    existing_keys.remove(key)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            oldest_key_to_keep = carbonara.SplitKey(<span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Rewrite all read-only splits just for fun (and compression). This</span></span><br><span class="line">        <span class="comment"># only happens if `previous_oldest_mutable_timestamp' exists, which</span></span><br><span class="line">        <span class="comment"># means we already wrote some splits at some point – so this is not the</span></span><br><span class="line">        <span class="comment"># first time we treat this timeserie.</span></span><br><span class="line">        <span class="comment"># 步骤四</span></span><br><span class="line">        <span class="keyword">if</span> need_rewrite:</span><br><span class="line">            previous_oldest_mutable_key = str(ts.get_split_key(</span><br><span class="line">                previous_oldest_mutable_timestamp))</span><br><span class="line">            oldest_mutable_key = str(ts.get_split_key(</span><br><span class="line">                oldest_mutable_timestamp))</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> previous_oldest_mutable_key != oldest_mutable_key:</span><br><span class="line">                <span class="keyword">for</span> key <span class="keyword">in</span> existing_keys:</span><br><span class="line">                    <span class="keyword">if</span> previous_oldest_mutable_key &lt;= key &lt; oldest_mutable_key:</span><br><span class="line">                        LOG.debug(</span><br><span class="line">                            <span class="string">"Compressing previous split %s (%s) for metric %s"</span>,</span><br><span class="line">                            key, aggregation, metric)</span><br><span class="line">                        <span class="comment"># NOTE(jd) Rewrite it entirely for fun (and later for</span></span><br><span class="line">                        <span class="comment"># compression). For that, we just pass None as split.</span></span><br><span class="line">                        self._store_timeserie_split(</span><br><span class="line">                            metric, carbonara.SplitKey(</span><br><span class="line">                                float(key), archive_policy_def.granularity),</span><br><span class="line">                            <span class="keyword">None</span>, aggregation, archive_policy_def,</span><br><span class="line">                            oldest_mutable_timestamp)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 步骤五</span></span><br><span class="line">        <span class="keyword">for</span> key, split <span class="keyword">in</span> ts.split():</span><br><span class="line">            <span class="keyword">if</span> key &gt;= oldest_key_to_keep:</span><br><span class="line">                LOG.debug(</span><br><span class="line">                    <span class="string">"Storing split %s (%s) for metric %s"</span>,</span><br><span class="line">                    key, aggregation, metric)</span><br><span class="line">                self._store_timeserie_split(</span><br><span class="line">                    metric, key, split, aggregation, archive_policy_def,</span><br><span class="line">                    oldest_mutable_timestamp)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>definition样例：</p>
+<p>[{‘points’: 300, ‘granularity’: 300.0, ‘timespan’: 90000.0}, {‘points’: 100, ‘granularity’: 900.0, ‘timespan’: 90000.0}, {‘points’: 100, ‘granularity’: 7200.0, ‘timespan’: 720000.0}, {‘points’: 200, ‘granularity’: 86400.0, ‘timespan’: 17280000.0}]</p>
+<p>一个d即archive_policy_def：{‘points’: 300, ‘granularity’: 300.0, ‘timespan’: 90000.0}，代表计算间隔300s，采集300个点，间隔300*300=90000</p>
+</blockquote>
+<ol>
+<li><p>步骤一：从 GroupedTimeSeries 取出具体的聚合方法，实例化 AggregatedTimeSerie 类对象，返回 ts</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">        ts = carbonara.AggregatedTimeSerie.from_grouped_serie(</span><br><span class="line">            grouped_serie, archive_policy_def.granularity,</span><br><span class="line">            aggregation, max_size=archive_policy_def.points)</span><br><span class="line">  </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AggregatedTimeSerie</span><span class="params">(TimeSerie)</span>:</span></span><br><span class="line">    _AGG_METHOD_PCT_RE = re.compile(<span class="string">r"([1-9][0-9]?)pct"</span>)</span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">from_grouped_serie</span><span class="params">(cls, grouped_serie, sampling, aggregation_method,</span></span></span><br><span class="line"><span class="function"><span class="params">                           max_size=None)</span>:</span></span><br><span class="line">        agg_name, q = cls._get_agg_method(aggregation_method)</span><br><span class="line">        <span class="keyword">return</span> cls(sampling, aggregation_method,</span><br><span class="line">                   ts=cls._resample_grouped(grouped_serie, agg_name,</span><br><span class="line">                                            q),</span><br><span class="line">                   max_size=max_size)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>步骤二：拿出当前metric在ceph中的字符串（待分析）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CephStorage</span><span class="params">(_carbonara.CarbonaraBasedStorage)</span>:</span></span><br><span class="line">    WRITE_FULL = <span class="keyword">False</span></span><br><span class="line">		<span class="function"><span class="keyword">def</span> <span class="title">_list_split_keys_for_metric</span><span class="params">(self, metric, aggregation, granularity,</span></span></span><br><span class="line"><span class="function"><span class="params">                                    version=None)</span>:</span></span><br><span class="line">        <span class="keyword">with</span> rados.ReadOpCtx() <span class="keyword">as</span> op:</span><br><span class="line">            omaps, ret = self.ioctx.get_omap_vals(op, <span class="string">""</span>, <span class="string">""</span>, <span class="number">-1</span>)</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                self.ioctx.operate_read_op(</span><br><span class="line">                    op, self._build_unaggregated_timeserie_path(metric, <span class="number">3</span>))</span><br><span class="line">            <span class="keyword">except</span> rados.ObjectNotFound:</span><br><span class="line">                <span class="keyword">raise</span> storage.MetricDoesNotExist(metric)</span><br><span class="line">            <span class="keyword">if</span> ret == errno.ENOENT:</span><br><span class="line">                <span class="keyword">raise</span> storage.MetricDoesNotExist(metric)</span><br><span class="line">            keys = set()</span><br><span class="line">            <span class="keyword">for</span> name, value <span class="keyword">in</span> omaps:</span><br><span class="line">                meta = name.split(<span class="string">'_'</span>)</span><br><span class="line">                <span class="keyword">if</span> (aggregation == meta[<span class="number">3</span>] <span class="keyword">and</span> granularity == float(meta[<span class="number">4</span>])</span><br><span class="line">                        <span class="keyword">and</span> self._version_check(name, version)):</span><br><span class="line">                    keys.add(meta[<span class="number">2</span>])</span><br><span class="line">            <span class="keyword">return</span> keys</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>步骤三：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> archive_policy_def.timespan:</span><br><span class="line">    oldest_point_to_keep = ts.last - datetime.timedelta(</span><br><span class="line">        seconds=archive_policy_def.timespan)</span><br><span class="line">    oldest_key_to_keep = ts.get_split_key(oldest_point_to_keep)</span><br><span class="line">    oldest_key_to_keep_s = str(oldest_key_to_keep)</span><br><span class="line">    <span class="keyword">for</span> key <span class="keyword">in</span> list(existing_keys):</span><br><span class="line">        <span class="comment"># NOTE(jd) Only delete if the key is strictly inferior to</span></span><br><span class="line">        <span class="comment"># the timestamp; we don't delete any timeserie split that</span></span><br><span class="line">        <span class="comment"># contains our timestamp, so we prefer to keep a bit more</span></span><br><span class="line">        <span class="comment"># than deleting too much</span></span><br><span class="line">        <span class="keyword">if</span> key &lt; oldest_key_to_keep_s:</span><br><span class="line">            self._delete_metric_measures(</span><br><span class="line">                metric, key, aggregation,</span><br><span class="line">                archive_policy_def.granularity)</span><br><span class="line">            existing_keys.remove(key)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    oldest_key_to_keep = carbonara.SplitKey(<span class="number">0</span>, <span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>步骤四：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> need_rewrite:</span><br><span class="line">    previous_oldest_mutable_key = str(ts.get_split_key(</span><br><span class="line">        previous_oldest_mutable_timestamp))</span><br><span class="line">    oldest_mutable_key = str(ts.get_split_key(</span><br><span class="line">        oldest_mutable_timestamp))</span><br><span class="line">   </span><br><span class="line">    <span class="keyword">if</span> previous_oldest_mutable_key != oldest_mutable_key:</span><br><span class="line">        <span class="keyword">for</span> key <span class="keyword">in</span> existing_keys:</span><br><span class="line">            <span class="keyword">if</span> previous_oldest_mutable_key &lt;= key &lt; oldest_mutable_key:</span><br><span class="line">                LOG.debug(</span><br><span class="line">                    <span class="string">"Compressing previous split %s (%s) for metric %s"</span>,</span><br><span class="line">                    key, aggregation, metric)</span><br><span class="line">                <span class="comment"># NOTE(jd) Rewrite it entirely for fun (and later for</span></span><br><span class="line">                <span class="comment"># compression). For that, we just pass None as split.</span></span><br><span class="line">                self._store_timeserie_split(</span><br><span class="line">                    metric, carbonara.SplitKey(</span><br><span class="line">                        float(key), archive_policy_def.granularity),</span><br><span class="line">                    <span class="keyword">None</span>, aggregation, archive_policy_def,</span><br><span class="line">                    oldest_mutable_timestamp)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>步骤五：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> key, split <span class="keyword">in</span> ts.split():</span><br><span class="line">    <span class="keyword">if</span> key &gt;= oldest_key_to_keep:</span><br><span class="line">        LOG.debug(</span><br><span class="line">            <span class="string">"Storing split %s (%s) for metric %s"</span>,</span><br><span class="line">            key, aggregation, metric)</span><br><span class="line">        self._store_timeserie_split(</span><br><span class="line">            metric, key, split, aggregation, archive_policy_def,</span><br><span class="line">            oldest_mutable_timestamp)</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">处理逻辑:</span><br><span class="line">步骤1. 对待处理监控数据按照时间从旧到新排序，获取监控项中聚合方法，采样间隔等信息</span><br><span class="line">步骤2. 调用_get_unaggregated_timeserie_and_unserialize方法获取未聚合的时间序列数据进行反序列化，来重新构建为新的时间序列，具体步骤如下</span><br><span class="line">	2.0. 先根据监控项id构建需要获取的对象名称，形如:gnocchi_01f0658b-f147-482b-bca9-f474a79320dc_none_v3</span><br><span class="line">				从ceph中读取该对象存储的值(是一个字符串)</span><br><span class="line">	2.1. 先解压从步骤0中读取的数据（实际是一个字符串），前面一半为时间，后面一半为时间对应的值</span><br><span class="line">	2.2. 解压的时间由于采用差值，所以累加计算每个时间；</span><br><span class="line">	2.3. 将时间列表，值列表来构建时间序列，然后根据block_size(实际是最大采样间隔)对序列计算出这个时间序列中最后一个数据，</span><br><span class="line">				在一天之前的起始时间，以该时间为基础，对此时间序列进行切片，得到最终需要处理的时间序列</span><br><span class="line">	2.4. 用步骤3的时间序列，block_size等实例化并返回最终需要处理的BoundTimeSerie</span><br><span class="line">步骤3 计算聚合后的时间序列，具体调用ts.set_values方法处理过程如下</span><br><span class="line">	3.1. 对给定的已经合并了待处理数据生成的时间序列和未聚合的时间序列的合并时间序列boundTimeSerie进行如下操作</span><br><span class="line">	3.2. 遍历归档策略，根据采样间隔，聚合方法：</span><br><span class="line">        计算每个boundTimeSerie聚合后的时间序列；</span><br><span class="line">        并对该聚合的时间序列分割，计算分割序列的偏移量和对应序列化的值；</span><br><span class="line">        根据偏移量，将序列化的值写入到对应的ceph对象</span><br><span class="line">        总结：步骤3实现了: 计算聚合后的时间序列，将聚合后的时间序列写入到ceph对象中</span><br><span class="line">步骤4. 更新未聚合的时间序列，具体调用_store_unaggregated_timeserie方法处理过程如下</span><br><span class="line">	4.1. 对时间序列的索引进行numpy.diff的求差值操作，并</span><br><span class="line">				在所求的索引差值列表的最前面加上该时间序列的第一个值，</span><br><span class="line">				得到差值索引列表</span><br><span class="line">	4.2. 对差值索引列表的类型转换为uint64类型</span><br><span class="line">	4.3. 对时间序列的值列表类型转换为浮点型</span><br><span class="line">	4.4 对差值索引列表转换为字节 + 对时间序列的值列表转换为字节，得到字符串</span><br><span class="line">	4.5. 对该字符串调用lz4.dumps进行压缩，返回该压缩后的字符串</span><br><span class="line">	4.6 构建类似gnocchi_01f0658b-f147-482b-bca9-f474a79320dc_none_v3的对象名称，</span><br><span class="line">			向该对象中写入未聚合的时间序列的压缩后的字符串</span><br><span class="line">			该字符串序列化前的前半部分为：时间序列索引，后半部分为时间序列值</span><br></pre></td></tr></table></figure>
+<h1 id="基于gnocchi的时间序列算法demo实现"><a href="#基于gnocchi的时间序列算法demo实现" class="headerlink" title="基于gnocchi的时间序列算法demo实现"></a>基于gnocchi的时间序列算法demo实现</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># @File    : scipy_demo.py</span></span><br><span class="line"><span class="comment"># @Software: PyCharm</span></span><br><span class="line"> </span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">参考: </span></span><br><span class="line"><span class="string">https://github.com/gnocchixyz/gnocchi/tree/3.1.4</span></span><br><span class="line"><span class="string">模拟gnocchi聚合的思路进行聚合的demo</span></span><br><span class="line"><span class="string">gnocchi聚合算法:</span></span><br><span class="line"><span class="string">步骤1:对时间序列ts的索引ts.index用采样间隔进行分组得到indexes</span></span><br><span class="line"><span class="string">步骤2:对分组后的索引indexes通过numpy.unique重计算得到uniqeIndexes</span></span><br><span class="line"><span class="string">步骤3:调用ndimage.mean方法，进行如下操作</span></span><br><span class="line"><span class="string">ndimage.mean(ts.value , labels=indexes, index=uniqueIndexes)</span></span><br><span class="line"><span class="string">即可得到聚合结果aggregatedValues</span></span><br><span class="line"><span class="string">步骤4: 将uniqueIndexes还原为datetime64[ns]类型的numpy数组</span></span><br><span class="line"><span class="string">timestamps</span></span><br><span class="line"><span class="string">步骤5: 重新用步骤3得到的aggregatedValues和步骤4得到的timestamps</span></span><br><span class="line"><span class="string">构建新的时间序列，该时间序列即为最终聚合的时间序列newTimeSerie</span></span><br><span class="line"><span class="string">步骤6：根据需要保存的点的个数n,进行切片处理，获取newTimeSerie[-n:]</span></span><br><span class="line"><span class="string">作为最终保存的时间序列的结果</span></span><br><span class="line"><span class="string">解释:</span></span><br><span class="line"><span class="string">scipy.ndimage.measurements.mean(input, labels=None, index=None)[source]</span></span><br><span class="line"><span class="string">功能：计算数组在labels处的平均值</span></span><br><span class="line"><span class="string">参数: </span></span><br><span class="line"><span class="string">input:数组，</span></span><br><span class="line"><span class="string">labels:类似数组，可选的。对应每个元素有一个标签</span></span><br><span class="line"><span class="string">标签数组的一些性状，或者。</span></span><br><span class="line"><span class="string">所有共享相同label的区域的元素会被用于计算平均值。</span></span><br><span class="line"><span class="string">index:需要计算的区域</span></span><br><span class="line"><span class="string">返回值：列表</span></span><br><span class="line"><span class="string">分析分组的算法:</span></span><br><span class="line"><span class="string"> (a // b) * b:这个操作的含义获取能够被b整除且最接近a的数</span></span><br><span class="line"><span class="string"> (numpy.array(ts.index, 'float') // freq) * freq：</span></span><br><span class="line"><span class="string"> 这里就是对数组中每个元素进行处理，获取能够被freq整除，且最接近该元素的值</span></span><br><span class="line"><span class="string"> 假设:</span></span><br><span class="line"><span class="string"> 1,2,3,4,5,6,7,8,9</span></span><br><span class="line"><span class="string"> freq=3</span></span><br><span class="line"><span class="string"> 那么运算之后的结果是</span></span><br><span class="line"><span class="string"> 0 0 3 3 3 6 6 6 9</span></span><br><span class="line"><span class="string"> 等于变相的是一个分组操作，且以freq的倍数进行划分</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"> </span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">ref:</span></span><br><span class="line"><span class="string">https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.ndimage.measurements.mean.html</span></span><br><span class="line"><span class="string">scipy.ndimage.measurements.mean</span></span><br><span class="line"><span class="string">scipy.ndimage.measurements.mean(input, labels=None, index=None)[source]</span></span><br><span class="line"><span class="string">Calculate the mean of the values of an array at labels.</span></span><br><span class="line"><span class="string">Parameters:	</span></span><br><span class="line"><span class="string">input : array_like</span></span><br><span class="line"><span class="string">Array on which to compute the mean of elements over distinct regions.</span></span><br><span class="line"><span class="string">labels : array_like, optional</span></span><br><span class="line"><span class="string">Array of labels of same shape, or broadcastable to the same shape as input. All elements sharing the same label form one region over which the mean of the elements is computed.</span></span><br><span class="line"><span class="string">index : int or sequence of ints, optional</span></span><br><span class="line"><span class="string">Labels of the objects over which the mean is to be computed. Default is None, in which case the mean for all values where label is greater than 0 is calculated.</span></span><br><span class="line"><span class="string">Returns:	</span></span><br><span class="line"><span class="string">out : list</span></span><br><span class="line"><span class="string">Sequence of same length as index, with the mean of the different regions labeled by the labels in index.</span></span><br><span class="line"><span class="string">See also</span></span><br><span class="line"><span class="string">ndimage.variance, ndimage.standard_deviation, ndimage.minimum, ndimage.maximum, ndimage.sum, ndimage.label</span></span><br><span class="line"><span class="string">scipy.ndimage.measurements.mean(input, labels=None, index=None)[source]</span></span><br><span class="line"><span class="string">功能：计算数组在labels处的平均值</span></span><br><span class="line"><span class="string">参数: </span></span><br><span class="line"><span class="string">input:数组，</span></span><br><span class="line"><span class="string">labels:类似数组，可选的。对应每个元素有一个标签</span></span><br><span class="line"><span class="string">标签数组的一些性状，或者。</span></span><br><span class="line"><span class="string">所有共享相同label的区域的元素会被用于计算平均值。</span></span><br><span class="line"><span class="string">index:需要计算的区域</span></span><br><span class="line"><span class="string">返回值：列表</span></span><br><span class="line"><span class="string">Examples</span></span><br><span class="line"><span class="string">&gt;&gt;&gt;</span></span><br><span class="line"><span class="string"><span class="meta">&gt;&gt;&gt; </span>a = np.arange(25).reshape((5,5))</span></span><br><span class="line"><span class="string"><span class="meta">&gt;&gt;&gt; </span>labels = np.zeros_like(a)</span></span><br><span class="line"><span class="string"><span class="meta">&gt;&gt;&gt; </span>labels[3:5,3:5] = 1</span></span><br><span class="line"><span class="string"><span class="meta">&gt;&gt;&gt; </span>index = np.unique(labels)</span></span><br><span class="line"><span class="string"><span class="meta">&gt;&gt;&gt; </span>labels</span></span><br><span class="line"><span class="string">array([[0, 0, 0, 0, 0],</span></span><br><span class="line"><span class="string">       [0, 0, 0, 0, 0],</span></span><br><span class="line"><span class="string">       [0, 0, 0, 0, 0],</span></span><br><span class="line"><span class="string">       [0, 0, 0, 1, 1],</span></span><br><span class="line"><span class="string">       [0, 0, 0, 1, 1]])</span></span><br><span class="line"><span class="string"><span class="meta">&gt;&gt;&gt; </span>index</span></span><br><span class="line"><span class="string">array([0, 1])</span></span><br><span class="line"><span class="string"><span class="meta">&gt;&gt;&gt; </span>ndimage.mean(a, labels=labels, index=index)</span></span><br><span class="line"><span class="string">[10.285714285714286, 21.0]</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> scipy <span class="keyword">import</span> ndimage</span><br><span class="line"><span class="keyword">import</span> numpy</span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">from</span> scipy <span class="keyword">import</span> ndimage</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">aggregateGnocchiTimeSerie</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="comment"># 步骤0: 构造时间序列数据</span></span><br><span class="line">    dates = pd.DatetimeIndex([<span class="string">'2018-04-18 11:20:30'</span>, <span class="string">'2018-04-18 11:21:30'</span>,</span><br><span class="line">                              <span class="string">'2018-04-18 11:22:30'</span>, <span class="string">'2018-04-18 11:23:30'</span>,</span><br><span class="line">                              <span class="string">'2018-04-18 11:24:30'</span>, <span class="string">'2018-04-18 11:25:30'</span>,</span><br><span class="line">                              <span class="string">'2018-04-18 11:26:30'</span>, <span class="string">'2018-04-18 11:27:30'</span>,</span><br><span class="line">                              <span class="string">'2018-04-18 11:28:30'</span>, <span class="string">'2018-04-18 11:29:30'</span>,</span><br><span class="line">                              <span class="string">'2018-04-18 11:30:30'</span>, <span class="string">'2018-04-18 11:31:30'</span>,])</span><br><span class="line">    <span class="keyword">print</span> dates</span><br><span class="line">    ts = pd.Series(np.arange(<span class="number">12</span>), index = dates)</span><br><span class="line">    <span class="keyword">print</span> <span class="string">"step 0 ############ time series:"</span></span><br><span class="line">    <span class="keyword">print</span> ts</span><br><span class="line">    granularity = <span class="number">300.0</span></span><br><span class="line">    freq = granularity * <span class="number">10e8</span></span><br><span class="line">    floatIndexes = numpy.array(ts.index, <span class="string">'float'</span>)</span><br><span class="line">    <span class="keyword">print</span> <span class="string">"############ float indexes:"</span></span><br><span class="line">    <span class="keyword">print</span> floatIndexes</span><br><span class="line">    <span class="comment"># 步骤1： 根据采样间隔对时间序列的索引进行分组</span></span><br><span class="line">    indexes = (floatIndexes // freq) * freq</span><br><span class="line">    <span class="keyword">print</span> <span class="string">"step 1 ############ group indexes:"</span></span><br><span class="line">    <span class="keyword">print</span> indexes</span><br><span class="line">    <span class="comment"># 步骤2： 对已经分组的索引进行去重</span></span><br><span class="line">    uniqueIndexes, counts = numpy.unique(indexes , return_counts=<span class="keyword">True</span>)</span><br><span class="line">    <span class="keyword">print</span> <span class="string">"step 2############ unique indexes:"</span></span><br><span class="line">    <span class="keyword">print</span> uniqueIndexes</span><br><span class="line">    <span class="keyword">print</span> <span class="string">"############ values"</span></span><br><span class="line">    <span class="keyword">print</span> ts.values</span><br><span class="line">    <span class="comment"># 步骤3： 根据时间序列的值，分组索引，去重索引计算聚合结果</span></span><br><span class="line">    values = ndimage.mean(ts.values, labels=indexes, index=uniqueIndexes)</span><br><span class="line">    <span class="keyword">print</span> <span class="string">"step 3 ############ gnocchi mean aggregated result"</span></span><br><span class="line">    <span class="keyword">print</span> values</span><br><span class="line">    <span class="comment"># 步骤4： 将去重索引还原为原来的时间序列格式</span></span><br><span class="line">    timestamps = numpy.array(uniqueIndexes, <span class="string">'datetime64[ns]'</span>)</span><br><span class="line">    <span class="keyword">print</span> <span class="string">"step 4 ############ recover unique indexes"</span></span><br><span class="line">    <span class="keyword">print</span> timestamps</span><br><span class="line">    <span class="comment"># 步骤5： 用新的聚合结果和恢复的去重索引构建新的时间序列</span></span><br><span class="line">    timestamps = pd.to_datetime(timestamps)</span><br><span class="line">    <span class="keyword">print</span> timestamps</span><br><span class="line">    newTimeSerie = pd.Series(values, timestamps)</span><br><span class="line">    <span class="keyword">print</span> <span class="string">"step 5 ############ get aggregated time serie"</span></span><br><span class="line">    <span class="keyword">print</span> newTimeSerie</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    aggregateGnocchiTimeSerie()</span><br></pre></td></tr></table></figure>
+<p>参考：</p>
+<p><a href="https://www.cnblogs.com/zdz8207/p/python-pandas-series.html" target="_blank" rel="external">Python数据分析工具：Pandas之Series</a></p>
+<p><a href="https://blog.csdn.net/MsSpark/article/details/83050261" target="_blank" rel="external">Python-Pandas中Series用法总结</a></p>
+<p><a href="https://blog.csdn.net/guoyajie1990/article/details/81044929" target="_blank" rel="external">struct 模块详解</a></p>
+<p><a href="https://docs.python.org/zh-cn/3/library/struct.html#module-struct" target="_blank" rel="external"><code>struct</code></a> — 将字节串解读为打包的二进制数据</p>
+<p>相近文章：</p>
+<p><a href="https://blog.csdn.net/MsSpark/article/details/83050000" target="_blank" rel="external">Numpy中Array用法总结</a></p>
+<p><a href="https://blog.csdn.net/MsSpark/article/details/83050572" target="_blank" rel="external">Pandas中DataFrame用法总结</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+<blockquote class="blockquote-center" style="color: #ccc;">
+    -------------本文结束 <i class="fa fa-apple"></i> 感谢您的阅读-------------
+</blockquote>
+
+  <span id="inline-green" style="border-radius:3px;">作者</span>：<a class="link-blue" href="https://github.com/magiceses" target="_blank">Magiceses</a><br/>有问题请 <a class="link-blue" href="https://magiceses.github.io/guestbook" target="_blank">留言</a> 或者私信我的 <a class="link-blue" href="https://weibo.com/u/3069595351" target="_blank">微博</a>。
+
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>满分是10分的话，这篇文章你给几分</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/reward/reward_wechat.png" alt="magiceses WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/reward/reward_alipay.png" alt="magiceses Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Openstack/" rel="tag"><i class="fa fa-tag"></i> Openstack</a>
+          
+            <a href="/tags/Telemetry/" rel="tag"><i class="fa fa-tag"></i> Telemetry</a>
+          
+            <a href="/tags/Gnocchi/" rel="tag"><i class="fa fa-tag"></i> Gnocchi</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/03/openstack-telemetry-gnocchi使用原理和源码分析-上/" rel="next" title="Gnocchi 使用原理及源码分析-上">
+                <i class="fa fa-chevron-left"></i> Gnocchi 使用原理及源码分析-上
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/10/04/openstack-telemetry-ceilometer-polling源码分析/" rel="prev" title="ceilometer-polling源码分析">
+                ceilometer-polling源码分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar/avatar.png"
+               alt="magiceses" />
+          <p class="site-author-name" itemprop="name">magiceses</p>
+          <p class="site-description motion-element" itemprop="description">Stay Hungry,Stay Foolish</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">61</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/magiceses" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://blog.csdn.net/weixin_43700106" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-chrome"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/weblog" title="建站日志" target="_blank">建站日志</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="/reward" title="打赏" target="_blank">打赏</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#工具"><span class="nav-number">1.</span> <span class="nav-text">工具</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#pandas"><span class="nav-number">1.1.</span> <span class="nav-text">pandas</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介"><span class="nav-number">1.1.1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据结构"><span class="nav-number">1.1.2.</span> <span class="nav-text">数据结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-Series"><span class="nav-number">1.1.3.</span> <span class="nav-text">使用 Series</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建-series"><span class="nav-number">1.1.3.1.</span> <span class="nav-text">创建 series</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#index及value属性"><span class="nav-number">1.1.3.2.</span> <span class="nav-text">index及value属性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#获取数据"><span class="nav-number">1.1.3.3.</span> <span class="nav-text">获取数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基本运算"><span class="nav-number">1.1.3.4.</span> <span class="nav-text">基本运算</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#缺失值处理"><span class="nav-number">1.1.3.5.</span> <span class="nav-text">缺失值处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#删除值"><span class="nav-number">1.1.3.6.</span> <span class="nav-text">删除值</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-timestamp"><span class="nav-number">1.1.4.</span> <span class="nav-text">使用 timestamp</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Timestamp"><span class="nav-number">1.1.4.1.</span> <span class="nav-text">Timestamp()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#to-datetime"><span class="nav-number">1.1.4.2.</span> <span class="nav-text">to_datetime()</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#numpy"><span class="nav-number">1.2.</span> <span class="nav-text">numpy</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建Numpy数组"><span class="nav-number">1.2.1.</span> <span class="nav-text">创建Numpy数组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取与创建数组时设置纬度"><span class="nav-number">1.2.2.</span> <span class="nav-text">获取与创建数组时设置纬度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数组索引、切片、比较"><span class="nav-number">1.2.3.</span> <span class="nav-text">数组索引、切片、比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数组值的替换"><span class="nav-number">1.2.4.</span> <span class="nav-text">数组值的替换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据类型转换"><span class="nav-number">1.2.5.</span> <span class="nav-text">数据类型转换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#统计计算方法"><span class="nav-number">1.2.6.</span> <span class="nav-text">统计计算方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#计算差值"><span class="nav-number">1.2.7.</span> <span class="nav-text">计算差值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#添加元素-insert"><span class="nav-number">1.2.8.</span> <span class="nav-text">添加元素 insert</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缓冲区读取"><span class="nav-number">1.2.9.</span> <span class="nav-text">缓冲区读取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#计算给定轴上数组元素的累计和"><span class="nav-number">1.2.10.</span> <span class="nav-text">计算给定轴上数组元素的累计和</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#struct"><span class="nav-number">1.3.</span> <span class="nav-text">struct</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#常见方法"><span class="nav-number">1.3.1.</span> <span class="nav-text">常见方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#格式化串"><span class="nav-number">1.3.2.</span> <span class="nav-text">格式化串</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Byte-Order-Size-and-Alignment"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">Byte Order, Size, and Alignment</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Format-Characters"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">Format Characters</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#序列化和反序列化"><span class="nav-number">2.</span> <span class="nav-text">序列化和反序列化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#序列化"><span class="nav-number">2.1.</span> <span class="nav-text">序列化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#反序列化"><span class="nav-number">2.2.</span> <span class="nav-text">反序列化</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#聚合和归档"><span class="nav-number">3.</span> <span class="nav-text">聚合和归档</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#合并时间序列"><span class="nav-number">3.1.</span> <span class="nav-text">合并时间序列</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#归档聚合"><span class="nav-number">3.2.</span> <span class="nav-text">归档聚合</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#基于gnocchi的时间序列算法demo实现"><span class="nav-number">5.</span> <span class="nav-text">基于gnocchi的时间序列算法demo实现</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+      
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="busuanzi-count">
+
+  <!-- <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script> -->
+  <!-- 上面这个是之前的，不知道为什么失效了，改成下面这个 -->
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">您是第<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>个小伙伴</span>
+  
+
+  
+    <span class="site-pv">本站总浏览<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">magiceses</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Pisces
+  </a>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count" style="color: #e90f92;">全站共 1m 字</span>
+</div>
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+  <!-- 按需加载背景 -->
+  <!-- 背景动画 -->
+<script type="text/javascript">
+  // 按需加载背景
+  // 如果是all，就直接加载了
+  if("pc" == "all") {
+    $.getScript("/js/src/particle.js?v=5.0.1");
+  }
+  // 识别手机或电脑的js开始
+  (function(){
+    var res = GetRequest();
+    var par = res['index'];
+    if(par!='gfan'){
+      var ua=navigator.userAgent.toLowerCase();
+      var contains=function (a, b){
+          if(a.indexOf(b)!=-1){return true;}
+      };
+      if((contains(ua,"android") && contains(ua,"mobile"))||(contains(ua,"android") && contains(ua,"mozilla"))||(contains(ua,"android") && contains(ua,"opera"))||contains(ua,"ucweb7")||contains(ua,"iphone")){
+        return false;
+      } else {
+        $.getScript("/js/src/particle.js?v=5.0.1");
+      }
+    }
+  })();
+  function GetRequest() {
+    var url = location.search;
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+      var str = url.substr(1);
+      strs = str.split("&");
+      for(var i = 0; i < strs.length; i ++) {
+        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+      }
+    }
+    return theRequest;
+  }
+</script>
+<!-- 识别手机或电脑的js结束 -->  
+
+  <!-- 页面点击小红心 -->
+  <!-- 页面点击小红心 -->
+
+  <script type="text/javascript" src="/js/src/love.js?v=5.0.1"></script>
+
+
+  <!-- 鼠标移动，效果 -->
+  <!-- 鼠标移动特效 -->
+
+  <script type="text/javascript" src="/js/src/jquery-stars.js?v=5.0.1"></script>
+  <script type="text/javascript">
+  jQuery('body').jstars({
+  	image_path: '/images',
+  	image: 'candy-cane-stars.png',
+  	style: 'white',
+  	width: 34,
+  	height: 34,
+  	delay: 700,
+  	frequency: 5
+  });
+  </script>
+
+
+  <!-- 页面 title 进入/离开 效果 -->
+
+  <script type="text/javascript">var OriginTitile=document.title,st;document.addEventListener("visibilitychange",function(){document.hidden?(document.title="Waiting for you back！",clearTimeout(st)):(document.title="Thanks for visit~ "+OriginTitile,st=setTimeout(function(){document.title=OriginTitile},4e3))})</script>
+
+
+</body>
+</html>
